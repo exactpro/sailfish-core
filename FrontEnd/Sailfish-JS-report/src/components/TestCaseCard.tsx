@@ -23,15 +23,13 @@ import {KnownBugIndicator} from "./knownbugs/KnownBugIndicator";
 import {KnownBugSummary} from "./knownbugs/KnownBugSummary";
 import {connect} from "react-redux";
 import AppState from "../state/models/AppState";
-import LiveTestCase from '../models/LiveTestCase';
 import { loadTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../actions/stateActions';
-import { selectLiveTestCase } from '../actions/actionCreators';
 import LiveTimer from './LiveTimer';
 
 interface OwnProps {
-    metadata: TestCaseMetadata | LiveTestCase;
+    metadata: TestCaseMetadata;
     knownBugsEnabled: boolean;
     index: number;
     isSelected: boolean;
@@ -148,9 +146,7 @@ function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSe
 const TestCaseCard = connect(
     () => ({}),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>, ownProps: OwnProps): DispatchProps => ({
-        handleClick: () => isTestCaseMetadata(ownProps.metadata) ? 
-            dispatch(loadTestCase(ownProps.metadata.jsonpFileName)) :
-            dispatch(selectLiveTestCase())
+        handleClick: () => dispatch(loadTestCase(ownProps.metadata.jsonpFileName))
     })
 )(TestCaseCardBase);
 

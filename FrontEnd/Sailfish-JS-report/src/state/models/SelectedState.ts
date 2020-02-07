@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 import { StatusType } from "../../models/Status";
 import TestCase from '../../models/TestCase';
-import Action, { ActionNode } from "../../models/Action";
+import Action from "../../models/Action";
 import SearchResult from "../../helpers/search/SearchResult";
-import Message from '../../models/Message';
-import LiveUpdateState from "./LiveUpdateState";
 
 export default interface SelectedState {
     selectedTestCaseId: string;
@@ -41,9 +39,6 @@ export default interface SelectedState {
     searchResultsCount: number;
     searchIndex: number;
     shouldScrollToSearchItem: boolean;
-
-    live: LiveUpdateState;
-    
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.

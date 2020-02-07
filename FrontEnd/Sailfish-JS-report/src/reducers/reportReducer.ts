@@ -25,13 +25,6 @@ export function reportReducer(state : ReportState = null, stateAction : StateAct
             return stateAction.report;
         }
 
-        case StateActionTypes.UPDATE_LIVE_TEST_CASE: {
-            return {
-                ...state,
-                metadata: [...state.metadata, stateAction.testCase]
-            }
-        }
-
         default: {
             return state;
         }

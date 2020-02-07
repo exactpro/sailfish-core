@@ -14,24 +14,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-export interface JsonpTask {
-    cancel: () => void;
-    filePath: string
-}
+/**
+ * This function retries request N times until it succeeds.
+ * @param jsonpRequest request callback for jsonp file.
+ * @param retry number of times it will retry request.
+ */
+export const retryRequest = <T>(jsonpRequest: () => Promise<T>, retry: number = 3): Promise<T> => {
+    return new Promise<T>((resolve, reject) => {
+        const onSuccess = response =>  resolve(response);
+        const onFailure = error => {
+            retry--;
+            if (retry > 0) {
+                makeRequest();
+            } else {
+                reject(error);
+            }
+        }
 
-export class JsonpTaskController {
-    private runningTasks: JsonpTask[] = [];
-
-    public cancelRunningTasks() {
-        this.runningTasks.forEach(task => task.cancel());
-        this.runningTasks = [];
-    }
-
-    public addTask(task: JsonpTask) {
-        this.runningTasks = [...this.runningTasks, task];
-    }
-
-    public removeTask(path: string){
-        this.runningTasks = this.runningTasks.filter(task => task.filePath !== path);
-    }
-}
+        const makeRequest = () => {
+            return jsonpRequest()
+                .then(onSuccess)
+                .catch(onFailure)
+        }
+        makeRequest();
+    });
+};

@@ -20,6 +20,7 @@ import KnownBugCategory from "./KnownBugCategory"
 import LiveTestCase from "./LiveTestCase";
 
 export interface TestCaseMetadata {
+    order: number;
     startTime: string;
     finishTime: string;
     name: string;

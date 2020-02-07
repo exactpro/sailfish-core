@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,10 @@
 import TestCase from "./TestCase";
 import { TestCaseMetadata } from "./TestcaseMetadata";
 
-export default interface LiveTestCase {
-    name: string;
-    id: string;
-    hash: number;
-    description: string;
-    startTime: string;
-}
+type LiveTestCase = Omit<TestCase, "actions" | "messages"> & { lastUpdate: string };
 
 export function isLiveTestCase(testCase: LiveTestCase | TestCase | TestCaseMetadata): testCase is LiveTestCase {
     return testCase['finishTime'] == null && testCase['status'] == null;
 }
  
+export default LiveTestCase;

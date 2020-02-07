@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  ******************************************************************************/
 
 import Report from '../../models/Report';
-import { TestCaseMetadata } from '../../models/TestcaseMetadata';
-import LiveTestCase from '../../models/LiveTestCase';
 
-export default interface ReportState extends Omit<Report, 'metadata'> {
-    metadata: (TestCaseMetadata | LiveTestCase)[];
-}
+export default interface ReportState extends Report {}
  

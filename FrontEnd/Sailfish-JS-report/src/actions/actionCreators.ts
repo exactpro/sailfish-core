@@ -23,7 +23,6 @@ import { Panel } from "../util/Panel";
 import Message from '../models/Message';
 import { PredictionData, SubmittedData } from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
-import LiveTestCase from '../models/LiveTestCase';
 import KnownBug from '../models/KnownBug';
 import { FilterBlock } from "../models/filter/FilterBlock";
 import Log from '../models/Log';
@@ -88,21 +87,6 @@ export const selectKnownBug = (knownBug: KnownBug, status: StatusType = null) =>
     type: StateActionTypes.SELECT_KNOWN_BUG,
     knownBug,
     status
-})
-
-export const updateLiveTestCase = (testCase: LiveTestCase) => (<const>{
-    type: StateActionTypes.UPDATE_LIVE_TEST_CASE,
-    testCase
-})
-
-export const updateLiveActions = (actions: ActionNode[]) => (<const>{
-    type: StateActionTypes.UPDATE_LIVE_ACTIONS,
-    actions
-})
-
-export const updateLiveMessages = (messages: Message[]) => (<const>{
-    type: StateActionTypes.UPDATE_LIVE_MESSAGES,
-    messages
 })
 
 export const setFilterResult = (results: string[]) => (<const>{
@@ -214,20 +198,29 @@ export const uglifyAllMessages = () => (<const>{
     type: StateActionTypes.UGLIFY_ALL_MESSAGES
 })
 
-export const addTestCaseMessages = (messages: Message[]) => (<const>{
+export const addTestCaseMessages = (messages: Message[], testCaseOrder: number) => (<const>{
     type: StateActionTypes.ADD_TEST_CASE_MESSAGES,
-    messages
+    messages,
+    testCaseOrder
 })
 
-export const addTestCaseActions = (actions: Action[]) => (<const>{
+export const addTestCaseActions = (actions: Action[], testCaseOrder: number) => (<const>{
     type: StateActionTypes.ADD_TEST_CASE_ACTIONS,
-    actions
+    actions,
+    testCaseOrder
 })
 
-export const addTestCaseLogs = (logs: Log[]) => (<const>{
+export const addTestCaseLogs = (logs: Log[], testCaseOrder: number) => (<const>{
     type: StateActionTypes.ADD_TEST_CASE_LOGS,
-    logs
+    logs,
+    testCaseOrder
 })
+
+export const updateTestCase = (testCase: TestCase) => (<const>{
+    type: StateActionTypes.UPDATE_TEST_CASE,
+    testCase
+})
+
 
 export const setIsConnectionError = (isConnectionError: boolean) => (<const>{
     type: StateActionTypes.SET_IS_CONNECTION_ERROR,

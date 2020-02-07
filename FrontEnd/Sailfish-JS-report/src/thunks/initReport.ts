@@ -34,7 +34,7 @@ export function initReport(): ThunkAction<void, AppState, ThunkExtraArgument, St
                 });
 
                 if (report.finishTime == null) {
-                    liveUpdateService.start();
+                    liveUpdateService.startWatchingReport();
                 } else {
                     console.log('Live updates disabled.');
                 }

@@ -15,29 +15,36 @@
  ******************************************************************************/
 
 import { ThunkAction } from "redux-thunk";
-import { fetchTestCase, fetchTestCaseFile } from "../helpers/jsonp/jsonp";
-import { setTestCase, setIsLoading, selectLiveTestCase, setIsConnectionError, addTestCaseLogs } from "../actions/actionCreators";
 import AppState from '../state/models/AppState';
-import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
-import { isTestCaseMetadata } from "../models/TestcaseMetadata";
+import { setTestCase, setIsLoading, setIsConnectionError, addTestCaseLogs } from "../actions/actionCreators";
 import { addTestCaseActions, addTestCaseMessages } from '../actions/actionCreators'
+import StateAction from '../actions/stateActions';
 import TestCase from '../models/TestCase';
 import { isAction } from '../models/Action';
 import { isMessage } from '../models/Message';
-import { getObjectKeys } from '../helpers/object';
-import { makeCancelableJsonpPromise } from '../helpers/jsonp/jsonpPromise'
-import ThunkExtraArgument from '../models/ThunkExtraArgument';
 import { isLog } from '../models/Log';
-import StateAction from '../actions/stateActions';
+import ThunkExtraArgument from '../models/ThunkExtraArgument';
+import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
+import { fetchTestCase, fetchTestCaseFile, CURRENT_TESTCASE_ORDER } from "../helpers/jsonp/jsonp";
+import { getObjectKeys } from '../helpers/object';
+import { retryRequest } from '../helpers/jsonp/retryRequest';
 
 export function loadTestCase(testCasePath: string): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {
+    return (dispatch, getState, { liveUpdateService }) => {
         dispatch(setIsLoading(true));
-        jsonpTaskController.cancelRunningTasks();
+        const { report: { metadata } } = getState();
+        const { order, finishTime } = metadata.find(meta => meta.jsonpFileName === testCasePath);
+        const isLiveTestCase = finishTime === null;
+        window[CURRENT_TESTCASE_ORDER] = order;
+
         fetchTestCase(testCasePath)
             .then((testCase: TestCase) => {
                 dispatch(setTestCase(testCase));
-                dispatch(loadMessagesAndActions());
+                if (isLiveTestCase) {
+                    liveUpdateService.startWatchingTestCase(testCasePath);
+                } else { 
+                    dispatch(loadMessagesAndActions());
+                }
             })
             .catch(err => {
                 console.error('Error catched while trying to fetch test case');
@@ -47,112 +54,80 @@ export function loadTestCase(testCasePath: string): ThunkAction<void, AppState, 
     }
 }
 
-export function loadNextTestCase(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {
-        jsonpTaskController.cancelRunningTasks();
+export function loadNextTestCase(): ThunkAction<void, AppState, {}, StateAction> {
+    return (dispatch, getState) => {
         const { report, selected } = getState(),
-            nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id);
-
-        if (isTestCaseMetadata(nextMetadata)) {
-            dispatch(setIsLoading(true));
-
-            fetchTestCase(nextMetadata.jsonpFileName)
-                .then(testCase =>  {
-                    dispatch(setTestCase(testCase));
-                    dispatch(loadMessagesAndActions());
-                })
-                .catch(err => {
-                    console.error('Error catched while trying to fetch test case');
-                    console.error(err);
-                })
-                .finally(() => dispatch(setIsLoading(false)));
-        } else {
-            dispatch(selectLiveTestCase());
-        }
+            nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.order === selected.testCase.order);
+            dispatch(loadTestCase(nextMetadata.jsonpFileName));
     }
 }
 
-export function loadPrevTestCase(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {
-        jsonpTaskController.cancelRunningTasks();
+export function loadPrevTestCase(): ThunkAction<void, AppState, {}, StateAction> {
+    return (dispatch, getState) => {
         const { report, selected } = getState(),
-            nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id);
-
-        if (isTestCaseMetadata(nextMetadata)) {
-            dispatch(setIsLoading(true));
-
-            fetchTestCase(nextMetadata.jsonpFileName)
-                .then(testCase =>  {
-                    dispatch(setTestCase(testCase));
-                    dispatch(loadMessagesAndActions());
-                })
-                .catch(err => {
-                    console.error('Error catched while trying to fetch test case');
-                    console.error(err);
-                })
-                .finally(() => dispatch(setIsLoading(false)));
-        } else {
-            dispatch(selectLiveTestCase());
-        }
+            nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.order === selected.testCase.order);
+            dispatch(loadTestCase(nextMetadata.jsonpFileName))
     }
 }
 
-export function loadTestCaseFiles(files: TestCase['files']): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {  
+export function loadTestCaseFiles(files: TestCase['files'], testCaseOrder: number): ThunkAction<void, AppState, {}, StateAction> {
+    return (dispatch) => {  
         getObjectKeys(files)
             .filter(fileType => files[fileType].count > 0)
             .forEach(async fileType => {
                 for (const [filePath, index] of Object.entries(files[fileType].dataFiles)) {
                     try {
-                        const { promise, cancel } = makeCancelableJsonpPromise(
-                            () => fetchTestCaseFile(filePath, index, fileType), filePath, 3
+                        const fileData = await retryRequest(
+                            () => fetchTestCaseFile(filePath, index, fileType, testCaseOrder), 3
                         );
-                        jsonpTaskController.addTask({ cancel, filePath });
-                        const fileData = await promise;
                         switch(fileType){
                             case "action":
-                                dispatch(addTestCaseActions(fileData.filter(isAction)))
+                                dispatch(addTestCaseActions(fileData.filter(isAction), testCaseOrder))
                                 break;
                             case "message":
-                                dispatch(addTestCaseMessages(fileData.filter(isMessage)))
+                                dispatch(addTestCaseMessages(fileData.filter(isMessage), testCaseOrder))
                                 break;
                             case "logentry":
-                                dispatch(addTestCaseLogs(fileData.filter(isLog)))
+                                dispatch(addTestCaseLogs(fileData.filter(isLog), testCaseOrder))
                                 break;
                             default:
                                 console.warn(`Unknown file type has been received: ${fileType}`);
                                 return;
                         }
-                        jsonpTaskController.removeTask(filePath);
+
                     } catch (err) {
-                        if (!err.isCanceled) {
-                            dispatch(setIsConnectionError(true));
-                            console.error('Error occured while fetching test case file');
-                            console.error(err);
-                        }
+                        dispatch(setIsConnectionError(true));
+                        console.error('Error occured while fetching test case file');
+                        console.error(err);
                     }
                 }
             })
     }
 }
 
-export function loadMessagesAndActions(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {
+export function loadMessagesAndActions(): ThunkAction<void, AppState, {}, StateAction> {
+    return (dispatch, getState) => {
         const { selected: { testCase }} = getState();
         const filesToLoad: TestCase['files'] = {
             action: testCase.files.action,
             message: testCase.files.message
         }
-        dispatch(loadTestCaseFiles(filesToLoad));
+        dispatch(loadTestCaseFiles(filesToLoad, testCase.order));
     }
 }
 
-export function loadLogs(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
-    return (dispatch, getState, { jsonpTaskController }) => {
+export function loadLogs(): ThunkAction<void, AppState, {}, StateAction> {
+    return (dispatch, getState) => {
         const { selected: { testCase }} = getState();
         const filesToLoad: TestCase['files'] = {
             logentry: testCase.files.logentry
         }
-        dispatch(loadTestCaseFiles(filesToLoad));
+        dispatch(loadTestCaseFiles(filesToLoad, testCase.order));
+    }
+}
+
+export function stopWatchingTestCase(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
+    return (dispatch, getState, { liveUpdateService }) => {
+        liveUpdateService.stopWatchingTestcase();
     }
 }

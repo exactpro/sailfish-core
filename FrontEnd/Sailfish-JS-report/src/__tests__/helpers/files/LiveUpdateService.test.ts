@@ -14,34 +14,39 @@
  * limitations under the License.
  ******************************************************************************/
 
-import * as Fetcher from '../../../helpers/files/fetcher';
-import LiveUpdateService from '../../../helpers/files/LiveUpdateService';
-import { createAction, createMessage } from '../../util/creators';
 import waitForExpect from 'wait-for-expect';
+import * as JsonpModule from '../../../helpers/jsonp/jsonp';
+import * as FetcherModule from '../../../helpers/files/fetcher';
+import LiveUpdateService from '../../../helpers/files/LiveUpdateService';
+import { createAction, createMessage, createTestCase } from '../../util/creators';
+import LiveTestCase from '../../../models/LiveTestCase';
 
 type Writable<T> = {
     -readonly [K in keyof T]: T[K]
 }
 
-const fetcherModule = Fetcher as Writable<typeof Fetcher>,
-    successInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(() => null),
-    failedInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(() => null),
+const jsonpModule = JsonpModule as Writable<typeof JsonpModule>,
+    successInitWatchTestCaseMock = jest.fn<ReturnType<typeof JsonpModule.watchLiveTestCase>, Parameters<typeof JsonpModule.watchLiveTestCase>>(() => null),
+    failedInitWatchTestCaseMock = jest.fn<ReturnType<typeof JsonpModule.watchLiveTestCase>, Parameters<typeof JsonpModule.watchLiveTestCase>>(() => null),
+    fetcherModule = FetcherModule as Writable<typeof FetcherModule>,
+    mocks = [successInitWatchTestCaseMock, failedInitWatchTestCaseMock];
 
-    mocks = [successInitWatchFileMock, failedInitWatchFileMock];
-
-const ROOT_JSONP_PATH = 'loadLiveReport',
+const ROOT_JSONP_PATH = 'loadJsonp',
     ACTION_JSONP_PATH = 'loadAction',
     MESSAGE_JSONP_PATH = 'loadMessage',
     JSONP_PATHS = [ROOT_JSONP_PATH, ACTION_JSONP_PATH, MESSAGE_JSONP_PATH];
 
 describe('LiveUpdateService tests', () => {
-
-    const testCase = {
-        startTime: new Date().toString(),
+    const { actions, messages, ...liveTestCase } = createTestCase();
+    const testCase: LiveTestCase = {
+        ...liveTestCase,
         name: 'test',
         id: 'test',
         hash: 0,
-        description: 'test'
+        description: 'test',
+        finishTime: null,
+        lastUpdate: new Date().toString(),
+        order: 5
     }
 
     const action = createAction();
@@ -52,33 +57,33 @@ describe('LiveUpdateService tests', () => {
         mocks.forEach(mock => mock.mockClear());
     })
 
-    test('recieve TestCase update', async () => {
-        fetcherModule.watchFile = successInitWatchFileMock;
-
+    test('receive TestCase update', async () => {
+        jsonpModule.watchLiveTestCase = successInitWatchTestCaseMock;
+        const testcaseFilePath = 'reportData/jsonp/testcase-1/testcase.js';
         const service = new LiveUpdateService(),
             updateTestCaseHandler = jest.fn(),
-            fileUpdate = {
+            updatedLiveTestCase = {
                 ...testCase,
+                files: null,
                 lastUpdate: new Date().toString(),
-                dataFiles: {}
             };
 
-        service.start();
+        service.startWatchingTestCase(testcaseFilePath);
 
-        expect(successInitWatchFileMock.mock.calls.length).toBe(1);
+        expect(successInitWatchTestCaseMock.mock.calls.length).toBe(1);
 
-        const testCaseCB = successInitWatchFileMock.mock.calls[0][3];
+        const testCaseCB = successInitWatchTestCaseMock.mock.calls[0][2];
         service.setOnTestCaseUpdate = updateTestCaseHandler;
 
-        testCaseCB({ type: 'data', data: fileUpdate });
+        testCaseCB({ type: 'data', data: updatedLiveTestCase });
 
         expect(updateTestCaseHandler.mock.calls.length).toBe(1);
-        expect(updateTestCaseHandler.mock.calls[0][0]).toEqual(testCase);
+        expect(updateTestCaseHandler.mock.calls[0][0]).toEqual(updatedLiveTestCase);
     })
 
     test('update fetching', async () => {
-        fetcherModule.watchFile = successInitWatchFileMock;
-
+        jsonpModule.watchLiveTestCase = successInitWatchTestCaseMock;
+        const testcaseFilePath = 'reportData/jsonp/testcase-1/testcase.js';
         const fetchUpdateMock = jest.fn(async () => ({
             [ACTION_JSONP_PATH]: [action],
             [MESSAGE_JSONP_PATH]: [message]
@@ -89,25 +94,32 @@ describe('LiveUpdateService tests', () => {
         const service = new LiveUpdateService(),
             onActionMock = jest.fn(),
             onMessageMock = jest.fn(),
-            fileUpdate = {
+            updatedLiveTestCase = {
                 ...testCase,
-                lastUpdate: new Date().toString(),
-                dataFiles: { 'test.js': 1 }
+                files: { 
+                    action: {
+                        dataFiles: {
+                            'reportData/jsonp/testcase-1/actions/data1.js': 1
+                        }
+                    }
+                 },
+                 lastUpdate: new Date().toString(),
             };
+
 
         service.setOnActionUpdate = onActionMock;
         service.setOnMessageUpdate = onMessageMock;
 
-        service.start();
-
-        const rootStateInit = successInitWatchFileMock.mock.calls[0][3];
-        rootStateInit({ type: 'data', data: fileUpdate });
-
+        service.startWatchingTestCase(testcaseFilePath);
+        const rootStateInit = successInitWatchTestCaseMock.mock.calls[0][2];
+        rootStateInit({ type: 'data', data: updatedLiveTestCase });
         expect(fetchUpdateMock.mock.calls.length).toBe(1);
         expect(fetchUpdateMock.mock.calls[0]).toEqual([
-            'reportData/live/test.js', 
+            'reportData/jsonp/testcase-1/actions/data1.js', 
             [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH], 
-            1
+            1,
+            Number.MIN_SAFE_INTEGER,
+            testCase.order
         ]);
 
         // wait for internal async calls
@@ -118,7 +130,4 @@ describe('LiveUpdateService tests', () => {
             expect(onMessageMock.mock.calls[0][0]).toEqual([message]);
         });
     })
-
-
 })
-

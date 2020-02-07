@@ -21,6 +21,7 @@ import { ActionNode } from '../../models/Action';
 
 const DATA_FOLDER_PATH = "reportData/jsonp/";
 const REPORT_PATH = DATA_FOLDER_PATH + "report.js";
+export const CURRENT_TESTCASE_ORDER = 'CURRENT_TESTCASE_ORDER';
 
 export const jsonpHandlerNames = (<const>{
     index: {
@@ -84,7 +85,77 @@ type TestCaseFilesResponse = {
     [jsonpHandlerNames.default]: TestCaseFileData
 }
 
-export async function fetchTestCaseFile(filePath: string, fileIndex: number, type: keyof TestCase['files']): Promise<TestCaseFileData> {
-    const file = await fetchUpdate<TestCaseFilesResponse>(filePath, [jsonpHandlerNames.files[type]], fileIndex);
+export async function fetchTestCaseFile(
+    filePath: string,
+    fileIndex: number,
+    type: keyof TestCase['files'],
+    testCaseOrder: number,
+): Promise<TestCaseFileData> {
+    const file = await fetchUpdate<TestCaseFilesResponse>(
+        filePath,
+        [jsonpHandlerNames.files[type]],
+        fileIndex,
+        Number.MIN_SAFE_INTEGER,
+        testCaseOrder,
+    );
     return Object.keys(file).reduce((fileNodes, currFile) => [...fileNodes, ...file[currFile]], []);
 }
+
+export type FileWatchEvent = {
+    type: 'data',
+    data: unknown
+} | {
+    type: 'error',
+    err?: Error
+}
+
+export type FileWatchCallback = (e: FileWatchEvent) => unknown;
+
+/**
+ * This async function can be used to watch to changes in report. 
+ * It retuns Promise, that resolves to true when file exists, otherwise it resolves to false. 
+ * @param interval interval for check updates of the test case files.
+ * @param cb Watch callback - it recieves event of 2 types: 
+ *  data - fires each time when file was loaded,
+ *  error - fires when something goes wrong, e.g. file was not found.
+ * @returns interval id.
+ */
+export function watchReport(interval: number, cb: FileWatchCallback) {
+    async function _watchReport(){
+        try {
+            const report = await fetchReport();
+            cb({ type: 'data', data: report });
+        } catch (err) {
+            cb({ type: 'error', err });
+        }
+    };
+    _watchReport();
+    return setInterval(() => {
+        _watchReport();
+    }, interval);
+};
+
+/**
+ * This async function can be used to watch to changes in live test case. 
+ * It retuns Promise, that resolves to true when file exists, otherwise it resolves to false. 
+ * @param filePath path to target jsonp file.
+ * @param interval interval for check updates of the test case files.
+ * @param cb Watch callback - it recieves event of 2 types: 
+ *  data - fires each time when file was loaded,
+ *  error - fires when something goes wrong, e.g. file was not found.
+ * @returns interval id.
+ */
+export function watchLiveTestCase(filePath: string, interval: number, cb: FileWatchCallback) {
+    async function _watchLiveTestCase(){
+        try {
+            const testCase = await fetchTestCase(filePath);
+            cb({ type: 'data', data: testCase });
+        } catch (err) {
+            cb({ type: 'error', err });
+        }
+    };
+    _watchLiveTestCase();
+    return setInterval(() => {
+        _watchLiveTestCase();
+    }, interval);
+};

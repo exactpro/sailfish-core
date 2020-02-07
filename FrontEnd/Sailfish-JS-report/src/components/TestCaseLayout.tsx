@@ -25,15 +25,24 @@ import NetworkError from './NetworkError';
 import AppState from '../state/models/AppState';
 import { getIsConnectionError, getTestCaseLoadingProgress } from '../selectors/view';
 import '../styles/layout.scss';
+import { stopWatchingTestCase } from '../thunks/loadTestCase';
+import { ThunkDispatch } from 'redux-thunk';
+import StateActionType from '../actions/stateActions';
 
 const MIN_PANEL_WIDTH = 600;
 
 interface TestCaseLayoutProps {
     testCaseLoadingProgress: number;
     isConnectionError: boolean;
+    stopWatchingTestCase: () => void;
 }
 
-const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError }: TestCaseLayoutProps) => {
+const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchingTestCase }: TestCaseLayoutProps) => {
+    React.useEffect(() => {
+        return () => {
+            stopWatchingTestCase();
+        }
+    }, []);
     return (
         <div className="layout">
             <div className="layout__header">
@@ -51,7 +60,12 @@ const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError }: TestCase
     )
 }
 
-export default connect((state: AppState) => ({
+export default connect(
+    (state: AppState) => ({
     testCaseLoadingProgress: getTestCaseLoadingProgress(state),
     isConnectionError: getIsConnectionError(state),
-}))(TestCaseLayout);
+}),
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+        stopWatchingTestCase: () => dispatch(stopWatchingTestCase())
+    })
+)(TestCaseLayout);

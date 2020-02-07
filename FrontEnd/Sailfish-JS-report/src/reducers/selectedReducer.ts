@@ -22,7 +22,6 @@ import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/action';
 import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
-import { liveUpdateReducer } from './liveUpdateReduceer';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -34,7 +33,12 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                     ...stateAction.testCase,
                     actions: [],
                     messages: [],
-                    logs: []
+                    logs: [],
+                    status: stateAction.testCase.status || {
+                        status: null,
+                        cause: null,
+                        description: null
+                    }
                 },
                 searchString: initialSelectedState.searchString,
                 searchResults: initialSelectedState.searchResults,
@@ -42,11 +46,28 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 searchResultsCount: initialSelectedState.searchResultsCount
             }
         }
+
+        case StateActionTypes.UPDATE_TEST_CASE: {
+            if (state.testCase !== null && stateAction.testCase.order === state.testCase.order) {
+                return {
+                    ...state,
+                    testCase: {
+                        ...state.testCase,
+                        ...stateAction.testCase,
+                        status: stateAction.testCase.status || {
+                            status: null,
+                            cause: null,
+                            description: null
+                        }
+                    }
+                }
+            }
+            return state;
+        }
     
         case StateActionTypes.RESET_TEST_CASE: {
             return {
-                ...initialSelectedState,
-                live: state.live
+                ...initialSelectedState
             }
         }
 
@@ -241,26 +262,6 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
-        case StateActionTypes.SELECT_LIVE_TESTCASE: {
-            return {
-                ...state,
-                testCase: {
-                    ...state.live.testCase,
-                    actionNodeType: 'testCase',
-                    actions: state.live.actions,
-                    messages: state.live.messages,
-                    bugs: [],
-                    logs: [],
-                    finishTime: null,
-                    status: {
-                        status: null,
-                        cause: null,
-                        description: null
-                    }
-                }
-            }
-        }
-
         case StateActionTypes.SELECT_KNOWN_BUG: {
             const actionsId = stateAction.status != null ? 
                 stateAction.knownBug.relatedActionIds
@@ -275,84 +276,49 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
-        case StateActionTypes.UPDATE_LIVE_TEST_CASE: {
-            return {
-                ...state,
-                live:  liveUpdateReducer(state.live, stateAction)
-            }
-        }
-
-        case StateActionTypes.UPDATE_LIVE_ACTIONS: {
-            const nextLiveState = liveUpdateReducer(state.live, stateAction);
-
-            if (state.testCase != null && state.testCase.hash === nextLiveState.testCase.hash) {
-                return {
-                    ...state,
-                    live: nextLiveState,
-                    testCase: {
-                        ...state.testCase,
-                        actions: nextLiveState.actions
-                    }
-                }
-            }
-
-            return {
-                ...state,
-                live: nextLiveState
-            }
-        }
-
-        case StateActionTypes.UPDATE_LIVE_MESSAGES: {
-            const nextLiveState = liveUpdateReducer(state.live, stateAction);
-
-            if (state.testCase != null && state.testCase.hash === nextLiveState.testCase.hash) {
-
-                return {
-                    ...state,
-                    live: nextLiveState,
-                    testCase: {
-                        ...state.testCase,
-                        messages: nextLiveState.messages
-                    }
-                }
-            }
-
-            return {
-                ...state,
-                live: nextLiveState
-            }
-        }
-
         case StateActionTypes.ADD_TEST_CASE_ACTIONS: {
-            const actions = [...state.testCase.actions, ...stateAction.actions];
-            return {
-                ...state,
-                actionsMap: generateActionsMap(getActions(actions)),
-                testCase: {
-                    ...state.testCase,
-                    actions
+            if (state.testCase !== null && state.testCase.order === stateAction.testCaseOrder) {
+                const actions = [...state.testCase.actions, ...stateAction.actions];
+
+                return {
+                    ...state,
+                    actionsMap: generateActionsMap(getActions(actions)),
+                    testCase: {
+                        ...state.testCase,
+                        actions
+                    }
                 }
             }
+
+            return state;
         }
 
         case StateActionTypes.ADD_TEST_CASE_LOGS: {
-            return {
-                ...state,
-                testCase: {
-                    ...state.testCase,
-                    logs: [...state.testCase.logs, ...stateAction.logs]
+            if (state.testCase !== null && state.testCase.order === stateAction.testCaseOrder) {
+                return {
+                    ...state,
+                    testCase: {
+                        ...state.testCase,
+                        logs: [...state.testCase.logs, ...stateAction.logs]
+                    }
                 }
             }
+
+            return state;
         }
 
         case StateActionTypes.ADD_TEST_CASE_MESSAGES: {
-            return {
-                ...state,
-                testCase: {
-                    ...state.testCase,
-                    messages: [...state.testCase.messages, ...stateAction.messages],
+            if (state.testCase !== null && state.testCase.order === stateAction.testCaseOrder) {
+                return {
+                    ...state,
+                    testCase: {
+                        ...state.testCase,
+                        messages: [...state.testCase.messages, ...stateAction.messages],
+                    }
                 }
             }
+            
+            return state;
         }
 
         default: {

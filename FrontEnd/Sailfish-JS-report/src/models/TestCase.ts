@@ -31,18 +31,19 @@ export default interface TestCase {
     bugs: (KnownBug | KnownBugCategory)[];
     type?: string;
     reference?: any;
-    order?: number;
+    order: number;
     outcomes?: any[];
     matrixOrder?: number;
     id: string;
     hash: number;
     description: string;
-    status: Status;
+    status?: Status;
     startTime: string;
     finishTime: string;
     verifications?: any[];
     indexFiles?: TestCaseIndexFiles;
     files?: TestCaseFiles;
+    lastUpdate?: string;
 }
 
 interface TestCaseIndexFiles {

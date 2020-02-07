@@ -45,7 +45,7 @@ interface Props extends OwnProps, StateProps, DispatchProps {}
 export const ActionMlUploadButtonBase = ({ actionId, token, submittedData, actionMap, submitEntry, deleteEntry }: Props) => {
 
     const isAvailable = token !== null
-        && actionMap.get(actionId).status.status === StatusType.FAILED;
+        && actionMap.get(actionId)?.status.status === StatusType.FAILED;
 
     const submittedWithThisAction = submittedData.filter((entry) => {
         return entry.actionId === actionId

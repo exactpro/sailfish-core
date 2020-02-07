@@ -24,7 +24,7 @@ export function isEqual(obj1: Object, obj2: Object): boolean {
         const value2 = obj2[key];
 
         if (typeof value1 == 'object' && typeof value2 == 'object') {
-            return isEqual(value1, value1);
+            return isEqual(value1, value2);
         }
 
         return value1 === value2;

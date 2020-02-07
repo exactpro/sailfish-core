@@ -17,7 +17,6 @@
 import * as React from 'react';
 import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
-import Report from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'react-redux';
@@ -36,14 +35,12 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
 import SplashScreen from './SplashScreen';
-import { isLiveTestCase } from '../models/LiveTestCase';
-import { isTestCaseMetadata } from '../models/TestcaseMetadata';
-import ReportState from '../state/models/ReportState';
+import Report from '../models/Report';
 
 const REPORT_FILE_PATH = 'index.html';
 
 interface AppStateProps {
-    report: ReportState;
+    report: Report;
     testCase: TestCase;
     mlToken: string;
     submittedMlData: SubmittedData[];
@@ -126,7 +123,7 @@ class AppBase extends React.Component<AppProps, {}> {
 
         const testCaseMetadata = this.props.report.metadata.find(metadata => metadata.id === testCaseId);
         
-        if (testCaseMetadata && isTestCaseMetadata(testCaseMetadata)) {
+        if (testCaseMetadata) {
             this.props.loadTestCase(testCaseMetadata.jsonpFileName);
         } else {
             console.warn("Can't handle shared url: Test Case with this id not found");

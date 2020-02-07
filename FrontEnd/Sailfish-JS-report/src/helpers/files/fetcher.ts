@@ -14,6 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
+import { CURRENT_TESTCASE_ORDER } from '../jsonp/jsonp';
+
 /**
  * This function fetches jsonp data from js file.
  * @param path path to jsonp file.
@@ -81,7 +83,8 @@ export async function fetchUpdate<T extends {}>(
     filePath: string, 
     jsonpPaths: string[], 
     currentIndex: number,
-    prevIndex: number = Number.MIN_SAFE_INTEGER
+    prevIndex: number = Number.MIN_SAFE_INTEGER,
+    testCaseOrder?: number
 ) {
     return new Promise<T>((resolve, reject) => {
         const loader = document.createElement('script'),
@@ -89,22 +92,23 @@ export async function fetchUpdate<T extends {}>(
 
         loader.src = filePath;
         loader.async = true;
-
         const jsonpHandler = (jsonpPath: string) => (index: number, data: unknown) => {
             if (index < prevIndex) {
                 // ignore update
                 return;
             }
-
             result[jsonpPath].push(data);
-
+            
             // final update
-            if (index === currentIndex) {
-                jsonpPaths.forEach(path => delete window[path]);
-                resolve(result);
+            if (
+                index === currentIndex &&
+                testCaseOrder == window[CURRENT_TESTCASE_ORDER]
+                ) {
+                    jsonpPaths.forEach(path => delete window[path]);
+                    resolve(result);
             }
         }
-
+        
         jsonpPaths.forEach((jsonpPath: string) => {
             result[jsonpPath] = [];
             window[jsonpPath] = jsonpHandler(jsonpPath);
@@ -121,35 +125,4 @@ export async function fetchUpdate<T extends {}>(
 
         document.body.appendChild(loader);
     });
-}
-
-export type FileWatchEvent = {
-    type: 'data',
-    data: unknown
-} | {
-    type: 'error',
-    err?: Error
-}
-
-export type FileWatchCallback = (e: FileWatchEvent) => unknown;
-
-/**
- * This async function can be used to watch to changes in jsonp file. 
- * It retuns Promise, that resolves to true when file exists, otherwise it resolves to false. 
- * @param filePath path to target jsonp file.
- * @param jsonpPath callback path for jsonp file.
- * @param interval interval for check updates of the file.
- * @param cb Watch callback - it recieves event of 2 types: 
- *  data - fires each time when file was loaded,
- *  error - fires when something goes wrong, e.g. file was not found.
- * @returns interval id.
- */
-export function watchFile(filePath: string, jsonpPath: string, interval: number, cb: FileWatchCallback) {
-    return setInterval(() => {
-
-        fetchJsonp(filePath, jsonpPath)
-            .then(data => cb({ type: 'data', data }))
-            .catch(err => cb({ type: 'error', err }));
-
-    }, interval);
 }

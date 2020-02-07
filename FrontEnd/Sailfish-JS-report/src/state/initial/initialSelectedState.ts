@@ -18,7 +18,6 @@ import SelectedState from '../models/SelectedState';
 import Action from '../../models/Action';
 import SearchResult from '../../helpers/search/SearchResult';
 import { StatusType } from '../../models/Status';
-import initialLiveUpdateState from './initialLiveUpdateState';
 
 export const initialSelectedState: SelectedState = {
     testCase: null,
@@ -39,5 +38,4 @@ export const initialSelectedState: SelectedState = {
     searchIndex: null,
     shouldScrollToSearchItem: false,
     selectedTestCaseId: null,
-    live: initialLiveUpdateState
 }

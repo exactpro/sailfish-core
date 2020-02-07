@@ -22,7 +22,7 @@ import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
-import { getFilteredActions } from "../../selectors/actions";
+import { getFilteredActions, getActionsWithoutNonexistingRelatedMessages } from "../../selectors/actions";
 import { getActionsFilterResultsCount, getIsFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
 import { getActions } from '../../helpers/action';
@@ -121,7 +121,7 @@ export const ActionsList = connect(
     (state: AppState): Props => ({
         actions: getIsFilterApplied(state) && !state.filter.isTransparent ?
             getFilteredActions(state) :
-            state.selected.testCase.actions,
+            getActionsWithoutNonexistingRelatedMessages(state),
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         filteredActionsCount: getActionsFilterResultsCount(state),

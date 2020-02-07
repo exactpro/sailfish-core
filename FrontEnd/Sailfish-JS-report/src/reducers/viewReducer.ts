@@ -46,7 +46,7 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
                 ...state, 
 
                 // reset active panel to default when there is no status info to show
-                leftPanel: stateAction.testCase.status.cause ? state.leftPanel : initialViewState.leftPanel
+                leftPanel: stateAction.testCase.status?.cause ? state.leftPanel : initialViewState.leftPanel
             }
         }
 
