@@ -325,3 +325,50 @@
         }
     }
 }
+
+.ac-skeleton {
+    @include skeleton-pulse;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 7px 8px;
+    background-color: white;
+    border: 2px solid $skeletonBackgroundColor;
+    border-radius: 3px;
+    display: grid;
+    grid-template-areas: "icons title status"
+                         ". description info";
+    grid-template-columns: 20px repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    grid-gap: 6px 18px;
+    margin: 6px 0;
+
+
+    &__icons, &__title, &__description, &__status, &__info {
+        @include skeleton;
+    }
+
+    &__icons {
+        grid-area: icons;
+    }
+
+    &__title {
+        grid-area: title;
+        width: 227px;
+    }
+
+    &__description {
+        grid-area: description;
+    }
+
+    &__status {
+        grid-area: status;
+        width: 80px;
+        justify-self: self-end;
+    }
+
+    &__info {
+        grid-area: info;
+        width: 190px;
+        justify-self: self-end;
+    }
+}

@@ -18,15 +18,21 @@ import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { isAction } from "../models/Action";
 import { keyForAction } from "../helpers/keys";
-import { getFilterBlocks, getFilterResults } from "./filter";
+import { getFilterBlocks, getFilterResults, getIsFilterApplied, getIsFilterTransparent } from "./filter";
 import FilterType from "../models/filter/FilterType";
-import { isCheckpointAction } from "../helpers/action";
 import { getCheckpointActions as filterCheckpointsActions } from "../helpers/checkpointFilter";
+import { isCheckpointAction, removeNonexistingRelatedMessages } from "../helpers/action";
+import { getMessagesIds } from './messages';
 
 export const getActions = (state: AppState) => state.selected.testCase.actions;
 
+export const getActionsWithoutNonexistingRelatedMessages = createSelector(
+    [getActions, getMessagesIds],
+    (actions, messagesIds) => actions.map(action => removeNonexistingRelatedMessages(action, messagesIds))
+);
+
 export const getFilteredActions = createSelector(
-    [getActions, getFilterBlocks, getFilterResults],
+    [getActionsWithoutNonexistingRelatedMessages, getFilterBlocks, getFilterResults],
     (actions, blocks, results) => {
         if (blocks.some(({ types }) => types.includes(FilterType.ACTION))) {
             return actions
@@ -41,4 +47,12 @@ export const getFilteredActions = createSelector(
 export const getCheckpointActions = createSelector(
     [getActions],
     actions => filterCheckpointsActions(actions)
+);
+
+export const getActionsFilesCount = (state: AppState) => state.selected.testCase.files?.action.count || 0;
+
+export const getActionsCount = createSelector(
+    [getIsFilterApplied, getIsFilterTransparent, getFilteredActions, getActionsFilesCount],
+    (isFilterApplied, isTransparent, filteredActions, actionsFilesCount) => 
+        isFilterApplied  && !isTransparent ? filteredActions.length : actionsFilesCount
 );

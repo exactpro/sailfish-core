@@ -18,7 +18,6 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import '../../styles/action.scss';
 import { ActionNode, isAction } from '../../models/Action';
-import { ActionTree } from './ActionTree';
 import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
@@ -27,6 +26,8 @@ import { getFilteredActions } from "../../selectors/actions";
 import { getActionsFilterResultsCount, getIsFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
 import { getActions } from '../../helpers/action';
+import SkeletonedActionTree from './SkeletonedActionTree';
+import { getActionsCount } from '../../selectors/actions';
 
 interface Props {
     actions: Array<ActionNode>;
@@ -34,6 +35,7 @@ interface Props {
     scrolledActionId: Number;
     isFilterApplied: boolean;
     filteredActionsCount: number;
+    actionsCount: number;
 }
 
 interface State {
@@ -78,7 +80,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { actions, selectedActions, isFilterApplied, filteredActionsCount } = this.props,
+        const { actions, selectedActions, isFilterApplied, filteredActionsCount, actionsCount } = this.props,
             { scrolledIndex } = this.state;
 
         const listRootClass = createBemElement(
@@ -99,7 +101,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                 <div className={listRootClass}>
                     <StateSaverProvider>
                         <VirtualizedList
-                            rowCount={actions.length}
+                            rowCount={actionsCount}
                             ref={this.list}
                             renderElement={this.renderAction}
                             scrolledIndex={scrolledIndex}
@@ -110,11 +112,9 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
             </div>
         )
     }
-
-    private renderAction = (idx: number): React.ReactElement => (
-        <ActionTree
-            action={this.props.actions[idx]}/>
-    )
+    private renderAction = (idx: number): React.ReactElement => {
+        return <SkeletonedActionTree index={idx} />
+    }
 }
 
 export const ActionsList = connect(
@@ -125,7 +125,8 @@ export const ActionsList = connect(
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         filteredActionsCount: getActionsFilterResultsCount(state),
-        isFilterApplied: getIsFilterApplied(state)
+        isFilterApplied: getIsFilterApplied(state),
+        actionsCount: getActionsCount(state),
     }),
     dispatch => ({}),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps }),

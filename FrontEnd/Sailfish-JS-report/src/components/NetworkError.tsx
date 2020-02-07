@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-$defaultCardBorderRadius: 5px;
+import React from 'react';
 
-$filterBubbleHeight: 30px;
-$filterBubbleBorderRadius: 3px;
-$filterCountHeight: 35px;
+function NetworkError(){
+	return (
+		<div className="tc-error">
+			<div className="tc-error__message">
+				<span className="tc-error__attention-icon"/>
+				<span className="tc-error__message-text">
+					Please try to refresh the page
+				</span>
+				<div className="tc-error__refresh-button" onClick={() => location.reload()}>
+					<span className="tc-error__refresh-icon"/>
+					<span className="tc-error__refresh-text">
+						Refresh
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
 
-$defaultSkeletonElementHigh: 20px;
-$defaultSkeletonElementBorderRadius: 3px;
+export default NetworkError;

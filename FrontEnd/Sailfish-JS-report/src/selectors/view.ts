@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-$defaultCardBorderRadius: 5px;
+import AppState from '../state/models/AppState';
 
-$filterBubbleHeight: 30px;
-$filterBubbleBorderRadius: 3px;
-$filterCountHeight: 35px;
+export const getIsConnectionError = (state: AppState) => state.view.isConnectionError;
 
-$defaultSkeletonElementHigh: 20px;
-$defaultSkeletonElementBorderRadius: 3px;
+export const getTestCaseLoadingProgress = (state: AppState) => {
+	return state.selected.testCase?.files ? Math.round(
+	  (state.selected.testCase.actions.length + state.selected.testCase.messages.length) /
+		(state.selected.testCase.files.action.count + state.selected.testCase.files.message.count) * 100
+	) : 0;
+  };
+  

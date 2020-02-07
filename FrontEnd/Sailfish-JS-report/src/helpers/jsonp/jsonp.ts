@@ -16,7 +16,7 @@
 
 import Report, { isReport } from '../../models/Report';
 import TestCase from '../../models/TestCase';
-import { fetchJsonp, fetchUpdate } from './../files/fetcher';
+import { fetchJsonp, fetchUpdate } from '../files/fetcher';
 import { ActionNode } from '../../models/Action';
 
 const DATA_FOLDER_PATH = "reportData/jsonp/";

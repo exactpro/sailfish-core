@@ -16,12 +16,17 @@
 
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
-import { getFilterBlocks, getFilterResults } from "./filter";
+import { getFilterBlocks, getFilterResults, getIsFilterTransparent, getIsMessageFilterApplied } from "./filter";
 import { keyForMessage } from "../helpers/keys";
 import { isCheckpointMessage, isRejected } from "../helpers/messageType";
 import FilterType from "../models/filter/FilterType";
 
 export const getMessages = (state: AppState) => state.selected.testCase.messages;
+
+export const getMessagesIds = createSelector(
+    [getMessages],
+    (messages) => messages.map(msg => msg.id)
+);
 
 export const getFilteredMessages = createSelector(
     [getMessages, getFilterBlocks, getFilterResults],
@@ -51,4 +56,12 @@ export const getTransparentMessages = createSelector(
 export const getRejectedMessages = createSelector(
     [getMessages],
     (messages) => messages.filter(isRejected)
+);
+
+export const getMessagesFilesCount = (state: AppState) => state.selected.testCase.files?.message.count || 0;
+
+export const getMessagesCount = createSelector(
+    [getIsMessageFilterApplied, getIsFilterTransparent, getFilteredMessages, getMessagesFilesCount],
+    (isMessageFilterApplied, isTransparent, getFilteredMessages, messagesFileCount) => 
+        isMessageFilterApplied && !isTransparent ? getFilteredMessages.length : messagesFileCount
 );

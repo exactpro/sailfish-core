@@ -17,6 +17,7 @@
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { isKeyForAction, isKeyForMessage, isKeyForVerification } from "../helpers/keys";
+import FilterType from '../models/filter/FilterType';
 
 export const getFilterBlocks = (state: AppState) => state.filter.blocks;
 export const getFilterResults = (state: AppState) => state.filter.results;
@@ -36,3 +37,10 @@ export const getMessagesFilterResultsCount = createSelector(
     [getFilterResults],
     (results) => results.filter(isKeyForMessage).length
 );
+
+export const getIsMessageFilterApplied = createSelector(
+    [getIsFilterApplied, getFilterBlocks],
+    (isFilterApplied, filterBlocks) =>
+        isFilterApplied && filterBlocks.some(({ types }) => types.includes(FilterType.MESSAGE))
+);
+export const getIsFilterTransparent = (state: AppState) => state.filter.isTransparent;

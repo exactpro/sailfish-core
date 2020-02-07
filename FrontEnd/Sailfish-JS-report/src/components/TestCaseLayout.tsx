@@ -15,26 +15,43 @@
  ******************************************************************************/
 
 import * as React from 'react';
+import { connect } from 'react-redux';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
+import LinearProgressBar from './LinearProgressBar';
+import NetworkError from './NetworkError';
+import AppState from '../state/models/AppState';
+import { getIsConnectionError, getTestCaseLoadingProgress } from '../selectors/view';
 import '../styles/layout.scss';
 
 const MIN_PANEL_WIDTH = 600;
 
-const TestCaseLayout = () =>  (
-    <div className="layout">
-        <div className="layout__header">
-            <Header/>
-        </div>
-        <div className="layout__body">
-            <SplitView minPanelWidth={MIN_PANEL_WIDTH}>
-                <LeftPanel/>
-                <RightPanel/>
-            </SplitView>
-        </div>
-    </div>
-)
+interface TestCaseLayoutProps {
+    testCaseLoadingProgress: number;
+    isConnectionError: boolean;
+}
 
-export default TestCaseLayout;
+const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError }: TestCaseLayoutProps) => {
+    return (
+        <div className="layout">
+            <div className="layout__header">
+                {!isConnectionError && <LinearProgressBar progress={testCaseLoadingProgress}/>}
+                {isConnectionError && <NetworkError />}
+                <Header/>
+            </div>
+            <div className="layout__body">
+                <SplitView minPanelWidth={MIN_PANEL_WIDTH}>
+                    <LeftPanel/>
+                    <RightPanel/>
+                </SplitView>
+            </div>
+        </div>
+    )
+}
+
+export default connect((state: AppState) => ({
+    testCaseLoadingProgress: getTestCaseLoadingProgress(state),
+    isConnectionError: getIsConnectionError(state),
+}))(TestCaseLayout);

@@ -17,21 +17,17 @@
 import * as React from 'react';
 import '../../styles/messages.scss';
 import Message from '../../models/Message';
-import MessageCard from './MessageCard';
 import { StatusType } from '../../models/Status';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { isAdmin, isCheckpointMessage } from '../../helpers/messageType';
-import { AdminMessageWrapper } from './AdminMessageWrapper';
-import { selectMessage } from '../../actions/actionCreators';
 import { messagesHeatmap } from '../../helpers/heatmapCreator';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { VirtualizedList } from '../VirtualizedList';
-import CheckpointMessage from './CheckpointMessage';
 import { getFilteredMessages } from "../../selectors/messages";
-import { getIsFilterApplied, getMessagesFilterResultsCount } from "../../selectors/filter";
-import FilterType from "../../models/filter/FilterType";
+import { getIsFilterApplied, getMessagesFilterResultsCount, getIsMessageFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
+import SkeletonedMessageCardListItem from './SkeletonedMessageCardListItem';
+import { getMessagesCount } from '../../selectors/messages';
 
 interface StateProps {
     messages: Message[];
@@ -40,6 +36,7 @@ interface StateProps {
     selectedStatus: StatusType;
     isFilterApplied: boolean;
     filteredCount: number;
+    messagesCount: number;
 }
 
 interface Props extends StateProps {}
@@ -82,7 +79,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { messages, selectedMessages, selectedStatus, isFilterApplied, filteredCount } = this.props,
+        const { messages, selectedMessages, selectedStatus, isFilterApplied, filteredCount, messagesCount } = this.props,
             { scrolledIndex } = this.state;
 
         const listClassName = createBemElement(
@@ -104,7 +101,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
                     <StateSaverProvider>
                         <VirtualizedList
                             selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
-                            rowCount={messages.length}
+                            rowCount={messagesCount}
                             renderElement={this.renderMessage}
                             scrolledIndex={scrolledIndex}
                         />
@@ -115,37 +112,22 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
     }
 
     private renderMessage = (index: number) => {
-        const message = this.props.messages[index];
-
-        if (isCheckpointMessage(message)) {
-            return <CheckpointMessage message={message}/>;
-        }
-        if (isAdmin(message)) {
-            return (
-                <AdminMessageWrapper
-                    key={message.id}
-                    message={message}/>
-            )
-        }
         return (
-            <MessageCard
-                key={message.id}
-                message={message}/>
-        );
+            <SkeletonedMessageCardListItem index={index} />
+        )
     }
 }
-
 
 export const MessagesCardList = connect(
     (state: AppState): StateProps => ({
         messages: getIsFilterApplied(state) && !state.filter.isTransparent ?
             getFilteredMessages(state) :
             state.selected.testCase.messages,
+        messagesCount: getMessagesCount(state),
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
         selectedStatus: state.selected.selectedActionStatus,
-        isFilterApplied: getIsFilterApplied(state) &&
-            state.filter.blocks.some(({ types }) => types.includes(FilterType.MESSAGE)),
+        isFilterApplied: getIsMessageFilterApplied(state),
         filteredCount: getMessagesFilterResultsCount(state)
     }),
     () => ({}),

@@ -320,3 +320,67 @@
         margin: 10px 0 10px 20px;
     }
 }
+
+.tc-error {
+    background-color: $errorMsgBackgroundColor;
+    height: 40px;
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 10px;
+
+    &__message {
+        color: white;
+        font-weight: 600;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    &__message-text {
+        color: inherit;
+        font-weight: inherit;
+        margin: 0 15px;
+    }
+
+    &__attention-icon {
+        background-image: url("../../resources/icons/attention-error.svg");
+        background-repeat: no-repeat;
+        height: 26px;
+        width: 24px;
+    }
+
+    &__refresh-icon {
+        background-image: url("../../resources/icons/refresh.svg");
+        background-repeat: no-repeat;
+        height: 24px;
+        width: 22px;
+        margin-right: 10px;
+    }
+
+    &__refresh-button {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    &__refresh-text {
+        color: inherit;
+        font-weight: inherit;
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background-color:  $tcLoaderBackgroundColor;
+    margin-bottom: 10px;
+    
+    &__filler {
+        background-color: $tcLoaderPrimaryColor;
+        height: 100%;
+        border-radius: inherit;
+        max-width: 100%;
+    }
+}

@@ -15,16 +15,14 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { Chip } from '../Chip';
 import Action from '../../models/Action';
-import { StatusType, statusValues } from '../../models/Status';
+import { StatusType } from '../../models/Status';
 import "../../styles/messages.scss";
 import { createSelector } from '../../helpers/styleCreators';
 import Message from '../../models/Message';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
-import { stopPropagationHandler } from '../../helpers/react';
 import ChipsList from '../ChipsList';
 
 type SelectHandler = (status: StatusType) => void;

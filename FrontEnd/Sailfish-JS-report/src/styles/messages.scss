@@ -477,3 +477,107 @@
         }
     }
 }
+
+.mc-skeleton {
+    @include skeleton-pulse;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-areas: "mc-header"
+                         "delimiter"
+                         "mc-body";
+    grid-row-gap: 12px;
+    border: 2px solid $skeletonBackgroundColor;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 6px 0;
+    position: relative;
+
+    &__header {
+        grid-area: mc-header;
+        display: grid;
+        grid-template-rows: repeat(2, 20px);
+        grid-template-columns: 1.1fr 3fr 0.2fr;
+        grid-row-gap: 6px;
+        grid-template-areas: "icons name submit"
+                             "timestamp session submit";
+        align-items: center;
+    }
+
+    &__icons, &__timestamp, &__session, &__name, &__submit, &__icons-el, &__session-el {
+        @include skeleton;
+
+        height: 100%;
+    } 
+
+    &__icons {
+        grid-area: icons;
+        background-color: white;
+    }
+
+    &__icons-el {
+        width: 20px;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    &__timestamp {
+        grid-area: timestamp;
+        width: 65%;
+    }
+
+    &__session {
+        width: 75%;
+        grid-area: session;
+        background-color: white;
+        display: grid;
+        grid-column-gap: 40px;
+        grid-template-columns: 1fr 20px 1fr;
+    }
+
+    &__name {
+        grid-area: name;
+        width: 55%;
+    }
+
+    &__submit {
+        grid-area: submit;
+        width: 22px;
+        height: 22px;
+        justify-self: end;
+        align-self: center;
+    }
+    
+    &__delimiter {
+        height: 2px;
+        background-color: $skeletonBackgroundColor;
+        grid-area: delimiter;
+    }
+
+    &__body {
+        grid-area: mc-body;
+        display: grid;
+        grid-template-rows: 16px 16px;
+        grid-template-columns: 1.2fr 1fr;
+        grid-row-gap: 7px;
+        grid-template-areas: "text1 text1"
+                             "text2 type";
+    }
+
+    &__body-text1, &__body-text2, &__body-type {
+        @include skeleton;
+    }
+
+    &__body-text1 {
+        grid-area: text1;
+    }
+
+    &__body-text2 {
+        grid-area: text2;
+    }
+
+    &__body-type {
+        justify-self: end;
+        grid-area: type;
+        width: 55px;
+    }
+}
