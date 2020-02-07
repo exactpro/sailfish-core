@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ interface KnownBugCardProps {
 }
 
 export function KnownBugCard({ bug, actionsMap, isSelected, onSelect, selectedStatus }: KnownBugCardProps) {
+    
     const statusClassName = bug.status === KnownBugStatus.REPRODUCED ? "reproduced" : "not-reproduced";
 
     const rootClassName = createBemBlock(
@@ -40,12 +41,17 @@ export function KnownBugCard({ bug, actionsMap, isSelected, onSelect, selectedSt
         isSelected ? 'selected' : null
     );
 
+    const relatedActions = React.useMemo(() => {
+        return bug.relatedActionIds.reduce((actions, id) => 
+            actionsMap.get(id) ? [...actions, actionsMap.get(id)] : actions, [])
+    }, [actionsMap]);
+
     return (
         <div className={rootClassName}
             onClick={() => onSelect()}>
             <div className="known-bug-card__left">
                 <ChipsList
-                    actions={bug.relatedActionIds.map(id => actionsMap.get(id))}
+                    actions={relatedActions}
                     onStatusSelect={onSelect}
                     selectedStatus={isSelected && selectedStatus}/>
             </div>

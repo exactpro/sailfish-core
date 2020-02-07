@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+* Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,6 +21,11 @@ export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
     SET_TEST_CASE = 'SET_TEST_CASE',
     RESET_TEST_CASE = 'RESET_TEST_CASE',
+
+    // add entities
+    ADD_TEST_CASE_ACTIONS = 'ADD_TEST_CASE_ACTIONS',
+    ADD_TEST_CASE_MESSAGES = 'ADD_TEST_CASE_MESSAGES',
+    ADD_TEST_CASE_LOGS = 'ADD_TEST_CASE_LOGS',
 
     // select entities
     SELECT_ACTION = 'SELECT_ACTION',
@@ -61,6 +66,7 @@ export enum StateActionTypes {
     UGLIFY_ALL_MESSAGES = 'UGLIFY_ALL_MESSAGES',
     SET_IS_LOADING = 'SET_IS_LOADING',
     TOGGLE_MESSAGE_BEAUTIFIER = 'TOGGLE_MESSAGE_BEAUTIFIER',
+    SET_IS_CONNECTION_ERROR = 'SET_IS_CONNECTION_ERROR',
 
     // machinelearning
     SET_ML_TOKEN = 'SET_ML_TOKEN',

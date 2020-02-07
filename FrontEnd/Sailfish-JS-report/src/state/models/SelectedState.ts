@@ -35,8 +35,7 @@ export default interface SelectedState {
      * Map (id -> action)
      */
     actionsMap: Map<number, Action>;
-    checkpointActions: Action[];
-
+    
     searchString: string;
     searchResults: SearchResult;
     searchResultsCount: number;

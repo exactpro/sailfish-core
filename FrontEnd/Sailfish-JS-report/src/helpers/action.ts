@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNode, ActionNodeType, isAction } from "../models/Action";
+import { ActionNode, isAction } from "../models/Action";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import { intersection } from "./array";

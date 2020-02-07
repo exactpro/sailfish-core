@@ -20,7 +20,7 @@ import AppState from '../../state/models/AppState';
 import StateAction from '../../actions/stateActions';
 import { ThunkDispatch } from 'redux-thunk';
 import { updateLiveActions, updateLiveMessages, updateLiveTestCase, setReport, setTestCase } from '../../actions/actionCreators';
-import { fetchReport, fetchTestCase } from '../../helpers/jsonp';
+import { fetchReport, fetchTestCase } from '../../helpers/jsonp/jsonp';
 import { batch } from 'react-redux';
 import TestCase from '../../models/TestCase';
 

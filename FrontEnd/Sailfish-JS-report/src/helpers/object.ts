@@ -30,3 +30,11 @@ export function isEqual(obj1: Object, obj2: Object): boolean {
         return value1 === value2;
     });
 }
+
+/**
+ * Returns typed object keys
+ * @param obj
+ */
+export function getObjectKeys<O extends object>(obj:O) {
+    return Object.keys(obj) as Array<keyof O>
+};

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import Action from "../../models/Action";
 import Checkpoint, { CheckpointStateProps, CheckpointDispatchProps } from "../Checkpoint";
 import { getActionCheckpointName } from '../../helpers/action';
 import { selectCheckpointAction } from "../../actions/actionCreators";
+import { getCheckpointActions } from '../../selectors/actions';
 
 interface OwnProps {
     action: Action;
@@ -29,7 +30,7 @@ const CheckpointAction = connect(
     (state: AppState, ownProps: OwnProps): CheckpointStateProps => ({
         name: getActionCheckpointName(ownProps.action),
         isSelected: ownProps.action.id === state.selected.checkpointActionId,
-        index: state.selected.checkpointActions.indexOf(ownProps.action) + 1,
+        index: getCheckpointActions(state).indexOf(ownProps.action) + 1,
         description: ownProps.action.description
     }),
     (dispatch, ownProps: OwnProps): CheckpointDispatchProps => ({

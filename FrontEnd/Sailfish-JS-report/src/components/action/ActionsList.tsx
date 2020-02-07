@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
-import { getActions } from '../../helpers/action';
 import { getFilteredActions } from "../../selectors/actions";
 import { getActionsFilterResultsCount, getIsFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
+import { getActions } from '../../helpers/action';
 
 interface Props {
     actions: Array<ActionNode>;

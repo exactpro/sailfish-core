@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: 
 
 export const MessageCardActionChips = connect(
     (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({
-        actions: ownProps.message.relatedActions.map(actionId => state.selected.actionsMap.get(actionId)),
+        actions: ownProps.message.relatedActions?.map(actionId => state.selected.actionsMap.get(actionId)) || [],
         selectedStatus: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null
     }),
     (dispatch, ownProps: ActionChipsOwnProps): ActionChipsDispatchProps => ({

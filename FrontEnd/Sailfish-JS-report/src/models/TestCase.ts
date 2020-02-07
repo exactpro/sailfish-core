@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNode } from "./Action";
+import { ActionNode } from "./Action";
 import Message from "./Message";
 import Log from "./Log";
 import Status from './Status';
@@ -41,6 +41,24 @@ export default interface TestCase {
     startTime: string;
     finishTime: string;
     verifications?: any[];
+    indexFiles?: TestCaseIndexFiles;
+    files?: TestCaseFiles;
+}
+
+interface TestCaseIndexFiles {
+    message?: string;
+    action?: string;
+    logentry?: string;
+}
+
+type TestCaseFiles = {
+    [key in keyof TestCase['indexFiles']]: {
+        count: number;
+        dataFiles: {
+            [filePath: string]: number
+        };
+        lastUpdate: string;
+    }
 }
 
 export function isTestCase(testCase: TestCase | Report): testCase is TestCase {

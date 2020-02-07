@@ -14,18 +14,24 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNodeType, ActionNode } from './Action';
-
-export default interface Log {
-    actionNodeType: ActionNodeType.LOG;
-    timestamp: string;
-    level: string;
-    thread: string;
-    message: string;
-    exception?: any;
-    class: string;
+export interface JsonpTask {
+    cancel: () => void;
+    filePath: string
 }
 
-export function isLog(action: ActionNode): action is Log {
-    return action.actionNodeType === ActionNodeType.LOG;
+export class JsonpTaskController {
+    private runningTasks: JsonpTask[] = [];
+
+    public cancelRunningTasks() {
+        this.runningTasks.forEach(task => task.cancel());
+        this.runningTasks = [];
+    }
+
+    public addTask(task: JsonpTask) {
+        this.runningTasks = [...this.runningTasks, task];
+    }
+
+    public removeTask(path: string){
+        this.runningTasks = this.runningTasks.filter(task => task.filePath !== path);
+    }
 }

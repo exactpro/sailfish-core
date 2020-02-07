@@ -27,6 +27,7 @@ import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './action/ActionsList';
 import { createSelector } from '../helpers/styleCreators';
 import CheckpointCarousel from './CheckpointCarousel';
+import { getCheckpointActions } from '../selectors/actions';
 
 interface Props {
     panel: Panel;
@@ -135,9 +136,8 @@ export const LeftPanel = connect(
     (state: AppState) => ({
         panel: state.view.leftPanel,
         selectedCheckpointId: state.selected.checkpointActionId,
-        checkpointActions: state.selected.checkpointActions,
-        statusEnabled: !!state.selected.testCase.status.cause,
-        isCheckpointsEnabled: state.selected.checkpointActions.length > 0
+        checkpointActions: getCheckpointActions(state),
+        statusEnabled: !!state.selected.testCase.status.cause
     }),
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),
@@ -147,6 +147,7 @@ export const LeftPanel = connect(
         ...stateProps,
         ...dispatchProps, 
         ...ownProps,
-        currentCheckpointHandler: () => setSelectedCheckpoint(checkpointActions.find(action => action.id === selectedCheckpointId))
+        currentCheckpointHandler: () => setSelectedCheckpoint(checkpointActions.find(action => action.id === selectedCheckpointId)),
+        isCheckpointsEnabled: checkpointActions.length > 0
     })
 )(LeftPanelBase)

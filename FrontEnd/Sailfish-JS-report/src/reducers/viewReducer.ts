@@ -86,6 +86,13 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
             }
         }
 
+        case StateActionTypes.SET_IS_CONNECTION_ERROR: {
+            return {
+                ...state,
+                isConnectionError: stateAction.isConnectionError,
+            }
+        }
+
         default: {
             return state
         }

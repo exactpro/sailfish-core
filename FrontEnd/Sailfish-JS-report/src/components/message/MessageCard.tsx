@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,6 @@ export function MessageCardBase({
     }: MessageCardProps) {
 
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
-
     const rejectedTitle = message.content.rejectReason,
         labels = renderMessageTypeLabels(message, prediction),
         labelsCount = labels.length;
@@ -113,7 +112,7 @@ export function MessageCardBase({
             <div className="mc-header default" 
                 onClick={() => selectHandler()}>
                 {
-                    rejectedMessagesCount && message.relatedActions.length == 0 ?
+                    rejectedMessagesCount && !(message.relatedActions?.length > 0) ?
                         (
                             <div className="mc-header__info rejected">
                                 <p>Rejected {rejectedMessagesCount}</p>
@@ -207,13 +206,13 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 
     if (prediction) {
         labels.push(
-            <MessagePredictionIndicator prediction={prediction} />
+            <MessagePredictionIndicator prediction={prediction} key="prediction"/>
         );
     }
 
     if (message.content.rejectReason !== null) {
         labels.push(
-            <div className="mc-label rejected">
+            <div className="mc-label rejected" key="rejected">
                 <div className="mc-label__icon rejected" />
             </div>
         );
@@ -221,7 +220,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 
     if (message.content.admin) {
         labels.push(
-            <div className="mc-label admin">
+            <div className="mc-label admin" key="admin">
                 <div className="mc-label__icon admin" />
             </div>
         )

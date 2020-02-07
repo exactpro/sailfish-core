@@ -32,7 +32,6 @@ export const initialSelectedState: SelectedState = {
     checkpointActionId: null,
     rejectedMessageId: null,
     actionsMap: new Map<number, Action>(),
-    checkpointActions: [],
     activeActionId: null,
     searchString: '',
     searchResults: new SearchResult(),

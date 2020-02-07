@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 import ActionParameter from "./ActionParameter"; 
 import Status from './Status';
 import Verification from './Verification';
-import Exception from './Exception';
 import UserMessage from './UserMessage';
 import Link from './Link';
 import UserTable from "./UserTable";
+import Message from './Message';
+import Log from './Log';
 
 export enum ActionNodeType {
     ACTION = "action",
@@ -29,10 +30,12 @@ export enum ActionNodeType {
     LINK = "link",
     TABLE = "table",
     KNOWN_BUG = "bug",
-    KNOWN_BUG_CATEGORY = "category"
+    KNOWN_BUG_CATEGORY = "category",
+    LOG = "logEntry",
+    MESSAGE = "message"
 }
 
-export type ActionNode = Action | UserMessage | Verification | Link | UserTable;
+export type ActionNode = Action | UserMessage | Verification | Link | UserTable | Message | Log;
 
 export default interface Action {
     id?: number;

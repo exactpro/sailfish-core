@@ -20,14 +20,13 @@ import SelectionCarousel, { SelectionCarouselProps } from './SelectionCarousel';
 import { selectCheckpointAction } from '../actions/actionCreators';
 import Action from '../models/Action';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
+import { getCheckpointActions } from '../selectors/actions';
 
 const CheckpointCarousel = connect(
     (state: AppState) => ({
-        itemsCount: state.selected.checkpointActions.length,
-        checkpointActions: state.selected.checkpointActions,
+        checkpointActions: getCheckpointActions(state),
         selectedCheckpointAction: state.selected.checkpointActionId,
-        index: state.selected.checkpointActions.findIndex(cp => cp.id === state.selected.checkpointActionId),
-        isEnabled: state.selected.checkpointActions.length > 0
+        index: getCheckpointActions(state).findIndex(cp => cp.id === state.selected.checkpointActionId),
     }),
     dispatch => ({
         selectCheckpoint: (checkpoint: Action) => dispatch(selectCheckpointAction(checkpoint))
@@ -37,7 +36,10 @@ const CheckpointCarousel = connect(
         ...ownProps,
         currentIndex: index + 1,
         next: () => selectCheckpoint(nextCyclicItemByIndex(checkpointActions, index)),
-        prev: () => selectCheckpoint(prevCyclicItemByIndex(checkpointActions, index))
+        prev: () => selectCheckpoint(prevCyclicItemByIndex(checkpointActions, index)),
+        itemsCount: checkpointActions.length,
+        isEnabled:  checkpointActions.length > 0
+
     })
 )(SelectionCarousel);
 

@@ -21,6 +21,7 @@ import { keyForAction } from "../helpers/keys";
 import { getFilterBlocks, getFilterResults } from "./filter";
 import FilterType from "../models/filter/FilterType";
 import { isCheckpointAction } from "../helpers/action";
+import { getCheckpointActions as filterCheckpointsActions } from "../helpers/checkpointFilter";
 
 export const getActions = (state: AppState) => state.selected.testCase.actions;
 
@@ -35,4 +36,9 @@ export const getFilteredActions = createSelector(
 
         return actions;
     }
+);
+
+export const getCheckpointActions = createSelector(
+    [getActions],
+    actions => filterCheckpointsActions(actions)
 );

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+* Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../util/Panel";
 import Message from '../models/Message';
-import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
+import { PredictionData, SubmittedData } from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 import LiveTestCase from '../models/LiveTestCase';
 import KnownBug from '../models/KnownBug';
 import { FilterBlock } from "../models/filter/FilterBlock";
+import Log from '../models/Log';
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -211,4 +212,24 @@ export const toggleMessageBeautifier = (messageId: number) => (<const>{
 
 export const uglifyAllMessages = () => (<const>{
     type: StateActionTypes.UGLIFY_ALL_MESSAGES
+})
+
+export const addTestCaseMessages = (messages: Message[]) => (<const>{
+    type: StateActionTypes.ADD_TEST_CASE_MESSAGES,
+    messages
+})
+
+export const addTestCaseActions = (actions: Action[]) => (<const>{
+    type: StateActionTypes.ADD_TEST_CASE_ACTIONS,
+    actions
+})
+
+export const addTestCaseLogs = (logs: Log[]) => (<const>{
+    type: StateActionTypes.ADD_TEST_CASE_LOGS,
+    logs
+})
+
+export const setIsConnectionError = (isConnectionError: boolean) => (<const>{
+    type: StateActionTypes.SET_IS_CONNECTION_ERROR,
+    isConnectionError
 })

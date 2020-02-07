@@ -24,4 +24,5 @@ export default interface ViewState {
 
     // We use Boolean object here. It's the way we handle flag chages after component unmount.
     adminMessagesEnabled: Boolean;
+    isConnectionError: boolean;
 }

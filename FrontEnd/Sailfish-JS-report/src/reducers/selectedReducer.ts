@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 import SelectedState from '../state/models/SelectedState';
 import { initialSelectedState } from '../state/initial/initialSelectedState';
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
-import { nextCyclicItem, getScrolledId } from '../helpers/array';
-import { getCheckpointActions } from '../helpers/checkpointFilter';
+import { getScrolledId } from '../helpers/array';
 import { generateActionsMap } from '../helpers/mapGenerator';
-import { getActions, removeNonexistingRelatedMessages } from '../helpers/action';
+import { getActions } from '../helpers/action';
 import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
 import { liveUpdateReducer } from './liveUpdateReduceer';
@@ -29,16 +28,13 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
     switch (stateAction.type) {
 
         case StateActionTypes.SET_TEST_CASE: {
-            const messagesIds = stateAction.testCase.messages.map(message => message.id),
-                actions = stateAction.testCase.actions.map(action => removeNonexistingRelatedMessages(action, messagesIds));
-
             return {
                 ...state,
-                checkpointActions: getCheckpointActions(actions),
-                actionsMap: generateActionsMap(getActions(actions)),
                 testCase: {
                     ...stateAction.testCase,
-                    actions
+                    actions: [],
+                    messages: [],
+                    logs: []
                 },
                 searchString: initialSelectedState.searchString,
                 searchResults: initialSelectedState.searchResults,
@@ -324,6 +320,38 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return {
                 ...state,
                 live: nextLiveState
+            }
+        }
+
+        case StateActionTypes.ADD_TEST_CASE_ACTIONS: {
+            const actions = [...state.testCase.actions, ...stateAction.actions];
+            return {
+                ...state,
+                actionsMap: generateActionsMap(getActions(actions)),
+                testCase: {
+                    ...state.testCase,
+                    actions
+                }
+            }
+        }
+
+        case StateActionTypes.ADD_TEST_CASE_LOGS: {
+            return {
+                ...state,
+                testCase: {
+                    ...state.testCase,
+                    logs: [...state.testCase.logs, ...stateAction.logs]
+                }
+            }
+        }
+
+        case StateActionTypes.ADD_TEST_CASE_MESSAGES: {
+            return {
+                ...state,
+                testCase: {
+                    ...state.testCase,
+                    messages: [...state.testCase.messages, ...stateAction.messages],
+                }
             }
         }
 

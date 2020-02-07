@@ -22,7 +22,8 @@ const initialViewState : ViewState = {
     adminMessagesEnabled: new Boolean(false),
     beautifiedMessages: [],
     leftPanel: Panel.Actions,
-    rightPanel: Panel.Messages
+    rightPanel: Panel.Messages,
+    isConnectionError: false
 }
 
 export default initialViewState;

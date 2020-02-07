@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /**
- * This fucntion fetches jsonp data from js file.
+ * This function fetches jsonp data from js file.
  * @param path path to jsonp file.
  * @param jsonpPath callback path for jsonp file.
  */
@@ -46,7 +46,7 @@ export async function fetchJsonp(path: string, jsonpPath: string): Promise<unkno
 }
 
 /**
- * This funciton can be used to fetch updates from jsonp file with multiple jsonp callbacks. 
+ * This function can be used to fetch updates from jsonp file with multiple jsonp callbacks. 
  * It accumulates updates for each jsonp callback path in array.
  * It uses prev and current update indexes to determine which of jsonp callback calls is with new update or not. 
  * 

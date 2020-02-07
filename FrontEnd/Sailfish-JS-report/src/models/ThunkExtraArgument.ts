@@ -15,7 +15,9 @@
  ******************************************************************************/
 
 import LiveUpdateService from "../helpers/files/LiveUpdateService";
+import { JsonpTaskController } from "../helpers/jsonp/jsonpTaskController"
 
 export default interface ThunkExtraArgument {
     liveUpdateService: LiveUpdateService;
+    jsonpTaskController: JsonpTaskController;
 }

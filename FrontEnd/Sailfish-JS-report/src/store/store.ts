@@ -30,11 +30,13 @@ import StateActionType from '../actions/stateActions';
 import { initLiveUpdateEventSource } from './eventSources/liveUpdate';
 import LiveUpdateService from '../helpers/files/LiveUpdateService';
 import ThunkExtraArgument from '../models/ThunkExtraArgument';
-import initBroserHistoryEventSource from './eventSources/browserHistory';
+import initBrowserHistoryEventSource from './eventSources/browserHistory';
+import { JsonpTaskController } from '../helpers/jsonp/jsonpTaskController';
 
 export function createAppStore() {
     const liveUpdateService = new LiveUpdateService(), 
-        thunkExtra: ThunkExtraArgument = { liveUpdateService },
+        jsonpTaskController = new JsonpTaskController(), 
+        thunkExtra: ThunkExtraArgument = { liveUpdateService, jsonpTaskController },
         middleware = [
             thunk.withExtraArgument(thunkExtra),
             urlHandler
@@ -53,7 +55,7 @@ export function createAppStore() {
     );
 
     initLiveUpdateEventSource(store, liveUpdateService);
-    initBroserHistoryEventSource(store);
+    initBrowserHistoryEventSource(store);
 
     return store;
 }
