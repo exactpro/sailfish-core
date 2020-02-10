@@ -27,9 +27,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.text.MessageFormat
 
-private val TEST_CASE_JSONP_TEMPLATE = MessageFormat("window.loadTestCase({0});")
+private val TEST_CASE_JSONP_TEMPLATE = "window.loadTestCase(%s);"
 
 private val mapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
@@ -53,9 +52,9 @@ class JsonpTestcaseWriter(testcaseNumber: Number, jsonpReportDir: Path, private 
     }
 
     fun updateTestCaseFile(testcase: TestCase) {
-        Files.write(testCaseFilePath, TEST_CASE_JSONP_TEMPLATE.format(arrayOf(
+        Files.write(testCaseFilePath, TEST_CASE_JSONP_TEMPLATE.format(
                 mapper.writeValueAsString(JsonpTestcase(dataStreams, testcase, reportRootDir))
-        )).toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
+        ).toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
     }
 
     fun <T : IJsonReportNode> write(node: T) {

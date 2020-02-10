@@ -582,7 +582,6 @@ public class JsonReport implements IScriptReport {
 
         if("Messages".equals(table.getName())) {
             List<Message> messages = table.getRows().stream().map(Message::new).collect(Collectors.toList());
-            messages.forEach(jsonpTestcaseWriter::write);
 
             if (currentNode instanceof Action) {
                 long actionId = ((Action) currentNode).getId();
@@ -596,6 +595,7 @@ public class JsonReport implements IScriptReport {
                 for (Message message : messages) {
                     message.setRelatedActions(messageToActionIdMap.computeIfAbsent (message.getId(), k -> new HashSet<>()));
                 }
+                messages.forEach(jsonpTestcaseWriter::write);
             }
             currentNode.addSubNodes(messages);
         } else {

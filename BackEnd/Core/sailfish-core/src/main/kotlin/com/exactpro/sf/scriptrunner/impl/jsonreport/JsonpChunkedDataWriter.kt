@@ -25,7 +25,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.text.MessageFormat
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,8 +36,8 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
         private val perFileItemLimit: Int,
         private val mapper: ObjectMapper
 ) {
-    private val messageFormat = MessageFormat("load$loaderFunctionPrefix({0}, {1});")
-    private val rootFileTemplate = MessageFormat("load${loaderFunctionPrefix}Index({0});")
+    private val template = "load$loaderFunctionPrefix(%d, %s);"
+    private val rootFileTemplate = "load${loaderFunctionPrefix}Index(%s);"
     val rootFilePath: Path get() = directory.resolve("index.js")
 
     private val dataFileNames: MutableMap<String, Int?> = mutableMapOf()
@@ -60,7 +59,7 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
 
         try {
             increaseItemCounter()
-            write(messageFormat.format(arrayOf(globalItemCounter, mapper.writeValueAsString(node))))
+            write(template.format(globalItemCounter, mapper.writeValueAsString(node)))
             updateRootFile()
         } catch (e: Exception) {
             logger.error(e) { "unable to write a node" }
@@ -80,9 +79,9 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
         try {
             val rootFilePath: Path = dispatcher.createFile(FolderType.REPORT, true, reportRootDirectory.parent.relativize(rootFilePath).toString()).toPath()
 
-            val data: String = rootFileTemplate.format(arrayOf(mapper.writeValueAsString(Index(globalItemCounter, dataFileNames.mapKeys {
+            val data: String = rootFileTemplate.format(mapper.writeValueAsString(Index(globalItemCounter, dataFileNames.mapKeys {
                 reportRootDirectory.relativize(directory.resolve(it.key)).toString()
-            }))))
+            })))
 
             Files.write(rootFilePath, data.toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
 
