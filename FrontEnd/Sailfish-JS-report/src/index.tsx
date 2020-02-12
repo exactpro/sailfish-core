@@ -20,6 +20,8 @@ import App from "./components/App";
 import ErrorBoundary from './components/util/ErrorBoundary';
 import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
+import 'core-js/features/array/flat-map';
+import 'core-js/features/array/flat';
 
 ReactDOM.render(
     <Provider store={createAppStore()}>
