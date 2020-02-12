@@ -17,10 +17,10 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
-import { getSecondsPeriod, formatTime } from '../helpers/date';
-import { TestCaseMetadata, isTestCaseMetadata } from '../models/TestcaseMetadata';
+import { getSecondsPeriod } from '../helpers/date';
+import { isTestCaseMetadata, TestCaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
-import { StatusType, statusValues } from '../models/Status';
+import { StatusType } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createStyleSelector, createBemElement } from '../helpers/styleCreators';
@@ -28,7 +28,9 @@ import { ExceptionChain } from './ExceptionChain';
 import TestCaseCard from './TestCaseCard';
 import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
 import ReportState from '../state/models/ReportState';
-import AlertCard from './AlertCard';
+import { ToggleButton } from './ToggleButton';
+import RunInformation from './RunInformation';
+import ReportSummary from './ReportSummary';
 import Tag from './Tag';
 
 const OLD_REPORT_PATH = 'report.html';
@@ -40,8 +42,11 @@ interface StateProps {
 
 interface Props extends StateProps { }
 
+enum Panel {ReportSummary, RunInfo}
+
 interface State {
     showKnownBugs: boolean;
+    panel: Panel;
 }
 
 export class ReportLayoutBase extends React.Component<Props, State> {
@@ -50,7 +55,8 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         super(props);
 
         this.state = {
-            showKnownBugs: true
+            showKnownBugs: true,
+            panel: Panel.ReportSummary
         };
     }
 
@@ -60,7 +66,25 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         })
     }
 
+    getPanel(): React.ReactNode {
+        return this.state.panel === Panel.RunInfo &&
+            <RunInformation report={this.props.report} /> ||
+            this.state.panel === Panel.ReportSummary &&
+            <ReportSummary report={this.props.report} />;
+    }
+
+    changePanel(panel: Panel) {
+        this.setState({
+            panel: panel
+        })
+    }
+
     render() {
+        const changePanel= (panel: Panel) => {
+            return () => {
+                this.changePanel(panel)
+            }
+        }
 
         const { report, selectedTestCaseId } = this.props,
             { showKnownBugs } = this.state;
@@ -70,9 +94,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             knownBugsClass = showKnownBugs ? "active" : "enabled",
             failedTestCasesEnabled = filteredMetadata.some(({status}) => status.status === StatusType.FAILED),
             failedTcTitleClass = createBemElement('report', 'title', failedTestCasesEnabled ? 'failed': 'disabled'),
-            isLive = report.finishTime == null,
-            alerts = report.alerts || [],
-            tags = report.tags || [];
+            isLive = report.finishTime == null;
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -88,9 +110,6 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                     </div>
                 )
         );
-
-        const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
-            plugins = report.plugins ? Object.entries(report.plugins) : [];
 
         return (
             <div className="report">
@@ -120,79 +139,28 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                 <div className="report__summary">
                     <div className="report-summary">
                         <div className="report-summary__card">
-                            <div className="report-summary__logo"/>
                             <div className="report-summary__element">
-                                <div className="report-summary__element-title">Version</div>
-                                <div className="report-summary__element-value">{report.version}</div>
+                                <div className="report-summary__logo"/>
+                                <div className="report-summary__vertical_element">
+                                    <div className="report-summary__element-title">Version</div>
+                                    <div className="report-summary__element-value">{report.version}</div>
+                                </div>
                             </div>
-                            <div className="report-summary__divider"/>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">Host</div>
-                                <div className="report-summary__element-value">{report.hostName}</div>
-                            </div>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">User</div>
-                                <div className="report-summary__element-value">{report.userName}</div>
-                            </div>
-                            <div className="report-summary__divider"/>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">ScriptRun ID</div>
-                                <div className="report-summary__element-value">{report.scriptRunId}</div>
-                            </div>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">Report Date</div>
-                                <div className="report-summary__element-value">{formatTime(report.startTime)}</div>
-                            </div>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">Execution time</div>
-                                <div className="report-summary__element-value">{executionTime}</div>
-                            </div>
-                            <div className="report-summary__divider"/>
-                            <div className="report-summary__element">
-                                <div className="report-summary__element-title">Test Cases</div>
-                                <div className="report-summary__element-value">{report.metadata.length}</div>
+                            <div className="layout-panel__tabs">
+                                <ToggleButton
+                                    textClass="report-summary__button_text"
+                                    isToggled={this.state.panel == Panel.ReportSummary}
+                                    onClick={changePanel(Panel.ReportSummary)}
+                                    text="Report Summary"/>
+                                <ToggleButton
+                                    textClass="report-summary__button_text"
+                                    isToggled={this.state.panel == Panel.RunInfo}
+                                    onClick={changePanel(Panel.RunInfo)}
+                                    text="Run Information"/>
                             </div>
                             {
-                                statusValues.map(statusValue => this.renderStatusInfo(statusValue, filteredMetadata))
+                                this.getPanel()
                             }
-                            <div className="report-summary__divider"/>
-                            {
-                                plugins.length ?
-                                    (
-                                        <div className="report-summary__element">
-                                            <div className="report-summary__element-title">Plugins</div>
-                                            <div className="report-summary__element-value">
-                                                {plugins.map(([name, version], index) => <p key={index}>{name}: {version}</p>)}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="report-summary__element">
-                                            <div className="report-summary__element-title">No plugins</div>
-                                        </div>
-                                    )
-                            }
-                            <div className="report-summary__divider"/>
-                            {
-                                tags.length ?
-                                    (
-                                        <div className="report-summary__tags">
-                                            <div className="report-summary__element report-summary__tags-header">
-                                                <div className="report-summary__element-title">Tags</div>
-                                                <div className="report-summary__element-value">{tags.length}</div>
-                                            </div>
-                                            <div className="report-summary__tags-list">
-                                                {tags.map((tag, i) => <Tag tag={tag} key={i}/>)}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="report-summary__element">
-                                            <div className="report-summary__element-title">No tags</div>
-                                        </div>
-                                    )
-                            }
-                        </div>
-                        <div className="report-summary__alerts">
-                            {alerts.map((alert, i) => <AlertCard {...alert} key={i}/>)}
                         </div>
                     </div>
                 </div>
@@ -219,26 +187,6 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                         )
                     }
                 </div>
-            </div>
-        )
-    }
-
-    private renderStatusInfo(status: StatusType, metadata: TestCaseMetadata[]): React.ReactNode {
-        const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-            valueClassName = createStyleSelector(
-                "report-summary__element-value",
-                "bold",
-                status.toLowerCase()
-            );
-
-        if (!testCasesCount) {
-            return null;
-        }
-
-        return (
-            <div className="report-summary__element" key={status}>
-                <div className={valueClassName}>{status.toUpperCase()}</div>
-                <div className={valueClassName}>{testCasesCount}</div>
             </div>
         )
     }

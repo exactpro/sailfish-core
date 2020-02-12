@@ -15,22 +15,25 @@
  ******************************************************************************/
 
 @import "./common/vars";
+@import "./common/mixins";
 
 .alert {
-	border: 2px solid;
-	padding: 7px 15px;
+	border-top: 2px solid;
 	font-size: 13px;
 	margin-bottom: 6px;
-	border-radius: 5px;
-	display: grid;
-	grid-template-columns: 1fr 100px;
-	grid-template-rows: 1fr 1fr;
-	grid-template-areas: "column type"
-						 "lines type"
-						 "message message";
+	min-height: 65px;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+
+	&__row {
+		margin-top: 10px;
+		justify-content: space-between;
+		display: flex;
+	}
 
 	&__column {
-		grid-area: column;
+		width: 60%;
 		&-title {
 			color: $secondaryTextColor;
 		}
@@ -41,7 +44,8 @@
 	}
 
 	&__lines {
-		grid-area: lines;
+		text-align: end;
+		width: 40%;
 		&-title {
 			color: $secondaryTextColor;
 		}
@@ -52,7 +56,6 @@
 	}
 
 	&__type {
-		grid-area: type;
 		text-align: right;
 		font-weight: bold;
 		font-size: 15px;
@@ -66,7 +69,8 @@
 	}
 
 	&__message {
-		grid-area: message;
+		width: 70%;
+		margin-right: 0px;
 	}
 	
 	&.warning {
@@ -78,4 +82,13 @@
 		border-color: $failedBorderColorSecondary;
 		color: $failedSecondaryTextColor;
 	}
+
+	&__icon {
+        &.error {
+			@include icon(url(../../resources/icons/report-summary-error.svg), 20px, 20px);
+        }
+        &.warning {
+			@include icon(url(../../resources/icons/report-summary-warning.svg), 20px, 20px);
+        }
+    }
 }

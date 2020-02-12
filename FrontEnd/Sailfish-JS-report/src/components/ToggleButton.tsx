@@ -25,9 +25,10 @@ interface Props {
     text: string;
     title?: string;
     theme?: string;
+    textClass?: string;
 }
 
-export function ToggleButton({ onClick = () => {}, isToggled = false, text, theme = 'default', isDisabled = false, title = '' }: Props) {
+export function ToggleButton({ onClick = () => {}, isToggled = false, text, textClass, theme = 'default', isDisabled = false, title = '' }: Props) {
     const className = createStyleSelector(
         "toggle-button", 
         theme, 
@@ -38,7 +39,7 @@ export function ToggleButton({ onClick = () => {}, isToggled = false, text, them
     return (
         <div className={className} onClick={() => !isDisabled && onClick(text)} title={title}>
             <div className="toggle-button__title">
-                <p>{text}</p>
+                <p className={textClass}>{text}</p>
             </div>
         </div>
     )

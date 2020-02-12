@@ -31,27 +31,29 @@ export const AlertCard = ({
 	const rootClassName = createBemBlock(
 		"alert",
 		type,
-	),	typeClassName = createBemElement(
+	),	iconClassName = createBemElement(
 		'alert',
-		'type',
+		'icon',
 		type
 	);
 
 	return (
 		<div className={rootClassName}>
-			<div className="alert__column">
-				<span className="alert__column-title">column:</span>
-				<span className="alert__column-value">{column}</span>
+			<div className="alert__row">
+				<div className="alert__message">
+					{message}
+				</div>
+				<div className={iconClassName}/>
 			</div>
-			<div className="alert__lines">
-				<span className="alert__column-title">lines:</span>
-				<span className="alert__lines-value">{lines}</span>
-			</div>
-			<div className={typeClassName}>
-				{type}
-			</div>
-			<div className="alert__message">
-				{message}
+			<div className="alert__row">
+				<div className="alert__column">
+					<span className="alert__column-title">column:</span>
+					<span className="alert__column-value">{column}</span>
+				</div>
+				<div className="alert__lines">
+					<span className="alert__column-title">lines:</span>
+					<span className="alert__lines-value">{lines}</span>
+				</div>
 			</div>
 		</div>
 	)
