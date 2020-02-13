@@ -24,6 +24,7 @@
     grid-template-columns: calc(50% - 13px) 25px calc(50% - 13px);
     grid-template-areas: "left-pane splitter-bar right-pane";
     position: relative;
+    overflow: hidden;
 
     &.dragging {
         @include unselectable;
@@ -49,6 +50,7 @@
         &.dragging {
             grid-area: initial;
             position: absolute;
+            z-index: 2;
         }
 
         &:hover:after {
@@ -66,6 +68,48 @@
             background-image: url('../../resources/icons/splitter-active.svg');
         }
     }
+    
+    &-preview-area-left {
+        left: 0%;
+    }
+
+    &-preview-area-right {
+        right: 0%;
+    }
+
+    &-preview-area-left, &-preview-area-right {
+        margin: 12px;
+        height: 100%;
+        position: absolute;
+        z-index: 1;
+        background-color: #000000;
+        border-radius: 5px;
+        opacity: 0.1;
+
+        &.hidden {
+            visibility: hidden;
+        }
+
+        &.w0 {
+            width: 0;
+        }
+
+        &.w25 {
+            width: calc(25% - 17px);
+        }
+
+        &.w50 {
+            width: calc(50% - 17px);
+        }
+
+        &.w75 {
+            width: calc(75% - 17px);
+        }
+
+        &.w100 {
+            width: calc(100% - 40px);
+        }
+    }
 
     &-pane {
         &-left {
@@ -81,6 +125,10 @@
 
             &.dragging {
                 filter: opacity(0.3);
+            }
+
+            &.hidden {
+                visibility: hidden;
             }
         }
     }

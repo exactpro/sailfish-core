@@ -29,8 +29,6 @@ import { stopWatchingTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 
-const MIN_PANEL_WIDTH = 600;
-
 interface TestCaseLayoutProps {
     testCaseLoadingProgress: number;
     isConnectionError: boolean;
@@ -51,7 +49,7 @@ const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchi
                 <Header/>
             </div>
             <div className="layout__body">
-                <SplitView minPanelWidth={MIN_PANEL_WIDTH}>
+                <SplitView>
                     <LeftPanel/>
                     <RightPanel/>
                 </SplitView>
