@@ -68,6 +68,20 @@ $conditionallyFailedSecondaryTextColor: #E69900;
 $conditionallyFailedVerificationBackgroundColor: mix($conditionallyFailedTextColor, white, 10%);
 $conditionallyFailedVerificationHighlightedBackgroundColor: mix($conditionallyFailedTextColor, white, 20%);
 
+$logCardErrorPrimaryColor: #E23636;
+$logCardErrorBorderColor: #FFCCCC;
+
+$logCardWarnPrimaryColor: #F57A3D;
+$logCardWarnBorderColor: #FFDDCC;
+
+$logCardDebugPrimaryColor: #5EBA6E;
+$logCardDebugBorderColor: #DBF0DF;
+
+$logCardInfoPrimaryColor: #808080;
+$logCardInfoBorderColor: #E6E6E6;
+
+$logCardPrimaryTextColor: #262626;
+
 $naTextColor: $reportTitleTextColor;
 
 $checkpointBorderColor: #59B368;

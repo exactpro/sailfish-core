@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import * as React from 'react';
-import Log from '../models/Log';
+import AppState from '../state/models/AppState';
 
-interface LogsPaneProps {
-    logs?: Log[];
-}
-
-export const LogsPane = ({logs}: LogsPaneProps) => {
-    return (
-        <div style={{paddingTop: 60}}>LOGS - SOON...</div>
-    );
-}
+export const getLogs = (state: AppState) => state.selected.testCase.logs;
+export const getLogsCount = (state: AppState) => state.selected.testCase.files?.logentry.count || 0;

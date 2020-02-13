@@ -1,0 +1,228 @@
+/******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+@import "./common/vars";
+
+.logs {
+	height: 100%;
+
+    &__list {
+        height: 100%;
+        padding: 0 5px;
+        overflow: hidden;
+    }
+}
+
+.log-card {
+	@include log-status-card;
+
+	border-radius: 5px;
+    padding: 15px;
+	margin: 6px 0;
+	position: relative;
+	display: grid;
+    grid-template-areas: "lc-head"
+                         "delimiter"
+                         "lc-message";
+    grid-row-gap: 12px;
+	border: 2px solid transparent;
+	border-color: var(--lc-border-color);
+	color: $logCardPrimaryTextColor;
+
+	&__head {
+		grid-area: lc-head;
+		display: grid;
+		grid-template-areas: "lc-level thread thread-val . ."
+							"timestamp class class-val exception exception-val";
+		grid-template-rows: auto auto;
+		grid-template-columns: 0.7fr 0.15fr 1.3fr 0.2fr 1fr;
+		align-items: center;
+		grid-row-gap: 10px;
+		grid-column-gap: 10px;
+		font-size: 14px;
+		color: #262626;
+	}
+
+	&__class {
+		grid-area: class;
+		color: $secondaryTextColor;
+        font-size: 10px;
+        align-self: baseline;
+	}
+
+	&__class-val {
+        grid-area: class-val;
+        word-break: break-all;
+        align-self: baseline;
+	}
+
+	&__exception {
+		grid-area: exception;
+		color: $secondaryTextColor;
+        font-size: 10px;
+        align-self: baseline;
+	}
+
+	&__exception-val {
+        grid-area: exception-val;
+        align-self: baseline;
+	}
+
+	&__level {
+		grid-area: lc-level;
+		font-weight: bold;
+		font-size: 16px;
+		line-height: 16px;
+		text-transform: uppercase;
+		color: var(--lc-primary-color);
+	}
+
+	&__thread {
+		grid-area: thread;
+		color: $secondaryTextColor;
+		font-size: 10px;
+	}
+
+	&__thread-val {
+		grid-area: thread-val;
+	}
+
+	&__timestamp {
+		grid-area: timestamp;
+        font-size: 12px;
+        align-self: baseline;
+	}
+
+	&__delimiter {
+		grid-area: delimiter;
+		height: 2px;
+		background-color: var(--lc-border-color);
+	}
+
+	&__message {
+		grid-area: lc-message;
+		line-height: 22px;
+        font-size: 13px;
+        white-space: pre-wrap;
+        font-family: Open sans;
+	}
+}
+
+.lc-skeleton {
+    @include skeleton-pulse;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-areas: "mc-header"
+                         "delimiter"
+                         "mc-body";
+    grid-row-gap: 12px;
+    border: 2px solid $skeletonBackgroundColor;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 6px 0;
+    position: relative;
+
+    &__header {
+        grid-area: mc-header;
+        display: grid;
+        grid-template-rows: repeat(2, auto);
+        grid-template-columns: 1fr 2.5fr 2fr;
+        grid-column-gap: 20px;
+        grid-row-gap: 6px;
+        grid-template-areas: "level thread ."
+                             "timestamp class exception";
+        align-items: center;
+    }
+
+    &__level, 
+    &__timestamp, 
+    &__class-label, 
+    &__class-value, 
+    &__thread-label, 
+    &__thread-value,
+    &__exception-label,
+    &__exception-value {
+        @include skeleton;
+    } 
+
+    &__level {
+        grid-area: level;
+        width: 25%;
+    }
+
+    &__timestamp {
+        grid-area: timestamp;
+    }
+
+    &__class {
+        grid-area: class;
+    }
+
+    &__thread {
+        grid-area: thread;
+    }
+
+    &__thread-value {
+        width: 50%;
+    }
+
+    &__exception {
+        grid-area: exception;
+    }
+    
+    &__delimiter {
+        height: 2px;
+        background-color: $skeletonBackgroundColor;
+        grid-area: delimiter;
+    }
+
+    &__body {
+        grid-area: mc-body;
+        display: grid;
+        grid-template-rows: 16px 16px;
+        grid-template-columns: 1.2fr 1fr;
+        grid-row-gap: 7px;
+        grid-template-areas: "message1 message1"
+                             "message2 type";
+    }
+
+    &__body-message1, &__body-message2, &__body-type {
+        @include skeleton;
+    }
+
+    &__body-message1 {
+        grid-area: message1;
+        height: 16px;
+    }
+
+    &__body-message2 {
+        grid-area: message2;
+        height: 16px;
+    }
+
+    &__body-type {
+        justify-self: end;
+        grid-area: type;
+        width: 55px;
+    }
+
+    & .grouped {
+        background-color: white;
+        display: grid;
+        grid-column-gap: 15px;
+        grid-template-columns: 50px 1fr;
+    }
+}

@@ -103,6 +103,30 @@
         --status-primary-header-background-color: #{$conditionallyFailedHeaderColor};
         --status-secondary-header-background-color: #{$conditionallyFailedHeaderSecondaryBackground};
     }
+
+
+}
+
+@mixin log-status-card {
+    &.error {
+        --lc-primary-color: #{$logCardErrorPrimaryColor};
+        --lc-border-color: #{$logCardErrorBorderColor};
+    }
+
+    &.warn {
+        --lc-primary-color: #{$logCardWarnPrimaryColor};
+        --lc-border-color: #{$logCardWarnBorderColor};
+    }
+
+    &.debug {
+        --lc-primary-color: #{$logCardDebugPrimaryColor};
+        --lc-border-color: #{$logCardDebugBorderColor};
+    }
+
+    &.info {
+        --lc-primary-color: #{$logCardInfoPrimaryColor};
+        --lc-border-color: #{$logCardInfoBorderColor};
+    }
 }
 
 @mixin status-card-with-running {

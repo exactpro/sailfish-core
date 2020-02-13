@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import { Panel } from '../util/Panel';
 import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardList';
-import { LogsPane } from './LogsPane';
+import LogsList from './log/LogsList';
 import AppState from '../state/models/AppState';
 import { isAdmin, isRejected } from '../helpers/messageType';
 import {
@@ -50,6 +50,7 @@ interface StateProps {
     predictionsAvailable: boolean;
     hasKnownBugs: boolean;
     beautifiedMessagesEnabled: boolean;
+    hasLogs: boolean;
 }
 
 interface DispatchProps {
@@ -112,7 +113,7 @@ class RightPanelBase extends React.Component<Props, State> {
     render() {
         const {
             panel, rejectedMessagesEnabled, adminMessages, adminMessagesEnabled, adminEnabledHandler, selectCurrentRejectedMessage,
-            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler
+            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler, hasLogs, hasKnownBugs,
         } = this.props;
 
         const adminControlEnabled = adminMessages.length != 0;
@@ -140,14 +141,14 @@ class RightPanelBase extends React.Component<Props, State> {
                             text="Messages"/>
                         <ToggleButton
                             isToggled={panel == Panel.KnownBugs}
-                            isDisabled={!this.props.hasKnownBugs}
+                            isDisabled={!hasKnownBugs}
                             onClick={() => this.selectPanel(Panel.KnownBugs)}
                             text="Known bugs"/>
                         <ToggleButton
-                            isToggled={false}
-                            isDisabled={true}
-                            title="Not implemented"
-                            text="Logs"/>
+                            isDisabled={!hasLogs}
+                            isToggled={panel == Panel.Logs}
+                            onClick={() => this.selectPanel(Panel.Logs)}
+                            text="Logs" />
                     </div>
                     {
                         beautifiedMessagesEnabled ? (
@@ -229,7 +230,8 @@ class RightPanelBase extends React.Component<Props, State> {
                         ref={this.messagesPanel}/>
                 </div>
                 <div className={logsRootClass}>
-                    <LogsPane/>
+                    <LogsList
+                        isActive={this.props.panel === Panel.Logs} />
                 </div>
                 <div className={knownBugsRootClass}>
                     <KnownBugPanel/>
@@ -261,7 +263,6 @@ export const RightPanel = connect(
         adminMessagesEnabled: state.view.adminMessagesEnabled.valueOf(),
         panel: state.view.rightPanel,
         beautifiedMessagesEnabled: state.view.beautifiedMessages.length > 0,
-
         predictionsAvailable:
             state.machineLearning.token != null
             && state.selected.testCase.messages.length > 0
@@ -270,14 +271,15 @@ export const RightPanel = connect(
             }),
 
         predictionsEnabled: state.machineLearning.predictionsEnabled,
-        hasKnownBugs: state.selected.testCase.bugs.length > 0
+        hasKnownBugs: state.selected.testCase.bugs.length > 0,
+        hasLogs: state.selected.testCase.files.logentry.count > 0
     }),
     (dispatch) => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),
         selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId)),
         adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled)),
         togglePredictions: () => dispatch(togglePredictions()),
-        uglifyAllHandler: () => dispatch(uglifyAllMessages())
+        uglifyAllHandler: () => dispatch(uglifyAllMessages()),
     }),
     ({ selectedRejectedMessageId, ...stateProps }, { selectRejectedMessage, ...dispatchProps }, ownProps): Props => ({
         ...stateProps,
