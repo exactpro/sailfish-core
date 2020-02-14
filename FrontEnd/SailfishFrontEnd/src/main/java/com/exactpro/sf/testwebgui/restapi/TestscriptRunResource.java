@@ -152,7 +152,7 @@ public class TestscriptRunResource {
                                         .filter(entity -> entity.getName().startsWith(reportFolderPath))
                                         .forEach(entity -> {
                                             try {
-                                                archive.putNextEntry(new ZipEntry(Paths.get(entity.getName()).getFileName().toString()));
+                                                archive.putNextEntry(new ZipEntry(Paths.get(entity.getName()).toString()));
                                                 Streams.copy(inputZipFile.getInputStream(entity), archive, false);
                                                 archive.closeEntry();
                                             } catch (IOException e) {
@@ -549,7 +549,7 @@ public class TestscriptRunResource {
                 }
 
                 xmlDescr.setTestcases(list);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }

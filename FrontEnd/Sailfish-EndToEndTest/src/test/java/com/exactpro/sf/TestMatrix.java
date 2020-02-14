@@ -18,6 +18,7 @@ package com.exactpro.sf;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -262,7 +263,12 @@ public class TestMatrix extends AbstractSFTest {
             Files.copy(stream, archive.toPath(), StandardCopyOption.REPLACE_EXISTING);
             ZipFile zipFile = new ZipFile(archive);
 
-            ReportRoot report = OBJECT_MAPPER.readValue(zipFile.getInputStream(zipFile.getEntry("report.json")), ReportRoot.class);
+            ZipEntry rootFileEntry = zipFile.stream()
+                    .filter(item -> item.getName().endsWith("report.json"))
+                    .findFirst()
+                    .orElseThrow(() -> new FileNotFoundException("report.json is missing"));
+
+            ReportRoot report = OBJECT_MAPPER.readValue(zipFile.getInputStream(rootFileEntry), ReportRoot.class);
 
 
             if (!valid) {
@@ -273,7 +279,12 @@ public class TestMatrix extends AbstractSFTest {
             }
 
             for (TestCaseMetadata link : report.getMetadata()) {
-                TestCase testCase = OBJECT_MAPPER.readValue(zipFile.getInputStream(zipFile.getEntry(link.getJsonFileName())), TestCase.class);
+                ZipEntry testCaseFileEntry = zipFile.stream()
+                        .filter(item -> item.getName().endsWith(link.getJsonFileName()))
+                        .findFirst()
+                        .orElseThrow(() -> new FileNotFoundException(String.format("%s is missing", link.getJsonFileName())));
+
+                TestCase testCase = OBJECT_MAPPER.readValue(zipFile.getInputStream(testCaseFileEntry), TestCase.class);
                 if (valid) {
                     Assert.assertEquals(testCase.getStatus().getStatus().name(), (STATUS_PASSED));
                 }
@@ -332,9 +343,7 @@ public class TestMatrix extends AbstractSFTest {
                 File file = new File("report.zip");
                 file.delete();
                 Files.copy(report.getInputStream(), file.toPath());
-                File reportRepack = File.createTempFile("repack"+UUID.randomUUID(), ".zip");
-                repackReport(file, reportRepack);
-                try (InputStream in = new FileInputStream(reportRepack)) {
+                try (InputStream in = new FileInputStream(file)) {
                     testReport(in, valid);
                 }
                 Files.delete(file.toPath());
@@ -354,41 +363,6 @@ public class TestMatrix extends AbstractSFTest {
         } catch (Exception e) {
             throw new APICallException(e);
         }
-    }
-
-    private void repackReport(File src, File target) throws Exception {
-
-        ZipFile zipFile = new ZipFile(src);
-        File tmpDir = Files.createTempDirectory("tmpReport"+UUID.randomUUID()).toFile();
-        zipFile.stream().forEach(o -> {
-            File out = new File(tmpDir, ((ZipEntry) o).getName());
-            out.mkdirs();
-            try {
-                Files.copy(zipFile.getInputStream(o), out.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        try(ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(target))) {
-            File reportData = tmpDir.listFiles(File::isDirectory)[0].listFiles(file -> file.isDirectory() && file.getName().equals("reportData"))[0];
-
-            for (File f : reportData.listFiles()) {
-                zipOutputStream.putNextEntry(new ZipEntry(f.getName()));
-                Files.copy(f.toPath(), zipOutputStream);
-                zipOutputStream.closeEntry();
-            }
-        }
-    }
-
-    private InputStream getInputStream(File zip, String entry) throws IOException {
-        ZipInputStream zin = new ZipInputStream(new FileInputStream(zip));
-        for (ZipEntry e; (e = zin.getNextEntry()) != null;) {
-            if (e.getName().contains(entry)) {
-                return zin;
-            }
-        }
-        throw new EOFException("Cannot find " + entry);
     }
 
     protected static Matrix getMatrixFromList(MatrixList matrixList, int matrixId, String name) throws APICallException {

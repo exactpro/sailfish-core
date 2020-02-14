@@ -271,7 +271,7 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
                 try (ZipFile zipFile = new ZipFile(reportFile)) {
                     ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportFile.getName()) + "/" + ROOT_JSON_REPORT_FILE);
                     try (InputStream stream = zipFile.getInputStream(zipJson)) {
-                        return convertToTestScriptDescription(relativeReportPath.toString(), jsonObjectMapper.readValue(stream, ReportRoot.class));
+                        return convertToTestScriptDescription(FilenameUtils.removeExtension(relativeReportPath.toString()), jsonObjectMapper.readValue(stream, ReportRoot.class));
                     }
                 }
             }

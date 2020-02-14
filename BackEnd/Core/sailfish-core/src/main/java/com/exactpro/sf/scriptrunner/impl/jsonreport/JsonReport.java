@@ -205,7 +205,7 @@ public class JsonReport implements IScriptReport {
     private void updateMetadata(TestCase testCase, String jsonFileName) {
         TestCaseMetadata metadata = new TestCaseMetadata(
                 testCase,
-                getFile(jsonFileName, false).getPath(),
+                getFile(jsonFileName, false).getName(),
                 jsonpTestcaseWriter == null ? null : reportRootDir.relativize(jsonpTestcaseWriter.getTestCaseFilePath()).toString());
 
         reportRoot.getMetadataMap().put(metadata.getOrder(), metadata);
