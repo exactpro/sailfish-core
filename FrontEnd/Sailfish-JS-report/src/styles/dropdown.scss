@@ -1,0 +1,71 @@
+/******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+@import "./common/vars";
+
+.dropdown {
+	position: relative;
+
+	&.disabled {
+		opacity: 0.8;
+	}
+
+	&__trigger {
+		display: flex;
+		align-items: center;
+		color: $primaryTextColor;
+		white-space: nowrap;
+		cursor: pointer;
+		font-weight: bold;
+		font-size: 14px;
+	}
+
+	&__menu {
+		position: absolute;
+		top: 0;
+		right: 0;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		transform: translate3d(0px, 26px, 0px);
+		border: 2px solid $primaryTextColor;
+		border-radius: 3px;
+	}
+
+	&__menu-item {
+		box-sizing: border-box;
+		cursor: pointer;
+		height: 28px;
+		padding: 5px 7px;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 18px;
+		border-bottom: 1px solid $liveBackgroundColor;
+		background-color: white;
+		white-space: nowrap;
+		color: $primaryTextColor;
+		user-select: none;
+
+		&:hover {
+			background-color: $passedBorderHoverColor;
+		}
+
+		&:last-child {
+			border: none;
+		}
+	}
+}
+

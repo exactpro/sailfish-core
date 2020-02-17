@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,19 @@ import SearchInput from './search/SearchInput';
 import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
 import LiveTimer from './LiveTimer';
 import FilterPanel from "./filter/FilterPanel";
-import { getIsFilterApplied } from "../selectors/filter";
+import { getIsFilterApplied, getIsMessageFilterApplied } from "../selectors/filter";
 import useOutsideClickListener from "../hooks/useOutsideClickListener";
+import { downloadTxtFile } from '../helpers/files/downloadTxt';
+import { getFilteredMessages } from '../selectors/messages';
+import Message from '../models/Message';
+import Dropdown from './Dropdown';
 
 interface StateProps {
     testCase: TestCase;
     isNavigationEnabled: boolean;
     isFilterApplied: boolean;
+    messages: Message[];
+    isMessageFilterApplied: boolean;
 }
 
 interface DispatchProps {
@@ -52,7 +58,9 @@ export const HeaderBase = ({
    isFilterApplied,
    nextTestCaseHandler,
    prevTestCaseHandler,
-   backToListHandler
+   backToListHandler,
+   messages,
+   isMessageFilterApplied
 }: Props) => {
     const {
         name = 'Test Case',
@@ -104,15 +112,55 @@ export const HeaderBase = ({
             !showFilter && isFilterApplied ? "applied" : null
         );
 
+    const downloadMessages = (fields: ('contentHumanReadable' | 'raw')[]) => {
+        const content = messages
+          .map(msg =>
+            fields
+              .filter(field => msg[field] !== 'null')
+              .map(field => msg[field])
+              .join('\n')
+              .replace(/\n$/, ''),
+          )
+          .filter(Boolean)
+          .join('\n\n');
+        const fileName = `${testCase.name}_messages_${new Date().toISOString()}.txt`;
+        downloadTxtFile([content], fileName);
+    }
+
     return (
         <div className={rootClass}>
             <div className="header__main   header-main">
-                <div className="header-button   header-main__contol-button"
-                     onClick={backToListHandler}>
-                    <div className="header-button__icon go-back"/>
-                    <div className="header-button__title">Back to list</div>
+                <div className="header__group">
+                    <div className="header-button"
+                        onClick={backToListHandler}>
+                        <div className="header-button__icon go-back"/>
+                        <div className="header-button__title">Back to list</div>
+                    </div>
+                    <Dropdown 
+                        disabled={messages.length === 0}
+                        className="header__dropdown">
+                        <Dropdown.Trigger>
+                            <div className="header-button__icon export" />
+                            <div>Export {isMessageFilterApplied && " Filtered "} Messages</div>
+                            <div className="header-button__icon down" />
+                        </Dropdown.Trigger>
+                        <Dropdown.Menu>
+                            <Dropdown.MenuItem
+                                onClick={() => downloadMessages(['contentHumanReadable'])}>
+                                Human-Readable
+                            </Dropdown.MenuItem>
+                            <Dropdown.MenuItem
+                                onClick={() => downloadMessages(['raw'])}>
+                                Raw Data
+                            </Dropdown.MenuItem>
+                            <Dropdown.MenuItem
+                                onClick={() => downloadMessages(['contentHumanReadable', 'raw'])}>
+                                Both
+                            </Dropdown.MenuItem>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
-                <div className="header-main__name ">
+                <div className="header-main__name header__group">
                     <div className={navButtonClass}
                          onClick={() => isNavigationEnabled && prevTestCaseHandler()}>
                         <div className="header-button__icon left"/>
@@ -134,35 +182,37 @@ export const HeaderBase = ({
                         <div className="header-button__icon right"/>
                     </div>
                 </div>
-                <div className={filterWrapperClass}>
-                    <div className="header-button   header-main__contol-button"
-                         ref={filterButtonRef}
-                         onClick={() => setShowFilter(!showFilter)}>
-                        <div className={filterIconClass}/>
-                        <div className={filterTitleClass}>
-                            {
-                                isFilterApplied ?
-                                    "Filter Applied" :
-                                    showFilter ?
-                                        "Hide Filter" :
-                                        "Show Filter"
-                            }
-                        </div>
-                    </div>
-                    {
-                        showFilter ? (
-                            <div ref={filterBaseRef} className="filter-wrapper">
-                                <FilterPanel/>
+                <div className="header__group">
+                    <div className={filterWrapperClass}>
+                        <div className="header-button"
+                            ref={filterButtonRef}
+                            onClick={() => setShowFilter(!showFilter)}>
+                            <div className={filterIconClass}/>
+                            <div className={filterTitleClass}>
+                                {
+                                    isFilterApplied ?
+                                        "Filter Applied" :
+                                        showFilter ?
+                                            "Hide Filter" :
+                                            "Show Filter"
+                                }
                             </div>
-                        ) : null
-                    }
-                </div>
-                <div className="header-main__search">
-                    <SearchInput/>
+                        </div>
+                        {
+                            showFilter ? (
+                                <div ref={filterBaseRef} className="filter-wrapper">
+                                    <FilterPanel/>
+                                </div>
+                            ) : null
+                        }
+                    </div>
+                    <div className="header-main__search">
+                        <SearchInput/>
+                    </div>
                 </div>
             </div>
             <div className="header__info">
-                <div className="header__info-group">
+                <div className="header__group">
                     <div className="header__info-element">
                         <span>Start:</span>
                         <p>{formatTime(startTime)}</p>
@@ -176,10 +226,10 @@ export const HeaderBase = ({
                         )
                     }
                 </div>
-                <div className="header__description">
+                <div className="header__description header__group">
                     {description}
                 </div>
-                <div className="header__info-group">
+                <div className="header__group">
                     <div className="header__info-element">
                         <span>ID:</span>
                         <p>{id}</p>
@@ -201,7 +251,9 @@ export const Header = connect(
     (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
         isNavigationEnabled: state.report.metadata.length > 1,
-        isFilterApplied: getIsFilterApplied(state)
+        isFilterApplied: getIsFilterApplied(state),
+        messages: getIsMessageFilterApplied(state) ? getFilteredMessages(state): state.selected.testCase.messages,
+        isMessageFilterApplied: getIsMessageFilterApplied(state)
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),
