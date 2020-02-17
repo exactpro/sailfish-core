@@ -152,6 +152,7 @@ public abstract class TestNTGClientBase extends TestClientBase {
         settings.setPort(port);
         settings.setHost(host);
         settings.setDecodeByDictionary(true);
+        settings.setDepersonalizationIncomingMessages(false);
         return settings;
     }
 

@@ -51,7 +51,7 @@ public class WaitLogonResponse implements Runnable {
         ISession iSession = server.getSession();
         long timeEnd = System.currentTimeMillis() + timeout;
         Set<IoSession> sessions = server.getSessionMap().keySet();
-        CSHIterator<IMessage> messagesIterator = handler.getIterator(iSession, ServiceHandlerRoute.FROM_APP, null);
+        CSHIterator<IMessage> messagesIterator = handler.getIterator(iSession, ServiceHandlerRoute.FROM_ADMIN, null);
 
         try {
             while(messagesIterator.hasNext(timeEnd - System.currentTimeMillis())) {

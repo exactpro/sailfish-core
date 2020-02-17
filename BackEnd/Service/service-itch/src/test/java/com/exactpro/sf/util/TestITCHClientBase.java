@@ -15,6 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.mina.core.session.IoSession;
+import org.junit.After;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -27,15 +36,8 @@ import com.exactpro.sf.services.itch.ITCHTCPClientSettings;
 import com.exactpro.sf.services.itch.ITCHTcpClient;
 import com.exactpro.sf.services.tcpip.DefaultFieldConverter;
 import com.exactpro.sf.services.tcpip.TCPIPServerSettings;
-import junit.framework.Assert;
-import org.apache.mina.core.session.IoSession;
-import org.junit.After;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import junit.framework.Assert;
 
 /**
  * @author sergey.vasiliev
@@ -104,6 +106,7 @@ public abstract class TestITCHClientBase extends TestClientBase {
         settings.setPort(port);
         settings.setHost(host);
         settings.setDecodeByDictionary(true);
+        settings.setDepersonalizationIncomingMessages(false);
         return settings;
     }
 

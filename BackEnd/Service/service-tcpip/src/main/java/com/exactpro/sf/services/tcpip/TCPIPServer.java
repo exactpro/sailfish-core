@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.codecs.CodecFactory;
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.AttributeNotFoundException;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -123,11 +122,13 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
             if (settings == null) {
                 throw new NullPointerException("'settings' parameter");
             }
-            this.settings = (TCPIPServerSettings) settings;
+            this.settings = (TCPIPServerSettings)settings;
 
             this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
 
             this.storage = Objects.requireNonNull(this.serviceContext.getMessageStorage(), "'Message storage' parameter");
+
+            this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(getServiceName()), "serviceInfo cannot be null");
 
             IMessageFactory defaultFactory = null;
             SailfishURI dictionaryName = this.settings.getDictionaryName();
@@ -213,9 +214,8 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
             changeStatus(ServiceStatus.STARTING, "service starting", null);
 
             this.acceptor = new WrapperNioSocketAcceptor(taskExecutor);
-            IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
 
-            CodecFactory codecFactory = new CodecFactory(serviceContext, msgFactory, dictionary, codecClass, settings.createCodecSettings());
+            CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, codecClass, settings.createCodecSettings());
 
             if (settings.isUseSSL()) {
                 installSSLFilter();
@@ -325,17 +325,18 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public void sessionClosed(IoSession session) throws Exception {
-        storeSessionEventMessage(session, "connection closed!");
-
         ISession iSession = sessionMap.remove(session);
         sessions.remove(iSession);
+
+        storeSessionEventMessage(session, "connection closed!");
+
         logger.info("sessionClosed: {} {} {}",
                 session, session.getClass().getCanonicalName(), session.hashCode());
     }
 
     private void storeSessionEventMessage(IoSession session, String eventMessage) {
         String from = serviceName.toString();
-        String to = session.getRemoteAddress().toString();
+        String to = getRemoteAddress(session);
         IMessage iMessage = ServiceUtil.createServiceMessage(eventMessage, from, to, serviceInfo, messageFactory);
         storage.storeMessage(iMessage);
     }
@@ -348,7 +349,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
             IMessage iMessage = (IMessage) message;
             MsgMetaData metaData = iMessage.getMetaData();
             metaData.setToService(serviceName.toString());
-            metaData.setFromService(session.getRemoteAddress().toString());
+            metaData.setFromService(getRemoteAddress(session));
             metaData.setServiceInfo(serviceInfo);
 
             storage.storeMessage(iMessage);
@@ -372,7 +373,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
         if (message instanceof IMessage) {
             IMessage iMessage = (IMessage) message;
             MsgMetaData metaData = iMessage.getMetaData();
-            metaData.setToService(session.getRemoteAddress().toString());
+            metaData.setToService(getRemoteAddress(session));
             metaData.setFromService(serviceName.toString());
             metaData.setServiceInfo(serviceInfo);
 
@@ -438,5 +439,9 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     public Map<IoSession, MINASession> getSessionMap() {
         return sessionMap;
+    }
+
+    private String getRemoteAddress(IoSession session) {
+        return Objects.toString(session.getRemoteAddress(), "UNKNOWN");
     }
 }
