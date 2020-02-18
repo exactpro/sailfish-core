@@ -35,6 +35,7 @@ import { downloadTxtFile } from '../helpers/files/downloadTxt';
 import { getFilteredMessages } from '../selectors/messages';
 import Message from '../models/Message';
 import Dropdown from './Dropdown';
+import { decodeBase64RawContent, getAllRawContent } from '../helpers/rawFormatter';
 
 interface StateProps {
     testCase: TestCase;
@@ -114,12 +115,16 @@ export const HeaderBase = ({
 
     const downloadMessages = (fields: ('contentHumanReadable' | 'raw')[]) => {
         const content = messages
-          .map(msg =>
-            fields
-              .filter(field => msg[field] !== 'null')
-              .map(field => msg[field])
-              .join('\n')
-              .replace(/\n$/, ''),
+            .map(msg =>
+                fields
+                    .filter(field => msg[field] !== null)
+                    .map(field => {
+                        if (field === 'raw') {
+                            return getAllRawContent(decodeBase64RawContent(msg.raw)).replace(/\n$/, '');
+                        }
+                        return msg[field];
+                    })
+                    .join('\n')
           )
           .filter(Boolean)
           .join('\n\n');

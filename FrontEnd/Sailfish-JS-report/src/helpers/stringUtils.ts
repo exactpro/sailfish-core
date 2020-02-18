@@ -78,3 +78,11 @@ const nonPrintableRegExp = createRegExp`
     \uFFE7\uFFEF-\uFFFB\uFFFE\uFFFF]
     ${'g'}
 `;
+
+export function replaceNonPrintableCharsWithDot(targetString: string): string {
+    if (!targetString) {
+        return targetString;
+    }
+    
+    return targetString.replace(nonPrintableRegExp, '.');
+}

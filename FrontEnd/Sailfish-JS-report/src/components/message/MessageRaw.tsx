@@ -16,10 +16,10 @@
 
 import * as React from 'react';
 import * as Raw from '../../helpers/rawFormatter';
-import '../../styles/messages.scss';
 import { copyTextToClipboard } from '../../helpers/copyHandler';
 import { showNotification } from '../../helpers/showNotification';
 import useSelectListener from '../../hooks/useSelectListener';
+import '../../styles/messages.scss';
 
 const COPY_NOTIFICATION_TEXT = 'Text copied to the clipboard!';
 
@@ -35,7 +35,13 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
     const hexadecimalRef = React.useRef<HTMLPreElement>();
     const humanReadableRef = React.useRef<HTMLPreElement>();
 
-    const [offset, hexadecimal, humanReadable] = Raw.splitRawContent(rawContent);
+    const decodedRawContent = Raw.decodeBase64RawContent(rawContent);
+    const [
+        offset,
+        hexadecimal,
+        humanReadable,
+        beautifiedHumanReadable
+    ] = Raw.getRawContent(decodedRawContent);
 
     useSelectListener(hexadecimalRef, e => {
         const sel = window.getSelection();
@@ -89,12 +95,14 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
         );
     }
 
+    const copyAll = () => copyHandler(Raw.getAllRawContent(decodedRawContent));
+
     return (
         <div className="mc-raw">
             <div className="mc-raw">
                 <div className="mc-raw__title">Raw message</div>
                 <div className="mc-raw__copy-all"
-                    onClick={() => copyHandler(rawContent)}
+                    onClick={copyAll}
                     title="Copy all raw content to clipboard">
                     <div className="mc-raw__copy-icon" />
                     <div className="mc-raw__copy-title">
@@ -113,7 +121,7 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
                         title="Copy to clipboard" />
                 </div>
                 <div className="mc-raw__column primary">
-                    <pre ref={humanReadableRef}>{renderHumanReadable(humanReadable)}</pre>
+                    <pre ref={humanReadableRef}>{renderHumanReadable(beautifiedHumanReadable)}</pre>
                     <div className="mc-raw__copy-btn   mc-raw__copy-icon"
                         onClick={() => copyHandler(Raw.getUnformattedContent(humanReadable))}
                         title="Copy to clipboard" />

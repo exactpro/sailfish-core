@@ -14,27 +14,95 @@
  * limitations under the License.
  ******************************************************************************/
 
-const OFFSET_END = 9,
-      HEXADECIMAL_START = 10,
-      HEXADECIMAL_END = 49,
-      CONTENT_START = 51;
- 
-/**
- * Splits a raw content into 3 lines : offset, hexadecimal representation and human-readable string.
- * @param raw raw content
- * @return {string[]} firts item - offset, second item - hexadecimal representation, third item - human-readable string
+import { replaceNonPrintableCharsWithDot } from './stringUtils';
+
+ /**
+ * Generates columns for rendering and copying.
+ * It splits raw content into 4 lines:
+ * - offset
+ * - hexadecimal
+ * - human-readable (for copying)
+ * - human-readable without unprintable characters (for rendering)
+ * @param rawBase64Content raw base64 encoded content
+ * @return {string[]}
  */
-export function splitRawContent(raw: string): string[] {
-    // first - offset, second - hexadecimal representation, third - human-readable string
-    const ret : string[] = ['', '', ''];
+export function getRawContent([offset, hexadecimal, humanReadable]: string[][]): string[] {
+    return [
+        offset.map(offsetRow => offsetRow + ":").join("\n"), 
+        hexadecimal.join("\n"), 
+        humanReadable.join("\n"),
+        humanReadable.map(replaceNonPrintableCharsWithDot).join("\n"),
+    ]
+}
 
-    raw.split('\r\n').forEach(row => {
-        ret[0] += row.substring(0, OFFSET_END) + '\n';
-        ret[1] += row.substring(HEXADECIMAL_START, HEXADECIMAL_END) + '\n';
-        ret[2] += row.substring(CONTENT_START, row.length) + '\n';
-    })
+ /**
+ * Combines offset, hexadecimal and human-readable columns into single table
+ * @param decodedRawContent
+ * @return {string}
+ */
+export function getAllRawContent([offset, hexadecimal, humanReadable]: string[][]): string {
+    let allContent = '';
+    for (let i = 0; i < offset.length; i++) {
+        const minHexadecimalColumnLength = 8*4+7;
+        const row = [
+            offset[i] + ':',
+            hexadecimal[i] + " ".repeat(minHexadecimalColumnLength - hexadecimal[i].length),
+            replaceNonPrintableCharsWithDot(humanReadable[i]),
+            "\n"
+        ].join(" ");
+        allContent += row;
+    }
+    return allContent;
+}
 
-    return ret;
+ /**
+ * Decodes base64 string and splits a raw content into 3 groups: 
+ * offset, hexadecimal representation and human-readable.
+ * @param rawBase64Content raw base64 encoded content
+ * @return {string[][]} firts item - offset, second item - hexadecimal representation, third item - human-readable group.
+ */
+export function decodeBase64RawContent(rawBase64Content: string): string[][] {
+    const offset = [],
+        hexadecimal = [],
+        humanReadable = [];
+    const raw = Uint16Array.from(atob(rawBase64Content), c => c.charCodeAt(0));
+    let index = 0;
+    let length = raw.length;
+    while (index < length) {
+        let offsetColumn = "", 
+            hexadecimalColumn = "",
+            humanReadableColumn = "";
+
+        offsetColumn = index.toString(16).padStart(8, "0");
+
+        let rowIndex = 0;
+        while (rowIndex < 16 && index < length) {
+            let b = raw[index];
+            let xs = b.toString(16);
+            if (xs.length < 2) {
+                hexadecimalColumn += 0;
+                hexadecimalColumn += xs;
+            } else {
+                // remove extra ffffff characters if any
+                hexadecimalColumn += xs.substring(xs.length - 2);
+            }
+            if (rowIndex % 2 == 1 && rowIndex < 15) {
+                hexadecimalColumn += " ";
+            }
+            humanReadableColumn += String.fromCharCode(b);
+            index++;
+            rowIndex++;
+        }
+        offset.push(offsetColumn);
+        hexadecimal.push(hexadecimalColumn);
+        humanReadable.push(humanReadableColumn);
+    }
+
+    return [
+        offset, 
+        hexadecimal,
+        humanReadable
+    ];
 }
 
 /**
