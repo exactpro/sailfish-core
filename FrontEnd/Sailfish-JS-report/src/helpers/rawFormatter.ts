@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,4 +73,43 @@ export function getRawContentByHex(hexString: string): string {
         resultString = charsArray.join('');
 
     return resultString;
+}
+
+/**
+ * This function returns pair of offsets that form range [startOffset, endOffset] of
+ * human readable symbols to be highlited (endOffset not incluede).
+ */
+export function mapOctetOffsetsToHumanReadableOffsets(start: number, end: number) {
+    // legend:
+    // 40 = length of octet line
+    // 17 = length of humen-readable line: 16 human readable chars + '\n'
+    const startOffset =
+        Math.floor(start / 40) * 17 +    // line
+        Math.floor(start % 40 / 5) * 2 + // symbols
+        Math.floor(start % 40 % 5 / 2);  // correction when only one byte from octet has been selected
+    const endOffset = 
+        Math.floor(end / 40) * 17 +
+        Math.floor(end % 40 / 5) * 2 +
+        Math.ceil(end % 40 % 5 / 2);
+    return start == end ? [startOffset, startOffset] : [startOffset, endOffset];
+}
+
+/**
+ * This function returns pair of offsets that form range [startOffset, endOffset] of
+ * octet symbols to be highlited (endOffset not incluede).
+ */
+export function mapHumanReadableOffsetsToOctetOffsets(start: number, end: number) {
+    // legend:
+    // 40 = length of octet line
+    // 17 = length of humen-readable line: 16 human readable chars + '\n'
+    const startOffset =
+        Math.floor(start / 17) * 40 +   // lines 
+        start % 17 * 2 +                // symbols
+        Math.max(0, Math.floor((start % 17 -1) / 2)); // space between octets
+    const endOffset = 
+        Math.floor(end / 17) * 40 +
+        end % 17 * 2 +
+        Math.max(0, Math.floor((end % 17 -1) / 2));
+        
+    return start == end ? [startOffset, startOffset] : [startOffset, endOffset];
 }

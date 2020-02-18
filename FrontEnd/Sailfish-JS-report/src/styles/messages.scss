@@ -432,6 +432,14 @@
             background: $messageCardRawHoverBackground;
         }
     }
+
+    &::selection {
+        background-color: #338FFF;
+    }
+
+    & .highlited {
+        background-color: #99C7FF;
+    }
 }
 
 .mc-expand-btn {
