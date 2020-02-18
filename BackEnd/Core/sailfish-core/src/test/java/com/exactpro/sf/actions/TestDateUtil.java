@@ -641,11 +641,23 @@ public class TestDateUtil {
         }
 
         modified = dateUtil.getDateTime("D-" + toSaturdayDown + timePattern, true);
-        assertEquals(modified.getDayOfWeek(), DayOfWeek.FRIDAY);
-        assertEquals(toSaturdayDown + 1, ChronoUnit.DAYS.between(modified, currentDate));
+        if (toSaturday != 0) {
+            assertEquals(modified.getDayOfWeek(), DayOfWeek.FRIDAY);
+            assertEquals(toSaturdayDown + 1, ChronoUnit.DAYS.between(modified, currentDate));
+        }
+        else {
+            assertEquals(modified.getDayOfWeek(), DayOfWeek.MONDAY);
+            assertEquals(toSaturdayDown -2, ChronoUnit.DAYS.between(modified, currentDate));
+
+        }
 
         modified = dateUtil.getDateTime("D-" + toSundayDown + timePattern, true);
-        assertEquals(modified.getDayOfWeek(), DayOfWeek.FRIDAY);
+        if (toSunday != 0) {
+            assertEquals(modified.getDayOfWeek(), DayOfWeek.FRIDAY);
+        }
+        else {
+            assertEquals(modified.getDayOfWeek(), DayOfWeek.MONDAY);
+        }
         assertEquals(toSundayDown + 2, ChronoUnit.DAYS.between(modified, currentDate));
 
         // subtract without skipping
@@ -715,12 +727,12 @@ public class TestDateUtil {
                 : DayOfWeek.SUNDAY.getValue() - toSaturday;
         int toSundayDown = DayOfWeek.SUNDAY.getValue() - toSunday;
 
-        DayOfWeek expected = toSunday == 0 ? DayOfWeek.TUESDAY : DayOfWeek.MONDAY;
+        DayOfWeek expected = toSunday == 0? DayOfWeek.TUESDAY : DayOfWeek.MONDAY;
         // add with skipping
         LocalDateTime modified = dateUtil.getBusinessDateTime("D+" + toSaturday + timePattern);
         assertEquals(modified.getDayOfWeek(), expected);
 
-        expected = toSunday == 0 ? DayOfWeek.FRIDAY : DayOfWeek.TUESDAY;
+        expected = toSunday == 0 ? DayOfWeek.MONDAY : DayOfWeek.TUESDAY;
         modified = dateUtil.getBusinessDateTime("D+" + toSunday + timePattern);
         assertEquals(modified.getDayOfWeek(), expected);
 
