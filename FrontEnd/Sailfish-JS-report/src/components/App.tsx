@@ -36,6 +36,7 @@ import StateActionType from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
 import SplashScreen from './SplashScreen';
 import Report from '../models/Report';
+import { TestCaseMetadata } from '../models/TestcaseMetadata';
 
 const REPORT_FILE_PATH = 'index.html';
 
@@ -53,7 +54,7 @@ interface AppDispatchProps {
     selectAction: (actionId: number) => any;
     selectMessage: (messageId: number) => any;
     loadReport: () => any;
-    loadTestCase: (testCasePath: string) => any;
+    loadTestCase: (metadata: TestCaseMetadata) => any;
 }
 
 interface AppProps extends AppStateProps, AppDispatchProps {}
@@ -86,12 +87,12 @@ class AppBase extends React.Component<AppProps, {}> {
     }
 
     handleSharedUrl() {
-        const testCaseId = this.searchParams.get(TEST_CASE_PARAM_KEY),
+        const testCaseOrder = this.searchParams.get(TEST_CASE_PARAM_KEY),
             actionId = this.searchParams.get(ACTION_PARAM_KEY),
             msgId = this.searchParams.get(MESSAGE_PARAM_KEY);
 
-        if (testCaseId != null) {
-            this.selectTestCaseById(testCaseId)
+        if (testCaseOrder != null) {
+            this.selectTestCaseByOrder(Number.parseInt(testCaseOrder))
         }
 
         if (msgId !== null && !isNaN(Number(msgId))) {
@@ -115,6 +116,21 @@ class AppBase extends React.Component<AppProps, {}> {
         }
     }
 
+    selectTestCaseByOrder(testCaseOrder: number) {
+        if (!this.props.report) {
+            console.error("Trying to handle shared url before report load.");
+            return;
+        }
+
+        const testCaseMetadata = this.props.report.metadata.find(metadata => metadata.order === testCaseOrder);
+        
+        if (testCaseMetadata) {
+            this.props.loadTestCase(testCaseMetadata);
+        } else {
+            console.warn("Can't handle shared url: Test Case with this id not found");
+        }
+    }
+
     selectTestCaseById(testCaseId: string) {
         if (!this.props.report) {
             console.error("Trying to handle shared url before report load.");
@@ -124,7 +140,7 @@ class AppBase extends React.Component<AppProps, {}> {
         const testCaseMetadata = this.props.report.metadata.find(metadata => metadata.id === testCaseId);
         
         if (testCaseMetadata) {
-            this.props.loadTestCase(testCaseMetadata.jsonpFileName);
+            this.props.loadTestCase(testCaseMetadata);
         } else {
             console.warn("Can't handle shared url: Test Case with this id not found");
         }
@@ -174,7 +190,7 @@ const App = connect(
         fetchToken: () => dispatch(fetchToken()),
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
         loadReport: () => dispatch(initReport()),
-        loadTestCase: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
+        loadTestCase: (metadata: TestCaseMetadata) => dispatch(loadTestCase(metadata.jsonpFileName))
     })
 )(AppBase);
 

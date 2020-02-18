@@ -68,7 +68,7 @@ function hadnleStateUpdate(prevState: AppState, nextState: AppState, action: Sta
 function getNextSearchParams(searchParams: URLSearchParams, prevState: AppState, nextState: AppState): URLSearchParams {
     if (prevState.selected.testCase != nextState.selected.testCase) {
         if (nextState.selected.testCase) {
-            searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.id);
+            searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.order.toString());
         } else {
             searchParams.delete(TEST_CASE_PARAM_KEY);
         }
