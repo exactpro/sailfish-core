@@ -18,6 +18,7 @@ package com.exactpro.sf.storage.impl;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
@@ -156,6 +157,8 @@ public class FileMessageStorage extends AbstractMessageStorage {
         row.setRejectReason(interner.intern(message.getRejectReason()));
 
         if(message.getRawMessage() != null) {
+
+            row.setRawBase64(Base64.getEncoder().encodeToString(message.getRawMessage()));
             if(hex) {
                 HexDumper dumper = new HexDumper(message.getRawMessage());
                 row.setRawMessage(interner.intern(dumper.getHexdump()));

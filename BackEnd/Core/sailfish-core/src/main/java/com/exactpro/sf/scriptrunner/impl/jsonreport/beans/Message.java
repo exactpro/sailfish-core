@@ -51,7 +51,7 @@ public class Message implements IJsonReportNode {
         this.id = Long.parseLong(data.get("Id"));
         this.contentHumanReadable = data.get("Content");
         this.checkPoint = data.get("UnderCheckPoint").isEmpty() ? null : data.get("UnderCheckPoint");
-        this.raw = data.get("RawMessage");
+        this.raw = data.get("RawBase64");
         this.from = data.get("From");
         this.to = data.get("To");
         this.msgName = data.get("MsgName");

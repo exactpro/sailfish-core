@@ -41,6 +41,7 @@ public class MessageRow {
     private String rawMessage;
     private String printableMessage;
     private String rejectReason;
+    private String rawBase64;
 
     public String getID() {
         return id;
@@ -136,5 +137,13 @@ public class MessageRow {
 
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
+    }
+
+    public String getRawBase64() {
+        return rawBase64;
+    }
+
+    public void setRawBase64(String rawBase64) {
+        this.rawBase64 = rawBase64;
     }
 }

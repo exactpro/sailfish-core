@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -274,6 +275,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
         row.setRejectReason(interner.intern(message.getRejectReason()));
 
         if(message.getRawMessage() != null) {
+            row.setRawBase64(Base64.getEncoder().encodeToString(message.getRawMessage()));
             if(hex) {
                 HexDumper dumper = new HexDumper(message.getRawMessage());
                 row.setRawMessage(interner.intern(dumper.getHexdump()));

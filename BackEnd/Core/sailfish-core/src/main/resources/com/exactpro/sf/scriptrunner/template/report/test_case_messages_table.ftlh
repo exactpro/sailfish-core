@@ -1,3 +1,19 @@
+<#--/******************************************************************************-->
+<#-- Copyright 2009-2020 Exactpro (Exactpro Systems Limited)-->
+<#---->
+<#-- Licensed under the Apache License, Version 2.0 (the "License");-->
+<#-- you may not use this file except in compliance with the License.-->
+<#-- You may obtain a copy of the License at-->
+<#---->
+<#--     http://www.apache.org/licenses/LICENSE-2.0-->
+<#---->
+<#-- Unless required by applicable law or agreed to in writing, software-->
+<#-- distributed under the License is distributed on an "AS IS" BASIS,-->
+<#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.-->
+<#-- See the License for the specific language governing permissions and-->
+<#-- limitations under the License.-->
+<#--******************************************************************************/-->
+
 <div class='eps-table-wrapper'>
     <div style='text-align: center; padding: 5px; position: relative'>
     <div style='right: 40px; position: absolute'>
@@ -29,6 +45,8 @@
             <#break>
             <#case 9>
             <#break>
+            <#case 10>
+            <#break>
             <#default>
             <th style="border-right-color: #ccc !important; width: 10%"><input name="${column}" onkeyup="filterMessages(this)" placeholder=" filter by ${column?lower_case}..." style="width: 95%"></th>
             </#switch>
@@ -36,7 +54,7 @@
         </tr>
         <tr>
         <#list table.header as column>
-        	<#if !(column?index >= 6 && column?index <= 9)>
+        	<#if !(column?index >= 6 && column?index <= 10)>
             	<th style="border-right-color: #ccc !important; box-sizing: border-box;"><b>${column}</b></th>
             </#if>
         </#list>
@@ -67,6 +85,8 @@
             		<td class="${column}" style="display: none"></td>
             	<#break>
             	<#case 8>
+                <#break>
+                <#case 10>
                 <#break>
             	<#default>
             		<td class="checkPointTD"></td>
@@ -99,6 +119,8 @@
             <#case 8>
             <#break>
             <#case 9>
+            <#break>
+            <#case 10>
             <#break>
             <#default>
             <td class="${column}">${row[column]!}</td>

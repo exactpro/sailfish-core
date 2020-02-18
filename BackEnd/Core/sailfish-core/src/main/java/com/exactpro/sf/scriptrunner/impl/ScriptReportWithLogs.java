@@ -276,6 +276,7 @@ public class ScriptReportWithLogs implements IScriptReport {
             header.add("UnderCheckPoint");
             header.add("ContentJson");
             header.add("Id");
+            header.add("RawBase64");
 
 			ReportTable messagesTable = new ReportTable("Messages", header);
 
@@ -316,6 +317,7 @@ public class ScriptReportWithLogs implements IScriptReport {
                 row.put("Content", finalContent);
                 row.put("ContentJson", msg.getJson());
                 row.put("Id", msg.getMetaDataID());
+                row.put("RawBase64", msg.getRawBase64());
 
 				messagesTable.addRow(row);
 			}
