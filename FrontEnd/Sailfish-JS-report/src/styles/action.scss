@@ -234,6 +234,11 @@
     &__item-title {
         font-weight: bold;
         font-size: 18px;
+
+        &:hover {
+            @include unselectable;
+            cursor: pointer;
+        }
     }
 
     &__input-params {
@@ -285,6 +290,10 @@
         color: var(--status-primary-color);
         font-weight: bold;
         font-size: 17px;
+
+        &:hover {
+            cursor: pointer;
+        }
     }
     
     &__verification-table {

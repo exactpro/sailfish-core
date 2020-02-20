@@ -171,7 +171,11 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                         <SearchExpandablePanel
                             searchKeyPrefix={keyForAction(id, 'parameters')}
                             stateKey={keyForAction(id, 'parameters')}>
-                            <div className="ac-body__item-title">Input parameters</div>
+                            {toggleExpand => (
+                                <div className="ac-body__item-title"
+                                    onClick={stopPropagationHandler(toggleExpand)}>
+                                        Input parameters</div>
+                            )}
                             <ParamsTable
                                 actionId={action.id}
                                 stateKey={action.id + '-input-params-nodes'}
@@ -196,7 +200,11 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
                                     stateKey={keyForAction(id, 'status')}>
-                                    <div className="ac-body__item-title">Status</div>
+                                    {toggleExpand => (
+                                        <div className="ac-body__item-title"
+                                            onClick={stopPropagationHandler(toggleExpand)}>
+                                                Status</div>
+                                    )}
                                     <RecoverableExceptionChain
                                         exception={action.status.cause}
                                         stateKey={`${keyForAction(id, 'status')}-exception`} />

@@ -54,16 +54,20 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                 <SearchExpandablePanel
                     searchKeyPrefix={key}
                     stateKey={key}>
-                    <div className="ac-body__verification-title-wrapper">
-                        <div className="ac-body__verification-title">
-                            <span>{"Verification — "}</span>
-                            <SearchableContent
-                                contentKey={`${key}-name`}
-                                content={name}/>
-                            <span>{" — " + status.status}</span>
-                        </div>
-                        <VerificationMlUploadButton targetActionId={parentActionId} targetMessageId={messageId}/>
-                    </div>
+                    {
+                        toggleExpand => (
+                            <div className="ac-body__verification-title-wrapper">
+                                <div className="ac-body__verification-title"
+                                onClick={toggleExpand}>
+                                    <span>{"Verification — "}</span>
+                                    <SearchableContent
+                                        contentKey={`${key}-name`}
+                                        content={name}/>
+                                    <span>{" — " + status.status}</span>
+                                </div>
+                                <VerificationMlUploadButton targetActionId={parentActionId} targetMessageId={messageId}/>
+                            </div>)
+                    }
                     <VerificationTable
                         keyPrefix={key}
                         actionId={parentActionId}

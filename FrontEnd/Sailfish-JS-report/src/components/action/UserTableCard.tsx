@@ -20,6 +20,7 @@ import Action from '../../models/Action';
 import { RecoverableExpandablePanel } from '../ExpandablePanel';
 import { CustomTable } from './CustomTable';
 import { keyForUserTable } from '../../helpers/keys';
+import { stopPropagationHandler } from '../../helpers/react';
 
 interface UserTableCardProps {
     table: UserTable;
@@ -31,7 +32,10 @@ function UserTableCard({ parent, table }: UserTableCardProps) {
         <div className="ac-body__table">
             <RecoverableExpandablePanel
                 stateKey={keyForUserTable(table, parent)}>
-                <div className="ac-body__item-title">{table.name || "Custom table"}</div>
+                {toggleExpand => (
+                    <div className="ac-body__item-title"
+                        onClick={stopPropagationHandler(toggleExpand)}>{table.name || "Custom table"}</div>
+                )}
                 <CustomTable
                     content={table.content} />
             </RecoverableExpandablePanel>
