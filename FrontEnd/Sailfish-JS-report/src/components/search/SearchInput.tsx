@@ -30,7 +30,7 @@ import { nextCyclicItem, removeByIndex, replaceByIndex } from "../../helpers/arr
 import AutosizeInput from "react-input-autosize";
 import { createBemBlock } from "../../helpers/styleCreators";
 
-const REACTIVE_SEARCH_DELAY = 500;
+export const REACTIVE_SEARCH_DELAY = 500;
 const INPUT_PLACEHOLDER = 'Separate words with a space to find multiple words';
 
 const COLORS = [
@@ -56,14 +56,14 @@ interface DispatchProps {
     clear: () => void;
 }
 
-interface Props extends StateProps, DispatchProps {}
+export interface Props extends StateProps, DispatchProps {}
 
 interface State {
     inputValue: string;
     isActive: boolean;
 }
 
-class SearchInputBase extends React.PureComponent<Props, State> {
+export class SearchInputBase extends React.PureComponent<Props, State> {
 
     private inputElement: React.MutableRefObject<HTMLInputElement> = React.createRef();
     private root = React.createRef<HTMLDivElement>();
@@ -214,25 +214,33 @@ class SearchInputBase extends React.PureComponent<Props, State> {
             const nextTokens = this.props.searchTokens[this.props.searchTokens.length - 1].isActive ?
                 this.props.searchTokens.slice(0, -1) :
                 [...this.props.searchTokens];
-            const [lastItem, ...restItems] = nextTokens.reverse();
 
-            this.props.updateSearchTokens([...restItems.reverse(), {
-                ...lastItem,
-                isActive: true
-            }]);
-            this.setState({
-                inputValue: lastItem.pattern
-            });
+            if (nextTokens.length > 0) {
+                const [lastItem, ...restItems] = nextTokens.reverse();
+
+                this.props.updateSearchTokens([...restItems.reverse(), {
+                    ...lastItem,
+                    isActive: true
+                }]);
+                this.setState({
+                    inputValue: lastItem.pattern
+                });
+            } else {
+                this.props.updateSearchTokens([]);
+            }
 
             e.preventDefault();
         }
 
         if (e.keyCode == KeyCodes.SPACE && e.currentTarget.value != "") {
-            if (this.props.searchTokens.some(({ isActive }) => isActive)) {
-                this.props.updateSearchTokens(this.props.searchTokens.map(token => ({
-                    ...token,
-                    isActive: false
-                })));
+            const [lastItem, ...restItems] = [...this.props.searchTokens].reverse();
+
+            if (lastItem?.isActive) {
+                this.props.updateSearchTokens([...restItems.reverse(), {
+                    ...lastItem,
+                    isActive: false,
+                    pattern: e.currentTarget.value
+                }]);
             } else {
                 this.props.updateSearchTokens([
                     ...this.props.searchTokens,

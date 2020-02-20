@@ -75,7 +75,7 @@
         font-weight: bold;
         color: $primaryTextColor;
         height: 18px;
-        padding: 1px 5px;
+        padding: 1px 4px;
 
         &:focus {
             outline: 0;
@@ -89,7 +89,8 @@
     }
 
     &__input-wrapper {
-        margin-left: 3px;
+        margin-left: 4px;
+        font-size: 13px;
     }
 
     &.active {
