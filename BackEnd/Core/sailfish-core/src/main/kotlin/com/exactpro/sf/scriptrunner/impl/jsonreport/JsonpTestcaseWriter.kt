@@ -22,6 +22,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.JsonpTestcase
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase
+import com.exactpro.sf.scriptrunner.impl.jsonreport.helpers.WorkspaceNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.nio.file.Files
@@ -35,15 +36,15 @@ private val mapper = jacksonObjectMapper()
         .setDateFormat(JsonReport.DATE_FORMAT)
 
 
-class JsonpTestcaseWriter(testcaseNumber: Number, jsonpReportDir: Path, private val reportRootDir: Path, dispatcher: IWorkspaceDispatcher) {
-    private val testcaseDirectoryPath = jsonpReportDir.resolve("testcase-$testcaseNumber")
+class JsonpTestcaseWriter(testcaseNumber: Number, jsonpRoot: WorkspaceNode, private val reportRoot: WorkspaceNode) {
+    private val testCaseDirectory = jsonpRoot.getSubNode("testcase-$testcaseNumber")
 
-    val testCaseFilePath: Path = dispatcher.createFile(FolderType.REPORT, true, reportRootDir.parent.relativize(testcaseDirectoryPath).resolve("testcase.js").toString()).toPath()
+    val testCaseFile: WorkspaceNode = testCaseDirectory.getSubNode("testcase.js")
 
     private val dataStreams = mapOf(
-            Message::class.java to JsonpChunkedDataWriter<Message>("Message", testcaseDirectoryPath.resolve("messages"), reportRootDir, dispatcher, 100, mapper),
-            Action::class.java to JsonpChunkedDataWriter<Action>("Action", testcaseDirectoryPath.resolve("actions"), reportRootDir, dispatcher, 50, mapper),
-            LogEntry::class.java to JsonpChunkedDataWriter<LogEntry>("LogEntry", testcaseDirectoryPath.resolve("logs"), reportRootDir, dispatcher, 100, mapper)
+            Message::class.java to JsonpChunkedDataWriter<Message>("Message", testCaseDirectory.getSubNode("messages"), reportRoot, 100, mapper),
+            Action::class.java to JsonpChunkedDataWriter<Action>("Action", testCaseDirectory.getSubNode("actions"), reportRoot, 50, mapper),
+            LogEntry::class.java to JsonpChunkedDataWriter<LogEntry>("LogEntry", testCaseDirectory.getSubNode("logs"), reportRoot, 100, mapper)
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -52,8 +53,8 @@ class JsonpTestcaseWriter(testcaseNumber: Number, jsonpReportDir: Path, private 
     }
 
     fun updateTestCaseFile(testcase: TestCase) {
-        Files.write(testCaseFilePath, TEST_CASE_JSONP_TEMPLATE.format(
-                mapper.writeValueAsString(JsonpTestcase(dataStreams, testcase, reportRootDir))
+        Files.write(testCaseFile.toAbsolutePath(true), TEST_CASE_JSONP_TEMPLATE.format(
+                mapper.writeValueAsString(JsonpTestcase(dataStreams, testcase, reportRoot))
         ).toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
     }
 

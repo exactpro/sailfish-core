@@ -16,50 +16,46 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport
 
-import com.exactpro.sf.configuration.workspace.FolderType
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Index
+import com.exactpro.sf.scriptrunner.impl.jsonreport.helpers.WorkspaceNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import java.io.IOException
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 private val logger = KotlinLogging.logger {}
 
+private data class DataFile(val file: WorkspaceNode, var counter: Int = 0)
+
 class JsonpChunkedDataWriter<T : IJsonReportNode>(
         loaderFunctionPrefix: String,
-        private val directory: Path,
-        private val reportRootDirectory: Path,
-        private val dispatcher: IWorkspaceDispatcher,
+        private val dataStreamDirectory: WorkspaceNode,
+        private val reportRootDirectory: WorkspaceNode,
         private val perFileItemLimit: Int,
-        private val mapper: ObjectMapper
-) {
+        private val mapper: ObjectMapper) {
+
     private val template = "load$loaderFunctionPrefix(%d, %s);"
     private val rootFileTemplate = "load${loaderFunctionPrefix}Index(%s);"
-    val rootFilePath: Path get() = directory.resolve("index.js")
+    val indexFile: WorkspaceNode get() = dataStreamDirectory.getSubNode("index.js")
 
-    private val dataFileNames: MutableMap<String, Int?> = mutableMapOf()
-    private var dataFileCounter = 0
-    private var currentFileItemCounter = 0
-    private var globalItemCounter = 0
-    private var currentFilePath: Path? = null
+    private val dataFiles: MutableList<DataFile> = mutableListOf()
+    private var currentDataFile: DataFile? = null
 
-    private var currentFileName: String? = null
+    private var globalCounter = 0
 
     init {
         updateRootFile()
     }
 
     fun writeNode(node: T) {
-        if (globalItemCounter == 0 || currentFileItemCounter >= perFileItemLimit) {
+        if (currentDataFile == null || currentDataFile!!.counter >= perFileItemLimit) {
             switchToNextFile()
         }
 
         try {
             increaseItemCounter()
-            write(template.format(globalItemCounter, mapper.writeValueAsString(node)))
+            write(template.format(currentDataFile!!.counter, mapper.writeValueAsString(node)))
             updateRootFile()
         } catch (e: Exception) {
             logger.error(e) { "unable to write a node" }
@@ -68,7 +64,7 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
 
     private fun write(data: String) {
         try {
-            Files.write(currentFilePath!!, data.toByteArray(), StandardOpenOption.APPEND)
+            Files.write(currentDataFile!!.file.toAbsolutePath(), data.toByteArray(), StandardOpenOption.APPEND)
         } catch (e: IOException) {
             logger.error(e) { "unable to write data to a file" }
         }
@@ -77,13 +73,12 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
     @Suppress("unused")
     private fun updateRootFile() {
         try {
-            val rootFilePath: Path = dispatcher.createFile(FolderType.REPORT, true, reportRootDirectory.parent.relativize(rootFilePath).toString()).toPath()
+            val data: String = rootFileTemplate.format(mapper.writeValueAsString(Index(
+                    globalCounter,
+                    dataFiles.associate { reportRootDirectory.toAbsolutePath().relativize(it.file.toAbsolutePath()).toString() to it.counter }
+            )))
 
-            val data: String = rootFileTemplate.format(mapper.writeValueAsString(Index(globalItemCounter, dataFileNames.mapKeys {
-                reportRootDirectory.relativize(directory.resolve(it.key)).toString()
-            })))
-
-            Files.write(rootFilePath, data.toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
+            Files.write (indexFile.toAbsolutePath(), data.toByteArray(), StandardOpenOption.TRUNCATE_EXISTING)
 
         } catch (e: IOException) {
             logger.error(e) { "unable to update live report file" }
@@ -91,24 +86,18 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
     }
 
     private fun switchToNextFile() {
-        dataFileCounter++
-        val path: String = reportRootDirectory.parent.relativize(directory.resolve("data$dataFileCounter.js")).toString()
+        val dataFile = DataFile(dataStreamDirectory.getSubNode("data${dataFiles.size}.js"))
 
-        try {
-            currentFilePath = dispatcher.createFile(FolderType.REPORT, true, path).toPath()
-
-            currentFileName = currentFilePath!!.fileName.toString()
-            dataFileNames[currentFileName!!] = null
-            currentFileItemCounter = 0
-
-        } catch (e: IOException) {
-            logger.error(e) { "unable to create jsonp file '$path'" }
-        }
+        currentDataFile = dataFile
+        dataFiles.add(dataFile)
     }
 
     private fun increaseItemCounter() {
-        currentFileItemCounter++
-        globalItemCounter++
-        dataFileNames[currentFileName!!] = globalItemCounter
+        globalCounter++
+
+        val dataFile = currentDataFile
+        if (dataFile != null) {
+            dataFile.counter = dataFile.counter + 1
+        }
     }
 }

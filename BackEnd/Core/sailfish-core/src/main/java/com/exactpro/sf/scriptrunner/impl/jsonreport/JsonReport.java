@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -50,12 +50,10 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptProgress;
@@ -91,6 +89,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.helpers.WorkspaceNode;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
@@ -121,14 +120,13 @@ public class JsonReport implements IScriptReport {
     private AtomicLong actionNodeDepth = new AtomicLong(0);
 
     private JsonpTestcaseWriter jsonpTestcaseWriter;
-    private Path jsonpRootDir;
-    private Path reportRootDir;
     private final Map<Long, Set<Long>> messageToActionIdMap;
 
-    private final IWorkspaceDispatcher dispatcher;
-    private final String reportDirectory;
     private final TestScriptDescription testScriptDescription;
     private final IDictionaryManager dictionaryManager;
+    private final WorkspaceNode reportRootDirectory;
+    private final WorkspaceNode reportDataDirectory;
+    private final WorkspaceNode reportJsonpDirectory;
 
     private final int verificationLimit;
 
@@ -148,15 +146,10 @@ public class JsonReport implements IScriptReport {
     public JsonReport(int verificationLimit, String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription, IDictionaryManager dictionaryManager) {
         this.messageToActionIdMap = new HashMap<>();
         this.reportStats = new ReportStats();
-        this.dispatcher = dispatcher;
-        this.reportDirectory = reportRootDirectoryPath;
+        this.reportRootDirectory = new WorkspaceNode(dispatcher, FolderType.REPORT, Paths.get(reportRootDirectoryPath));
+        this.reportDataDirectory = reportRootDirectory.getSubNode(REPORT_DATA_DIRECTORY_NAME);
+        this.reportJsonpDirectory = reportDataDirectory.getSubNode(REPORT_JSONP_DIRECTORY_NAME);
         this.testScriptDescription = testScriptDescription;
-        try {
-            this.reportRootDir = dispatcher.createFolder(FolderType.REPORT, reportRootDirectoryPath).toPath();
-            this.jsonpRootDir = dispatcher.createFolder(FolderType.REPORT, reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, REPORT_JSONP_DIRECTORY_NAME).toPath();
-        } catch (WorkspaceStructureException e) {
-            throw new EPSCommonException("unable to get report directory", e);
-        }
         this.dictionaryManager = dictionaryManager;
         this.verificationLimit = verificationLimit;
         this.reportRoot.setTags(
@@ -192,21 +185,18 @@ public class JsonReport implements IScriptReport {
             fileName = fileName + extension;
         }
 
-        try {
-            return jsonp
-                    ? dispatcher.createFile(FolderType.REPORT, true, reportDirectory, REPORT_DATA_DIRECTORY_NAME, REPORT_JSONP_DIRECTORY_NAME, fileName)
-                    : dispatcher.createFile(FolderType.REPORT, true, reportDirectory, REPORT_DATA_DIRECTORY_NAME, fileName);
-
-        } catch (WorkspaceStructureException e) {
-            throw new ScriptRunException("unable to create report file", e);
-        }
+        return jsonp
+                ? reportJsonpDirectory.getSubNode(fileName).toFile(true)
+                : reportDataDirectory.getSubNode(fileName).toFile(true);
     }
 
     private void updateMetadata(TestCase testCase, String jsonFileName) {
         TestCaseMetadata metadata = new TestCaseMetadata(
                 testCase,
                 getFile(jsonFileName, false).getName(),
-                jsonpTestcaseWriter == null ? null : reportRootDir.relativize(jsonpTestcaseWriter.getTestCaseFilePath()).toString());
+                jsonpTestcaseWriter == null
+                        ? null
+                        : reportRootDirectory.toAbsolutePath(false).relativize(jsonpTestcaseWriter.getTestCaseFile().toAbsolutePath(false)).toString());
 
         reportRoot.getMetadataMap().put(metadata.getOrder(), metadata);
     }
@@ -349,7 +339,7 @@ public class JsonReport implements IScriptReport {
 
         setContext(ContextType.TESTCASE, testcase);
 
-        jsonpTestcaseWriter = new JsonpTestcaseWriter(order, jsonpRootDir, reportRootDir, dispatcher);
+        jsonpTestcaseWriter = new JsonpTestcaseWriter(order, reportJsonpDirectory, reportRootDirectory);
         jsonpTestcaseWriter.updateTestCaseFile(testcase);
 
         updateMetadata(testcase, testcase.getName());
