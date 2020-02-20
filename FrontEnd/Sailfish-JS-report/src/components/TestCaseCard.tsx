@@ -18,7 +18,7 @@ import * as React from 'react';
 import {TestCaseMetadata, isTestCaseMetadata} from '../models/TestcaseMetadata';
 import {formatTime, getSecondsPeriod} from '../helpers/date';
 import '../styles/report.scss';
-import {createStyleSelector} from '../helpers/styleCreators';
+import { createStyleSelector, createBemElement } from '../helpers/styleCreators';
 import {KnownBugIndicator} from "./knownbugs/KnownBugIndicator";
 import {KnownBugSummary} from "./knownbugs/KnownBugSummary";
 import {connect} from "react-redux";
@@ -33,6 +33,7 @@ interface OwnProps {
     knownBugsEnabled: boolean;
     index: number;
     isSelected: boolean;
+    isMLSubmitted: boolean;
 }
 
 interface DispatchProps {
@@ -41,7 +42,7 @@ interface DispatchProps {
 
 interface Props extends OwnProps, DispatchProps {}
 
-function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) {
+function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSelected, isMLSubmitted }: Props) {
 
     const baseRef = React.useRef<HTMLDivElement>();
 
@@ -67,7 +68,9 @@ function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSe
         "tc-card",
         status,
         isSelected ? "selected" : null
-    );
+    ), mlSubmittedBoxClass = createBemElement("tc-card",
+        "ml-submitted",
+        isMLSubmitted? null: "hidden");
 
     const baseClickHandler = () => {
         // Don't trigger 'click' event when user selects text
@@ -97,6 +100,9 @@ function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSe
                         <div className="tc-card__description"> — {metadata.description}</div> :
                         null
                 }
+            </div>
+            <div className={mlSubmittedBoxClass}>
+                <div className="tc-card__ml-submitted icon"/>
             </div>
             <div className="tc-card__status">
                 {status}

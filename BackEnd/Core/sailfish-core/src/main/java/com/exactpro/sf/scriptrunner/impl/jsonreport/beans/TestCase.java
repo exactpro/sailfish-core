@@ -24,7 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -88,6 +90,38 @@ public class TestCase implements IJsonReportNode {
     @JsonIgnore
     public Map<Bug, List<String>> getBugToCategoryMap() {
         return this.bugToCategoryMap;
+    }
+
+    @JsonIgnore
+    public List<Action> getRootActions() {
+        return this.actions.stream().filter(n -> n instanceof Action).map(n -> (Action)n).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public Long getFirstActionId() {
+        List<Action> rootActions = getRootActions();
+        if (rootActions.size() == 0) {
+            return null;
+        }
+        else {
+            return rootActions.get(0).getId();
+        }
+    }
+
+    @JsonIgnore
+    public Long getLastActionId() {
+        List<Action> rootActions = getRootActions();
+        if (rootActions.size() == 0) {
+            return null;
+        }
+        else {
+            return rootActions.get(rootActions.size() - 1).getId();
+        }
+    }
+
+    @JsonIgnore
+    public int getFailedActionsCount() {
+        return (int)getRootActions().stream().filter(a -> a.getStatus().getStatus() == StatusType.FAILED).count();
     }
 
     public List<IJsonReportNode> getActions() {

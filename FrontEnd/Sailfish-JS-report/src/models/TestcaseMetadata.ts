@@ -31,6 +31,9 @@ export interface TestCaseMetadata {
     jsonFileName: string;
     jsonpFileName: string;
     bugs: (KnownBug | KnownBugCategory) [];
+    firstActionId: number;
+    lastActionId: number;
+    failedActionCount: number;
 }
 
 export function isTestCaseMetadata(testCase: TestCaseMetadata | LiveTestCase): testCase is TestCaseMetadata {

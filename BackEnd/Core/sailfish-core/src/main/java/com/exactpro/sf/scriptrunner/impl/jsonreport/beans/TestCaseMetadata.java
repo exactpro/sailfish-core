@@ -32,6 +32,9 @@ public class TestCaseMetadata {
     private String id;
     private int hash;
     private String description;
+    private Long firstActionId;
+    private Long lastActionId;
+    private int failedActionCount;
 
     private Collection<IJsonReportNode> bugs;
 
@@ -55,6 +58,9 @@ public class TestCaseMetadata {
         this.jsonFileName = jsonFileName;
         this.jsonpFileName = jsonpFileName;
         this.tags = testCase.getTags();
+        this.firstActionId = testCase.getFirstActionId();
+        this.lastActionId = testCase.getLastActionId();
+        this.failedActionCount = testCase.getFailedActionsCount();
     }
 
 
@@ -152,5 +158,29 @@ public class TestCaseMetadata {
 
     public void setJsonpFileName(String jsonpFileName) {
         this.jsonpFileName = jsonpFileName;
+    }
+
+    public Long getFirstActionId() {
+        return firstActionId;
+    }
+
+    public void setFirstActionId(Long firstActionId) {
+        this.firstActionId = firstActionId;
+    }
+
+    public Long getLastActionId() {
+        return lastActionId;
+    }
+
+    public void setLastActionId(Long lastActionId) {
+        this.lastActionId = lastActionId;
+    }
+
+    public int getFailedActionCount() {
+        return failedActionCount;
+    }
+
+    public void setFailedActionCount(int failedActionCount) {
+        this.failedActionCount = failedActionCount;
     }
 }

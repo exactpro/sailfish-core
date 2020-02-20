@@ -32,12 +32,16 @@ import { ToggleButton } from './ToggleButton';
 import RunInformation from './RunInformation';
 import ReportSummary from './ReportSummary';
 import Tag from './Tag';
+import { SubmittedData } from '../models/MlServiceResponse';
+import TestCase from '../models/TestCase';
 
 const OLD_REPORT_PATH = 'report.html';
 
 interface StateProps {
     report: ReportState;
     selectedTestCaseId: string;
+    submittedData: SubmittedData[];
+    mlEnabled: boolean;
 }
 
 interface Props extends StateProps { }
@@ -50,6 +54,7 @@ interface State {
 }
 
 export class ReportLayoutBase extends React.Component<Props, State> {
+
 
     constructor(props) {
         super(props);
@@ -78,6 +83,24 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             panel: panel
         })
     }
+    
+    isMLSubmitted(metadata: TestCaseMetadata) {
+        const { submittedData } = this.props;
+        const submittedCount = [...new Set(submittedData.map(m => m.actionId))]
+            .filter(actionId => actionId >= metadata.firstActionId &&
+                actionId <= metadata.lastActionId).length;
+        
+        return submittedCount === metadata.failedActionCount && submittedCount != 0;
+    }
+
+    calculateMLStats() {
+        const { submittedData, report } = this.props;
+
+        let uniqueActionId = new Set(submittedData.map(m => m.actionId)).size,
+            failedActions = report.metadata.map(m => m.failedActionCount).reduce((a,b) => a + b);
+
+        return uniqueActionId / failedActions
+    }
 
     render() {
         const changePanel= (panel: Panel) => {
@@ -87,14 +110,18 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         }
 
         const { report, selectedTestCaseId } = this.props,
-            { showKnownBugs } = this.state;
+            { showKnownBugs } = this.state,
+            mlStats = (this.calculateMLStats() * 100).toPrecision(2) + "%";
 
         const filteredMetadata = report.metadata.filter(isTestCaseMetadata),
             knownBugsPresent = filteredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
             knownBugsClass = showKnownBugs ? "active" : "enabled",
             failedTestCasesEnabled = filteredMetadata.some(({status}) => status.status === StatusType.FAILED),
             failedTcTitleClass = createBemElement('report', 'title', failedTestCasesEnabled ? 'failed': 'disabled'),
-            isLive = report.finishTime == null;
+            isLive = report.finishTime == null,
+            alerts = report.alerts || [],
+            tags = report.tags || [],
+            mlStatsClass = createStyleSelector('ml-stats', this.props.mlEnabled? null: "hidden");
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -135,6 +162,13 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                     </div>
                     <FailedTestCaseCarousel/>
                     {knownBugsButton}
+                    <div className={mlStatsClass}>
+                        <span className="ml-stats__title">ML Collected</span>
+                        <div className="ml-stats__bar">
+                            <div className="ml-stats__progress-bar" style={{width: mlStats}}/>
+                        </div>
+                        <span className="ml-stats__percents">{mlStats}</span>
+                    </div>
                 </div>
                 <div className="report__summary">
                     <div className="report-summary">
@@ -179,7 +213,8 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                             isSelected={metadata.id === selectedTestCaseId}
                                             key={index}
                                             metadata={metadata}
-                                            index={index + 1}/>
+                                            index={index + 1}
+                                            isMLSubmitted={this.isMLSubmitted(metadata)}/>
                                     ))
                                 }
                             </HeatmapScrollbar>
@@ -197,7 +232,9 @@ export class ReportLayoutBase extends React.Component<Props, State> {
 const ReportLayout = connect(
     (state: AppState): StateProps => ({
         report: state.report,
-        selectedTestCaseId: state.selected.selectedTestCaseId
+        selectedTestCaseId: state.selected.selectedTestCaseId,
+        submittedData: state.machineLearning.submittedData,
+        mlEnabled: state.machineLearning.token != null
     })
 )(ReportLayoutBase);
 

@@ -293,16 +293,63 @@
     }
 }
 
+.ml-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-left: 20px;
+
+    &__title {
+        @include unselectable;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 19px;
+        color: #45A155;
+        white-space: nowrap;
+        margin-right: 8px;
+    }
+
+    &__bar {
+        width: 200px;
+        height: 10px;
+        background-color: #CCCCCC;
+    }
+
+    &__progress-bar {
+        background-color: #59B368;
+        height: 100%;
+    }
+
+    &__bar, &__progress-bar {
+        border-radius: 5px;
+    }
+
+    &__percents {
+        @include unselectable;
+        margin-left: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 19px;
+        text-align: right;
+
+        color: #3D994D;
+    }
+
+    &.hidden {
+        display: none;
+    }
+}
+
 .tc-card {
     @include status-card-with-running;
 
     width: 100%;
     display: grid;
     grid-template: auto auto / 55px 1fr auto;
-    grid-template-areas: "index title status"
-                        "index info elapsed-time"
-                        "divider divider divider"
-                        "bugs-indicator bugs-summary bugs-summary";
+    grid-template-areas: "index title status ml"
+                        "index info elapsed-time ml"
+                        "divider divider divider ml"
+                        "bugs-indicator bugs-summary bugs-summary ml";
 
     border: 2px solid var(--status-secondary-border-color);
     border-radius: 5px;
@@ -380,6 +427,20 @@
     &__info-value {
         color: $secondaryTextColor;
         padding-left: 15px;
+    }
+
+    &__ml-submitted {
+        margin-left: 16px;
+        grid-area: ml;
+        align-self: center;
+
+        &.icon {
+            @include icon(url(../../resources/icons/ml-message-submitted.svg), 22px, 22px);
+        }
+
+        &.hidden {
+            display: none;
+        }
     }
 
     &__status {
