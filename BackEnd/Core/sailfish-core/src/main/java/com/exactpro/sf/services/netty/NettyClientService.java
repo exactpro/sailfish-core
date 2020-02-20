@@ -15,6 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -37,27 +50,20 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.handler.codec.MessageToMessageEncoder;
 
 public abstract class NettyClientService implements IInitiatorService {
 
@@ -383,14 +389,44 @@ public abstract class NettyClientService implements IInitiatorService {
 			hbFuture.cancel(false);
 			hbFuture = null;
 		}
-	}
+    }
 
-	protected void setChannel(Channel channel) {
+    protected void setChannel(Channel channel) {
         try {
             channelLock.writeLock().lock();
             this.channel = channel;
         } finally {
             channelLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * No-op inbound terminal handler.
+     * Can be used to consume incoming objects if there is no terminal handler for them
+     * @param <T> handled object type
+     */
+    protected static final class InboundBlackholeHandler<T> extends MessageToMessageDecoder<T> {
+        public InboundBlackholeHandler() {
+        }
+
+        @Override
+        protected final void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
+            // do nothing
+        }
+    }
+
+    /**
+     * No-op outbound terminal handler.
+     * Can be used to consume outgoing objects if there is no terminal handler for them
+     * @param <T> handled object type
+     */
+    protected static final class OutboundBlackholeHandler<T> extends MessageToMessageEncoder<T> {
+        public OutboundBlackholeHandler() {
+        }
+
+        @Override
+        protected final void encode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
+            // do nothing
         }
     }
 }
