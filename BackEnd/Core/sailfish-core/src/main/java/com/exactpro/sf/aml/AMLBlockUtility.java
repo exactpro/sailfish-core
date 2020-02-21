@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.aml;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,7 @@ import com.exactpro.sf.aml.reader.struct.AMLBlock;
 import com.exactpro.sf.aml.reader.struct.AMLElement;
 import com.exactpro.sf.aml.visitors.AMLBlockFlattenerVisitor;
 import com.exactpro.sf.aml.visitors.AMLBlockHasherVisitor;
+import com.exactpro.sf.aml.visitors.AMLDefineServiceNameResolvingVisitor;
 import com.exactpro.sf.aml.visitors.AMLLanguageDetectorVisitor;
 import com.exactpro.sf.aml.visitors.ActionURIResolverVisitor;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -82,9 +84,25 @@ public class AMLBlockUtility {
 
         AlertCollector alertCollector = visitor.getAlertCollector();
 
-        if(alertCollector.getCount(AlertType.ERROR) > 0) {
+        if (alertCollector.getCount(AlertType.ERROR) > 0) {
             throw new AMLException("Failed to resolve action URIs", alertCollector);
         }
+    }
+
+    public static Map<String, String> resolveDefinedServiceNames(List<AMLBlock> blocks, String environmentName, IConnectionManager serviceManager) throws AMLException {
+        AMLDefineServiceNameResolvingVisitor visitor = new AMLDefineServiceNameResolvingVisitor(environmentName, serviceManager.getServiceNames());
+
+        for (AMLBlock block : blocks) {
+            block.accept(visitor);
+        }
+
+        AlertCollector alertCollector = visitor.getAlertCollector();
+
+        if (alertCollector.getCount(AlertType.ERROR) > 0) {
+            throw new AMLException("Failed to resolve defined service names", alertCollector);
+        }
+
+        return Collections.unmodifiableMap(visitor.getDefinedServiceNames());
     }
 
     public static int hash(AMLBlock block, AMLMatrixWrapper wrapper, Map<String, String> staticVariables, Map<AMLBlock, Integer> cache, Set<String> references) throws AMLException {
@@ -94,7 +112,7 @@ public class AMLBlockUtility {
     }
 
     public static int hash(AMLElement element, AMLMatrixWrapper wrapper, Map<String, String> staticVariables,
-                           Map<AMLBlock, Integer> cache, Set<String> references) throws AMLException {
+            Map<AMLBlock, Integer> cache, Set<String> references) throws AMLException {
         AMLBlockHasherVisitor visitor = new AMLBlockHasherVisitor(wrapper, staticVariables, cache, references);
         element.accept(visitor);
         return visitor.getHash();

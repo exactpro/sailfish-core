@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 public class AMLLangUtil {
 
@@ -153,5 +154,9 @@ public class AMLLangUtil {
     public static boolean isExecutable(String value, boolean skipOptional) {
         //FIXME: validate value?
         return OPTIONAL.equalsIgnoreCase(value) ? !skipOptional : !NO.equalsIgnoreCase(value);
+    }
+
+    public static boolean isExpression(@Nullable String value) {
+        return value != null && !findExpressions(value).isEmpty();
     }
 }

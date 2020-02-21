@@ -47,6 +47,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.util.Base64;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +99,6 @@ import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.google.common.collect.Iterables;
 
-
 /**
  * Action Matrix Language code generator.
  *
@@ -116,7 +116,6 @@ public class CodeGenerator_new implements ICodeGenerator {
 	public static final String CONTEXT_NAME = "context";
 	public static final String REPORT_NAME = "report";
 	public static final String STATIC_MAP_NAME = CONTEXT_NAME+".getStaticMap()";
-	public static final String SERVICE_MAP_NAME = CONTEXT_NAME+".getServiceNames()";
     public static final String ACTION_MANAGER_CALL = CONTEXT_NAME + ".getActionManager().call";
     public static final String UTILITY_MANAGER = CONTEXT_NAME + ".getUtilityManager()";
     public static final String UTILITY_MANAGER_VARIABLE = "um";
@@ -125,7 +124,6 @@ public class CodeGenerator_new implements ICodeGenerator {
 
 	private final AlertCollector alertCollector;
 	private Set<String> definedReferences; // references defined in the current test case
-    private final Map<String, String> definedServiceNames = new HashMap<>();
 	private final Set<String> resolvedServiceNames = new HashSet<>();
     private final Set<String> autoStartableServiceNames = new HashSet<>();
 
@@ -170,6 +168,7 @@ public class CodeGenerator_new implements ICodeGenerator {
     private IUtilityManager utilityManager;
 
     private String compilerClassPath;
+    private Map<String, String> definedServiceNames;
 
 	public CodeGenerator_new() {
 		this.alertCollector = new AlertCollector();
@@ -187,7 +186,8 @@ public class CodeGenerator_new implements ICodeGenerator {
 	                 ScriptContext scriptContext,
 	                 AMLSettings amlSettings,
 	                 List<IProgressListener> progressListeners,
-	                 String compilerClassPath) throws AMLException {
+            String compilerClassPath,
+            Map<String, String> definedServiceNames) throws AMLException {
 	    this.workspaceDispatcher = workspaceDispatcher;
 	    this.adapterManager = adapterManager;
 	    this.environmentManager = environmentManager;
@@ -198,6 +198,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	    this.scriptContext = scriptContext;
 	    this.progressListeners = progressListeners;
 	    this.compilerClassPath = compilerClassPath;
+        this.definedServiceNames = definedServiceNames;
 
 	    impl = new OldImpl(alertCollector, adapterManager, dictionaryManager, actionManager, utilityManager, this);
         newImpl = new NewImpl(alertCollector, adapterManager, this.environmentManager.getConnectionManager(), dictionaryManager, actionManager, utilityManager, this.staticServiceManager, this);
@@ -379,7 +380,6 @@ public class CodeGenerator_new implements ICodeGenerator {
 			            line = writeStaticDefinition(tc, action);
 			            break;
 			        case DEFINE_SERVICE_NAME:
-			            line = writeServiceNameDefinition(action);
 			            break;
                     default:
                         alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: " + statement));
@@ -398,6 +398,13 @@ public class CodeGenerator_new implements ICodeGenerator {
 				    if (action.getActionInfo() == null) {
 					    throw new AMLException("action.getActionMethod() == null");
 				    }
+
+                    Value serviceName = action.getServiceName();
+
+                    if (serviceName != null && serviceName.isReference()) {
+                        String value = NewImpl.getMvelString(tc, action, serviceName.getValue(), Column.ServiceName, alertCollector, definedReferences, dictionaryManager, actionManager, utilityManager);
+                        serviceName.setValue(value);
+                    }
 
 				    String methodBody = "";
 				    MessageDirection annotation = action.getActionInfo().getAnnotation(MessageDirection.class);
@@ -442,7 +449,21 @@ public class CodeGenerator_new implements ICodeGenerator {
                         }
 
                         actionClass.writeLine();
+
+                        if (serviceName != null && serviceName.isReference()) {
+                            actionClass.writeLine(2, "try {");
+                            actionClass.writeLine(3, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().tryLockService(new ServiceName(\"%s\", %s), 30000L);", scriptContext.getEnvironmentName(),
+                                    serviceName.getValue());
+                        }
+
                         actionClass.writeLine(methodBody);
+
+                        if (serviceName != null && serviceName.isReference()) {
+                            actionClass.writeLine(2, "} finally {");
+                            actionClass.writeLine(3, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().unlockService(new ServiceName(\"%s\", %s));", scriptContext.getEnvironmentName(), serviceName.getValue());
+                            actionClass.writeLine(2, "}");
+                        }
+
                         actionClass.writeLine(1, "}");
                         actionClass.writeLine();
 
@@ -520,19 +541,6 @@ public class CodeGenerator_new implements ICodeGenerator {
 		action.setGenerateStatus(AMLGenerateStatus.GENERATED);
 
 		return TAB3+STATIC_MAP_NAME+".put(\""+ref+"\", "+newValue+");"+EOL;
-	}
-
-	private String writeServiceNameDefinition(AMLAction action) {
-        String serviceName = action.getServiceName();
-        String reference = action.getReference();
-
-        if(getService(serviceName, action.getLine(), action.getUID(), Column.ServiceName.getName()) == null) {
-            return null;
-        }
-
-        definedServiceNames.put(reference, serviceName);
-
-        return TAB3 + SERVICE_MAP_NAME + ".put(\"" + reference + "\", \"" + serviceName + "\");" + EOL;
 	}
 
 	private String writeJavaStatement(AMLTestCase tc, AMLAction action, JavaStatement word)
@@ -625,10 +633,26 @@ public class CodeGenerator_new implements ICodeGenerator {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Timeout.getName(), e.getMessage()));
             }
 		}
-		if (action.getServiceName() != null)
-		{
+        if (action.getServiceName() != null) {
+            Value serviceName = action.getServiceName();
             getMethod(alertCollector, ActionContext.class, "setServiceName", action, Column.ServiceName.getName(), String.class);
-			sb.append(TAB2+varName+".setServiceName(\""+ServiceName.toString(scriptContext.getEnvironmentName(), action.getServiceName())+"\");"+EOL);
+
+            sb.append(TAB2);
+            sb.append(varName);
+            sb.append(".setServiceName(ServiceName.toString(\"");
+            sb.append(scriptContext.getEnvironmentName());
+            sb.append("\", ");
+
+            if (serviceName.isReference()) {
+                sb.append(serviceName.getValue());
+            } else {
+                sb.append('"');
+                sb.append(serviceName.getValue());
+                sb.append('"');
+            }
+
+            sb.append("));");
+            sb.append(EOL);
 		}
 		if (action.hasReference())
 		{
@@ -1079,7 +1103,6 @@ public class CodeGenerator_new implements ICodeGenerator {
 			definedReferences.clear();
         }
 
-        definedServiceNames.clear();
         resolvedServiceNames.clear();
 
         if(imports != null) {
@@ -1115,34 +1138,24 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
     }
 
+    @Nullable
     protected IService resolveService(String name, long line, long uid, String column) {
         if(name == null) {
             return null;
         }
 
         if(!Column.ServiceName.getName().equals(column)) {
-            String temp = name;
+            name = definedServiceNames.getOrDefault(name, name);
 
-            if(AMLLangUtil.isStaticVariableReference(name)) {
-                temp = AMLLangUtil.getStaticVariableName(name);
-            }
-
-            String error = JavaValidator.validateVariableName(temp);
-
-            if(error != null) {
-                alertCollector.add(new Alert(line, uid, null, column, error));
+            if (AMLLangUtil.isExpression(name)) {
+                alertCollector.add(new Alert(line, uid, null, column, "References instead of service names are only supported for " + Column.ServiceName.name() + " column"));
                 return null;
             }
         }
 
-        if(AMLLangUtil.isStaticVariableReference(name)) {
-            if(definedServiceNames.containsKey(name)) {
-                name = definedServiceNames.get(name);
-            } else {
-                alertCollector.add(new Alert(line, uid, null, column, "Unknown service name reference: " + name));
+        if (AMLLangUtil.isExpression(name)) {
                 return null;
             }
-        }
 
         return getService(name, line, uid, column);
     }
@@ -1210,5 +1223,15 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
 
         return service;
+    }
+
+    public static String generateServiceNameString(AMLAction action) {
+        Value serviceName = action.getServiceName();
+
+        if (serviceName == null) {
+            return "\"\"";
+        }
+
+        return serviceName.isReference() ? serviceName.getValue() : StringUtil.enclose(serviceName.getValue());
     }
 }

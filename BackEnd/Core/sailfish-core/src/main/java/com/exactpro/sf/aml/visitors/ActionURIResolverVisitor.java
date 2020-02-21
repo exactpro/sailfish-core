@@ -15,13 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.visitors;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.ObjectUtils;
-
 import com.exactpro.sf.aml.AMLBlockBrace;
 import com.exactpro.sf.aml.AMLException;
+import com.exactpro.sf.aml.AMLLangUtil;
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.matrix.Column;
@@ -41,14 +37,12 @@ public class ActionURIResolverVisitor implements IAMLElementVisitor {
     private final IConnectionManager connectionManager;
     private final String environmentName;
     private final AlertCollector alertCollector;
-    private final Map<String, String> serviceNames;
 
     public ActionURIResolverVisitor(IActionManager actionManager, IConnectionManager connectionManager, String environmentName) {
         this.actionManager = actionManager;
         this.connectionManager = connectionManager;
         this.environmentName = environmentName;
         this.alertCollector = new AlertCollector();
-        this.serviceNames = new HashMap<>();
     }
 
     @Override
@@ -59,33 +53,27 @@ public class ActionURIResolverVisitor implements IAMLElementVisitor {
 
         String actionName = element.getValue(Column.Action);
 
-        if(actionName == null || AMLBlockBrace.value(actionName) != null) {
-            return;
-        }
-
-        JavaStatement statement = JavaStatement.value(actionName);
-
-        if(statement != null) {
-            //TODO: populate this map outside and pass it here and in codegen
-            if(statement == JavaStatement.DEFINE_SERVICE_NAME && element.containsCell(Column.Reference) && element.containsCell(Column.ServiceName)) {
-                serviceNames.put(element.getValue(Column.Reference), element.getValue(Column.ServiceName));
-            }
-
+        if (actionName == null || AMLBlockBrace.value(actionName) != null || JavaStatement.value(actionName) != null) {
             return;
         }
 
         try {
             SailfishURI actionURI = SailfishURI.parse(actionName);
             String name = element.getValue(Column.ServiceName);
-            ServiceName serviceName = new ServiceName(environmentName, ObjectUtils.defaultIfNull(serviceNames.get(name), name));
 
-            if(serviceName.getServiceName() != null && !SailfishURIRule.REQUIRE_PLUGIN.check(actionURI)) {
+            if (AMLLangUtil.isExpression(name)) {
+                return;
+            }
+
+            ServiceName serviceName = new ServiceName(environmentName, name);
+
+            if (serviceName.getServiceName() != null && !SailfishURIRule.REQUIRE_PLUGIN.check(actionURI)) {
                 ServiceDescription serviceDescription = connectionManager.getServiceDescription(serviceName);
 
-                if(serviceDescription != null) {
+                if (serviceDescription != null) {
                     SailfishURI mergedURI = actionURI.merge(serviceDescription.getType());
 
-                    if(actionManager.containsAction(mergedURI)) {
+                    if (actionManager.containsAction(mergedURI)) {
                         element.setValue(Column.Action, mergedURI.toString());
                     }
                 }

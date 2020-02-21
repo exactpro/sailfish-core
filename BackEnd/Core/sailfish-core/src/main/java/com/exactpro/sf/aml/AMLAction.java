@@ -58,7 +58,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	private String referenceToFilter = "";
 	private String template = "";
     private String id;
-    private String serviceName;
+    private Value serviceName;
     private ExecutionMode executionMode = ExecutionMode.EXECUTABLE;
     private SailfishURI actionURI; // null if not set
     private SailfishURI dictionaryURI;
@@ -189,22 +189,20 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         return StringUtils.isNotEmpty(id);
     }
 
-	@Override
-	public void setServiceName(String serviceName)
-	{
-		this.serviceName = serviceName;
-	}
+    @Override
+    public void setServiceName(Value serviceName) {
+        this.serviceName = serviceName;
+    }
 
-	@Override
-	public String getServiceName()
-	{
+    @Override
+    public Value getServiceName() {
         return serviceName;
-	}
+    }
 
 	@Override
 	public boolean hasServiceName() {
-	    return StringUtils.isNotEmpty(serviceName);
-	}
+        return serviceName != null;
+    }
 
 	@Override
 	public void setExecutionMode(ExecutionMode executionMode)

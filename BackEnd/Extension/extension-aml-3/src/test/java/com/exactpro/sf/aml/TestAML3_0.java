@@ -28,6 +28,8 @@ import org.junit.Test;
 
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.generator.AlertType;
+import com.exactpro.sf.aml.generator.matrix.Column;
+import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -78,7 +80,7 @@ public class TestAML3_0 extends TestAML3Base {
 		Assert.assertEquals(40, aml.getTestCases().get(n++).getActions().size());
 		Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
-        Assert.assertEquals("fake", aml.getTestCases().get(n++).findActionByRef("s1").getServiceName());
+        Assert.assertEquals("fake", aml.getTestCases().get(n++).findActionByRef("s1").getServiceName().getValue());
         Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
@@ -289,23 +291,19 @@ public class TestAML3_0 extends TestAML3Base {
             Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(56, null, "#service_name", "Unknown service: unknown");
             Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(57, null, "#service_name", "Unknown service: unknown");
+            alert = new Alert(60, "", "#service_name", "Undefined reference [unknown] in column '#service_name': '%{unknown}'.");
             Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(58, null, "#service_name", "Unknown service: %{unknown}");
-            Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(60, null, "#service_name", "Unknown service name reference: %{unknown}");
-            Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(61, null, "#service_name", "Unknown service name reference: %{unknown}");
+            alert = new Alert(61, "", "#service_name", "Undefined reference [unknown] in column '#service_name': '%{unknown}'.");
             Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(63, null, "ServiceName", "Unknown service: unknown");
             Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(64, null, "ServiceName", "Unknown service name reference: %{unknown}");
+            alert = new Alert(64, null, "ServiceName", "References instead of service names are only supported for ServiceName column");
             Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(65, "", "ServiceName", "Value cannot be a collection: [unknown]");
             Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(66, null, "ServiceNames", "Unknown service: unknown");
             Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(67, null, "ServiceNames", "Unknown service name reference: %{unknown}");
+            alert = new Alert(67, null, "ServiceNames", "References instead of service names are only supported for ServiceName column");
             Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(68, "", "ServiceNames", "Value is not a collection: unknown");
             Assert.assertTrue(alert.toString(), source.remove(alert));
@@ -344,25 +342,77 @@ public class TestAML3_0 extends TestAML3Base {
         }
     }
 
-	@Override
-	protected AMLSettings createSettings()
-	{
-		AMLSettings settings = new AMLSettings();
-		settings.setAutoStart(true);
-		settings.setBaseDir(BIN_FOLDER_PATH);
-		settings.setContinueOnFailed(true);
-		settings.setLanguageURI(AML3LanguageFactory.URI);
-		return settings;
-	}
+    @Test
+    public void testInvalidDefineServiceName() throws Exception {
+        try {
+            executeTest(INVALID_TEST_PATH + "invalid-define-service-name.csv");
+        } catch (AMLException e) {
+            Collection<Alert> source = e.getAlertCollector().getAlerts();
 
-	private void addService(IConnectionManager conManager, SailfishURI serviceURI, String name) throws InterruptedException, ExecutionException {
-	    ServiceName serviceName = new ServiceName(ServiceName.DEFAULT_ENVIRONMENT, name);
-	    conManager.getService(serviceName);
-	    if (conManager.getService(serviceName) == null) {
+            Alert alert = new Alert(3, null, Column.ServiceName.getName(), "Missing column", AlertType.ERROR);
+            Assert.assertTrue(alert.toString(), source.remove(alert));
+            alert = new Alert(3, null, Column.Reference.getName(), "Missing column", AlertType.ERROR);
+            Assert.assertTrue(alert.toString(), source.remove(alert));
+            alert = new Alert(4, "%{ref}", Column.ServiceName.getName(), "Unknown service: nonexistent", AlertType.ERROR);
+            Assert.assertTrue(alert.toString(), source.remove(alert));
+            alert = new Alert(5, "ref", Column.Reference.getName(), "Invalid reference format. Expected %{ref}", AlertType.ERROR);
+            Assert.assertTrue(alert.toString(), source.remove(alert));
+            alert = new Alert(6, "%{r e f}", Column.Reference.getName(), "Invalid reference format: Variable 'r e f' contain white space", AlertType.ERROR);
+            Assert.assertTrue(alert.toString(), source.remove(alert));
+
+            Assert.assertEquals("Unchecked error", 0, source.size());
+        }
+    }
+
+    @Test
+    public void testValidDefineServiceName() throws AMLException, IOException, InterruptedException {
+        AML aml = executeTest(VALID_TEST_PATH + "valid-define-service-name.csv");
+        List<AMLTestCase> testCases = aml.getTestCases();
+
+        Assert.assertEquals(0, aml.getAlertCollector().getCount());
+        Assert.assertEquals(1, testCases.size());
+
+        AMLTestCase testCase = testCases.get(0);
+        List<AMLAction> actions = testCase.getActions();
+
+        Assert.assertEquals(3, actions.size());
+
+        AMLAction defineServiceName = actions.get(0);
+        AMLAction isConnectedService1 = actions.get(1);
+        AMLAction isConnectedService2 = actions.get(2);
+
+        Value serviceName = defineServiceName.getServiceName();
+        Value serviceName1 = isConnectedService1.getServiceName();
+        Value serviceName2 = isConnectedService2.getServiceName();
+
+        Assert.assertTrue(serviceName.isReference());
+        Assert.assertEquals("#{toString(\"fake\")}", serviceName.getOrigValue());
+
+        Assert.assertTrue(serviceName1.isReference());
+        Assert.assertEquals(serviceName.getOrigValue(), serviceName1.getOrigValue());
+
+        Assert.assertTrue(serviceName2.isReference());
+        Assert.assertEquals("#{toString(\"fake\")}", serviceName2.getOrigValue());
+    }
+
+    @Override
+    protected AMLSettings createSettings() {
+        AMLSettings settings = new AMLSettings();
+        settings.setAutoStart(true);
+        settings.setBaseDir(BIN_FOLDER_PATH);
+        settings.setContinueOnFailed(true);
+        settings.setLanguageURI(AML3LanguageFactory.URI);
+        return settings;
+    }
+
+    private void addService(IConnectionManager conManager, SailfishURI serviceURI, String name) throws InterruptedException, ExecutionException {
+        ServiceName serviceName = new ServiceName(ServiceName.DEFAULT_ENVIRONMENT, name);
+        conManager.getService(serviceName);
+        if (conManager.getService(serviceName) == null) {
             ServiceDescription serviceDescription = new ServiceDescription(serviceURI);
             serviceDescription.setName(name);
             serviceDescription.setEnvironment(ServiceName.DEFAULT_ENVIRONMENT);
             conManager.addService(serviceDescription, null).get();
-	    }
+        }
 	}
 }

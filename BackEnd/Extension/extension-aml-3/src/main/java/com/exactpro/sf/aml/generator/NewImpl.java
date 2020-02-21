@@ -15,6 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+import static java.lang.String.format;
+
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AMLException;
@@ -45,24 +64,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-import static java.lang.String.format;
 
 public class NewImpl {
 
@@ -118,46 +119,45 @@ public class NewImpl {
 
 		this.variables = variables;
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATED) {
-			return null;
-		}
+            return null;
+        }
 
-		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
+        if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
-			return null;
-		}
+            return null;
+        }
 
-		action.setGenerateStatus(AMLGenerateStatus.GENERATING);
+        action.setGenerateStatus(AMLGenerateStatus.GENERATING);
 
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
-		Variable inputVariable = null;
-//		Variable outputVariable = null;
-		Class<?> type = action.getActionInfo().getMessageType();
+        StringBuilder sb = new StringBuilder(CAPACITY_128K);
+        Variable inputVariable = null;
+        //		Variable outputVariable = null;
+        Class<?> type = action.getActionInfo().getMessageType();
+        Value serviceName = action.getServiceName();
 
-        if(action.hasServiceName()) {
-            IService service = codeGenerator.resolveService(action.getServiceName(), action.getLine(), action.getUID(), Column.ServiceName.getName());
+        if (serviceName != null && !serviceName.isReference()) {
+            IService service = codeGenerator.resolveService(serviceName.getValue(), action.getLine(), action.getUID(), Column.ServiceName.getName());
 
-            if(service != null) {
-                action.setServiceName(service.getServiceName().getServiceName());
+            if (service != null) {
                 codeGenerator.resolveDictionary(action, service);
             }
         }
 
-		if (type != null)
-		{
-			if (!action.hasDictionaryURI()) {
+        if (type != null) {
+            if (!action.hasDictionaryURI()) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
-				return null;
-			}
+                return null;
+            }
 
-			sb.append(TAB2+"try {"+EOL);
+            sb.append(TAB2 + "try {" + EOL);
 
-			inputVariable = getVariable(type, MESSAGE_PREFIX+action.getMessageTypeColumn());
-			sb.append(createSendMessageDefinition(tc, action, inputVariable, isDirty));
-			addReferenceToFilter(sb, action, inputVariable);
-			action.setGenerateStatus(AMLGenerateStatus.GENERATED);
+            inputVariable = getVariable(type, MESSAGE_PREFIX + action.getMessageTypeColumn());
+            sb.append(createSendMessageDefinition(tc, action, inputVariable, isDirty));
+            addReferenceToFilter(sb, action, inputVariable);
+            action.setGenerateStatus(AMLGenerateStatus.GENERATED);
             writeFillComparisonErrorsDefinition(sb, tc, action, isDirty);
-			sb.append(createSendCall(tc,action,inputVariable));
-		}
+            sb.append(createSendCall(tc, action, inputVariable));
+        }
 		else
 		{
 			sb.append(TAB2+"try {"+EOL);
@@ -184,53 +184,49 @@ public class NewImpl {
 
     private String createSendCall(AMLTestCase tc, AMLAction action,
 			Variable inputVariable) {
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
+        StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
         Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
-		Class<?> returnType = action.getActionInfo().getReturnType();
-		String inputType = inputVariable != null ? inputVariable.getType().getCanonicalName() : null;
+        Class<?> returnType = action.getActionInfo().getReturnType();
+        String inputType = inputVariable != null ? inputVariable.getType().getCanonicalName() : null;
 
-		boolean continueOnFailed = action.getContinueOnFailed() || this.continueOnFailed;
+        boolean continueOnFailed = action.getContinueOnFailed() || this.continueOnFailed;
 
-		String id = (action.getId() == null) ? "" : action.getId()+" ";
-		String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
-		String messageType = (action.getMessageTypeColumn() == null) ? "" : " "+action.getMessageTypeColumn();
+        String id = (action.getId() == null) ? "" : action.getId() + " ";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
+        String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
         String description = "null";
 
         if (inputVariable != null) {
             sb.append(MessageFormat.format(TAB2 + "{0} = ({1})stripFilter({0});" + EOL, inputVariable.getName(), inputType));
         }
 
-
-		if (action.isAddToReport())
-		{
+        if (action.isAddToReport()) {
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
 
-			if (inputVariable != null)
-			{
-				sb.append(TAB2+REPORT_NAME+".createAction(\""
+            if (inputVariable != null) {
+                sb.append(TAB2 + REPORT_NAME + ".createAction(\""
                         + id + "\", "
 
-						+ "\""+ serviceName.trim() + "\", "
-						+ "\""+ action.getActionURI() + "\", "
-						+ "\""+ messageType.trim() + "\", " +
+                        + serviceName + ", "
+                        + "\"" + action.getActionURI() + "\", "
+                        + "\"" + messageType.trim() + "\", " +
 
-						description+", "+inputVariable.getName());
-			}
-			else
-			{
-				sb.append(TAB2+REPORT_NAME+".createAction(\""
+                        description + ", " + inputVariable.getName());
+            }
+			else {
+                sb.append(TAB2 + REPORT_NAME + ".createAction(\""
                         + id + "\", "
 
-						+ "\""+ serviceName.trim() + "\", "
-						+ "\""+ action.getActionURI() + "\", "
-						+ "\""+ messageType.trim() + "\", "
+                        + serviceName + ", "
+                        + "\"" + action.getActionURI() + "\", "
+                        + "\"" + messageType.trim() + "\", "
 
-						+description+", null");
-			}
+                        + description + ", null");
+            }
 
             sb.append(",");
             sb.append(settings.getName());
@@ -837,79 +833,77 @@ public class NewImpl {
 
 		this.variables = variables2;
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATED) {
-			return null;
-		}
+            return null;
+        }
 
-		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
+        if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
-			return null;
-		}
+            return null;
+        }
 
-		action.setGenerateStatus(AMLGenerateStatus.GENERATING);
+        action.setGenerateStatus(AMLGenerateStatus.GENERATING);
 
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
-		Variable inputVariable = null;
-//		Variable outputVariable = null;
-		Class<?> type = action.getActionInfo().getMessageType();
+        StringBuilder sb = new StringBuilder(CAPACITY_128K);
+        Variable inputVariable = null;
+        //		Variable outputVariable = null;
+        Class<?> type = action.getActionInfo().getMessageType();
+        Value serviceName = action.getServiceName();
 
-        if(action.hasServiceName()) {
-            IService service = codeGenerator.resolveService(action.getServiceName(), action.getLine(), action.getUID(), Column.ServiceName.getName());
+        if (serviceName != null && !serviceName.isReference()) {
+            IService service = codeGenerator.resolveService(serviceName.getValue(), action.getLine(), action.getUID(), Column.ServiceName.getName());
 
-            if(service != null) {
-                action.setServiceName(service.getServiceName().getServiceName());
+            if (service != null) {
                 codeGenerator.resolveDictionary(action, service);
             }
         }
 
-		if (type != null)
-		{
-			if (!action.hasDictionaryURI()) {
+        if (type != null) {
+            if (!action.hasDictionaryURI()) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
-				return null;
-			}
+                return null;
+            }
 
-			sb.append(TAB2+"try {"+EOL);
+            sb.append(TAB2 + "try {" + EOL);
 
-			inputVariable = getVariable(type, MESSAGE_PREFIX+action.getMessageTypeColumn());
-			sb.append(createReceiveMessageDefinition(tc, action, inputVariable));
-			addReferenceToFilter(sb, action, inputVariable);
-			action.setGenerateStatus(AMLGenerateStatus.GENERATED);
+            inputVariable = getVariable(type, MESSAGE_PREFIX + action.getMessageTypeColumn());
+            sb.append(createReceiveMessageDefinition(tc, action, inputVariable));
+            addReferenceToFilter(sb, action, inputVariable);
+            action.setGenerateStatus(AMLGenerateStatus.GENERATED);
             writeFillComparisonErrorsDefinition(sb, tc, action, false);
-			sb.append(createReceiveCall(tc,action,inputVariable));
-		}
+            sb.append(createReceiveCall(tc, action, inputVariable));
+        }
 
 		return sb.toString(); // TODO: to be done
 	}
 
 	private Object createReceiveCall(AMLTestCase tc, AMLAction action,
 			Variable inputVariable) {
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
+        StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
         Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
-		Class<?> returnType = action.getActionInfo().getReturnType();
+        Class<?> returnType = action.getActionInfo().getReturnType();
 
-		boolean continueOnFailed = action.getContinueOnFailed() || this.continueOnFailed;
+        boolean continueOnFailed = action.getContinueOnFailed() || this.continueOnFailed;
 
-		String id = (action.getId() == null) ? "" : action.getId()+" ";
-		String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
-		String messageType = (action.getMessageTypeColumn() == null) ? "" : " "+action.getMessageTypeColumn();
+        String id = (action.getId() == null) ? "" : action.getId() + " ";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
+        String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
         String description = "null";
 
-		if (action.isAddToReport())
-		{
+        if (action.isAddToReport()) {
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
 
             sb.append(TAB2 + REPORT_NAME + ".createAction(\""
                     + id + "\", "
 
-					+ "\""+ serviceName.trim() + "\", "
-					+ "\""+ action.getActionURI() + "\", "
-					+ "\""+ messageType.trim() + "\", " +
+                    + serviceName + ", "
+                    + "\"" + action.getActionURI() + "\", "
+                    + "\"" + messageType.trim() + "\", " +
 
-					description+", "+inputVariable.getName());
+                    description + ", " + inputVariable.getName());
 
             sb.append(", ");
             sb.append(settings.getName());
@@ -1100,7 +1094,7 @@ public class NewImpl {
         sb.append(TAB3 + "if (!" + REPORT_NAME + ".isActionCreated()) {" + EOL);
         sb.append(TAB4 + REPORT_NAME + ".createAction(\"" + id + "\", "
 
-                + "\"" + serviceName.trim() + "\", "
+                + serviceName + ", "
                 + "\"" + action.getActionURI() + "\", "
                 + "\"" + messageType.trim() + "\", "
 
@@ -1109,7 +1103,7 @@ public class NewImpl {
                 + action.getHash() + ", "
                 + "Arrays.asList( " + verificationsOrder + "), "
                 + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
-                +");" + EOL);
+                + ");" + EOL);
         sb.append(TAB3 + "}" + EOL);
     }
 

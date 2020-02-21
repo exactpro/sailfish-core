@@ -16,11 +16,12 @@
 package com.exactpro.sf.scriptrunner;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.center.IDisposable;
 import com.exactpro.sf.common.services.ServiceName;
@@ -71,32 +72,48 @@ public interface IConnectionManager extends IDisposable
 
     List<String> getEnvironmentList();
 
-	/**
-	 * Lock services which are used in a script.
-	 * If another script will lock one of the locked services it will wait
-	 * until service release in setServiceNotUsed method.
-	 * @param names collection of services to be locked
-	 * @throws InterruptedException
-	 */
-	void setServiceUsed(String[] name) throws InterruptedException;
+    /**
+     * Lock services which are used in a script.
+     * If another script will lock one of the locked services it will wait
+     * until service release in setServiceNotUsed method.
+     * @param names collection of services to be locked
+     * @throws InterruptedException
+     */
+    void setServiceUsed(String[] name) throws InterruptedException;
 
-	/**
-	 * Release specified services.
-	 * @param names collection of services to be released
-	 */
-	void setServiceNotUsed(String[] name);
+    /**
+     * Release specified services.
+     * @param names collection of services to be released
+     */
+    void setServiceNotUsed(String[] name);
 
-	Set<String> getUsedServices();
+    /**
+     * Tries to acquire a lock for a service.
+     * Throws exception if it fails to do so in specified time or if the service doesn't exist.
+     * @param name service name
+     * @param timeout time to wait for the lock in milliseconds
+     * @throws InterruptedException
+     */
+    void tryLockService(@NotNull ServiceName name, long timeout) throws InterruptedException;
 
-	<Service extends IService> Service getService(ServiceName serviceName);
+    /**
+     * Unlocks a service.
+     * Throws exception if the service wasn't locked by a current thread or if it doesn't exist.
+     * @param name service name
+     */
+    void unlockService(@NotNull ServiceName name);
 
-	ServiceName[] getServiceNames();
+    Set<String> getUsedServices();
 
-	IService[] getStartedServices();
+    <Service extends IService> Service getService(ServiceName serviceName);
 
-	ServiceDescription[] getServicesDescriptions();
+    ServiceName[] getServiceNames();
 
-	ServiceDescription getServiceDescription(ServiceName serviceName);
+    IService[] getStartedServices();
+
+    ServiceDescription[] getServicesDescriptions();
+
+    ServiceDescription getServiceDescription(ServiceName serviceName);
 
 	IServiceSettings getServiceSettings(ServiceName serviceName);
 

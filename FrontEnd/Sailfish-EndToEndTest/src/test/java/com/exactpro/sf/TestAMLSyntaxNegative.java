@@ -406,18 +406,11 @@ public class TestAMLSyntaxNegative extends TestMatrix {
     public void testIncorrectDefineService() {
         logger.info("Start testIncorrectDefineService()");
         try {
-            checkErrorPresents("Error in line 4 reference 'serviceName' column '#reference': Invalid value: serviceName (expected: %{name})", errorsIncorrectDefineService);
-            checkErrorPresents("Error in line 4 reference 'serviceName' column '#service_name': Required column is missing", errorsIncorrectDefineService);
-
-            checkErrorPresents("Error in line 9 reference '%{serviceName' column '#reference': Invalid value: %{serviceName (expected: %{name})", errorsIncorrectDefineService);
-            checkErrorPresents("Error in line 9 reference '%{serviceName' column '#service_name': Required column is missing", errorsIncorrectDefineService);
-
-            checkErrorPresents("Error in line 15 reference '${serviceName}' column '#reference': Invalid value: ${serviceName} (expected: %{name})", errorsIncorrectDefineService);
-            checkErrorPresents("Error in line 15 reference '${serviceName}' column '#service_name': Required column is missing", errorsIncorrectDefineService);
-
-            checkErrorPresents("Error in line 20 reference '#{serviceName}' column '#reference': Invalid value: #{serviceName} (expected: %{name})", errorsIncorrectDefineService);
-            checkErrorPresents("Error in line 20 reference '#{serviceName}' column '#service_name': Required column is missing", errorsIncorrectDefineService);
-
+            checkErrorPresents("Error in line 3 column '#reference': Missing column", errorsIncorrectDefineService);
+            checkErrorPresents("Error in line 3 column '#service_name': Missing column", errorsIncorrectDefineService);
+            checkErrorPresents("Error in line 4 reference '%{ref}' column '#service_name': Unknown service: nonexistent", errorsIncorrectDefineService);
+            checkErrorPresents("Error in line 5 reference 'ref' column '#reference': Invalid reference format. Expected %{ref}", errorsIncorrectDefineService);
+            checkErrorPresents("Error in line 6 reference '%{r e f}' column '#reference': Invalid reference format: Variable 'r e f' contain white space", errorsIncorrectDefineService);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;

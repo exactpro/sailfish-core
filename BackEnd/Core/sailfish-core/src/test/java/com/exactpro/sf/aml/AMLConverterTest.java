@@ -143,7 +143,7 @@ public class AMLConverterTest extends AbstractTest {
 
             Collection<Alert> errors = collector.getAlerts();
 
-            Assert.assertEquals(64, errors.size());
+            Assert.assertEquals(63, errors.size());
 
             Alert error = new Alert(2, "29", "#reference", "Variable '29' start with a digit", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
@@ -212,8 +212,6 @@ public class AMLConverterTest extends AbstractTest {
             error = new Alert(20, null, "#service_name", "Variable '_foobar' start with invalid character '_'", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(21, null, "#service_name", "Variable '0foobar' start with a digit", AlertType.ERROR);
-            Assert.assertTrue(error.toString(), errors.remove(error));
-            error = new Alert(22, null, "#service_name", "Invalid empty variable name", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(23, "s1", "#static_type", "Unknown type: foo", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));

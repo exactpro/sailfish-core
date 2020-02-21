@@ -15,6 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLLangConst;
@@ -41,19 +55,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 
 public class OldImpl {
 
@@ -104,55 +105,51 @@ public class OldImpl {
 
 		this.variables = variables2;
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATED) {
-			return null;
-		}
+            return null;
+        }
 
-		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
+        if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
-			return null;
-		}
+            return null;
+        }
 
-		action.setGenerateStatus(AMLGenerateStatus.GENERATING);
+        action.setGenerateStatus(AMLGenerateStatus.GENERATING);
 
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
-		Variable inputVariable = null;
-		Variable outputVariable = null;
-		Class<?> type = null;
+        StringBuilder sb = new StringBuilder(CAPACITY_128K);
+        Variable inputVariable = null;
+        Variable outputVariable = null;
+        Class<?> type = null;
+        Value serviceName = action.getServiceName();
 
-        if(action.hasServiceName()) {
-            IService service = codeGenerator.resolveService(action.getServiceName(), action.getLine(), action.getUID(), Column.ServiceName.getName());
+        if (serviceName != null && !serviceName.isReference()) {
+            IService service = codeGenerator.resolveService(serviceName.getValue(), action.getLine(), action.getUID(), Column.ServiceName.getName());
 
-            if(service != null) {
-                action.setServiceName(service.getServiceName().getServiceName());
+            if (service != null) {
                 codeGenerator.resolveDictionary(action, service);
             }
         }
 
-		if(action.hasActionURI()) {
-	        openTryClause(sb);
-	    }
+        if (action.hasActionURI()) {
+            openTryClause(sb);
+        }
 
-		if (action.getActionInfo() != null)
-		{
-		    type = action.getActionInfo().getMessageType();
+        if (action.getActionInfo() != null) {
+            type = action.getActionInfo().getMessageType();
 
-		    if (type != null)
-	        {
-	            inputVariable = getVariable(type, MESSAGE_PREFIX + type.getSimpleName());
-	            sb.append(createMessageDefinition(tc, action, inputVariable));
-	            addReferenceToFilter(sb, action, inputVariable);
-	        }
+            if (type != null) {
+                inputVariable = getVariable(type, MESSAGE_PREFIX + type.getSimpleName());
+                sb.append(createMessageDefinition(tc, action, inputVariable));
+                addReferenceToFilter(sb, action, inputVariable);
+            }
 
-			Class<?> returnType = action.getActionInfo().getReturnType();
-			if (action.hasReference() && void.class.equals(returnType))
-			{
+            Class<?> returnType = action.getActionInfo().getReturnType();
+            if (action.hasReference() && void.class.equals(returnType)) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot refer to void method: " + action.getActionURI() + ". "
-						+ "Please remove reference label and all reference occurrences to this row.", AlertType.WARNING));
-            } else if(!void.class.equals(returnType))
-			{
-				outputVariable = getVariable(returnType, MESSAGE_PREFIX + returnType.getSimpleName());
-			}
-		}
+                        + "Please remove reference label and all reference occurrences to this row.", AlertType.WARNING));
+            } else if (!void.class.equals(returnType)) {
+                outputVariable = getVariable(returnType, MESSAGE_PREFIX + returnType.getSimpleName());
+            }
+        }
 
 		if (action.hasActionURI())
 		{
@@ -525,37 +522,35 @@ public class OldImpl {
 		if(inputVariable != null) {
             factory = (IGetterSetterGenerator)adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
 
-    		if (factory == null)
-    		{
+            if (factory == null) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
-    					+action.getActionInfo().getMessageType().getCanonicalName()));
+                        + action.getActionInfo().getMessageType().getCanonicalName()));
                 throw new AMLException("Cannot find getter&setter generator", alertCollector);
-    		}
-		}
+            }
+        }
 
-		if (action.isAddToReport())
-		{
-			String id = (action.getId() == null) ? "" : action.getId()+" ";
-			String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
-			String method = "";
+        if (action.isAddToReport()) {
+            String id = (action.getId() == null) ? "" : action.getId() + " ";
+            String serviceName = CodeGenerator_new.generateServiceNameString(action);
+            String method = "";
 
-			if(factory != null) {
-		        method = factory.getMethodForExtractingTreeEntity();
+            if (factory != null) {
+                method = factory.getMethodForExtractingTreeEntity();
 
-		        if (method == null) {
-		            throw new AMLException("Factory "+factory.getClass().getCanonicalName()+" return null from getMethodForExtractingTreeEntity()");
-		        }
-			}
+                if (method == null) {
+                    throw new AMLException("Factory " + factory.getClass().getCanonicalName() + " return null from getMethodForExtractingTreeEntity()");
+                }
+            }
 
             String description = toJavaString(action.getDescrption());
 
             sb.append(TAB2 + REPORT_NAME + ".createAction(\""
                     + id + "\", "
 
-					+ "\""+ serviceName + "\", "
-					+ "\""+ action.getActionURI() + "\", "
+                    + serviceName + ", "
+                    + "\"" + action.getActionURI() + "\", "
                     + "\"\", "
-                    + "\""+description+"\", ");
+                    + "\"" + description + "\", ");
 
 			if(inputVariable != null) {
                 sb.append(MessageUtil.class.getSimpleName());
@@ -652,7 +647,7 @@ public class OldImpl {
         }
 
         String id = (action.getId() == null) ? "" : action.getId() + " ";
-        String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
         String description = toJavaString(action.getDescrption());
 
         NewImpl.writeCreateTestCase(tc, sb);
@@ -680,7 +675,7 @@ public class OldImpl {
 
     private void writeCreateAction(AMLAction action, StringBuilder sb) {
         String id = (action.getId() == null) ? "" : action.getId() + " ";
-        String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
         String description = toJavaString(action.getDescrption());
         writeCreateAction(action, sb, id, serviceName, description);
     }
@@ -692,13 +687,13 @@ public class OldImpl {
         sb.append(TAB4 + REPORT_NAME + ".createAction(\""
                 + id + "\", "
 
-                + "\"" + serviceName + "\", "
+                + serviceName + ", "
                 + "\"" + action.getActionURI() + "\", "
                 + "\"\", "
 
                 + "\"" + description + "\" , null, null, "
                 + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
-                + action.getHash()  + ", "
+                + action.getHash() + ", "
                 + "Arrays.asList( " + verificationsOrder + "), "
                 + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
                 + ");" + EOL);

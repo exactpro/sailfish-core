@@ -59,6 +59,7 @@ import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.common.util.TextOutputStream;
 import com.exactpro.sf.comparison.conversion.MultiConverter;
@@ -160,6 +161,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(Reference.class.getCanonicalName());
         imports.add(MessageUtil.class.getCanonicalName());
         imports.add(MetaContainer.class.getCanonicalName());
+        imports.add(ServiceName.class.getCanonicalName());
 
         for (String imp : imports) {
             stream.writeLine("import %s;", imp);
@@ -232,7 +234,7 @@ public abstract class AbstractCodeBuilder {
         stream.writeLine(2, "if(%s.isTestCaseCreated() && %s.getOutcomeStatus(\"%s\", \"%s\")==Status.FAILED) {", reportName, contextName, action.getOutcomeGroup(), action.getOutcomeName());
 
         String id = StringUtils.trimToEmpty(action.getId());
-        String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
         String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
         String description = toJavaString(action.getDescrption());
         String tag = toJavaString(action.getTag());
@@ -243,7 +245,7 @@ public abstract class AbstractCodeBuilder {
             tag = enclose(tag, '"');
         }
 
-        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", null, null, %s, %d, Arrays.asList(%s), \"%s\");",
+        stream.writeLine(3, "%s.createAction(\"%s\", %s, \"%s\", \"%s\", \"%s\", null, null, %s, %d, Arrays.asList(%s), \"%s\");",
                 reportName, id, serviceName, action.getActionURI(), messageType, description, tag,
                 action.getHash(), verificationsOrder, outcome);
         stream.writeLine(3, "%s.closeAction(new StatusDescription(StatusType.NA, \"Action skipped\"), null);", reportName);
@@ -301,7 +303,7 @@ public abstract class AbstractCodeBuilder {
         stream.writeLine(2, "if(!%s.checkExecutedActions(Arrays.asList(%s))) {", contextName, dependencies);
 
         String id = (action.getId() == null) ? "" : action.getId() + " ";
-        String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
+        String serviceName = CodeGenerator_new.generateServiceNameString(action);
         String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
         String description = toJavaString(action.getDescrption());
         String name = id + serviceName + action.getActionURI() + messageType;
@@ -313,7 +315,7 @@ public abstract class AbstractCodeBuilder {
             tag = enclose(tag, '"');
         }
 
-        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"\", null, %s, Arrays.asList(%s), %s);", reportName, name, serviceName, action.getActionURI(), messageType, description, tag, verificationsOrder,
+        stream.writeLine(3, "%s.createAction(\"%s\", %s, \"%s\", \"%s\", \"%s\", \"\", null, %s, Arrays.asList(%s), %s);", reportName, name, serviceName, action.getActionURI(), messageType, description, tag, verificationsOrder,
                 outcome);
         stream.writeLine(3, "%s.closeAction(new StatusDescription(StatusType.FAILED, \"Skipped due to failed dependencies\"), null);", reportName);
         stream.writeLine();

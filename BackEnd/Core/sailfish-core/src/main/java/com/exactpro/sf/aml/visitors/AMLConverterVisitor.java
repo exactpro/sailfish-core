@@ -314,7 +314,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
                         break;
                     case ReferenceToFilter:
-                        if(validateVariableName(element, column, cellValue)) {
+                        if (validateVariableName(element, column, cellValue)) {
                             action.setReferenceToFilter(cellValue);
                         }
                         break;
@@ -322,21 +322,21 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         action.setReorderGroups(AMLLangConst.YES.equalsIgnoreCase(cellValue));
                         break;
                     case ServiceName:
-                        tempValue = cellValue;
+                        Value serviceName = new Value(cellValue);
 
-                        if(isStaticVariableReference(cellValue)) {
-                            tempValue = AMLLangUtil.getStaticVariableName(cellValue);
+                        if (AMLLangUtil.isExpression(cellValue)) {
+                            serviceName.setReference(true);
+                        } else {
+                            validateVariableName(element, column, cellValue);
                         }
 
-                        if(validateVariableName(element, column, tempValue)) {
-                            action.setServiceName(cellValue);
-                        }
+                        action.setServiceName(serviceName);
 
                         break;
                     case StaticType:
                         Class<?> type = TypeHelper.getClass(cellValue);
 
-                        if(type != null) {
+                        if (type != null) {
                             action.setStaticType(type.getSimpleName());
                         } else {
                             addError(element, column, "Unknown type: %s", cellValue);

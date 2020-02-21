@@ -29,30 +29,40 @@ public interface IAction extends Cloneable {
 
 	void setReference(String ref);
 	String getReference();
-	boolean hasReference();
 
-	void setReferenceToFilter(String ref);
-	String getReferenceToFilter();
-	boolean hasReferenceToFilter();
+    boolean hasReference();
 
-	void setId(String id);
-	String getId();
-	boolean hasId();
+    void setReferenceToFilter(String ref);
 
-	void setServiceName(String serviceName);
-	String getServiceName();
-	boolean hasServiceName();
+    String getReferenceToFilter();
 
-	void setCheckPoint(String checkPoint);
-	String getCheckPoint();
+    boolean hasReferenceToFilter();
 
-	void setDoublePrecision(String precision);
-	String getDoublePrecision();
+    void setId(String id);
+
+    String getId();
+
+    boolean hasId();
+
+    void setServiceName(Value serviceName);
+
+    Value getServiceName();
+
+    boolean hasServiceName();
+
+    void setCheckPoint(String checkPoint);
+
+    String getCheckPoint();
+
+    void setDoublePrecision(String precision);
+
+    String getDoublePrecision();
 
     void setExecutionMode(ExecutionMode executionMode);
+
     ExecutionMode getExecutionMode();
 
-	SailfishURI getActionURI();
+    SailfishURI getActionURI();
 	void setActionURI(SailfishURI actionURI);
 	boolean hasActionURI();
 

@@ -23,12 +23,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -61,27 +63,28 @@ public class ServiceDescription implements Cloneable, Serializable {
 	@XmlElement(name="type")
 	@XmlJavaTypeAdapter(SailfishURIAdapter.class)
 	private SailfishURI type;
-	@XmlElement(name="name")
-	private String name;
-	@XmlElement(name="serviceHandlerClassName")
-	private String serviceHandlerClassName;
-	@XmlElement(name="environment")
-	private String environment;
-	@XmlAnyElement(lax=true)
-	private IServiceSettings settings;
+    @XmlElement(name = "name")
+    private String name;
+    @XmlElement(name = "serviceHandlerClassName")
+    private String serviceHandlerClassName;
+    @XmlElement(name = "environment")
+    private String environment;
+    @XmlAnyElement(lax = true)
+    private IServiceSettings settings;
     @XmlElement(name = "variables")
     private Map<String, String> variables = new HashMap<>();
+    @XmlTransient
+    private ReentrantLock lock = new ReentrantLock();
 
-	public ServiceDescription()
-	{
-		// default constructor
-	}
+    public ServiceDescription() {
+        // default constructor
+    }
 
-	public ServiceDescription(SailfishURI type) {
-	    setType(type);
-	}
+    public ServiceDescription(SailfishURI type) {
+        setType(type);
+    }
 
-	public IServiceSettings getSettings()
+    public IServiceSettings getSettings()
 	{
         return settings;
 	}
@@ -121,7 +124,7 @@ public class ServiceDescription implements Cloneable, Serializable {
 
 	public void setEnvironment(String environment) {
 		this.environment = environment;
-	}
+    }
 
     public Map<String, String> getVariables() {
         return variables;
@@ -129,6 +132,10 @@ public class ServiceDescription implements Cloneable, Serializable {
 
     public void setVariables(Map<String, String> variables) {
         this.variables = variables;
+    }
+
+    public ReentrantLock getLock() {
+        return lock;
     }
 
     public ServiceName getServiceName() {

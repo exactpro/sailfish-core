@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -148,7 +149,9 @@ public class AML {
     {
         this.matrix = matrix;
 
+        Map<String, String> definedServiceNames = AMLBlockUtility.resolveDefinedServiceNames(matrix.getBlocks(), scriptContext.getEnvironmentName(), environmentManager.getConnectionManager());
         AMLBlockUtility.resolveActionURIs(matrix.getBlocks(), actionManager, environmentManager.getConnectionManager(), scriptContext.getEnvironmentName());
+
         SailfishURI languageURI = AMLBlockUtility.detectLanguage(matrix.getBlocks(), languageManager.getLanguageURIs(), amlSettings.getLanguageURI(), actionManager);
 
         onDetermineLanguage(languageURI);
@@ -169,16 +172,17 @@ public class AML {
 
         try {
             codeGen.init(workspaceDispatcher,
-                         adapterManager,
-                         environmentManager,
-                         dictionaryManager,
-                         staticServiceManager,
-                         actionManager,
-                         utilityManager,
-                         scriptContext,
-                         amlSettings,
-                         progressListeners,
-                         compilerClassPath);
+                    adapterManager,
+                    environmentManager,
+                    dictionaryManager,
+                    staticServiceManager,
+                    actionManager,
+                    utilityManager,
+                    scriptContext,
+                    amlSettings,
+                    progressListeners,
+                    compilerClassPath,
+                    definedServiceNames);
 
             for(IPreprocessor preprocessor : amlSettings.getPreprocessors()) {
                 if(!preprocessor.preprocess(scriptContext.getEnvironmentName(), this, matrix, alertCollector)) {
