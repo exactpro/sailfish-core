@@ -15,14 +15,15 @@
  ******************************************************************************/
 
 import { ActionNodeType, ActionNode } from './Action';
+import Exception from './Exception';
 
 export default interface Log {
     actionNodeType: ActionNodeType.LOG;
     timestamp: string;
-    level: string;
+    level: "ERROR" | "WARN" | "DEBUG" | "INFO";
     thread: string;
     message: string;
-    exception?: any;
+    exception?: Exception;
     class: string;
 }
 

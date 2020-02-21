@@ -24,6 +24,10 @@
         padding: 0 5px;
         overflow: hidden;
     }
+
+    &__scroll-container {
+        @include scrollbar;
+    }
 }
 
 .log-card {
@@ -40,7 +44,9 @@
     grid-row-gap: 12px;
 	border: 2px solid transparent;
 	border-color: var(--lc-border-color);
-	color: $logCardPrimaryTextColor;
+    color: $logCardPrimaryTextColor;
+    overflow-x: auto;
+    @include scrollbar;
 
 	&__head {
 		grid-area: lc-head;

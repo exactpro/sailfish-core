@@ -27,7 +27,6 @@ import '../../styles/log.scss'
 
 interface StateProps {
     logsCount: number;
-    testcaseId: string;
 }
 
 interface DispatchProps {
@@ -65,6 +64,7 @@ function LogsListBase({
                     item={renderLog}
                     overscan={3}
                     style={{height: '100%'}}
+                    className="logs__scroll-container"
                 />
             </div>
         </div>
@@ -74,7 +74,6 @@ function LogsListBase({
 const LogsList = connect(
     (state: AppState): StateProps => ({
         logsCount: getLogsCount(state),
-        testcaseId: state.selected.testCase.id,
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         loadLogs: () => dispatch(loadLogs()),

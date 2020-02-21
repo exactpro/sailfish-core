@@ -50,7 +50,7 @@ function LogCard({ log }: LogCardProps){
 					exception && 
 						<>
 							<div className="log-card__exception">Exception</div>
-							<div className="log-card__exception-val">{exception}</div>
+							<div className="log-card__exception-val">{exception.class}</div>
 						</>
 				}
 			</div>
