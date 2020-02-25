@@ -17,10 +17,9 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { clearSearch, nextSearchResult, prevSearchResult } from '../../actions/actionCreators';
+import { clearSearch, nextSearchResult, prevSearchResult, setSearchTokens } from '../../actions/actionCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
-import { performSearch } from '../../thunks/search';
 import '../../styles/search.scss';
 import SearchResult from '../../helpers/search/SearchResult';
 import KeyCodes from "../../util/KeyCodes";
@@ -345,7 +344,7 @@ const SearchInput = connect(
         searchResults: state.selected.search.results
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        updateSearchTokens: searchTokens => dispatch(performSearch(searchTokens)),
+        updateSearchTokens: searchTokens => dispatch(setSearchTokens(searchTokens)),
         nextSearchResult: () => dispatch(nextSearchResult()),
         prevSearchResult: () => dispatch(prevSearchResult()),
         clear: () => dispatch(clearSearch())

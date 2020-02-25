@@ -31,13 +31,15 @@ import { initLiveUpdateEventSource } from './eventSources/liveUpdate';
 import LiveUpdateService from '../helpers/files/LiveUpdateService';
 import ThunkExtraArgument from '../models/ThunkExtraArgument';
 import initBrowserHistoryEventSource from './eventSources/browserHistory';
+import searchAutorun from "../middleware/autorun/searchAutorun";
 
 export function createAppStore() {
     const liveUpdateService = new LiveUpdateService(), 
         thunkExtra: ThunkExtraArgument = { liveUpdateService },
         middleware = [
             thunk.withExtraArgument(thunkExtra),
-            urlHandler
+            urlHandler,
+            searchAutorun
         ];
 
     const store = createStore<AppState, StateActionType, {}, {}>(
@@ -54,8 +56,6 @@ export function createAppStore() {
 
     initLiveUpdateEventSource(store, liveUpdateService);
     initBrowserHistoryEventSource(store);
-
-    window['REDUX_STORE'] = store;
 
     return store;
 }

@@ -22,6 +22,7 @@ import Link from './Link';
 import UserTable from "./UserTable";
 import Message from './Message';
 import Log from './Log';
+import KnownBug from "./KnownBug";
 
 export enum ActionNodeType {
     ACTION = "action",
@@ -35,7 +36,7 @@ export enum ActionNodeType {
     MESSAGE = "message"
 }
 
-export type ActionNode = Action | UserMessage | Verification | Link | UserTable | Message | Log;
+export type ActionNode = Action | UserMessage | Verification | Link | UserTable | Message | Log | KnownBug;
 
 export default interface Action {
     id?: number;

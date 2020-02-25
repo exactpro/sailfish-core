@@ -17,7 +17,7 @@
 import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
-import Action, { isAction, ActionNodeType } from '../../models/Action';
+import Action, { isAction, ActionNodeType, ActionNode } from '../../models/Action';
 import { keyForMessage, keyForAction, keyForActionParameter, keyForVerification } from '../keys';
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
@@ -37,17 +37,22 @@ export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'c
     // we need to ignore all fields besides 'name' in parent nodes because it doesn't render
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 
-export async function findAll(tokens: ReadonlyArray<SearchToken>, testCase: TestCase): Promise<SearchResult> {
+interface SearchContent {
+    actions: ActionNode[];
+    messages: Message[];
+}
+
+export async function findAll(tokens: ReadonlyArray<SearchToken>, content: SearchContent): Promise<SearchResult> {
     if (!tokens) {
-        return null;
+        return new SearchResult();
     }
 
-    const filteredActions = testCase.actions.filter(
+    const filteredActions = content.actions.filter(
         actionNode => isAction(actionNode) && !isCheckpointAction(actionNode)
     ) as Action[];
 
     const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, tokens));
-    const messageResults = await asyncFlatMap(testCase.messages, item => findAllInMessage(item, tokens));
+    const messageResults = await asyncFlatMap(content.messages, item => findAllInMessage(item, tokens));
 
     return new SearchResult(actionResults.concat(messageResults));
 }

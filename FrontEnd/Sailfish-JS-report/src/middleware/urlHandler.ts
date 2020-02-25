@@ -38,12 +38,12 @@ export const urlHandler: Middleware<never, AppState> = store => next => (action:
         result = next(action),
         nextState = store.getState();
 
-    hadnleStateUpdate(prevState, nextState, action);
+    handleStateUpdate(prevState, nextState, action);
 
     return result;
-}
+};
 
-function hadnleStateUpdate(prevState: AppState, nextState: AppState, action: StateAction) {
+function handleStateUpdate(prevState: AppState, nextState: AppState, action: StateAction) {
     if (prevState.selected.actionsId == nextState.selected.actionsId &&
         prevState.selected.messagesId == nextState.selected.messagesId &&
         prevState.selected.testCase == nextState.selected.testCase) {

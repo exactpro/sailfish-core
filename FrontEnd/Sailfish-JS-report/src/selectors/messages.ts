@@ -20,8 +20,11 @@ import { getFilterBlocks, getFilterResults, getIsFilterTransparent, getIsMessage
 import { keyForMessage } from "../helpers/keys";
 import { isCheckpointMessage, isRejected } from "../helpers/messageType";
 import FilterType from "../models/filter/FilterType";
+import Message from "../models/Message";
 
-export const getMessages = (state: AppState) => state.selected.testCase.messages;
+const EMPTY_MESSAGES_ARRAY = new Array<Message>();
+
+export const getMessages = (state: AppState) => state.selected.testCase?.messages ?? EMPTY_MESSAGES_ARRAY;
 
 export const getMessagesIds = createSelector(
     [getMessages],

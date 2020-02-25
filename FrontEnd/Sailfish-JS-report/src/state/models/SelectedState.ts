@@ -21,7 +21,7 @@ import SearchState from "./SearchState";
 
 export default interface SelectedState {
     selectedTestCaseId: string;
-    testCase: TestCase;
+    testCase: TestCase | null;
     actionsId: number[];
     messagesId: number[];
     verificationId: number;

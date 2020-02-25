@@ -16,7 +16,7 @@
 
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
-import { isAction } from "../models/Action";
+import { ActionNode, isAction } from "../models/Action";
 import { keyForAction } from "../helpers/keys";
 import { getFilterBlocks, getFilterResults, getIsFilterApplied, getIsFilterTransparent } from "./filter";
 import FilterType from "../models/filter/FilterType";
@@ -24,7 +24,9 @@ import { getCheckpointActions as filterCheckpointsActions } from "../helpers/che
 import { isCheckpointAction, removeNonexistingRelatedMessages } from "../helpers/action";
 import { getMessagesIds } from './messages';
 
-export const getActions = (state: AppState) => state.selected.testCase.actions;
+const EMPTY_ACTIONS_ARRAY = new Array<ActionNode>();
+
+export const getActions = (state: AppState) => state.selected.testCase?.actions ?? EMPTY_ACTIONS_ARRAY;
 
 export const getActionsWithoutNonexistingRelatedMessages = createSelector(
     [getActions, getMessagesIds],
