@@ -56,11 +56,6 @@ class LeftPanelBase extends React.Component<Props> {
     render() {
         const { panel, isCheckpointsEnabled, statusEnabled, currentCheckpointHandler } = this.props;
 
-        const cpRootClass = createStyleSelector(
-                "layout-control",
-                isCheckpointsEnabled ? null : "disabled"
-            );
-
         return (
             <div className="layout-panel">
                 <div className="layout-panel__controls">
@@ -133,12 +128,16 @@ class LeftPanelBase extends React.Component<Props> {
 }
 
 export const LeftPanel = connect(
-    (state: AppState) => ({
-        panel: state.view.leftPanel,
-        selectedCheckpointId: state.selected.checkpointActionId,
-        checkpointActions: getCheckpointActions(state),
-        statusEnabled: !!state.selected.testCase.status.cause
-    }),
+    (state: AppState) => {
+        const isActionsEmpty = !(state.selected.testCase.actions && state.selected.testCase.actions.length > 0)
+        return ({
+            selectedCheckpointId: state.selected.checkpointActionId,
+            checkpointActions: getCheckpointActions(state),
+            statusEnabled: !!state.selected.testCase.status.cause,
+            isActionsEmpty: isActionsEmpty,
+            panel: state.view.leftPanel == Panel.Actions && isActionsEmpty? Panel.Status: state.view.leftPanel
+        })
+    },
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),
         setSelectedCheckpoint: (checkpointAciton: Action) => dispatch(selectCheckpointAction(checkpointAciton))
