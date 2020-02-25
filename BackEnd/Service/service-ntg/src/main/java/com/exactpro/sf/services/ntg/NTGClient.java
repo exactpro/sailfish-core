@@ -115,8 +115,10 @@ public final class NTGClient extends AbstractMINATCPService {
     protected void internalStart() throws Exception {
         super.internalStart();
         connect();
+    }
 
-        if(getSettings().isDoLoginOnStart()) {
+    private void autoLogin() throws InterruptedException {
+        if (getSettings().isDoLoginOnStart()) {
             login();
 
             WaitLogin waitLogin = new WaitLogin();
@@ -220,6 +222,8 @@ public final class NTGClient extends AbstractMINATCPService {
         super.postConnect();
         updateState(NTGClientState.SessionCreated);
         restartDisconnectTimer();
+
+        autoLogin();
     }
 
     private void updateState(NTGClientState newState) {
