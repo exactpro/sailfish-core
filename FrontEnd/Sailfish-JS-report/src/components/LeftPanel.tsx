@@ -62,14 +62,16 @@ class LeftPanelBase extends React.Component<Props> {
                     <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.ACTIONS}
-                            onClick={() => this.selectPanel(Panel.ACTIONS)}
-                            text="Actions" />
+                            onClick={() => this.selectPanel(Panel.ACTIONS)}>
+                                Actions
+                        </ToggleButton>
                         <ToggleButton
                             isToggled={panel == Panel.STATUS}
                             isDisabled={!statusEnabled}
                             onClick={statusEnabled ? (() => this.selectPanel(Panel.STATUS)) : undefined}
-                            text="Status" 
-                            title={statusEnabled ? null : "No status info"}/>
+                            title={statusEnabled ? null : "No status info"}>
+                                Status
+                        </ToggleButton>
                     </div>
                     {
                         isCheckpointsEnabled ? (

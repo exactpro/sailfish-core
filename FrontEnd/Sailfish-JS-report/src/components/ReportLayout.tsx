@@ -150,13 +150,15 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                 <ToggleButton
                                     textClass="report-summary__button_text"
                                     isToggled={this.state.panel == Panel.ReportSummary}
-                                    onClick={changePanel(Panel.ReportSummary)}
-                                    text="Report Summary"/>
+                                    onClick={changePanel(Panel.ReportSummary)}>
+                                        Report Summary
+                                </ToggleButton>
                                 <ToggleButton
                                     textClass="report-summary__button_text"
                                     isToggled={this.state.panel == Panel.RunInfo}
-                                    onClick={changePanel(Panel.RunInfo)}
-                                    text="Run Information"/>
+                                    onClick={changePanel(Panel.RunInfo)}>
+                                        Run Information
+                                </ToggleButton>
                             </div>
                             {
                                 this.getPanel()

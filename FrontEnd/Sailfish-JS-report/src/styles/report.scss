@@ -268,6 +268,31 @@
     }
 }
 
+.log-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    &__chip {
+        margin-left: 12px;
+        border-radius: 5px;
+        width: 12px;
+        height: 12px;
+
+        &.error {
+            background: #E23636;
+        }
+
+        &.warning {
+            background: #F57A3D;
+        }
+
+        &.hiden {
+            display: none;
+        }
+    }
+}
+
 .tc-card {
     @include status-card-with-running;
 

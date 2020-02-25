@@ -88,7 +88,9 @@ export function createTestCase(id: string = '0', actions: ActionNode[] = [], mes
         hash: 0,
         status: { status },
         startTime: new Date().toString(),
-        finishTime: new Date().toString()
+        finishTime: new Date().toString(),
+        hasErrorLogs: false,
+        hasWarnLogs: false
     }
 }
 

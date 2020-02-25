@@ -595,8 +595,15 @@ public class JsonReport implements IScriptReport {
 
     public void createLogTable(List<String> header, List<LoggerRow> rows) {
         assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
+        TestCase testCase = context.getFirstParentNode(TestCase.class);
+        List<LogEntry> entries = rows.stream().map(LogEntry::new).collect(Collectors.toList());
+        Set<String> levels = entries.stream().map(LogEntry::getLevel).collect(Collectors.toSet());
+        testCase.setHasErrorLogs(levels.contains("ERROR"));
+        testCase.setHasWarnLogs(levels.contains("WARN"));
 
-        rows.stream().map(LogEntry::new).forEachOrdered(jsonpTestcaseWriter::write);
+        exportToFile(testCase, testCase.getName(), false);
+        jsonpTestcaseWriter.updateTestCaseFile(testCase);
+        entries.forEach(jsonpTestcaseWriter::write);
     }
 
     public void setOutcomes(OutcomeCollector outcomes) {

@@ -19,7 +19,6 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode
 import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonpChunkedDataWriter
 import com.exactpro.sf.scriptrunner.impl.jsonreport.helpers.WorkspaceNode
-import java.nio.file.Path
 import java.time.Instant
 
 class JsonpTestcase(
@@ -45,6 +44,8 @@ class JsonpTestcase(
     val description: String? = testCase.description
     val status: Status? = testCase.status
     val bugs: Collection<IJsonReportNode> = testCase.bugTree
+    val hasErrorLogs: Boolean = testCase.hasErrorLogs()
+    val hasWarnLogs: Boolean = testCase.hasWarnLogs()
 
     val indexFiles: Map<String, String> = dataWriters.asSequence().associate {
         it.key.simpleName.toLowerCase() to reportRoot.toAbsolutePath().relativize(it.value.indexFile.toAbsolutePath()).toString()

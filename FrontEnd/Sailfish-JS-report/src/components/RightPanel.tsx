@@ -31,7 +31,7 @@ import {
     togglePredictions,
     uglifyAllMessages
 } from '../actions/actionCreators';
-import { createStyleSelector, createTriStateControlClassName } from '../helpers/styleCreators';
+import { createStyleSelector, createTriStateControlClassName, createBemElement } from '../helpers/styleCreators';
 import { isAction } from "../models/Action";
 import { KnownBugPanel } from "./knownbugs/KnownBugPanel";
 import { StatusType } from '../models/Status';
@@ -51,6 +51,8 @@ interface StateProps {
     hasKnownBugs: boolean;
     beautifiedMessagesEnabled: boolean;
     hasLogs: boolean;
+    hasErrorLogs: boolean;
+    hasWarningLogs: boolean;
 }
 
 interface DispatchProps {
@@ -114,9 +116,12 @@ class RightPanelBase extends React.Component<Props, State> {
         const {
             panel, rejectedMessagesEnabled, adminMessages, adminMessagesEnabled, adminEnabledHandler, selectCurrentRejectedMessage,
             predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler, hasLogs, hasKnownBugs,
+            hasErrorLogs, hasWarningLogs
         } = this.props;
 
         const adminControlEnabled = adminMessages.length != 0;
+
+        const logChipClassName = createBemElement('log-button', 'chip', hasErrorLogs? 'error': hasWarningLogs? 'warning': 'hiden')
 
         const adminRootClass = createTriStateControlClassName("layout-control", adminMessagesEnabled, adminControlEnabled),
             adminIconClass = createTriStateControlClassName("layout-control__icon admin", adminMessagesEnabled, adminControlEnabled),
@@ -137,18 +142,24 @@ class RightPanelBase extends React.Component<Props, State> {
                     <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.MESSAGES}
-                            onClick={() => this.selectPanel(Panel.MESSAGES)}
-                            text="Messages"/>
+                            onClick={() => this.selectPanel(Panel.MESSAGES)}>
+                                Messages
+                        </ToggleButton>
                         <ToggleButton
                             isToggled={panel == Panel.KNOWN_BUGS}
                             isDisabled={!hasKnownBugs}
-                            onClick={() => this.selectPanel(Panel.KNOWN_BUGS)}
-                            text="Known bugs"/>
+                            onClick={() => this.selectPanel(Panel.KNOWN_BUGS)}>
+                                Known bugs
+                        </ToggleButton>
                         <ToggleButton
                             isDisabled={!hasLogs}
                             isToggled={panel == Panel.LOGS}
-                            onClick={() => this.selectPanel(Panel.LOGS)}
-                            text="Logs" />
+                            onClick={() => this.selectPanel(Panel.LOGS)}>
+                                <div className="log-button">
+                                    <p>Logs</p>
+                                    <div className={logChipClassName}/>
+                                </div>
+                        </ToggleButton>
                     </div>
                     {
                         beautifiedMessagesEnabled ? (
@@ -272,7 +283,9 @@ export const RightPanel = connect(
 
         predictionsEnabled: state.machineLearning.predictionsEnabled,
         hasKnownBugs: state.selected.testCase.bugs.length > 0,
-        hasLogs: state.selected.testCase.files.logentry.count > 0
+        hasLogs: state.selected.testCase.files.logentry.count > 0,
+        hasErrorLogs: state.selected.testCase.hasErrorLogs,
+        hasWarningLogs: state.selected.testCase.hasWarnLogs
     }),
     (dispatch) => ({
         panelSelectHandler: (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => dispatch(setRightPane(panel)),

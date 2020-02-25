@@ -18,17 +18,26 @@ import * as React from 'react';
 import '../styles/buttons.scss';
 import { createStyleSelector } from '../helpers/styleCreators';
 
+type ToggleButtonContent = string | React.ReactNode
+
 interface Props {
     onClick?: Function;
     isToggled?: boolean;
     isDisabled?: boolean;
-    text: string;
     title?: string;
     theme?: string;
     textClass?: string;
+    children: ToggleButtonContent;
 }
 
-export function ToggleButton({ onClick = () => {}, isToggled = false, text, textClass, theme = 'default', isDisabled = false, title = '' }: Props) {
+export function ToggleButton({ onClick = () => { },
+    isToggled = false,
+    theme = 'default',
+    isDisabled = false,
+    title = '',
+    textClass,
+    children: content }: Props) {
+
     const className = createStyleSelector(
         "toggle-button", 
         theme, 
@@ -36,10 +45,18 @@ export function ToggleButton({ onClick = () => {}, isToggled = false, text, text
         isToggled ? "toggled" : null
     );
 
+    if (textClass) {
+        content = (
+            <span className={textClass}>
+                {content}
+            </span>
+        )
+    }
+
     return (
-        <div className={className} onClick={() => !isDisabled && onClick(text)} title={title}>
+        <div className={className} onClick={() => !isDisabled && onClick(content)} title={title}>
             <div className="toggle-button__title">
-                <p className={textClass}>{text}</p>
+                {content}
             </div>
         </div>
     )

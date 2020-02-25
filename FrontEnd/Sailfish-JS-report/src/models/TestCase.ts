@@ -43,6 +43,8 @@ export default interface TestCase {
     indexFiles?: TestCaseIndexFiles;
     files?: TestCaseFiles;
     lastUpdate?: string;
+    hasErrorLogs: boolean;
+    hasWarnLogs: boolean;
 }
 
 interface TestCaseIndexFiles {

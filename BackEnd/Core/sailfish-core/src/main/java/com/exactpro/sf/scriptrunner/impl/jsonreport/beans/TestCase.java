@@ -47,6 +47,8 @@ public class TestCase implements IJsonReportNode {
     private int hash;
     private String description;
     private Status status;
+    private boolean hasErrorLogs;
+    private boolean hasWarnLogs;
 
     @JsonIgnore private final BugCategory bugRoot;
     @JsonIgnore private Map<Bug, List<String>> bugToCategoryMap;
@@ -201,5 +203,21 @@ public class TestCase implements IJsonReportNode {
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
+    }
+
+    public boolean hasErrorLogs() {
+        return hasErrorLogs;
+    }
+
+    public void setHasErrorLogs(boolean hasErrorLogs) {
+        this.hasErrorLogs = hasErrorLogs;
+    }
+
+    public boolean hasWarnLogs() {
+        return hasWarnLogs;
+    }
+
+    public void setHasWarnLogs(boolean hasWarnLogs) {
+        this.hasWarnLogs = hasWarnLogs;
     }
 }
