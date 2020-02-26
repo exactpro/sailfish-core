@@ -309,9 +309,6 @@ public class SFLocalContext implements ISFContext {
         this.statisticsService = new StatisticsService();
         embeddedServices.add(statisticsService);
 
-        this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor);
-        embeddedServices.add(updateService);
-
         PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
         MessageStorageLoader messageStorageLoader = new MessageStorageLoader();
 
@@ -392,6 +389,9 @@ public class SFLocalContext implements ISFContext {
 		this.pluginToPreprocessors = preprocessorLoader.getPluginToPreprocessorsMap();
 		this.pluginVersions = pluginLoader.getPluginVersions();
         this.pluginClassLoaders = loadInfo.getClassLoaders();
+
+        this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor, pluginVersions);
+        embeddedServices.add(updateService);
 
         this.machineLearningService = new MachineLearningService(workspaceDispatcher, dictionaryManager, dataManager, pluginClassLoaders);
         embeddedServices.add(machineLearningService);

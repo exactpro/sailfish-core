@@ -50,4 +50,19 @@ public interface IVersion {
     }
 
     String getArtifactName();
+
+    /**
+     * The method returns {@link String} with artifactVersion that is using to identify the artifact from Deployer response
+     * @return artifact version in format major.minor.maintenance.build
+     */
+    default String getArtifactVersion() {
+        //TODO probably, we should remove that method when the Sailfish stops using deployer by itself
+        return String.valueOf(getMajor() == -1 ? 0 : getMajor())
+                + '.'
+                + (getMinor() == -1 ? 0 : getMinor())
+                + '.'
+                + (getMaintenance() == -1 ? 0 : getMaintenance())
+                + '.'
+                + (getBuild() == -1 ? 0 : getBuild());
+    }
 }

@@ -37,7 +37,7 @@ import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
 import com.exactpro.sf.embedded.updater.UpdateService;
-import com.exactpro.sf.embedded.updater.UpdateService.ComponentUpdateInfo;
+import com.exactpro.sf.embedded.updater.ComponentUpdateInfo;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
@@ -65,9 +65,7 @@ public class UpdaterConfigBean implements Serializable {
         this.settings = context.getUpdateService().getSettings().clone();
         from = parseTime(settings.getFromTime());
         to = parseTime(settings.getToTime());
-        this.currentVersions = context.getPluginVersions().stream()
-                .map(ComponentInfo::new)
-                .collect(Collectors.toList());
+        this.currentVersions = currentVersions();
     }
 
     private Date parseTime(String timeValue) {
@@ -187,13 +185,47 @@ public class UpdaterConfigBean implements Serializable {
     private void fillNewVersions() {
         UpdateService updateService = BeanUtil.getSfContext().getUpdateService();
         if (updateService.isConnected() && updateService.isUpdateRequire()) {
-            for(ComponentUpdateInfo componentUpdateInfo : updateService.getComponentUpdateInfos()) {
-                currentVersions.stream()
-                        .filter(componentInfo -> componentInfo.getName().equals(componentUpdateInfo.getName()))
-                        .findFirst()
-                        .ifPresent(componentInfo -> componentInfo.setNewVersion(componentUpdateInfo.getVersion()));
-            }
+            currentVersions = currentVersions();
+            updateNewVersions(updateService, currentVersions);
+
+            processNewComponents(updateService, currentVersions);
+
+            markRemovedComponents(updateService, currentVersions);
+
         }
+    }
+
+    private void markRemovedComponents(UpdateService updateService, List<ComponentInfo> currentVersions) {
+        for (ComponentUpdateInfo removedComponent : updateService.getRemovedComponents()) {
+            currentVersions.stream()
+                    .filter(info -> info.getName().equals(removedComponent.getName()))
+                    .findFirst()
+                    .ifPresent(info -> info.setRemoved(true));
+        }
+    }
+
+    private void processNewComponents(UpdateService updateService, List<ComponentInfo> currentVersions) {
+        for (ComponentUpdateInfo addedComponent : updateService.getAddedComponents()) {
+            ComponentInfo info = new ComponentInfo(addedComponent.getName(), null);
+            info.setNewVersion(addedComponent.getVersion());
+            info.setAdded(true);
+            currentVersions.add(info);
+        }
+    }
+
+    private void updateNewVersions(UpdateService updateService, List<ComponentInfo> currentVersions) {
+        for(ComponentUpdateInfo componentUpdateInfo : updateService.getComponentUpdateInfos()) {
+            currentVersions.stream()
+                    .filter(componentInfo -> componentInfo.getName().equals(componentUpdateInfo.getName()))
+                    .findFirst()
+                    .ifPresent(componentInfo -> componentInfo.setNewVersion(componentUpdateInfo.getVersion()));
+        }
+    }
+
+    private List<ComponentInfo> currentVersions() {
+        return BeanUtil.getSfContext().getUpdateService().getCurrentComponents().stream()
+                .map(info -> new ComponentInfo(info.getName(), info.getVersion()))
+                .collect(Collectors.toList());
     }
 
     public ServiceStatus getServiceStatus() {
@@ -246,33 +278,34 @@ public class UpdaterConfigBean implements Serializable {
         settings.setToTime(formatTime(to));
     }
 
-    public class ComponentInfo {
+    public static class ComponentInfo {
 
-        private String name;
+        private final String name;
 
-        private String currentVersion;
+        private final String currentVersion;
 
         private String newVersion;
 
+        private boolean removed;
+
+        private boolean added;
+
         public ComponentInfo(IVersion version) {
             this.name = version.getArtifactName();
-            this.currentVersion = version.buildVersion();
+            this.currentVersion = version.getArtifactVersion();
+        }
+
+        public ComponentInfo(String name, String currentVersion) {
+            this.name = name;
+            this.currentVersion = currentVersion;
         }
 
         public String getName() {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getCurrentVersion() {
             return currentVersion;
-        }
-
-        public void setCurrentVersion(String currentVersion) {
-            this.currentVersion = currentVersion;
         }
 
         public String getNewVersion() {
@@ -281,6 +314,22 @@ public class UpdaterConfigBean implements Serializable {
 
         public void setNewVersion(String newVersion) {
             this.newVersion = newVersion;
+        }
+
+        public boolean isRemoved() {
+            return removed;
+        }
+
+        public void setRemoved(boolean removed) {
+            this.removed = removed;
+        }
+
+        public boolean isAdded() {
+            return added;
+        }
+
+        public void setAdded(boolean added) {
+            this.added = added;
         }
     }
 }

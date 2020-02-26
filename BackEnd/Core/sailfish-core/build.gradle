@@ -107,6 +107,7 @@ dependencies {
     //compile 'com.sun.mail:javax.mail:1.5.2' ???
 
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.7"
 
     compile 'org.jamon:jamon-runtime:2.4.1'
 
