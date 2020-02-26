@@ -15,24 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty.handlers;
 
-import java.util.function.BiConsumer;
+import com.exactpro.sf.common.messages.IMessage;
 
-import io.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.MessageToByteEncoder;
 
-public class ExceptionInboundHandler extends ChannelInboundHandlerAdapter {
-    
-    private final BiConsumer<Channel, Throwable> onExceptionCaught;
-    
-    public ExceptionInboundHandler(BiConsumer<Channel, Throwable> onExceptionCaught) {
-        this.onExceptionCaught = onExceptionCaught;
-    }
+public class RawMessageOutboundHandler extends MessageToByteEncoder<IMessage> {
     
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        onExceptionCaught.accept(ctx.channel(), cause);
-        ctx.fireExceptionCaught(cause);
+    protected void encode(ChannelHandlerContext ctx, IMessage msg, ByteBuf out) throws Exception {
+        out.writeBytes(msg.getMetaData().getRawMessage());
     }
 }
-

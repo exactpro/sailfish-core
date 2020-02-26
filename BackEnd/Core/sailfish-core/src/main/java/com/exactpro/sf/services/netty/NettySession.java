@@ -23,10 +23,17 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.netty.sessions.AbstractNettySession;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
+
+/**
+ * @deprecated Please use {@link AbstractNettySession}
+ */
+@Deprecated
 public class NettySession implements ISession {
 
 	protected final Logger logger = LoggerFactory
@@ -123,5 +130,8 @@ public class NettySession implements ISession {
 	public NettyClientService getClient() {
 		return client;
 	}
-
+    
+    public void onExceptionCaught(Channel channel, Throwable cause) {
+        onExceptionCaught(cause);
+    }
 }

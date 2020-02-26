@@ -67,6 +67,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.util.internal.TypeParameterMatcher;
 
+/**
+ * @deprecated Please use {@link AbstractNettyClient}
+ */
+@Deprecated
 public abstract class NettyClientService implements IInitiatorService {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
@@ -213,7 +217,7 @@ public abstract class NettyClientService implements IInitiatorService {
                     }
                     // add exception handler for inbound messages
                     // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
-                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
+                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession::onExceptionCaught));
 
                 }
             });

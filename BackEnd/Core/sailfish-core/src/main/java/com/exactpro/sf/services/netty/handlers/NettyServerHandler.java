@@ -15,24 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty.handlers;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class ExceptionInboundHandler extends ChannelInboundHandlerAdapter {
+/**Handles client initiated disconnection.*/
+public class NettyServerHandler extends ChannelDuplexHandler {
+    private final Consumer<Channel> stopClientChannel;
     
-    private final BiConsumer<Channel, Throwable> onExceptionCaught;
-    
-    public ExceptionInboundHandler(BiConsumer<Channel, Throwable> onExceptionCaught) {
-        this.onExceptionCaught = onExceptionCaught;
+    public NettyServerHandler(Consumer<Channel> stopClientChannel) {
+        this.stopClientChannel = stopClientChannel;
     }
     
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        onExceptionCaught.accept(ctx.channel(), cause);
-        ctx.fireExceptionCaught(cause);
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        stopClientChannel.accept(ctx.channel());
     }
 }
-

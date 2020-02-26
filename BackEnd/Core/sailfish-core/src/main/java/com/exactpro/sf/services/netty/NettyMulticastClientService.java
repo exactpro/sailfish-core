@@ -42,6 +42,10 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
+/**
+ * @deprecated Please use {@link AbstractNettyMulticastClient}
+ */
+@Deprecated
 public abstract class NettyMulticastClientService extends NettyClientService {
 
 	//
@@ -118,7 +122,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
                     handlers.forEach((key, value) -> ch.pipeline().addLast(key, value));
                     // add exception handler for inbound messages
                     // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
-                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
+                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession::onExceptionCaught));
 
                 }
             });

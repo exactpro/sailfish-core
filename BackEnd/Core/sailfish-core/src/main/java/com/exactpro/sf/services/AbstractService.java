@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
-import java.util.function.Predicate;
 
 public abstract class AbstractService implements IService {
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
 
     protected IServiceContext serviceContext;
     protected ServiceName serviceName;
@@ -73,7 +74,7 @@ public abstract class AbstractService implements IService {
 
     protected void initDictionaryData() {}
 
-    protected abstract void internalInit() throws Exception;
+    protected void internalInit() throws Exception {}
 
     protected void initCleanup() {}
 
@@ -94,7 +95,7 @@ public abstract class AbstractService implements IService {
         }
     }
 
-    protected abstract void internalStart() throws Exception;
+    protected void internalStart() throws Exception {}
 
     protected void startCleanup() {}
 

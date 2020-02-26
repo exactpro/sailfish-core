@@ -13,26 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.services.netty.handlers;
+package com.exactpro.sf.services.netty;
 
-import java.util.function.BiConsumer;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.services.AbstractServiceSettings;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-
-public class ExceptionInboundHandler extends ChannelInboundHandlerAdapter {
+public abstract class NettyServerSettings extends AbstractServiceSettings {
     
-    private final BiConsumer<Channel, Throwable> onExceptionCaught;
+    @Description("The server binds to this port")
+    private int port;
     
-    public ExceptionInboundHandler(BiConsumer<Channel, Throwable> onExceptionCaught) {
-        this.onExceptionCaught = onExceptionCaught;
+    @Description("Dictionary name")
+    protected SailfishURI dictionaryName;
+    
+    @Override
+    public SailfishURI getDictionaryName() {
+        return dictionaryName;
     }
     
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        onExceptionCaught.accept(ctx.channel(), cause);
-        ctx.fireExceptionCaught(cause);
+    public void setDictionaryName(SailfishURI dictionaryName) {
+        this.dictionaryName = dictionaryName;
+    }
+    
+    public int getPort() {
+        return port;
+    }
+    
+    public void setPort(int port) {
+        this.port = port;
     }
 }
-
