@@ -24,8 +24,8 @@ import org.junit.Test;
 
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactpro.sf.util.AbstractTest;
 
 public class TestScriptRunner extends AbstractTest

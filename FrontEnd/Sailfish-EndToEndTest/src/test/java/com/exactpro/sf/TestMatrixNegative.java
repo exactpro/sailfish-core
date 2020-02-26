@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
 
@@ -428,7 +429,7 @@ public class TestMatrixNegative extends TestMatrix {
                         .getId();
 
                 XmlTestscriptRunDescription xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-                Assert.assertEquals("Wrong status before running matrix: " + xmlDescription.getScriptState(), SCRIPT_STATE_PENDING,
+                Assert.assertEquals("Wrong status before running matrix: " + xmlDescription.getScriptState(), ScriptState.PENDING,
                         xmlDescription.getScriptState());
                 sfapi.compileTestScriptRun(testScriptId);
                 try {
@@ -441,7 +442,7 @@ public class TestMatrixNegative extends TestMatrix {
                     throw new APICallException(e);
                 }
                 xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-                Assert.assertEquals("Wrong status after running matrix: " + xmlDescription.getScriptState(), SCRIPT_STATE_FINISHED,
+                Assert.assertEquals("Wrong status after running matrix: " + xmlDescription.getScriptState(), ScriptState.FINISHED,
                         xmlDescription.getScriptState());
                 runs.add(testScriptId);
                 testScriptRunDescription(false, sfapi, testScriptId);

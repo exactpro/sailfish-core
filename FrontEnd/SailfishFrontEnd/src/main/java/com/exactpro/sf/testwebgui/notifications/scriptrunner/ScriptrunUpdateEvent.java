@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.notifications.scriptrunner;
 
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactprosystems.webchannels.AbstractUpdateEvent;
 
 public class ScriptrunUpdateEvent implements AbstractUpdateEvent {

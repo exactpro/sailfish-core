@@ -44,6 +44,8 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixDescription;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestCaseDescription;
@@ -61,14 +63,6 @@ public class TestMatrix extends AbstractSFTest {
 
     public static final String STATUS_PASSED = "PASSED";
     public static final String STATUS_FAILED = "FAILED";
-    public static final String SCRIPT_STATE_FINISHED = "FINISHED";
-    public static final String SCRIPT_STATE_PENDING = "PENDING";
-    public static final String SCRIPT_STATE_CANCELED = "CANCELED";
-    public static final String SCRIPT_STATE_RUNNING = "RUNNING";
-    public static final String SCRIPT_STATE_READY = "READY";
-    public static final String SCRIPT_STATUS_INTERRUPTED = "INTERRUPTED";
-    public static final String SCRIPT_STATUS_CANCELED = SCRIPT_STATE_CANCELED;
-    public static final String SCRIPT_STATUS_EXECUTED = "EXECUTED";
     public static final String SCRIPT_STATUS_INIT_FAILED = "INIT_FAILED";
     private final static String ENVIRONMENT = "default";
     private static List<ServiceImportResult> importedServices = null;
@@ -206,16 +200,16 @@ public class TestMatrix extends AbstractSFTest {
         XmlTestscriptRunDescription xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
         if (valid) {
             List<XmlTestCaseDescription> xmlCases = xmlDescription.getTestcases();
-            Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", SCRIPT_STATUS_EXECUTED, xmlDescription.getScriptStatus());
-            Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", SCRIPT_STATE_FINISHED, xmlDescription.getScriptState());
+            Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", ScriptStatus.EXECUTED, xmlDescription.getScriptStatus());
+            Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", ScriptState.FINISHED, xmlDescription.getScriptState());
             Assert.assertEquals("Wrong Passed value in TestScriptRun.", 1, xmlDescription.getPassed());
             Assert.assertEquals("Wrong Failed value in TestScriptRun.", 0, xmlDescription.getFailed());
             for (XmlTestCaseDescription xCase : xmlCases) {
                 Assert.assertEquals(STATUS_PASSED, xCase.getStatus());
             }
         } else {
-            Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", SCRIPT_STATUS_INIT_FAILED, xmlDescription.getScriptStatus());
-            Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", SCRIPT_STATE_FINISHED, xmlDescription.getScriptState());
+            Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", ScriptStatus.INIT_FAILED, xmlDescription.getScriptStatus());
+            Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", ScriptState.FINISHED, xmlDescription.getScriptState());
             Assert.assertEquals("Wrong Passed value in TestScriptRun.", 0, xmlDescription.getPassed());
             Assert.assertEquals("Wrong Failed value in TestScriptRun.", 0, xmlDescription.getFailed());
         }
@@ -314,8 +308,8 @@ public class TestMatrix extends AbstractSFTest {
             throw new APICallException(e);
         }
         XmlTestscriptRunDescription xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-        Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", SCRIPT_STATUS_INTERRUPTED, xmlDescription.getScriptStatus());
-        Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", SCRIPT_STATE_FINISHED, xmlDescription.getScriptState());
+        Assert.assertEquals("Wrong ScriptStatus value in TestScriptRun.", ScriptStatus.INTERRUPTED, xmlDescription.getScriptStatus());
+        Assert.assertEquals("Wrong ScriptState value in TestScriptRun.", ScriptState.FINISHED, xmlDescription.getScriptState());
         Assert.assertEquals("Wrong Passed value in TestScriptRun.", 0, xmlDescription.getPassed());
 
         if(xmlDescription.isLocked()){

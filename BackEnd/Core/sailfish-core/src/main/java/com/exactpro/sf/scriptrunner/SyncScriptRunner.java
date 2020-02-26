@@ -30,12 +30,12 @@ import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.IEnvironmentManager;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.DefaultScriptConfig;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.storage.ITestScriptStorage;
 
