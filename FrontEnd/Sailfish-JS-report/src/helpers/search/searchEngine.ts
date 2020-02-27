@@ -27,6 +27,7 @@ import { asyncFlatMap } from '../array';
 import multiTokenSplit  from "./multiTokenSplit";
 import SearchToken from "../../models/search/SearchToken";
 import SearchSplitResult from "../../models/search/SearchSplitResult";
+import SearchContent from "../../models/search/SearchContent";
 
 // list of fields that will be used to search (order is important!)
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -36,11 +37,6 @@ export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'c
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
     // we need to ignore all fields besides 'name' in parent nodes because it doesn't render
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
-
-interface SearchContent {
-    actions: ActionNode[];
-    messages: Message[];
-}
 
 export async function findAll(tokens: ReadonlyArray<SearchToken>, content: SearchContent): Promise<SearchResult> {
     if (!tokens) {

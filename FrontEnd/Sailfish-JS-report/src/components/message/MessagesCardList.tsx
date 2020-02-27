@@ -103,6 +103,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
                             selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
                             rowCount={messagesCount}
                             renderElement={this.renderMessage}
+                            computeItemKey={this.computeKey}
                             scrolledIndex={scrolledIndex}
                         />
                     </StateSaverProvider>
@@ -115,7 +116,11 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
         return (
             <SkeletonedMessageCardListItem index={index} />
         )
-    }
+    };
+
+    private computeKey = (index: number) => {
+        return this.props.messages[index]?.id ?? index;
+    };
 }
 
 export const MessagesCardList = connect(

@@ -50,7 +50,7 @@
     cursor: text;
 
     min-height: 29px;
-    padding: 2px 5px;
+    padding: 2px 5px 0 5px;
 
     &__counter {
         @include unselectable;
@@ -95,7 +95,42 @@
 
     &.active {
         @include card-shadow;
-        cursor: default;
+    }
+}
+
+.search-panel-controls {
+    height: 30px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    border-top: 1px solid #CCCCCC;
+    margin-top: 3px;
+    cursor: default;
+
+    &__checkbox {
+        @include disable-appearance;
+        @include icon(url(../../resources/icons/checkbox-unchecked.svg), 16px, 16px);
+
+        cursor: pointer;
+
+        &:checked {
+            @include icon(url(../../resources/icons/checkbox-checked.svg), 16px, 16px)
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    &__label {
+        @include unselectable;
+
+        padding: 3px 5px 0 3px;
+        font-size: 12px;
+        font-weight: bold;
+        color: $primaryTextColor;
+        cursor: pointer;
     }
 }
 

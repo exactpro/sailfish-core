@@ -104,6 +104,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                             rowCount={actionsCount}
                             ref={this.list}
                             renderElement={this.renderAction}
+                            computeItemKey={this.computeKey}
                             scrolledIndex={scrolledIndex}
                             selectedElements={actionsHeatmap(getActions(actions), selectedActions)}
                         />
@@ -112,9 +113,16 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
             </div>
         )
     }
-    private renderAction = (idx: number): React.ReactElement => {
-        return <SkeletonedActionTree index={idx} />
-    }
+
+    private renderAction = (index: number): React.ReactElement => {
+        return <SkeletonedActionTree index={index} />
+    };
+
+    private computeKey = (index: number): number => {
+        const action = this.props.actions[index];
+
+        return action && isAction(action) ? action.id : index;
+    };
 }
 
 export const ActionsList = connect(

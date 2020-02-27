@@ -14,18 +14,10 @@
  *  limitations under the License.
  ******************************************************************************/
 
-import createAutorunMiddleware from "./autorun";
-import { getSearchContent, getSearchTokens } from "../../selectors/search";
-import { findAll } from "../../helpers/search/searchEngine";
-import { setSearchResults } from "../../actions/actionCreators";
+import Action, { ActionNode } from "../Action";
+import Message from "../Message";
 
-const searchAutorun = createAutorunMiddleware(
-    [getSearchContent, getSearchTokens],
-    async (content, searchTokens) => {
-        const results = await findAll(searchTokens, content);
-
-        return setSearchResults(results);
-    }
-);
-
-export default searchAutorun;
+export default interface SearchContent {
+    actions: ActionNode[];
+    messages: Message[];
+}

@@ -25,6 +25,10 @@ import { mount } from "enzyme";
 import SearchToken from "../../../models/search/SearchToken";
 import KeyCodes from "../../../util/KeyCodes";
 import { timer } from "../../util/timer";
+import * as SearchPanelsControlModule from '../../../components/search/SearchPanelsControl';
+
+// we need to mock this import because SearchPanelControl's Connect wrapper uses redux context
+(SearchPanelsControlModule as any).default = () => null;
 
 describe('[React] <SearchInput/>', () => {
 

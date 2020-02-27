@@ -162,6 +162,16 @@ export const prevSearchResult = () => (<const>{
     type: StateActionTypes.PREV_SEARCH_RESULT
 })
 
+export const setSearchLeftPanelEnabled = (isEnabled: boolean) => (<const>{
+    type: StateActionTypes.SET_SEARCH_LEFT_PANEL_ENABLED,
+    isEnabled
+})
+
+export const setSearchRightPanelEnabled = (isEnabled: boolean) => (<const>{
+    type: StateActionTypes.SET_SEARCH_RIGHT_PANEL_ENABLED,
+    isEnabled
+})
+
 export const clearSearch = () => (<const>{
     type: StateActionTypes.CLEAR_SEARCH
 })

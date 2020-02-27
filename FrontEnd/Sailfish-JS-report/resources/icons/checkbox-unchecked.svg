@@ -1,0 +1,5 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Checkbox off">
+<path id="Exclude" fill-rule="evenodd" clip-rule="evenodd" d="M9 0H71C76.1607 0 80 3.83929 80 9V71C80 76.1607 76.1607 80 71 80H9C3.83929 80 0 76.1607 0 71V9C0 3.83929 3.83929 0 9 0ZM10 72H71C71.5168 72 72 71.5168 72 71V10C72 9.48324 71.5168 9 71 9H10C9.48324 9 9 9.48324 9 10V71C9 71.5168 9.48324 72 10 72Z" fill="#4D4D4D"/>
+</g>
+</svg>

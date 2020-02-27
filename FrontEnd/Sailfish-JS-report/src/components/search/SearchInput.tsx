@@ -28,6 +28,7 @@ import Bubble from "../util/Bubble";
 import { nextCyclicItem, removeByIndex, replaceByIndex } from "../../helpers/array";
 import AutosizeInput from "react-input-autosize";
 import { createBemBlock } from "../../helpers/styleCreators";
+import SearchPanelControl from "./SearchPanelsControl";
 
 export const REACTIVE_SEARCH_DELAY = 500;
 const INPUT_PLACEHOLDER = 'Separate words with a space to find multiple words';
@@ -102,11 +103,13 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { currentIndex, resultsCount, prevSearchResult } = this.props,
+        const { currentIndex, resultsCount, prevSearchResult, nextSearchResult, searchTokens } = this.props,
             { inputValue, isActive } = this.state;
 
-        const searchTokens = this.props.searchTokens.filter(({ isActive }) => !isActive),
-            activeToken = this.props.searchTokens.find(({ isActive }) => isActive);
+        const notActiveTokens = searchTokens.filter(({ isActive }) => !isActive),
+            activeTokens = searchTokens.find(({ isActive }) => isActive);
+
+        const showControls = searchTokens.length > 0;
 
         const wrapperClassName = createBemBlock(
             "search-field-wrapper",
@@ -125,16 +128,20 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
                     {
                         isActive ? (
                             <React.Fragment>
-                                <div className="search-controls">
-                                    <div className="search-controls__prev"
-                                         onClick={prevSearchResult}/>
-                                    <div className="search-controls__next"
-                                         onClick={prevSearchResult}/>
-                                    <div className="search-controls__clear"
-                                         onClick={this.clear}/>
-                                </div>
                                 {
-                                    searchTokens.map(({ color, pattern }, index) => (
+                                    showControls ? (
+                                        <div className="search-controls">
+                                            <div className="search-controls__prev"
+                                                 onClick={prevSearchResult}/>
+                                            <div className="search-controls__next"
+                                                 onClick={nextSearchResult}/>
+                                            <div className="search-controls__clear"
+                                                 onClick={this.clear}/>
+                                        </div>
+                                    ) : null
+                                }
+                                {
+                                    notActiveTokens.map(({ color, pattern }, index) => (
                                         <Bubble
                                             key={index}
                                             className="search-bubble"
@@ -153,19 +160,24 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
                                     inputRef={ref => this.inputElement.current = ref}
                                     inputStyle={
                                         inputValue.length > 0 ? {
-                                            backgroundColor: activeToken?.color ?? this.getNextColor(),
+                                            backgroundColor: activeTokens?.color ?? this.getNextColor(),
                                             color: '#FFF'
                                         } : undefined
                                     }
-                                    placeholder={searchTokens.length < 1 && inputValue.length < 1 ? INPUT_PLACEHOLDER : undefined}
+                                    placeholder={notActiveTokens.length < 1 && inputValue.length < 1 ? INPUT_PLACEHOLDER : undefined}
                                     type="text"
                                     spellCheck={false}
                                     value={inputValue}
                                     onChange={this.inputOnChange}
                                     onKeyDown={this.onKeyDown}/>
-                                <span className="search-field__counter">
-                                    {currentIndex != null ? currentIndex + 1 : 0} of {resultsCount ?? 0}
-                                </span>
+                                {
+                                    showControls ? (
+                                        <span className="search-field__counter">
+                                            {currentIndex != null ? currentIndex + 1 : 0} of {resultsCount ?? 0}
+                                        </span>
+                                    ) : null
+                                }
+                                <SearchPanelControl/>
                             </React.Fragment>
                         ) : (
                             <div className="search-field__icon"/>

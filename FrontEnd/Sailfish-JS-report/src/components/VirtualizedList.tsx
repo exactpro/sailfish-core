@@ -31,6 +31,7 @@ const { Provider, Consumer } = React.createContext({
 
 interface Props {
     renderElement: (idx: number) => React.ReactElement;
+    computeItemKey?: (idx: number) => number;
     rowCount: number;
 
     // for heatmap scrollbar
@@ -91,7 +92,7 @@ export class VirtualizedList extends React.Component<Props, State> {
     }
 
     render() {
-        const { rowCount, selectedElements } = this.props;
+        const { rowCount, selectedElements, computeItemKey } = this.props;
 
         return (
             <Provider value={{ selectedElements, rowCount, rowHeightMap: this.state }}>
@@ -100,6 +101,7 @@ export class VirtualizedList extends React.Component<Props, State> {
                     ref={this.virtuoso}
                     overscan={3}
                     ScrollContainer={ScrollContainer}
+                    computeItemKey={computeItemKey}
                     item={this.itemRenderer} />
             </Provider>
         )

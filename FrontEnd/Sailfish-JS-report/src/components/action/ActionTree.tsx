@@ -135,7 +135,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         this.setState({
             expandTree: mapTree(
                 (expandStatus: ActionExpandStatus) => 
-                    expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
+                    expandStatus.id === actionId ? ({ ...expandStatus, isExpanded: !expandStatus.isExpanded }) : expandStatus,
                 this.state.expandTree
             )
         });

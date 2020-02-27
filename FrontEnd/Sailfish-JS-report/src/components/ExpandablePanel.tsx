@@ -24,7 +24,7 @@ import { stopPropagationHandler } from '../helpers/react';
 
 interface PanelProps {
     isExpanded?: boolean;
-    onExpand?: (isExpanded: boolean) => any;
+    onExpand?: (isExpanded: boolean) => void;
     children: [React.ReactNode | ((onExpand: () => void) => React.ReactNode), React.ReactNode];
 }
 

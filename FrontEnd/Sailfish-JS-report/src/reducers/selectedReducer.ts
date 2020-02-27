@@ -176,6 +176,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
+        case StateActionTypes.SET_SEARCH_RIGHT_PANEL_ENABLED:
+        case StateActionTypes.SET_SEARCH_LEFT_PANEL_ENABLED:
         case StateActionTypes.SET_SEARCH_TOKENS: {
             return {
                 ...state,

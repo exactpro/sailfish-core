@@ -23,6 +23,8 @@ const initialSearchState: SearchState = {
     resultsCount: null,
     index: null,
     shouldScrollToItem: false,
+    leftPanelEnabled: true,
+    rightPanelEnabled: true
 };
 
 export default initialSearchState;

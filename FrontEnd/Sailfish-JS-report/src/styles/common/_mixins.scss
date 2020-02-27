@@ -246,6 +246,13 @@
     user-select: none;
 }
 
+@mixin disable-appearance {
+    -webkit-appearance: none;
+    -khtml-appearance: none;
+    -moz-appearance: none;
+    user-select: none;
+}
+
 @mixin default-table {
 
     table {

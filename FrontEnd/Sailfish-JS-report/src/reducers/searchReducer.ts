@@ -75,5 +75,23 @@ export default function searchReducer(state: SearchState = initialSearchState, s
                 shouldScrollToItem: stateAction.isNeedsScroll
             }
         }
+
+        case StateActionTypes.SET_SEARCH_LEFT_PANEL_ENABLED: {
+            return {
+                ...state,
+                leftPanelEnabled: stateAction.isEnabled
+            }
+        }
+
+        case StateActionTypes.SET_SEARCH_RIGHT_PANEL_ENABLED: {
+            return {
+                ...state,
+                rightPanelEnabled: stateAction.isEnabled
+            }
+        }
+
+        default: {
+            return state;
+        }
     }
 }

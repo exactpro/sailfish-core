@@ -14,5 +14,21 @@
  *  limitations under the License.
  ******************************************************************************/
 import AppState from "../state/models/AppState";
+import { createSelector } from "reselect";
+import { getFilteredActions } from "./actions";
+import { getFilteredMessages } from "./messages";
+import SearchContent from "../models/search/SearchContent";
+
+const EMPTY_ARRAY = [];
 
 export const getSearchTokens = (state: AppState) => state.selected.search.tokens;
+const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanelEnabled;
+const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
+
+export const getSearchContent = createSelector(
+    [getFilteredActions, getFilteredMessages, getLeftPanelEnabled, getRightPanelEnabled],
+    (actions, messages, leftPanelEnabled, rightPanelEnabled): SearchContent => ({
+        actions: leftPanelEnabled ? actions : EMPTY_ARRAY,
+        messages: rightPanelEnabled ? messages : EMPTY_ARRAY
+    })
+);

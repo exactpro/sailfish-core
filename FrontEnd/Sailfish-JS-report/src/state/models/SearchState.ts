@@ -23,4 +23,6 @@ export default interface SearchState {
     resultsCount: number;
     index: number;
     shouldScrollToItem: boolean;
+    leftPanelEnabled: boolean;
+    rightPanelEnabled: boolean;
 }
