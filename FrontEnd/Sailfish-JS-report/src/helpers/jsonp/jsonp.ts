@@ -15,13 +15,12 @@
  ******************************************************************************/
 
 import Report, { isReport } from '../../models/Report';
-import TestCase from '../../models/TestCase';
+import TestCase, { TestCaseIndexFiles, TestCaseFiles } from '../../models/TestCase';
 import { fetchJsonp, fetchUpdate } from '../files/fetcher';
 import { ActionNode } from '../../models/Action';
 
 const DATA_FOLDER_PATH = "reportData/jsonp/";
 const REPORT_PATH = DATA_FOLDER_PATH + "report.js";
-export const CURRENT_TESTCASE_ORDER = 'CURRENT_TESTCASE_ORDER';
 
 export const jsonpHandlerNames = (<const>{
     index: {
@@ -68,12 +67,12 @@ export async function fetchTestCaseBody(testCasePath: string): Promise<Omit<Test
     return testcase as Omit<TestCase, "files">;
 }
 
-export async function fetchTestCaseIndexFiles(indexFiles: TestCase['indexFiles']): Promise<TestCase['files']> {
+export async function fetchTestCaseIndexFiles(indexFiles: TestCaseIndexFiles): Promise<TestCaseFiles> {
     const filesList = await Promise.all(
-        Object.keys(indexFiles)
-            .map((key: keyof TestCase['indexFiles']) =>
-                fetchJsonp(indexFiles[key], jsonpHandlerNames.index[key])
-                    .then(filesInfo => ({[key]: filesInfo}))
+        Object.entries(indexFiles)
+            .map(([type, link]: [keyof TestCaseIndexFiles, string]) =>
+                fetchJsonp(link, jsonpHandlerNames.index[type])
+                    .then(filesInfo => ({[type]: filesInfo}))
             )
     );
 
@@ -81,24 +80,27 @@ export async function fetchTestCaseIndexFiles(indexFiles: TestCase['indexFiles']
 }
 
 type TestCaseFileData = ActionNode[];
+type TestCaseFileHandlerNames = 'loadMessage' | 'loadAction' | 'loadLogEntry';
 type TestCaseFilesResponse = {
-    [jsonpHandlerNames.default]: TestCaseFileData
+    [key in TestCaseFileHandlerNames]: TestCaseFileData
 }
 
 export async function fetchTestCaseFile(
     filePath: string,
     fileIndex: number,
-    type: keyof TestCase['files'],
+    type: keyof TestCaseFiles,
     testCaseOrder: number,
 ): Promise<TestCaseFileData> {
+    const jsonpHandlerName = jsonpHandlerNames.files[type];
     const file = await fetchUpdate<TestCaseFilesResponse>(
         filePath,
-        [jsonpHandlerNames.files[type]],
+        [jsonpHandlerName],
         fileIndex,
         Number.MIN_SAFE_INTEGER,
         testCaseOrder,
     );
-    return Object.keys(file).reduce((fileNodes, currFile) => [...fileNodes, ...file[currFile]], []);
+
+    return file[jsonpHandlerName];
 }
 
 export type FileWatchEvent = {

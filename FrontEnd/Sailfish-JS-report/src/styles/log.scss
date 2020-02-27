@@ -45,8 +45,7 @@
 	border: 2px solid transparent;
 	border-color: var(--lc-border-color);
     color: $logCardPrimaryTextColor;
-    overflow-x: auto;
-    @include scrollbar;
+    overflow: hidden;
 
 	&__head {
 		grid-area: lc-head;
@@ -124,6 +123,8 @@
         font-size: 13px;
         white-space: pre-wrap;
         font-family: Open sans;
+        overflow-x: auto;
+        @include scrollbar;
 	}
 }
 

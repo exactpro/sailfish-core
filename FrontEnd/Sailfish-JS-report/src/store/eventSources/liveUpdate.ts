@@ -19,10 +19,13 @@ import { ThunkDispatch } from 'redux-thunk';
 import LiveUpdateService from '../../helpers/files/LiveUpdateService';
 import AppState from '../../state/models/AppState';
 import StateAction from '../../actions/stateActions';
-import { setReport, updateTestCase, addTestCaseActions, addTestCaseMessages, setIsConnectionError } from '../../actions/actionCreators';
+import { setReport, updateTestCase, addTestCaseActions, addTestCaseMessages, setIsConnectionError, addTestCaseLogs } from '../../actions/actionCreators';
 import { isAction } from '../../models/Action';
 import { isMessage } from '../../models/Message';
 import Report from '../../models/Report';
+import { isDateEqual } from '../../helpers/date';
+import { isEqual } from '../../helpers/object';
+import { isLog } from '../../models/Log';
 
 export function initLiveUpdateEventSource(store: Store<AppState, StateAction>, service: LiveUpdateService) {
     const dispatch: ThunkDispatch<AppState, {}, StateAction> = store.dispatch;
@@ -32,9 +35,19 @@ export function initLiveUpdateEventSource(store: Store<AppState, StateAction>, s
     }
 
     service.setOnTestCaseUpdate = liveTestCase => {
-        dispatch(updateTestCase(liveTestCase));
+        const testCase = store.getState().selected.testCase;
 
-        if (liveTestCase.finishTime !== null) {
+        if (
+            !isDateEqual(testCase.lastUpdate, liveTestCase.lastUpdate) ||
+            !isEqual(testCase.files, liveTestCase.files)
+            ) {
+            dispatch(updateTestCase(liveTestCase));
+        }
+
+        const filesAreLoaded = (testCase.messages.length + testCase.actions.length) === 
+            (liveTestCase.files.action.count + liveTestCase.files.message.count);
+
+        if (liveTestCase.finishTime !== null && filesAreLoaded) {
             service.stopWatchingTestcase();
         }
     }
@@ -45,6 +58,10 @@ export function initLiveUpdateEventSource(store: Store<AppState, StateAction>, s
 
     service.setOnMessageUpdate = (updatedMessages, testcaseOrder) => {
         dispatch(addTestCaseMessages(updatedMessages.filter(isMessage), testcaseOrder));
+    }
+
+    service.setOnLogsUpdate = (updatedLogs, testCaseOrder) => {
+        dispatch(addTestCaseLogs(updatedLogs.filter(isLog), testCaseOrder));
     }
 
     service.setOnFetchError = () => {

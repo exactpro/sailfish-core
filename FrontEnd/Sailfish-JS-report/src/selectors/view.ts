@@ -19,9 +19,10 @@ import AppState from '../state/models/AppState';
 export const getIsConnectionError = (state: AppState) => state.view.isConnectionError;
 
 export const getTestCaseLoadingProgress = (state: AppState) => {
-	return state.selected.testCase?.files ? Math.round(
-	  (state.selected.testCase.actions.length + state.selected.testCase.messages.length) /
-		(state.selected.testCase.files.action.count + state.selected.testCase.files.message.count) * 100
-	) : 0;
+	if (!state.selected.testCase?.files) return 100;
+	const total = state.selected.testCase.files.action.count + state.selected.testCase.files.message.count;
+	if (total == 0) return 100;
+	const loaded = state.selected.testCase.actions.length + state.selected.testCase.messages.length;
+	return Math.round(loaded / total * 100 );
   };
   

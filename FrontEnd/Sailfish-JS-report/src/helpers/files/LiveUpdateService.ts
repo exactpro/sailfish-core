@@ -18,22 +18,24 @@ import { fetchUpdate } from "./fetcher";
 import { jsonpHandlerNames, watchLiveTestCase, FileWatchCallback, watchReport } from '../jsonp/jsonp'
 import { ActionNode } from "../../models/Action";
 import Message from "../../models/Message";
-import { isEqual } from "../object";
-import { isDateEqual } from "../date";
-import LiveTestCase from "../../models/LiveTestCase";
+import { isEqual, getObjectKeys } from "../object";
 import Report from '../../models/Report';
-import TestCase from '../../models/TestCase';
+import TestCase, { TestCaseFiles } from '../../models/TestCase';
+import Log from '../../models/Log';
 
 const STUB_CALLBACK = () => {};
 
-const ROOT_JSONP_PATH = jsonpHandlerNames.default,
-    ACTION_JSONP_PATH = jsonpHandlerNames.files.action,
-    MESSAGE_JSONP_PATH = jsonpHandlerNames.files.message;
+const ACTION_JSONP_PATH = jsonpHandlerNames.files.action,
+    MESSAGE_JSONP_PATH = jsonpHandlerNames.files.message,
+    LOG_JSON_PATH = jsonpHandlerNames.files.logentry;
 
 const ROOT_WATCH_INTERVAL = 1500;
+const TESTCASE_WATCH_INTERVAL = 1500;
 
-type DataFiles = {
-    [key: string]: number
+const EMPTY_LOG_FILES: TestCaseFiles['logentry'] = {
+    count: 0,
+    dataFiles: {},
+    lastUpdate: ''
 };
 
 type FileUpdate = {
@@ -43,6 +45,7 @@ type FileUpdate = {
 
 type ActionUpdate = (actions: ActionNode[], testCaseOrder: number) => unknown;
 type MessageUpdate = (messages: Message[], testCaseOrder: number) => unknown;
+type LogsUpdate = (logs: Log[], testCaseOrder: number) => unknown;
 type TestCaseUpdate = (tc: TestCase) => unknown;
 type ReportUpdate = (report: Report) => unknown;
 type ReportFinish = (report: Report) => unknown;
@@ -55,21 +58,29 @@ export default class LiveUpdateService {
     private testCaseWatchIntervalId = null;
     private onActionUpdate: ActionUpdate = STUB_CALLBACK;
     private onMessageUpdate: MessageUpdate = STUB_CALLBACK;
+    private onLogsUpdate: LogsUpdate = STUB_CALLBACK;
     private onTestCaseUpdate: TestCaseUpdate = STUB_CALLBACK;
     private onReportUpdate: ReportUpdate = STUB_CALLBACK;
     private onReportFinish: ReportFinish = STUB_CALLBACK;
     private onError: () => void = STUB_CALLBACK;
+    private isLoading = false;
+    private watchLogs = false;
+    private loadedFiles: TestCaseFiles | null = null;
 
     public set setOnActionUpdate(cb: ActionUpdate) {
         this.onActionUpdate = cb;
     }
 
-    public set setOnReportUpdate(cb: ReportUpdate) {
-        this.onReportUpdate = cb;
-    }
-
     public set setOnMessageUpdate(cb: MessageUpdate) {
         this.onMessageUpdate = cb;
+    }
+
+    public set setOnLogsUpdate(cb: LogsUpdate) {
+        this.onLogsUpdate = cb;
+    }
+
+    public set setOnReportUpdate(cb: ReportUpdate) {
+        this.onReportUpdate = cb;
     }
 
     public set setOnTestCaseUpdate(cb: TestCaseUpdate) {
@@ -87,13 +98,17 @@ export default class LiveUpdateService {
     public startWatchingReport() {
         this.reportWatchIntervalId = watchReport(
             ROOT_WATCH_INTERVAL, 
-            this.onReportDataUpdate.bind(this)
+            this.onReportDataUpdate,
         );
     }
 
     public stopWatchingReport() {
         clearInterval(this.reportWatchIntervalId);
         this.report = null;
+    }
+
+    public startWatchingLogs(){
+        this.watchLogs = true;
     }
 
     private onReportDataUpdate: FileWatchCallback = e => {
@@ -115,7 +130,6 @@ export default class LiveUpdateService {
             }
         }
     }
-
 
     public updateReport(report: Report) {
         if (!this.report) {
@@ -143,7 +157,7 @@ export default class LiveUpdateService {
         this.stopWatchingTestcase();
         this.testCaseWatchIntervalId = watchLiveTestCase(
             jsonpFileName, 
-            ROOT_WATCH_INTERVAL, 
+            TESTCASE_WATCH_INTERVAL, 
             this.onTestCaseDataUpdate
         );
     }
@@ -151,6 +165,9 @@ export default class LiveUpdateService {
     public stopWatchingTestcase() {
         clearInterval(this.testCaseWatchIntervalId);
         this.liveTestCase = null;
+        this.loadedFiles = null;
+        this.isLoading = false;
+        this.watchLogs = false;
     }
 
 
@@ -175,61 +192,111 @@ export default class LiveUpdateService {
     }
 
     private updateLiveTestCase(testcase: TestCase) {
-        const { files, lastUpdate, hash } = testcase;
-       
-        if (this.liveTestCase && isDateEqual(lastUpdate, this.liveTestCase.lastUpdate)) {
-            // no update found
-            return;
+        const { files, order } = testcase;
+
+        if (!this.liveTestCase) {
+            this.fetchFullUpdateData(files, order);
+        } else if (!isEqual(files, this.liveTestCase.files)) {
+            this.fetchDiffUpdateData(files, this.loadedFiles, order);
         }
 
-        if (lastUpdate !== this.liveTestCase?.lastUpdate) {
-            this.onTestCaseUpdate(testcase);
-            if (hash !== this.liveTestCase?.hash) {
-                this.fetchFullUpdateData(files, testcase.order);
-            } else if (!this.liveTestCase || !isEqual(files, this.liveTestCase.files)) {
-                this.fetchDiffUpdateData(files, this.liveTestCase?.files, testcase.order);
-            }
-        }
-
+        this.onTestCaseUpdate(testcase);
         this.liveTestCase = testcase;
     }
 
-    private async fetchDiffUpdateData(nextFiles: LiveTestCase['files'], prevFiles: LiveTestCase['files'], testCaseOrder: number) {
-        const nextFilesData: DataFiles = nextFiles ? Object.keys(nextFiles)
-            .reduce((files, currFile) => ({ ...files, ...nextFiles[currFile].dataFiles }) , {}) : {};
-        const prevFilesData: DataFiles = prevFiles ? Object.keys(prevFiles)
-            .reduce((files, currFile) => ({ ...files, ...prevFiles[currFile].dataFiles }) , {}) : {};
-
-        for (let [filePath, index] of Object.entries(nextFilesData)) {
-            const prevIndex = typeof prevFilesData[filePath] === 'number' ?
-                prevFilesData[filePath] + 1 :
-                    Number.MIN_SAFE_INTEGER;
-
-            const fileUpdate = await fetchUpdate<FileUpdate>(
-                filePath, 
-                [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH],
-                index,
-                prevIndex,
-                testCaseOrder 
-            );
-
-            this.handleFileUpdate(fileUpdate, testCaseOrder);
-        }
+    private async fetchFullUpdateData(files: TestCaseFiles | null, testCaseOrder: number) {
+        if (!files) return;
+        this.isLoading = true;
+        const filesToLoad: TestCaseFiles = {
+            ...files,
+            logentry: this.watchLogs ? files.logentry : EMPTY_LOG_FILES
+        };
+        await Promise.all(
+            getObjectKeys(filesToLoad)
+                .filter(fileType => filesToLoad[fileType].count > 0)
+                .map(async fileType => {
+                    for (const [filePath, currentIndex] of Object.entries(filesToLoad[fileType].dataFiles)) {
+                        try {
+                            await this.fetchFileUpdate(
+                                filePath,
+                                jsonpHandlerNames.files[fileType],
+                                currentIndex,
+                                Number.MIN_SAFE_INTEGER,
+                                testCaseOrder
+                            );
+                        } catch (error) {
+                            if (error.isCancelled) {
+                                break;
+                            } else {
+                                this.onError();
+                            }
+                        }
+                    }
+                })
+        );
+        this.loadedFiles = filesToLoad;
+        this.isLoading = false;
+        this.checkFilesForUpdates(this.liveTestCase.files, this.loadedFiles, testCaseOrder);
     }
 
-    private async fetchFullUpdateData(dataFiles: LiveTestCase['files'], testCaseOrder: number) {
-        if (!dataFiles) return;
-        const files: DataFiles = Object.keys(dataFiles)
-            .reduce((files, currFile) => ({ ...files, ...dataFiles[currFile].dataFiles }) , {});
-        for (let [filePath, currentIndex] of Object.entries(files)) {
-            const fileUpdate = await fetchUpdate<FileUpdate>(
-                filePath,
-                [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH],
-                currentIndex,
-                Number.MIN_SAFE_INTEGER,
-                testCaseOrder
-            );
-            this.handleFileUpdate(fileUpdate, testCaseOrder);
+    private async fetchDiffUpdateData(nextFiles: TestCaseFiles, prevFiles: TestCaseFiles, testCaseOrder: number) {
+        if (this.isLoading) return;
+        this.isLoading = true;
+        const filesToLoad: TestCaseFiles = {
+            ...nextFiles,
+            logentry: this.watchLogs ? nextFiles.logentry : EMPTY_LOG_FILES
+        };
+        await Promise.all(
+            getObjectKeys(filesToLoad)
+                .filter(fileType => filesToLoad[fileType].count > 0)
+                .map(async fileType => {
+                    for (const [filePath, index] of Object.entries(filesToLoad[fileType].dataFiles)) {
+                        if (filesToLoad[fileType].dataFiles[filePath] == prevFiles[fileType].dataFiles[filePath]) continue;
+                        try {
+                            const prevIndex = typeof prevFiles[fileType].dataFiles[filePath] === 'number'
+                                ? prevFiles[fileType].dataFiles[filePath] + 1
+                                : Number.MIN_SAFE_INTEGER;
+                            await this.fetchFileUpdate(
+                                filePath,
+                                jsonpHandlerNames.files[fileType],
+                                index,
+                                prevIndex,
+                                testCaseOrder
+                            );
+                        } catch (error) {
+                            if (error.isCancelled) {
+                                break;
+                            } else {
+                                this.onError();
+                            }
+                        }
+                    }
+                })
+        );
+        this.loadedFiles = filesToLoad;
+        this.isLoading = false;
+        this.checkFilesForUpdates(this.liveTestCase.files, this.loadedFiles, testCaseOrder);
+    }
+
+    private async fetchFileUpdate(filePath: string, jsonpHandlerName: string, index: number, prevIndex: number, testCaseOrder: number) {
+        const fileUpdate = await fetchUpdate<FileUpdate>(
+            filePath, 
+            [jsonpHandlerName],
+            index,
+            prevIndex,
+            testCaseOrder 
+        );
+        this.handleFileUpdate(fileUpdate, testCaseOrder);
+    }
+
+    private async checkFilesForUpdates(nextFiles: TestCaseFiles, prevFiles: TestCaseFiles, testCaseOrder: number){
+        if (!this.liveTestCase || this.liveTestCase.order !== testCaseOrder) return;
+        const currentFiles: TestCaseFiles = {
+            ...nextFiles,
+            logentry: this.watchLogs ? nextFiles.logentry : EMPTY_LOG_FILES
+        };
+        if (!prevFiles || !isEqual(currentFiles, prevFiles)) {
+            this.fetchDiffUpdateData(currentFiles, prevFiles, this.liveTestCase.order);
         }
     }
 
@@ -247,6 +314,14 @@ export default class LiveUpdateService {
                 case MESSAGE_JSONP_PATH: {
                     if (updatedValues.length != 0) {
                         this.onMessageUpdate(updatedValues as Message[], testCaseOrder);
+                    }
+
+                    break;
+                }
+
+                case LOG_JSON_PATH: {
+                    if (updatedValues.length != 0) {
+                        this.onLogsUpdate(updatedValues as Log[], testCaseOrder);
                     }
 
                     break;

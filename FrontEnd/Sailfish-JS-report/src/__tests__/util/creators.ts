@@ -25,6 +25,8 @@ import SearchToken from "../../models/search/SearchToken";
 import KnownBug, { KnownBugNode } from "../../models/KnownBug";
 import { KnownBugStatus } from "../../models/KnownBugStatus";
 import KnownBugCategory from "../../models/KnownBugCategory";
+import Report from '../../models/Report';
+import { TestCaseMetadata } from '../../models/TestcaseMetadata';
 
 export function createAction(
     id: number = 0, 
@@ -132,5 +134,53 @@ export function createKnownBugCategory(name: string = '', subNodes: KnownBugNode
         actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY,
         name,
         subNodes
+    }
+}
+
+export function createReport(
+    startTime: string, 
+    finishTime: string | null, 
+    metadata: TestCaseMetadata[] = [],
+    ): Report {
+    return {
+        branchName: '',
+        bugs: [],
+        description: '',
+        startTime,
+        finishTime,
+        hostName: '',
+        metadata,
+        name: '',
+        plugins: [],
+        precision: '',
+        scriptRunId: 1,
+        userName: '',
+        version: '',
+        alerts: [],
+        exception: null,
+        outcomes: null,
+        reportProperties: null,
+        tags: [],
+        testCases: [],
+    }
+}
+
+export function createTestCaseMetadata(
+    order: number = 1,
+    finishTime: string | null,
+    hash: number
+): TestCaseMetadata {
+    return {
+        order,
+        startTime: new Date().toString(),
+        finishTime,
+        name: '',
+        status: null,
+        id: order.toString(),
+        hash,
+        description: '',
+        jsonFileName: '',
+        jsonpFileName: '',
+        bugs: []
     }
 }

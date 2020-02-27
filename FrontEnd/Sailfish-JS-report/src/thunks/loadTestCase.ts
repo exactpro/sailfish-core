@@ -19,15 +19,17 @@ import AppState from '../state/models/AppState';
 import { setTestCase, setIsLoading, setIsConnectionError, addTestCaseLogs } from "../actions/actionCreators";
 import { addTestCaseActions, addTestCaseMessages } from '../actions/actionCreators'
 import StateAction from '../actions/stateActions';
-import TestCase from '../models/TestCase';
+import TestCase, { TestCaseFiles } from '../models/TestCase';
 import { isAction } from '../models/Action';
 import { isMessage } from '../models/Message';
 import { isLog } from '../models/Log';
 import ThunkExtraArgument from '../models/ThunkExtraArgument';
 import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
-import { fetchTestCase, fetchTestCaseFile, CURRENT_TESTCASE_ORDER } from "../helpers/jsonp/jsonp";
+import { fetchTestCase, fetchTestCaseFile } from "../helpers/jsonp/jsonp";
 import { getObjectKeys } from '../helpers/object';
 import { retryRequest } from '../helpers/jsonp/retryRequest';
+
+export const CURRENT_TESTCASE_ORDER = 'CURRENT_TESTCASE_ORDER';
 
 export function loadTestCase(testCasePath: string): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
     return (dispatch, getState, { liveUpdateService }) => {
@@ -70,7 +72,7 @@ export function loadPrevTestCase(): ThunkAction<void, AppState, {}, StateAction>
     }
 }
 
-export function loadTestCaseFiles(files: TestCase['files'], testCaseOrder: number): ThunkAction<void, AppState, {}, StateAction> {
+export function loadTestCaseFiles(files: TestCaseFiles, testCaseOrder: number): ThunkAction<void, AppState, {}, StateAction> {
     return (dispatch) => {  
         getObjectKeys(files)
             .filter(fileType => files[fileType].count > 0)
@@ -96,9 +98,14 @@ export function loadTestCaseFiles(files: TestCase['files'], testCaseOrder: numbe
                         }
 
                     } catch (err) {
-                        dispatch(setIsConnectionError(true));
-                        console.error('Error occured while fetching test case file');
-                        console.error(err);
+                        if (err.isCancelled) {
+                            break;
+                        } else {
+                            dispatch(setIsConnectionError(true));
+                            console.error('Error occured while fetching test case file');
+                            console.error(err);
+                        }
+               
                     }
                 }
             })
@@ -108,7 +115,7 @@ export function loadTestCaseFiles(files: TestCase['files'], testCaseOrder: numbe
 export function loadMessagesAndActions(): ThunkAction<void, AppState, {}, StateAction> {
     return (dispatch, getState) => {
         const { selected: { testCase }} = getState();
-        const filesToLoad: TestCase['files'] = {
+        const filesToLoad: TestCaseFiles = {
             action: testCase.files.action,
             message: testCase.files.message
         }
@@ -116,13 +123,18 @@ export function loadMessagesAndActions(): ThunkAction<void, AppState, {}, StateA
     }
 }
 
-export function loadLogs(): ThunkAction<void, AppState, {}, StateAction> {
-    return (dispatch, getState) => {
+export function loadLogs(): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
+    return (dispatch, getState, { liveUpdateService }) => {
         const { selected: { testCase }} = getState();
-        const filesToLoad: TestCase['files'] = {
-            logentry: testCase.files.logentry
+        if (testCase.finishTime !== null) {
+            const filesToLoad: TestCaseFiles = {
+                logentry: testCase.files.logentry
+            }
+            dispatch(loadTestCaseFiles(filesToLoad, testCase.order));
+        } else {
+            liveUpdateService.startWatchingLogs();
         }
-        dispatch(loadTestCaseFiles(filesToLoad, testCase.order));
+
     }
 }
 

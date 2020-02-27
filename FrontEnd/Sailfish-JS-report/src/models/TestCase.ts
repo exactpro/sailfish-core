@@ -47,14 +47,14 @@ export default interface TestCase {
     hasWarnLogs: boolean;
 }
 
-interface TestCaseIndexFiles {
+export interface TestCaseIndexFiles {
     message?: string;
     action?: string;
     logentry?: string;
 }
 
-type TestCaseFiles = {
-    [key in keyof TestCase['indexFiles']]: {
+export type TestCaseFiles = {
+    [key in keyof TestCaseIndexFiles]: {
         count: number;
         dataFiles: {
             [filePath: string]: number

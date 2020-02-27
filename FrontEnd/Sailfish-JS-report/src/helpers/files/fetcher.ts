@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { CURRENT_TESTCASE_ORDER } from '../jsonp/jsonp';
+import { CURRENT_TESTCASE_ORDER } from '../../thunks/loadTestCase';
 
 /**
  * This function fetches jsonp data from js file.
@@ -97,15 +97,15 @@ export async function fetchUpdate<T extends {}>(
                 // ignore update
                 return;
             }
-            result[jsonpPath].push(data);
-            
+            if (index <= currentIndex) {
+                result[jsonpPath].push(data);
+            }
             // final update
-            if (
-                index === currentIndex &&
-                testCaseOrder == window[CURRENT_TESTCASE_ORDER]
-                ) {
-                    jsonpPaths.forEach(path => delete window[path]);
-                    resolve(result);
+            if (index == currentIndex && testCaseOrder == window[CURRENT_TESTCASE_ORDER]) {
+                jsonpPaths.forEach(path => delete window[path]);
+                resolve(result);
+            } else if (index == currentIndex && testCaseOrder !== window[CURRENT_TESTCASE_ORDER]) {
+                reject({ isCancelled: true })
             }
         }
         
