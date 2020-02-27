@@ -48,6 +48,10 @@ interface State {
     scrolledIndex: Number;
 }
 
+interface OwnProps {
+    ref?: React.MutableRefObject<MessagesCardListBase>
+}
+
 export class MessagesCardListBase extends React.PureComponent<Props, State> {
 
     constructor(props: Props) {
@@ -123,8 +127,8 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
     };
 }
 
-export const MessagesCardList = connect(
-    (state: AppState): StateProps => ({
+export const MessagesCardList = connect<StateProps, {}, OwnProps, StateProps & OwnProps>(
+    (state: AppState) => ({
         messages: getIsFilterApplied(state) && !state.filter.isTransparent ?
             getFilteredMessages(state) :
             state.selected.testCase.messages,

@@ -21,7 +21,7 @@ import Panel from '../util/Panel';
 import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardList';
-import LogsList from './log/LogsList';
+import LogsList, { LogListActions } from './log/LogsList';
 import AppState from '../state/models/AppState';
 import { isAdmin, isRejected } from '../helpers/messageType';
 import {
@@ -72,6 +72,7 @@ interface State {
 class RightPanelBase extends React.Component<Props, State> {
 
     private messagesPanel = React.createRef<MessagesCardListBase>();
+    private logsPanel = React.createRef<LogListActions>();
     private root = React.createRef<HTMLDivElement>();
 
     private rootResizeObserver = new ResizeObserver(elements => {
@@ -95,6 +96,10 @@ class RightPanelBase extends React.Component<Props, State> {
         switch (panel) {
             case (Panel.MESSAGES): {
                 this.messagesPanel.current?.scrollToTop();
+                break;
+            }
+            case (Panel.LOGS): {
+                this.logsPanel.current?.scrollToTop();
                 break;
             }
 
@@ -242,6 +247,7 @@ class RightPanelBase extends React.Component<Props, State> {
                 </div>
                 <div className={logsRootClass}>
                     <LogsList
+                        ref={this.logsPanel}
                         isActive={this.props.panel === Panel.LOGS} />
                 </div>
                 <div className={knownBugsRootClass}>

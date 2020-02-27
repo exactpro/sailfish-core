@@ -23,7 +23,7 @@ import { loadLogs } from '../../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import SkeletonedLogsListItem from './SkeletonedLogsListItem';
-import '../../styles/log.scss'
+import '../../styles/log.scss';
 
 interface StateProps {
     logsCount: number;
@@ -34,18 +34,25 @@ interface DispatchProps {
     loadLogs: () => void;
 }
 
-interface Props extends StateProps, DispatchProps {
+interface OwnProps {
     isActive: boolean;
 }
 
-function LogsListBase({
+interface Props extends OwnProps, StateProps, DispatchProps {
+}
+
+export interface LogListActions {
+    scrollToTop(): void
+}
+
+const LogsListBase = React.forwardRef<LogListActions, Props>(({
     logsCount,
     isActive,
     loadLogs,
     scrolledIndex
-}: Props) {
+}: Props, ref: React.MutableRefObject<LogListActions>) => {
     const [loadingLogs, setLoadingLogs] = React.useState(false);
-    const virtuoso = React.useRef<Virtuoso>();
+    const virtuosoRef = React.createRef<Virtuoso>();
 
     React.useEffect(() => {
         if (isActive && !loadingLogs) {
@@ -56,7 +63,7 @@ function LogsListBase({
 
     React.useEffect(() => {
         if (scrolledIndex != null) {
-            virtuoso.current?.scrollToIndex(scrolledIndex.valueOf());
+            virtuosoRef.current?.scrollToIndex(scrolledIndex.valueOf());
         }
     }, [scrolledIndex]);
 
@@ -64,11 +71,20 @@ function LogsListBase({
         return <SkeletonedLogsListItem index={idx} />
     };
 
+    ref.current = {
+        scrollToTop() {
+            if (virtuosoRef.current) {
+                virtuosoRef.current.scrollToIndex(0);
+            }
+        }
+    }
+
+
     return (
         <div className="logs">
             <div className="logs__list">
                 <Virtuoso
-                    ref={virtuoso}
+                    ref={virtuosoRef}
                     totalCount={logsCount}
                     item={renderLog}
                     overscan={3}
@@ -78,7 +94,7 @@ function LogsListBase({
             </div>
         </div>
     )
-}
+})
 
 const LogsList = connect(
     (state: AppState): StateProps => ({
@@ -88,7 +104,10 @@ const LogsList = connect(
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         loadLogs: () => dispatch(loadLogs()),
     }),
-    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
-)(LogsListBase);
+    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps }),
+    {
+        forwardRef: true
+    }
+)(LogsListBase)
 
 export default LogsList;

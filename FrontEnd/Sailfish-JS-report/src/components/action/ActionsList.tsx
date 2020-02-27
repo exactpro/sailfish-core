@@ -45,6 +45,10 @@ interface State {
     scrolledIndex: Number;
 }
 
+interface OwnProps {
+    ref?: React.MutableRefObject<ActionsListBase>
+}
+
 export class ActionsListBase extends React.PureComponent<Props, State> {
 
     private list = React.createRef<VirtualizedList>();
@@ -125,7 +129,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
     };
 }
 
-export const ActionsList = connect(
+export const ActionsList = connect<Props, {}, OwnProps, Props & OwnProps>(
     (state: AppState): Props => ({
         actions: getIsFilterApplied(state) && !state.filter.isTransparent ?
             getFilteredActions(state) :
