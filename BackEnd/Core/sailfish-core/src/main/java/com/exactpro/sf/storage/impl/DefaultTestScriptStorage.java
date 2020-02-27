@@ -88,6 +88,7 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
     public static final String JSON_EXTENSION = "json";
     public static final String REPORT_DATA_DIR = "reportData";
     public static final Path ROOT_JSON_REPORT_FILE = Paths.get(REPORT_DATA_DIR, "report." + JSON_EXTENSION);
+    public static final String ROOT_JSON_REPORT_ZIP_ENTRY = FilenameUtils.separatorsToUnix(ROOT_JSON_REPORT_FILE.toString());
 
     private static final String DATETIME_PATTERN_GROUP_NAME = "datetime";
     private static final Pattern DATETIME_PATTERN = Pattern.compile("[\\s\\S]+(?<datetime>[\\d]{8}_[\\d]{6}_[\\d]{3})");
@@ -269,7 +270,9 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         try {
             if (FilenameUtils.isExtension(reportRootPath, ZipReport.ZIP_EXTENSION)) {
                 try (ZipFile zipFile = new ZipFile(reportFile)) {
-                    ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportFile.getName()) + "/" + ROOT_JSON_REPORT_FILE);
+                    String entryToExtract = FilenameUtils.removeExtension(reportFile.getName()) + "/" + ROOT_JSON_REPORT_ZIP_ENTRY;
+                    logger.debug("Extract entry {}", entryToExtract);
+                    ZipEntry zipJson = zipFile.getEntry(entryToExtract);
                     try (InputStream stream = zipFile.getInputStream(zipJson)) {
                         return convertToTestScriptDescription(FilenameUtils.removeExtension(relativeReportPath.toString()), jsonObjectMapper.readValue(stream, ReportRoot.class));
                     }
