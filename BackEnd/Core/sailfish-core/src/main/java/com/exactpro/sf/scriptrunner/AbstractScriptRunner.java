@@ -541,15 +541,19 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     protected void onRunFinished(TestScriptDescription descr) {
         descr.setFinishedTime(System.currentTimeMillis());
+
+        logger.debug("Closing description for {}", descr.getMatrixPath());
+        try {
+            descr.close();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Closing report for {}", descr.getMatrixPath());
         try {
             descr.getContext().getReport().closeReport();
         }
         catch (Exception e){
-            logger.error(e.getMessage(), e);
-        }
-        try {
-            descr.close();
-        } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
 
