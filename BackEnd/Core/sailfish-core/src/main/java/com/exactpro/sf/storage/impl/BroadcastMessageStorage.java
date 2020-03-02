@@ -16,10 +16,14 @@
 
 package com.exactpro.sf.storage.impl;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -40,8 +44,9 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
     public BroadcastMessageStorage(AbstractMessageStorage primaryStorage, List<AbstractMessageStorage> secondaryStorages) {
         super(primaryStorage.dictionaryManager);
         this.primaryStorage = Objects.requireNonNull(primaryStorage, "Primary storage can`t be null");
-        writableStorages = secondaryStorages == null ? new LinkedList<>() : secondaryStorages;
+        writableStorages = new ArrayList<>();
         writableStorages.add(this.primaryStorage);
+        writableStorages.addAll(Objects.requireNonNull(secondaryStorages, "Secondary storages can`t be null"));
     }
 
     public BroadcastMessageStorage(AbstractMessageStorage primaryStorage, AbstractMessageStorage... secondaryStorages) {
@@ -60,22 +65,7 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
 
     @Override
     protected void storeMessage(IMessage message, IHumanMessage humanMessage, String jsonMessage) {
-        EPSCommonException exception = null;
-        for (AbstractMessageStorage storage : writableStorages) {
-            try {
-                storage.storeMessage(message, humanMessage, jsonMessage);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                if (exception == null) {
-                    exception = new EPSCommonException(ERROR_MESSAGE_ON_STORE);
-                }
-                exception.addSuppressed(e);
-            }
-        }
-
-        if (exception != null && exception.getSuppressed().length > 0) {
-            throw exception;
-        }
+        execute(messageStorage -> messageStorage.storeMessage(message, humanMessage, jsonMessage), ERROR_MESSAGE_ON_STORE);
     }
 
     @Override
@@ -89,37 +79,34 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
     }
 
     @Override
-    public void clear() {
-        EPSCommonException exception = null;
-        for (AbstractMessageStorage storage : writableStorages) {
-            try {
-                storage.clear();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                if (exception == null) {
-                    exception = new EPSCommonException(ERROR_MESSAGE_ON_CLEAR);
-                }
-                exception.addSuppressed(e);
-            }
-        }
+    public void removeMessages(Instant olderThan) {
+        execute(messageStorage -> messageStorage.removeMessages(olderThan), "Can`t remove message older than '" + olderThan.toString() + "' from all storages");
+    }
 
-        if (exception != null && exception.getSuppressed().length > 0) {
-            throw exception;
-        }
+    @Override
+    public void removeMessages(String serviceID) {
+        execute(messageStorage -> messageStorage.removeMessages(serviceID), "Can`t remove message of '" + serviceID + "' service  from all storages");
+    }
+
+    @Override
+    public void clear() {
+        execute(AbstractMessageStorage::clear, ERROR_MESSAGE_ON_CLEAR);
     }
 
     @Override
     public void dispose() {
+        execute(AbstractMessageStorage::dispose, ERROR_MESSAGE_ON_DISPOSE);
+    }
 
+    private void execute(Consumer<AbstractMessageStorage> action, String errorMessage) {
         EPSCommonException exception = null;
-
         for (AbstractMessageStorage storage : writableStorages) {
             try {
-                storage.dispose();
+                action.accept(storage);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 if (exception == null) {
-                    exception = new EPSCommonException(ERROR_MESSAGE_ON_DISPOSE);
+                    exception = new EPSCommonException(errorMessage);
                 }
                 exception.addSuppressed(e);
             }
