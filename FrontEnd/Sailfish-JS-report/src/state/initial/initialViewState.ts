@@ -14,15 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from "../../util/Panel";
+import Panel from "../../util/Panel";
 import ViewState from '../models/ViewState';
 
 const initialViewState : ViewState = {
     isLoading: true,
     adminMessagesEnabled: new Boolean(false),
     beautifiedMessages: [],
-    leftPanel: Panel.Actions,
-    rightPanel: Panel.Messages,
+    leftPanel: Panel.ACTIONS,
+    rightPanel: Panel.MESSAGES,
     isConnectionError: false
 }
 

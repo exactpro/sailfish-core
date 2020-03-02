@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import '../styles/layout.scss';
-import { Panel } from '../util/Panel';
+import Panel from '../util/Panel';
 import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardList';
@@ -91,7 +91,7 @@ class RightPanelBase extends React.Component<Props, State> {
 
     scrollPanelToTop(panel: Panel) {
         switch (panel) {
-            case (Panel.Messages): {
+            case (Panel.MESSAGES): {
                 this.messagesPanel.current?.scrollToTop();
                 break;
             }
@@ -136,18 +136,18 @@ class RightPanelBase extends React.Component<Props, State> {
                 <div className="layout-panel__controls">
                     <div className="layout-panel__tabs">
                         <ToggleButton
-                            isToggled={panel == Panel.Messages}
-                            onClick={() => this.selectPanel(Panel.Messages)}
+                            isToggled={panel == Panel.MESSAGES}
+                            onClick={() => this.selectPanel(Panel.MESSAGES)}
                             text="Messages"/>
                         <ToggleButton
-                            isToggled={panel == Panel.KnownBugs}
+                            isToggled={panel == Panel.KNOWN_BUGS}
                             isDisabled={!hasKnownBugs}
-                            onClick={() => this.selectPanel(Panel.KnownBugs)}
+                            onClick={() => this.selectPanel(Panel.KNOWN_BUGS)}
                             text="Known bugs"/>
                         <ToggleButton
                             isDisabled={!hasLogs}
-                            isToggled={panel == Panel.Logs}
-                            onClick={() => this.selectPanel(Panel.Logs)}
+                            isToggled={panel == Panel.LOGS}
+                            onClick={() => this.selectPanel(Panel.LOGS)}
                             text="Logs" />
                     </div>
                     {
@@ -212,15 +212,15 @@ class RightPanelBase extends React.Component<Props, State> {
     private renderPanels(selectedPanel: Panel): React.ReactNode {
         const messagesRootClass = createStyleSelector(
             "layout-panel__content-wrapper",
-            selectedPanel == Panel.Messages ? null : "disabled"
+            selectedPanel == Panel.MESSAGES ? null : "disabled"
             ),
             knownBugsRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.KnownBugs ? null : "disabled"
+                selectedPanel == Panel.KNOWN_BUGS ? null : "disabled"
             ),
             logsRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.Logs ? null : "disabled"
+                selectedPanel == Panel.LOGS ? null : "disabled"
             );
 
         return (
@@ -231,7 +231,7 @@ class RightPanelBase extends React.Component<Props, State> {
                 </div>
                 <div className={logsRootClass}>
                     <LogsList
-                        isActive={this.props.panel === Panel.Logs} />
+                        isActive={this.props.panel === Panel.LOGS} />
                 </div>
                 <div className={knownBugsRootClass}>
                     <KnownBugPanel/>

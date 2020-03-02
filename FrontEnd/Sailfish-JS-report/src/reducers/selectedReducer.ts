@@ -189,13 +189,18 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             const { searchResults } = stateAction, 
                 searchResultsCount = searchResults.sum(),  
                 searchIndex = searchResultsCount > 0 ? 0 : null,
-                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(searchResults, searchIndex);
+                [
+                    actionId = state.scrolledActionId,
+                    msgId = state.scrolledMessageId,
+                    logIndex = state.scrolledLogIndex
+                ] = getScrolledIndex(searchResults, searchIndex);
 
             return {
                 ...state,
                 search: searchReducer(state.search, stateAction),
                 scrolledActionId: actionId,
-                scrolledMessageId: msgId
+                scrolledMessageId: msgId,
+                scrolledLogIndex: logIndex
             }
         }
 
@@ -212,13 +217,18 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             } 
 
             const targetIndex = (state.search.index + 1) % state.search.resultsCount,
-                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.search.results, targetIndex);
+                [
+                    actionId = state.scrolledActionId,
+                    msgId = state.scrolledMessageId,
+                    logIndex = state.scrolledLogIndex
+                ] = getScrolledIndex(state.search.results, targetIndex);
 
             return {
                 ...state,
                 search: searchReducer(state.search, stateAction),
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId
+                scrolledActionId: actionId,
+                scrolledLogIndex: logIndex
             }
         }
 
@@ -228,13 +238,18 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
             
             const targetIndex = (state.search.resultsCount + state.search.index - 1) % state.search.resultsCount,
-                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.search.results, targetIndex);
+                [
+                    actionId = state.scrolledActionId,
+                    msgId = state.scrolledMessageId,
+                    logIndex = state.scrolledLogIndex
+                ] = getScrolledIndex(state.search.results, targetIndex);
 
             return {
                 ...state,
                 search: searchReducer(state.search, stateAction),
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId
+                scrolledActionId: actionId,
+                scrolledLogIndex: logIndex
             }
         }
 

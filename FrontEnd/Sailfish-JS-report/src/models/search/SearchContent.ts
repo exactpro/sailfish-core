@@ -16,8 +16,10 @@
 
 import Action, { ActionNode } from "../Action";
 import Message from "../Message";
+import Log from "../Log";
 
 export default interface SearchContent {
     actions: ActionNode[];
     messages: Message[];
+    logs: Log[];
 }

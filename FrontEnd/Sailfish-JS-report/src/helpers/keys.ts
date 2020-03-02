@@ -19,6 +19,7 @@ import Action from '../models/Action';
 import UserMessage, { isUserMessage } from '../models/UserMessage';
 import UserTable, { isUserTable } from '../models/UserTable';
 import { ACTION_FIELDS, MESSAGE_FIELDS } from "./search/searchEngine";
+import Log from "../models/Log";
 
 const ACTION_KEY_PREFIX = 'action',
     MESSAGE_KEY_PREFIX = 'msg',
@@ -83,4 +84,8 @@ export function keyForUserTable(table: UserTable, parent: Action): string {
 
 export function keyForActionParameter(actionId: number, index: number): string {
     return `${keyForAction(actionId, 'parameters')}-${index}`;
+}
+
+export function keyForLog(index: number, fieldName?: keyof Log): string {
+    return `log-${index}` + (fieldName ? `-${fieldName}` : '');
 }

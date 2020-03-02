@@ -32,10 +32,8 @@ function StatusPanelBase({ status }: StatusPanelProps) {
     }
 
     return (
-        <div className="status">
-            <div className="status-container">
-                <ExceptionChain exception = {status.cause}/>
-            </div>
+        <div className="status-container">
+            <ExceptionChain exception={status.cause}/>
         </div>
     );
 }
@@ -43,6 +41,5 @@ function StatusPanelBase({ status }: StatusPanelProps) {
 export const StatusPanel = connect(
     (state: AppState) => ({
         status: state.selected.testCase.status
-    }),
-    dispatch => ({})
+    })
 )(StatusPanelBase);

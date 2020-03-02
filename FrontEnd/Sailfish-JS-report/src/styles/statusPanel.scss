@@ -31,6 +31,7 @@
         @include scrollbar;
         overflow-y: scroll;
         height: 100%;
+        padding-top: 7px;
     }
 
     &-wrapper {
@@ -39,7 +40,7 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
-        padding: 0 20px;
+        padding: 0 25px;
     }
 
     &-panel {
@@ -86,22 +87,20 @@
                 color: $primaryTextColor;
     
                 &-title {
+                    @include unselectable;
                     font-weight: bold;
                 }
     
                 &-icon {
-                    height: 14px;
-                    width: 14px;
-                    background-size: 100%;
                     margin-top: 2px;
                     padding-left: 5px;
                     
                     &.expanded {
-                        background-image: url(../../resources/icons/arr4-up.svg);
+                        @include icon(url(../../resources/icons/arr4-up.svg), 14px, 14px);
                     }
     
                     &.hidden {
-                        background-image: url(../../resources/icons/arr4-down.svg);
+                        @include icon(url(../../resources/icons/arr4-down.svg), 14px, 14px);
                     }
                 }
             }

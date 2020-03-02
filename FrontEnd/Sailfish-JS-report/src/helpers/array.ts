@@ -162,7 +162,7 @@ export function areArraysEqual<T extends unknown[]>(arr1: T, arr2: T): boolean {
  * @param fn mapper function
  * @param chunkSize size of chunk
  */
-export async function asyncFlatMap<T, R extends {}>(arr: T[], fn: (item: T) => R[] | R, chunkSize: number = 25): Promise<R[]> {
+export async function asyncFlatMap<T, R extends {}>(arr: T[], fn: (item: T, index?: number) => R[] | R, chunkSize: number = 25): Promise<R[]> {
     const results: R[] = [],
         chunks = sliceToChunks(arr, chunkSize);
 
@@ -174,7 +174,7 @@ export async function asyncFlatMap<T, R extends {}>(arr: T[], fn: (item: T) => R
     return results;
 }
 
-function asyncChunkMapper<T, R>(chunk: T[], fn: (item: T) => R[] | R) {
+function asyncChunkMapper<T, R>(chunk: T[], fn: (item: T, index?: number) => R[] | R) {
     return new Promise<(R[] | R)[]>(resolve => {
         window.setImmediate(() => {
             resolve(chunk.map(fn));

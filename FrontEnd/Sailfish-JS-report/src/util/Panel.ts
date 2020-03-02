@@ -14,4 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-export enum Panel {Actions, Status, Messages, Logs, KnownBugs}
+const enum Panel {
+    ACTIONS= 'ACTIONS',
+    STATUS = 'STATUS',
+    MESSAGES = 'MESSAGES',
+    LOGS = 'LOGS',
+    KNOWN_BUGS = 'KNOWN_BUGS'
+}
+
+export default Panel;

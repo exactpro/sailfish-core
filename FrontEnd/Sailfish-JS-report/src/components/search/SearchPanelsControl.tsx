@@ -18,10 +18,13 @@ import * as React from 'react';
 import { connect } from "react-redux";
 import AppState from "../../state/models/AppState";
 import { setSearchLeftPanelEnabled, setSearchRightPanelEnabled } from "../../actions/actionCreators";
+import Panel from "../../util/Panel";
 
 interface StateProps {
     leftPanelEnabled: boolean;
+    leftPanel: Panel;
     rightPanelEnabled: boolean;
+    rightPanel: Panel;
 }
 
 interface DispatchProps {
@@ -31,7 +34,7 @@ interface DispatchProps {
 
 interface Props extends StateProps, DispatchProps {}
 
-function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPanelEnable, onLeftPanelEnable }: Props) {
+function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPanelEnable, onLeftPanelEnable, leftPanel, rightPanel }: Props) {
     return (
         <div className="search-panel-controls">
             <input
@@ -41,7 +44,7 @@ function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPa
                 checked={leftPanelEnabled}
                 onChange={() => onLeftPanelEnable(!leftPanelEnabled)}/>
             <label htmlFor="left-panel" className="search-panel-controls__label">
-                Actions
+                {leftPanel.toLowerCase().replace('_', ' ')}
             </label>
             <input
                 className="search-panel-controls__checkbox"
@@ -50,7 +53,7 @@ function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPa
                 checked={rightPanelEnabled}
                 onChange={() => onRightPanelEnable(!rightPanelEnabled)}/>
             <label htmlFor="right-panel" className="search-panel-controls__label">
-                Messages
+                {rightPanel.toLowerCase().replace('_', ' ')}
             </label>
         </div>
     )
@@ -59,7 +62,9 @@ function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPa
 const SearchPanelControl = connect(
     (state: AppState): StateProps => ({
         leftPanelEnabled: state.selected.search.leftPanelEnabled,
-        rightPanelEnabled: state.selected.search.rightPanelEnabled
+        leftPanel: state.view.leftPanel,
+        rightPanelEnabled: state.selected.search.rightPanelEnabled,
+        rightPanel: state.view.rightPanel
     }),
     (dispatch): DispatchProps => ({
         onLeftPanelEnable: isEnabled => dispatch(setSearchLeftPanelEnabled(isEnabled)),

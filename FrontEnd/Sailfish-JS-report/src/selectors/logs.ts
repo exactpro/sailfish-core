@@ -15,6 +15,9 @@
  ******************************************************************************/
 
 import AppState from '../state/models/AppState';
+import Log from "../models/Log";
 
-export const getLogs = (state: AppState) => state.selected.testCase.logs;
+const EMPTY_LOGS_ARRAY = new Array<Log>();
+
+export const getLogs = (state: AppState) => state.selected.testCase?.logs ?? EMPTY_LOGS_ARRAY;
 export const getLogsCount = (state: AppState) => state.selected.testCase.files?.logentry.count || 0;

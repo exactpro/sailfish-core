@@ -37,7 +37,7 @@ function SkeletonedLogsListItem({ logs, index }: SkeletonedLogsListItemProps ){
 		return <LogCardSkeleton />
 	}
 
-	return <LogCard log={log} />
+	return <LogCard log={log} index={index} />
 }
 
 export default connect(

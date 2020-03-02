@@ -18,17 +18,32 @@ import { createSelector } from "reselect";
 import { getFilteredActions } from "./actions";
 import { getFilteredMessages } from "./messages";
 import SearchContent from "../models/search/SearchContent";
+import { getLogs } from "./logs";
+import Panel from "../util/Panel";
 
 const EMPTY_ARRAY = [];
 
 export const getSearchTokens = (state: AppState) => state.selected.search.tokens;
 const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanelEnabled;
 const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
+const getLeftPanel = (state: AppState) => state.view.leftPanel;
+const getRightPanel = (state: AppState) => state.view.rightPanel;
 
 export const getSearchContent = createSelector(
-    [getFilteredActions, getFilteredMessages, getLeftPanelEnabled, getRightPanelEnabled],
-    (actions, messages, leftPanelEnabled, rightPanelEnabled): SearchContent => ({
-        actions: leftPanelEnabled ? actions : EMPTY_ARRAY,
-        messages: rightPanelEnabled ? messages : EMPTY_ARRAY
+    [
+        getFilteredActions,
+        getFilteredMessages,
+        getLogs,
+        getLeftPanelEnabled,
+        getRightPanelEnabled,
+        getLeftPanel,
+        getRightPanel
+    ],
+    (
+        actions, messages,logs , leftPanelEnabled, rightPanelEnabled, leftPanel, rightPanel
+    ): SearchContent => ({
+        actions: leftPanelEnabled && leftPanel == Panel.ACTIONS ? actions : EMPTY_ARRAY,
+        messages: rightPanelEnabled && rightPanel == Panel.MESSAGES ? messages : EMPTY_ARRAY,
+        logs: rightPanelEnabled && rightPanel == Panel.LOGS ? logs : EMPTY_ARRAY
     })
 );

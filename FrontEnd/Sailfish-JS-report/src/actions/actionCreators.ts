@@ -19,7 +19,7 @@ import { StateActionTypes } from "./stateActions";
 import Action, { ActionNode } from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
-import { Panel } from "../util/Panel";
+import Panel from "../util/Panel";
 import Message from '../models/Message';
 import { PredictionData, SubmittedData } from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';

@@ -14,24 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
-import Action, { isAction, ActionNodeType, ActionNode } from '../../models/Action';
-import { keyForMessage, keyForAction, keyForActionParameter, keyForVerification } from '../keys';
+import Action, { isAction, ActionNodeType } from '../../models/Action';
+import { keyForMessage, keyForAction, keyForActionParameter, keyForVerification, keyForLog } from '../keys';
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { isCheckpointAction } from '../action';
 import { asyncFlatMap } from '../array';
-import multiTokenSplit  from "./multiTokenSplit";
+import multiTokenSplit from "./multiTokenSplit";
 import SearchToken from "../../models/search/SearchToken";
 import SearchSplitResult from "../../models/search/SearchSplitResult";
 import SearchContent from "../../models/search/SearchContent";
+import Log from "../../models/Log";
 
 // list of fields that will be used to search (order is important!)
-export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
+export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'contentHumanReadable'],
     ACTION_FIELDS: Array<keyof Action> = ['matrixId', 'serviceName', 'name', 'messageType', 'description'],
+    LOG_FIELDS: Array<keyof Log> = ['thread', 'class', 'message'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
@@ -49,8 +50,13 @@ export async function findAll(tokens: ReadonlyArray<SearchToken>, content: Searc
 
     const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, tokens));
     const messageResults = await asyncFlatMap(content.messages, item => findAllInMessage(item, tokens));
+    const logResults = await asyncFlatMap(content.logs, (item, index) => findAllInLog(item, tokens, index));
 
-    return new SearchResult(actionResults.concat(messageResults));
+    return new SearchResult([
+        ...actionResults,
+        ...messageResults,
+        ...logResults
+    ]);
 }
 
 function findAllInMessage(message: Message, searchTokens: ReadonlyArray<SearchToken>): Array<[string, SearchSplitResult[]]> {
@@ -67,12 +73,12 @@ function findAllInAction(action: Action, searchTokens: ReadonlyArray<SearchToken
 
     results.push(...findAllInObject(action, ACTION_FIELDS, searchTokens, keyForAction(action.id)));
 
-    action.parameters?.forEach((param, index) => 
+    action.parameters?.forEach((param, index) =>
         results.push(...findAllInParams(param, searchTokens, keyForActionParameter(action.id, index)))
     );
 
     action.subNodes.forEach(subAction => {
-        switch(subAction.actionNodeType) { 
+        switch (subAction.actionNodeType) {
             case ActionNodeType.ACTION: {
                 results.push(...findAllInAction(subAction, searchTokens));
                 return;
@@ -92,13 +98,22 @@ function findAllInAction(action: Action, searchTokens: ReadonlyArray<SearchToken
     return results;
 }
 
+function findAllInLog(log: Log, searchTokens: ReadonlyArray<SearchToken>, index: number): Array<[string, SearchSplitResult[]]> {
+    return findAllInObject(
+        log,
+        LOG_FIELDS,
+        searchTokens,
+        keyForLog(index)
+    )
+}
+
 function findAllInParams(param: ActionParameter, searchTokens: ReadonlyArray<SearchToken>, keyPrefix: string): Array<[string, SearchSplitResult[]]> {
     let results = new Array<[string, SearchSplitResult[]]>();
 
     results.push(...findAllInObject(
-        param, 
-        param.subParameters?.length > 0 ? INPUT_PARAM_NODE_FIELD : INPUT_PARAM_VALUE_FIELDS, 
-        searchTokens, 
+        param,
+        param.subParameters?.length > 0 ? INPUT_PARAM_NODE_FIELD : INPUT_PARAM_VALUE_FIELDS,
+        searchTokens,
         keyPrefix
     ));
 
@@ -146,19 +161,19 @@ function findAllInVerificationEntries(entry: VerificationEntry, searchTokens: Re
 
 /**
  * This function preforms a search in a specific fields of target object
- * and returns result as array of ["<prefix> - <field_name>", number of search results] 
+ * and returns result as array of ["<prefix> - <field_name>", number of search results]
  * @param target target object
  * @param fieldsList list of fields of target object that will be used to search in them
  * @param searchTokens target search tokens
  * @param resultKeyPrefix prefix for search result key
  */
 export function findAllInObject<T>(
-    target: T, 
-    fieldsList: Array<keyof T>, 
-    searchTokens: ReadonlyArray<SearchToken>, 
+    target: T,
+    fieldsList: Array<keyof T>,
+    searchTokens: ReadonlyArray<SearchToken>,
     resultKeyPrefix: string
 ): Array<[string, SearchSplitResult[]]> {
-    
+
     let results = new Array<[string, SearchSplitResult[]]>();
 
     fieldsList.forEach(fieldName => {

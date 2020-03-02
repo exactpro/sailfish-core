@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from '../../util/Panel';
+import Panel from '../../util/Panel';
 
 export default interface ViewState {
     isLoading: boolean;

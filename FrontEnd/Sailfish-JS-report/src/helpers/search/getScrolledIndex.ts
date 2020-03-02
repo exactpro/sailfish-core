@@ -16,13 +16,14 @@
 
 import SearchResult from "./SearchResult";
 
-function getScrolledIndex(searchResults: SearchResult, targetIndex: number): [Number, Number] {
+function getScrolledIndex(searchResults: SearchResult, targetIndex: number): [Number, Number, Number] {
     const [currentKey = ''] = searchResults.getByIndex(targetIndex),
         [keyType, keyId] = currentKey.split('-'),
         actionId = keyType === 'action' ? new Number(keyId) : undefined,
-        msgId = keyType === 'msg' ?  new Number(keyId) : undefined;
+        msgId = keyType === 'msg' ?  new Number(keyId) : undefined,
+        logIndex = keyType === 'log' ? new Number(keyId) : undefined;
 
-    return [actionId, msgId];
+    return [actionId, msgId, logIndex];
 }
 
 export default getScrolledIndex;

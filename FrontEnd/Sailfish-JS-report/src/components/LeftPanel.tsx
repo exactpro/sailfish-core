@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import '../styles/layout.scss';
-import { Panel } from '../util/Panel';
+import Panel from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
 import { ActionsList } from './action/ActionsList';
@@ -33,8 +33,8 @@ interface Props {
     panel: Panel;
     isCheckpointsEnabled: boolean;
     statusEnabled: boolean;
-    panelSelectHandler: (panel: Panel) => any;
-    currentCheckpointHandler: () => any;
+    panelSelectHandler: (panel: Panel) => void;
+    currentCheckpointHandler: () => void;
 }
 
 class LeftPanelBase extends React.Component<Props> {
@@ -43,7 +43,7 @@ class LeftPanelBase extends React.Component<Props> {
     
     scrollPanelToTop(panel: Panel) {
         switch (panel) {
-            case Panel.Actions: {
+            case Panel.ACTIONS: {
                 this.actionPanel.current && this.actionPanel.current.scrollToTop();
                 break;
             }
@@ -61,13 +61,13 @@ class LeftPanelBase extends React.Component<Props> {
                 <div className="layout-panel__controls">
                     <div className="layout-panel__tabs">
                         <ToggleButton
-                            isToggled={panel == Panel.Actions}
-                            onClick={() => this.selectPanel(Panel.Actions)}
+                            isToggled={panel == Panel.ACTIONS}
+                            onClick={() => this.selectPanel(Panel.ACTIONS)}
                             text="Actions" />
                         <ToggleButton
-                            isToggled={panel == Panel.Status}
+                            isToggled={panel == Panel.STATUS}
                             isDisabled={!statusEnabled}
-                            onClick={statusEnabled ? (() => this.selectPanel(Panel.Status)) : undefined}
+                            onClick={statusEnabled ? (() => this.selectPanel(Panel.STATUS)) : undefined}
                             text="Status" 
                             title={statusEnabled ? null : "No status info"}/>
                     </div>
@@ -98,11 +98,11 @@ class LeftPanelBase extends React.Component<Props> {
     private renderPanels(selectedPanel: Panel): React.ReactNode {
         const actionRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.Actions ? null : "disabled"
+                selectedPanel == Panel.ACTIONS ? null : "disabled"
             ),
             statusRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.Status ? null : "disabled"
+                selectedPanel == Panel.STATUS ? null : "disabled"
             );
     
         return (
@@ -135,7 +135,7 @@ export const LeftPanel = connect(
             checkpointActions: getCheckpointActions(state),
             statusEnabled: !!state.selected.testCase.status.cause,
             isActionsEmpty: isActionsEmpty,
-            panel: state.view.leftPanel == Panel.Actions && isActionsEmpty? Panel.Status: state.view.leftPanel
+            panel: state.view.leftPanel == Panel.ACTIONS && isActionsEmpty? Panel.STATUS: state.view.leftPanel
         })
     },
     dispatch => ({

@@ -17,12 +17,15 @@
 import React from 'react';
 import Log from '../../models/Log';
 import { createStyleSelector } from '../../helpers/styleCreators';
+import SearchableContent from "../search/SearchableContent";
+import { keyForLog } from "../../helpers/keys";
 
 interface LogCardProps {
 	log: Log;
+	index: number;
 }
 
-function LogCard({ log }: LogCardProps){
+export default function LogCard({ log , index }: LogCardProps){
 	const {
 		class: classStr,
 		exception,
@@ -42,10 +45,18 @@ function LogCard({ log }: LogCardProps){
 			<div className="log-card__head">
 				<div className="log-card__level">{level}</div>
 				<div className="log-card__thread">Thread</div>
-				<div className="log-card__thread-val">{thread}</div>
+				<div className="log-card__thread-val">
+					<SearchableContent
+						contentKey={keyForLog(index, 'thread')}
+						content={thread}/>
+				</div>
 				<div className="log-card__timestamp">{timestamp}</div>
 				<div className="log-card__class">Class</div>
-				<div className="log-card__class-val">{classStr}</div>
+				<div className="log-card__class-val">
+					<SearchableContent
+						contentKey={keyForLog(index, 'class')}
+						content={classStr}/>
+				</div>
 				{
 					exception && 
 						<>
@@ -55,9 +66,11 @@ function LogCard({ log }: LogCardProps){
 				}
 			</div>
 			<div className="log-card__delimiter" />
-			<pre className="log-card__message">{message}</pre>
+			<pre className="log-card__message">
+				<SearchableContent
+					contentKey={keyForLog(index, 'message')}
+					content={message}/>
+			</pre>
 		</div>
 	)
 }
-
-export default LogCard;

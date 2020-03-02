@@ -27,6 +27,7 @@ import '../../styles/log.scss'
 
 interface StateProps {
     logsCount: number;
+    scrolledIndex: Number | null;
 }
 
 interface DispatchProps {
@@ -40,26 +41,34 @@ interface Props extends StateProps, DispatchProps {
 function LogsListBase({
     logsCount,
     isActive,
-    loadLogs
+    loadLogs,
+    scrolledIndex
 }: Props) {
     const [loadingLogs, setLoadingLogs] = React.useState(false);
+    const virtuoso = React.useRef<Virtuoso>();
 
     React.useEffect(() => {
         if (isActive && !loadingLogs) {
             loadLogs();
             setLoadingLogs(true);
         }
-    }, [isActive])
+    }, [isActive]);
 
+    React.useEffect(() => {
+        if (scrolledIndex != null) {
+            virtuoso.current?.scrollToIndex(scrolledIndex.valueOf());
+        }
+    }, [scrolledIndex]);
 
     const renderLog = (idx: number): React.ReactElement => {
         return <SkeletonedLogsListItem index={idx} />
-    }
+    };
 
     return (
         <div className="logs">
             <div className="logs__list">
-                <Virtuoso 
+                <Virtuoso
+                    ref={virtuoso}
                     totalCount={logsCount}
                     item={renderLog}
                     overscan={3}
@@ -74,6 +83,7 @@ function LogsListBase({
 const LogsList = connect(
     (state: AppState): StateProps => ({
         logsCount: getLogsCount(state),
+        scrolledIndex: state.selected.scrolledLogIndex
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         loadLogs: () => dispatch(loadLogs()),
