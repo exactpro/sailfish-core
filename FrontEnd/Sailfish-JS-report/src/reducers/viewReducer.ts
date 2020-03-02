@@ -30,14 +30,14 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
         case StateActionTypes.SET_LEFT_PANE: {
             return {
                 ...state,
-                leftPanel: stateAction.pane
+                leftPanel: stateAction.panel
             }
         }
 
         case StateActionTypes.SET_RIGHT_PANE: {
             return {
                 ...state,
-                rightPanel: stateAction.pane
+                rightPanel: stateAction.panel
             }
         }
 

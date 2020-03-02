@@ -20,6 +20,7 @@ import UserMessage, { isUserMessage } from '../models/UserMessage';
 import UserTable, { isUserTable } from '../models/UserTable';
 import { ACTION_FIELDS, MESSAGE_FIELDS } from "./search/searchEngine";
 import Log from "../models/Log";
+import KnownBug from "../models/KnownBug";
 
 const ACTION_KEY_PREFIX = 'action',
     MESSAGE_KEY_PREFIX = 'msg',
@@ -88,4 +89,8 @@ export function keyForActionParameter(actionId: number, index: number): string {
 
 export function keyForLog(index: number, fieldName?: keyof Log): string {
     return `log-${index}` + (fieldName ? `-${fieldName}` : '');
+}
+
+export function keyForKnownBug(knownBug: KnownBug, fieldName?: keyof KnownBug): string {
+    return `known-bug-${knownBug.id}` + (fieldName ? `-${fieldName}` : '');
 }

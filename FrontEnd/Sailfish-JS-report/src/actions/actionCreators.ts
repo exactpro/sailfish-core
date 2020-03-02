@@ -80,10 +80,6 @@ export const selectRejectedMessageId = (messageId: number) => (<const>{
     messageId
 })
 
-export const selectLiveTestCase = () => (<const>{
-    type: StateActionTypes.SELECT_LIVE_TESTCASE
-})
-
 export const selectKnownBug = (knownBug: KnownBug, status: StatusType = null) => (<const>{
     type: StateActionTypes.SELECT_KNOWN_BUG,
     knownBug,
@@ -114,14 +110,14 @@ export const resetFilter = () => (<const>{
     type: StateActionTypes.RESET_FILTER
 })
 
-export const setLeftPane = (pane: Panel) => (<const>{
+export const setLeftPane = (panel: Panel.ACTIONS | Panel.STATUS) => (<const>{
     type: StateActionTypes.SET_LEFT_PANE,
-    pane
+    panel
 })
 
-export const setRightPane = (pane: Panel) => (<const>{
+export const setRightPane = (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => (<const>{
     type: StateActionTypes.SET_RIGHT_PANE,
-    pane
+    panel
 })
 
 export const setMlToken = (token: string) => (<const>{

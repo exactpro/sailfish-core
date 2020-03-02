@@ -42,7 +42,7 @@ const MIN_CONTROLS_WIDTH = 850,
     MIN_CONTROLS_WIDTH_WITH_REJECTED = 900;
 
 interface StateProps {
-    panel: Panel;
+    panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS;
     adminMessages: Message[];
     adminMessagesEnabled: boolean;
     rejectedMessagesEnabled: boolean;
@@ -54,11 +54,11 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    panelSelectHandler: (panel: Panel) => any;
-    selectCurrentRejectedMessage: () => any;
-    adminEnabledHandler: (adminEnabled: boolean) => any;
-    togglePredictions: () => any;
-    uglifyAllHandler: () => any;
+    panelSelectHandler: (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => void;
+    selectCurrentRejectedMessage: () => void;
+    adminEnabledHandler: (adminEnabled: boolean) => void;
+    togglePredictions: () => void;
+    uglifyAllHandler: () => void;
 }
 
 interface Props extends StateProps, DispatchProps {}
@@ -240,7 +240,7 @@ class RightPanelBase extends React.Component<Props, State> {
         );
     }
 
-    private selectPanel(panel: Panel) {
+    private selectPanel(panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) {
         if (panel == this.props.panel) {
             this.scrollPanelToTop(panel);
         } else {
@@ -256,7 +256,7 @@ class RightPanelBase extends React.Component<Props, State> {
 }
 
 export const RightPanel = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps & { selectedRejectedMessageId: number } => ({
         adminMessages: state.selected.testCase.messages.filter(isAdmin),
         rejectedMessagesEnabled: state.selected.testCase.messages.filter(isRejected).length > 0,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
@@ -275,7 +275,7 @@ export const RightPanel = connect(
         hasLogs: state.selected.testCase.files.logentry.count > 0
     }),
     (dispatch) => ({
-        panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),
+        panelSelectHandler: (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => dispatch(setRightPane(panel)),
         selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId)),
         adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled)),
         togglePredictions: () => dispatch(togglePredictions()),

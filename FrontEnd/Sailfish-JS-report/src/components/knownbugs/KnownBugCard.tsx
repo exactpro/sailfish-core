@@ -22,6 +22,8 @@ import KnownBug from "../../models/KnownBug";
 import Action from "../../models/Action";
 import { StatusType } from '../../models/Status';
 import ChipsList from '../ChipsList';
+import SearchableContent from "../search/SearchableContent";
+import { keyForKnownBug } from "../../helpers/keys";
 
 interface KnownBugCardProps {
     bug: KnownBug;
@@ -43,7 +45,7 @@ export function KnownBugCard({ bug, actionsMap, isSelected, onSelect, selectedSt
 
     const relatedActions = React.useMemo(() => {
         return bug.relatedActionIds.reduce((actions, id) => 
-            actionsMap.get(id) ? [...actions, actionsMap.get(id)] : actions, [])
+            actionsMap.has(id) ? [...actions, actionsMap.get(id)] : actions, [])
     }, [actionsMap]);
 
     return (
@@ -56,7 +58,11 @@ export function KnownBugCard({ bug, actionsMap, isSelected, onSelect, selectedSt
                     selectedStatus={isSelected && selectedStatus}/>
             </div>
             <div className="known-bug-card__right">
-                <div className="known-bug-card__name">{bug.subject}</div>
+                <div className="known-bug-card__name">
+                    <SearchableContent
+                        contentKey={keyForKnownBug(bug, 'subject')}
+                        content={bug.subject}/>
+                </div>
             </div>
         </div>
     )

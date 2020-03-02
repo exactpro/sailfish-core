@@ -17,7 +17,14 @@
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
 import Action, { isAction, ActionNodeType } from '../../models/Action';
-import { keyForMessage, keyForAction, keyForActionParameter, keyForVerification, keyForLog } from '../keys';
+import {
+    keyForMessage,
+    keyForAction,
+    keyForActionParameter,
+    keyForVerification,
+    keyForLog,
+    keyForKnownBug
+} from '../keys';
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
@@ -28,11 +35,14 @@ import SearchToken from "../../models/search/SearchToken";
 import SearchSplitResult from "../../models/search/SearchSplitResult";
 import SearchContent from "../../models/search/SearchContent";
 import Log from "../../models/Log";
+import KnownBug, { KnownBugNode } from "../../models/KnownBug";
+import { isKnownBugCategory } from "../../models/KnownBugCategory";
 
 // list of fields that will be used to search (order is important!)
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'contentHumanReadable'],
     ACTION_FIELDS: Array<keyof Action> = ['matrixId', 'serviceName', 'name', 'messageType', 'description'],
     LOG_FIELDS: Array<keyof Log> = ['thread', 'class', 'message'],
+    KNOWN_BUG_FIELDS: Array<keyof KnownBug> = ['subject'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
@@ -50,11 +60,13 @@ export async function findAll(tokens: ReadonlyArray<SearchToken>, content: Searc
 
     const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, tokens));
     const messageResults = await asyncFlatMap(content.messages, item => findAllInMessage(item, tokens));
+    const kbResults = await asyncFlatMap(content.bugs, item => findAllInKnownBugNode(item, tokens));
     const logResults = await asyncFlatMap(content.logs, (item, index) => findAllInLog(item, tokens, index));
 
     return new SearchResult([
         ...actionResults,
         ...messageResults,
+        ...kbResults,
         ...logResults
     ]);
 }
@@ -104,6 +116,20 @@ function findAllInLog(log: Log, searchTokens: ReadonlyArray<SearchToken>, index:
         LOG_FIELDS,
         searchTokens,
         keyForLog(index)
+    )
+}
+
+function findAllInKnownBugNode(node: KnownBugNode, searchTokens: ReadonlyArray<SearchToken>): Array<[string, SearchSplitResult[]]> {
+    if (isKnownBugCategory(node)) {
+        return node.subNodes
+            .flatMap(subNode => findAllInKnownBugNode(subNode, searchTokens));
+    }
+
+    return findAllInObject(
+        node,
+        KNOWN_BUG_FIELDS,
+        searchTokens,
+        keyForKnownBug(node)
     )
 }
 

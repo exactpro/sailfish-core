@@ -13,15 +13,9 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************/
+import { KnownBugNode } from "../models/KnownBug";
+import AppState from "../state/models/AppState";
 
-import Action, { ActionNode } from "../Action";
-import Message from "../Message";
-import Log from "../Log";
-import { KnownBugNode } from "../KnownBug";
+const EMPTY_KNOWN_BUG_ARRAY = new Array<KnownBugNode>();
 
-export default interface SearchContent {
-    actions: ActionNode[];
-    messages: Message[];
-    logs: Log[];
-    bugs: KnownBugNode[];
-}
+export const getKnownBugs = (state: AppState) => state.selected.testCase?.bugs ?? EMPTY_KNOWN_BUG_ARRAY;

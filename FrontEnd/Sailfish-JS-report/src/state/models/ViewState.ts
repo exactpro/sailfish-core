@@ -18,11 +18,11 @@ import Panel from '../../util/Panel';
 
 export default interface ViewState {
     isLoading: boolean;
-    leftPanel: Panel;
-    rightPanel: Panel;
+    leftPanel: Panel.ACTIONS | Panel.STATUS;
+    rightPanel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS;
     beautifiedMessages: number[];
 
-    // We use Boolean object here. It's the way we handle flag chages after component unmount.
+    // We use Boolean object here. It's the way we handle flag changes after component unmount.
     adminMessagesEnabled: Boolean;
     isConnectionError: boolean;
 }

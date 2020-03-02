@@ -20,6 +20,8 @@ import { getFilteredMessages } from "./messages";
 import SearchContent from "../models/search/SearchContent";
 import { getLogs } from "./logs";
 import Panel from "../util/Panel";
+import { getKnownBugs } from "./knownBugs";
+import { getCategoryBugChains } from "../helpers/knownbug";
 
 const EMPTY_ARRAY = [];
 
@@ -34,16 +36,21 @@ export const getSearchContent = createSelector(
         getFilteredActions,
         getFilteredMessages,
         getLogs,
+        getKnownBugs,
         getLeftPanelEnabled,
         getRightPanelEnabled,
         getLeftPanel,
         getRightPanel
     ],
     (
-        actions, messages,logs , leftPanelEnabled, rightPanelEnabled, leftPanel, rightPanel
+        actions, messages,logs , knownBugs, leftPanelEnabled, rightPanelEnabled, leftPanel, rightPanel
     ): SearchContent => ({
         actions: leftPanelEnabled && leftPanel == Panel.ACTIONS ? actions : EMPTY_ARRAY,
         messages: rightPanelEnabled && rightPanel == Panel.MESSAGES ? messages : EMPTY_ARRAY,
-        logs: rightPanelEnabled && rightPanel == Panel.LOGS ? logs : EMPTY_ARRAY
+        logs: rightPanelEnabled && rightPanel == Panel.LOGS ? logs : EMPTY_ARRAY,
+        bugs: rightPanelEnabled && rightPanel == Panel.KNOWN_BUGS ?
+            // we need to place it in chains first to receive list of bugs in correct order
+            getCategoryBugChains(knownBugs).reduce((acc, { categoryBugs }) => [...acc, ...categoryBugs], []) :
+            EMPTY_ARRAY
     })
 );

@@ -22,6 +22,9 @@ import ActionParameter from "../../models/ActionParameter";
 import Verification from "../../models/Verification";
 import VerificationEntry from "../../models/VerificationEntry";
 import SearchToken from "../../models/search/SearchToken";
+import KnownBug, { KnownBugNode } from "../../models/KnownBug";
+import { KnownBugStatus } from "../../models/KnownBugStatus";
+import KnownBugCategory from "../../models/KnownBugCategory";
 
 export function createAction(
     id: number = 0, 
@@ -109,5 +112,23 @@ export function createSearchToken(pattern = 'test', color = 'default', isActive 
         pattern,
         color,
         isActive
+    }
+}
+
+export function createKnownBug(id: number = 0, subject: string = '', relatedActionIds: number[] = []): KnownBug {
+    return {
+        actionNodeType: ActionNodeType.KNOWN_BUG,
+        id,
+        subject,
+        relatedActionIds,
+        status: KnownBugStatus.REPRODUCED
+    }
+}
+
+export function createKnownBugCategory(name: string = '', subNodes: KnownBugNode[] = []): KnownBugCategory {
+    return {
+        actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY,
+        name,
+        subNodes
     }
 }

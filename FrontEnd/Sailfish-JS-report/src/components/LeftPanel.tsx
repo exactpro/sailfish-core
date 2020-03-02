@@ -33,7 +33,7 @@ interface Props {
     panel: Panel;
     isCheckpointsEnabled: boolean;
     statusEnabled: boolean;
-    panelSelectHandler: (panel: Panel) => void;
+    panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => void;
     currentCheckpointHandler: () => void;
 }
 
@@ -118,7 +118,7 @@ class LeftPanelBase extends React.Component<Props> {
         )
     }
 
-    private selectPanel(panel: Panel) {
+    private selectPanel(panel: Panel.ACTIONS | Panel.STATUS) {
         if (panel == this.props.panel) {
             this.scrollPanelToTop(panel);
         } else {
@@ -139,8 +139,8 @@ export const LeftPanel = connect(
         })
     },
     dispatch => ({
-        panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),
-        setSelectedCheckpoint: (checkpointAciton: Action) => dispatch(selectCheckpointAction(checkpointAciton))
+        panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => dispatch(setLeftPane(panel)),
+        setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpointAction(checkpointAction))
     }),
     ({ checkpointActions, selectedCheckpointId, ...stateProps }, { setSelectedCheckpoint, ...dispatchProps}, ownProps): Props => ({
         ...stateProps,
@@ -149,4 +149,4 @@ export const LeftPanel = connect(
         currentCheckpointHandler: () => setSelectedCheckpoint(checkpointActions.find(action => action.id === selectedCheckpointId)),
         isCheckpointsEnabled: checkpointActions.length > 0
     })
-)(LeftPanelBase)
+)(LeftPanelBase);

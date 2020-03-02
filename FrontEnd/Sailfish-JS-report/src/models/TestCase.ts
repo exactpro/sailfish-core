@@ -19,8 +19,7 @@ import Message from "./Message";
 import Log from "./Log";
 import Status from './Status';
 import Report from "./Report";
-import KnownBug from './KnownBug';
-import KnownBugCategory from './KnownBugCategory';
+import { KnownBugNode } from './KnownBug';
 
 export default interface TestCase {
     actionNodeType: 'testCase';
@@ -28,7 +27,7 @@ export default interface TestCase {
     actions: ActionNode[];
     logs: Log[];
     messages: Message[];
-    bugs: (KnownBug | KnownBugCategory)[];
+    bugs: KnownBugNode[];
     type?: string;
     reference?: any;
     order: number;

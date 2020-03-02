@@ -14,15 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-import KnownBug from "./KnownBug";
+import KnownBug, { KnownBugNode } from "./KnownBug";
 import { ActionNodeType } from "./Action";
 
 export default interface KnownBugCategory {
     actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY;
     name: string;
-    subNodes: (KnownBug | KnownBugCategory) [];
+    subNodes: KnownBugNode[];
 }
 
-export function isKnownBugCategory(category: KnownBug | KnownBugCategory): category is KnownBugCategory {
+export function isKnownBugCategory(category: KnownBugNode): category is KnownBugCategory {
     return category.actionNodeType === ActionNodeType.KNOWN_BUG_CATEGORY;
 }

@@ -26,6 +26,8 @@ export default interface KnownBug {
     id: number;
 }
 
-export function isKnownBug(bug: KnownBug | KnownBugCategory): bug is KnownBug {
+export type KnownBugNode = KnownBug | KnownBugCategory;
+
+export function isKnownBug(bug: KnownBugNode): bug is KnownBug {
     return bug.actionNodeType === ActionNodeType.KNOWN_BUG;
 }
