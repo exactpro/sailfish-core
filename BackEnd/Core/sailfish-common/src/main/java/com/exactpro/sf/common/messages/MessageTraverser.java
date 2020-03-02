@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -57,17 +60,9 @@ public class MessageTraverser extends MessageStructureReader {
     }
 
     protected Map<String, IFieldStructure> combineUnknownFields(Map<String, IFieldStructure> fields, IMessage message) {
-        Map<String, JavaType> namesByDictionary = fields.values().stream()
-                .filter(e -> !e.isComplex())
-                .collect(Collectors.toMap(IFieldStructure::getName, IFieldStructure::getJavaType));
-
-        fields.values().stream()
-                .filter(IFieldStructure::isComplex)
-                .forEach(e ->namesByDictionary.put(e.getName(), null));
-
         return Stream.concat(fields.values().stream(),
                 message.getFieldNames().stream()
-                        .filter(name -> !contains(namesByDictionary, name, message.getField(name)))
+                        .filter(field -> !fields.containsKey(field))
                         .map(name -> createFieldStructure(message, name)))
                 .collect(Collectors.groupingBy(IFieldStructure::getName, LinkedHashMap::new, Collectors.reducing(this::overrideStructure)))
                 .values().stream()
@@ -126,11 +121,12 @@ public class MessageTraverser extends MessageStructureReader {
         super.visitComplexField(curField, msgStrVisitor, fieldName, value);
     }
     
-    protected IFieldStructure createFieldStructure(IFieldStructure fieldStructure, String namespace, String fieldName, Object value) {
+    protected IFieldStructure createFieldStructure(IFieldStructure originFieldStructure, String namespace, String fieldName, Object value) {
+        IFieldStructure fieldStructure = originFieldStructure;
         if(value != null) {
             boolean isCollection = false;
             JavaType javaType = null;
-            StructureType structureType = (fieldStructure != null && !fieldStructure.isComplex()) ? fieldStructure.getStructureType() : StructureType.SIMPLE;
+            StructureType structureType = (originFieldStructure != null && !originFieldStructure.isComplex()) ? originFieldStructure.getStructureType() : StructureType.SIMPLE;
 
             if(value instanceof List<?>) {
                 isCollection = true;
@@ -148,13 +144,21 @@ public class MessageTraverser extends MessageStructureReader {
                 }
             }
 
-            if (fieldStructure == null 
-                    || fieldStructure.isCollection() != isCollection
-                    || fieldStructure.getStructureType() != structureType
+            if (originFieldStructure == null
+                    || originFieldStructure.isCollection() != isCollection
+                    || originFieldStructure.getStructureType() != structureType
                     || (structureType == StructureType.COMPLEX && javaType != null)
-                    || (structureType != StructureType.COMPLEX && fieldStructure.getJavaType() != javaType)) {
+                    || (structureType != StructureType.COMPLEX && originFieldStructure.getJavaType() != javaType)) {
                 if (structureType == StructureType.COMPLEX && javaType == null) {
                     fieldStructure = new MessageStructure(fieldName, namespace, isCollection, emptyMessageStructure);
+                } else if  (originFieldStructure != null && value != null) {
+                    Map<String, IAttributeStructure> newValues =  new HashMap<>();
+
+                    originFieldStructure.getValues().forEach((nameValue, originalValue) -> {
+                        AttributeStructure attributeStructure = new AttributeStructure(nameValue, originalValue.getValue(), originalValue.getValue(), JavaType.JAVA_LANG_STRING);
+                        newValues.put(nameValue, attributeStructure );
+                    });
+                    fieldStructure = new FieldStructure(fieldName, namespace, ObjectUtils.defaultIfNull(javaType, JavaType.JAVA_LANG_STRING), isCollection, structureType, originFieldStructure.getAttributes(), newValues);
                 } else {
                     fieldStructure = new FieldStructure(fieldName, namespace, ObjectUtils.defaultIfNull(javaType, JavaType.JAVA_LANG_STRING), isCollection, structureType);
                 }

@@ -80,6 +80,10 @@ public class FieldStructure implements IFieldStructure {
 		this.referenceName = referenceName;
 	}
 
+	public FieldStructure(String name, String namespace, JavaType javaType, boolean isCollection, StructureType structureType, Map<String, IAttributeStructure> attributes, Map<String, IAttributeStructure> values) {
+		this(name, namespace, null, null, attributes, values, javaType, false, isCollection, false, null, structureType);
+	}
+
 	@Override
 	public boolean isComplex() {
         return structureType == StructureType.COMPLEX;

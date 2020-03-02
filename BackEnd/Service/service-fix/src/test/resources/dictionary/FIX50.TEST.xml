@@ -16,6 +16,79 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --><dictionary xmlns="http://exactprosystems.com/dictionary" name="FIX_5_0">
 	<fields>
+		<field type="java.lang.Integer" id="F_NoOrderAttributes" name="NoOrderAttributes">
+			<attribute type="java.lang.Integer" name="tag">2593</attribute>
+			<attribute type="java.lang.String" name="fixtype">NUMINGROUP</attribute>
+		</field>
+		<field type="java.lang.Integer" id="F_ClientGroup" name="ClientGroup">
+			<attribute type="java.lang.Integer" name="tag">9050</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="GROUP_1">1</value>
+			<value name="GROUP_2">2</value>
+			<value name="GROUP_3">3</value>
+			<value name="GROUP_4">4</value>
+		</field>
+		<field type="java.lang.Integer" id="F_CounterPartyGroup" name="CounterPartyGroup">
+			<attribute type="java.lang.Integer" name="tag">9051</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="GROUP_1">1</value>
+			<value name="GROUP_2">2</value>
+			<value name="GROUP_3">3</value>
+			<value name="GROUP_4">4</value>
+		</field>
+		<field type="java.lang.Integer" id="F_GroupID" name="GroupID">
+			<attribute type="java.lang.Integer" name="tag">27017</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+		</field>
+		<field type="java.lang.Integer" id="F_OrderAttributeType" name="OrderAttributeType">
+			<attribute type="java.lang.Integer" name="tag">2594</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="LIQUIDITY_PROVISION">2</value>
+			<value name="ALGORITHM">4</value>
+		</field>
+		<field type="java.lang.String" id="F_OrderAttributeValue" name="OrderAttributeValue">
+			<attribute type="java.lang.Integer" name="tag">2595</attribute>
+			<attribute type="java.lang.String" name="fixtype">STRING</attribute>
+			<value name="YES">Y</value>
+		</field>
+		<field type="java.lang.Integer" id="F_OrderOrigination" name="OrderOrigination">
+			<attribute type="java.lang.Integer" name="tag">1724</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="DEA">5</value>
+		</field>
+		<field type="java.lang.String" id="F_OrderSource" name="OrderSource">
+			<attribute type="java.lang.Integer" name="tag">30004</attribute>
+			<attribute type="java.lang.String" name="fixtype">STRING</attribute>
+		</field>
+		<field type="java.lang.Integer" id="F_OrderSubType" name="OrderSubType">
+			<attribute type="java.lang.Integer" name="tag">9020</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+		</field>
+		<field type="java.lang.Integer" id="F_PartyRoleQualifier" name="PartyRoleQualifier">
+			<attribute type="java.lang.Integer" name="tag">2376</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="ALGORITHM">22</value>
+			<value name="FIRM_OR_LEGAL_ENTITY">23</value>
+			<value name="NATURAL_PERSON">24</value>
+		</field>
+		<field type="java.lang.Integer" id="F_PassiveOnlyOrder" name="PassiveOnlyOrder">
+			<attribute type="java.lang.Integer" name="tag">27010</attribute>
+			<attribute type="java.lang.String" name="fixtype">INT</attribute>
+			<value name="NO_CONSTRAINT">0</value>
+			<value name="SETTING_NEW_BBO_OR_JOINING_EXISTING_BBO">1</value>
+			<value name="SETTING_NEW_VISIBLE_BBO">100</value>
+			<value name="AT_BBO_OR_WITHIN_ONE_VISIBLE_PRICE_POINT">2</value>
+			<value name="AT_BBO_OR_WITHIN_TWO_VISIBLE_PRICE_POINTS">3</value>
+			<value name="NOT_MATCH_WITH_VISIBLE_CONTRA_ORDER">99</value>
+		</field>
+		<field type="java.lang.Character" id="F_RoutingInst" name="RoutingInst">
+			<attribute type="java.lang.Integer" name="tag">9303</attribute>
+			<attribute type="java.lang.String" name="fixtype">CHAR</attribute>
+		</field>
+		<field type="java.lang.String" id="F_SecurityExchange" name="SecurityExchange">
+			<attribute type="java.lang.Integer" name="tag">207</attribute>
+			<attribute type="java.lang.String" name="fixtype">EXCHANGE</attribute>
+		</field>
         <field id="field-RefreshIndicator" name="RefreshIndicator" type="java.lang.Boolean">
             <attribute name="tag" type="java.lang.Integer">1187</attribute>
             <attribute name="fixtype" type="java.lang.String">BOOLEAN</attribute>
@@ -58,6 +131,7 @@
 			<value name="SEQUENCE_RESET">4</value>
 			<value name="LOGOUT">5</value>
 			<value name="LOGON">A</value>
+			<value name="ORDER_SINGLE">D</value>
 			<value name="ORDER_LIST">E</value>
 			<value name="MARKET_DATA_SNAPSHOT_FULL_REFRESH">W</value>
 			<value name="MARKET_DATA_INCREMENTAL_REFRESH">X</value>
@@ -3439,6 +3513,99 @@
             <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
             <field name="QuoteSetID" reference="field-QuoteSetID" required="false"/>
         </message>
-
+		<message id="M_NewOrderSingle" name="NewOrderSingle">
+			<attribute type="java.lang.String" name="entity_type">Message</attribute>
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute type="java.lang.String" name="MessageType">D</attribute>
+			<field reference="M_header" name="header" required="true"/>
+			<field reference="field-ClOrdID" name="ClOrdID" required="true"/>
+			<field reference="component-TradingParty" name="TradingParty" required="true"/>
+			<field reference="field-Account" name="Account"/>
+			<field reference="field-Symbol" name="Symbol">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-SecurityID" name="SecurityID" required="true"/>
+			<field reference="field-SecurityIDSource" name="SecurityIDSource" required="true"/>
+			<field reference="F_RoutingInst" name="RoutingInst">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-Currency" name="Currency">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="F_SecurityExchange" name="SecurityExchange">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-OrdType" name="OrdType" required="true"/>
+			<field reference="field-PreTradeAnonymity" name="PreTradeAnonymity"/>
+			<field reference="field-TimeInForce" name="TimeInForce"/>
+			<field reference="field-ExpireTime" name="ExpireTime"/>
+			<field reference="field-ExpireDate" name="ExpireDate"/>
+			<field reference="field-Side" name="Side" required="true"/>
+			<field reference="field-OrderQty" name="OrderQty" required="true"/>
+			<field reference="field-DisplayQty" name="DisplayQty" required="true"/>
+			<field reference="field-DisplayMethod" name="DisplayMethod"/>
+			<field reference="field-MinQty" name="MinQty"/>
+			<field reference="field-Price" name="Price"/>
+			<field reference="field-StopPx" name="StopPx"/>
+			<field reference="field-AccountType" name="AccountType" required="true"/>
+			<field reference="field-OrderCapacity" name="OrderCapacity" required="true"/>
+			<field reference="field-TransactTime" name="TransactTime" required="true"/>
+			<field reference="field-SecondaryClOrdID" name="SecondaryClOrdID"/>
+			<field reference="field-ClOrdLinkID" name="ClOrdLinkID"/>
+			<field reference="F_ClientGroup" name="ClientGroup">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="F_CounterPartyGroup" name="CounterpartyGroup">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-ExecInst" name="ExecInst">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-PegPriceType" name="PegPriceType">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="field-OrderBook" name="OrderBook">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="F_OrderSource" name="OrderSource">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="F_OrderSubType" name="OrderSubType">
+				<attribute type="java.lang.Boolean" name="Applicable">false</attribute>
+			</field>
+			<field reference="F_PassiveOnlyOrder" name="PassiveOnlyOrder"/>
+			<field reference="component-TrdgSesGrp" name="TrdgSesGrp"/>
+			<field reference="M_NoOrderAttributesGrp" name="NoOrderAttributesGrp"/>
+			<field reference="F_OrderOrigination" name="OrderOrigination"/>
+			<field reference="F_GroupID" name="GroupID"/>
+			<field reference="trailer" name="trailer" required="true"/>
+		</message>
+		<message id="M_NoOrderAttributesGrp" name="NoOrderAttributesGrp">
+			<attribute type="java.lang.String" name="entity_type">Component</attribute>
+			<field isCollection="true" reference="M_NoOrderAttributesGrp_NoOrderAttributes" name="NoOrderAttributes"/>
+		</message>
+		<message id="M_NoOrderAttributesGrp_NoOrderAttributes" name="NoOrderAttributesGrp_NoOrderAttributes">
+			<attribute type="java.lang.String" name="entity_type">Group</attribute>
+			<attribute type="java.lang.Integer" name="tag">2593</attribute>
+			<attribute type="java.lang.String" name="fixtype">NUMINGROUP</attribute>
+			<field reference="F_OrderAttributeType" name="OrderAttributeType"/>
+			<field reference="F_OrderAttributeValue" name="OrderAttributeValue"/>
+		</message>
+		<message id="M_header" name="header_tag">
+			<attribute type="java.lang.String" name="entity_type">Header</attribute>
+			<field reference="field-BeginString" name="BeginString" required="true"/>
+			<field reference="field-BodyLength" name="BodyLength" required="true"/>
+			<field reference="field-MsgType" name="MsgType" required="true"/>
+			<field reference="field-MsgSeqNum" name="MsgSeqNum" required="true"/>
+			<field reference="field-SenderCompID" name="SenderCompID" required="true"/>
+			<field reference="field-TargetCompID" name="TargetCompID" required="true"/>
+			<field reference="field-PossDupFlag" name="PossDupFlag"/>
+			<field reference="field-PossResend" name="PossResend"/>
+			<field reference="field-SendingTime" name="SendingTime"/>
+			<field reference="field-OrigSendingTime" name="OrigSendingTime"/>
+			<field reference="field-ApplVerID" name="ApplVerID"/>
+			<field reference="field-OnBehalfOfCompID" name="OnBehalfOfCompID"/>
+			<field reference="field-DeliverToCompID" name="DeliverToCompID"/>
+		</message>
 	</messages>
 </dictionary>
