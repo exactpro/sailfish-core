@@ -15,6 +15,41 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
+import static com.exactpro.sf.scriptrunner.state.ScriptStatus.CANCELED;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.SFAPIClient;
 import com.exactpro.sf.Service.Status;
 import com.exactpro.sf.ServiceImportResult;
@@ -53,39 +88,10 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.util.EMailUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterators;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class ExecutorClient {
+
+    private static final int TIMEOUT_FOR_CHECK_TEST_SCRIPT_STATUS = 500;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ExecutorClient.class);
 	
@@ -382,7 +388,7 @@ public class ExecutorClient {
 
     }
 
-	public void registerTags(List<Tag> tags) {
+    public void registerTags(List<Tag> tags) {
 		
 		this.state = ExecutorState.RegisteringTags;
 		
@@ -710,7 +716,7 @@ public class ExecutorClient {
                 ScriptState scriptState;
                 while (!(scriptState = apiClient.getTestScriptRunInfo(testScriptId).getScriptState()).isTerminateState()
                     && scriptState != ScriptState.READY) {
-                    Thread.sleep(1000);
+                    Thread.sleep(TIMEOUT_FOR_CHECK_TEST_SCRIPT_STATUS);
                 }
             } catch (APICallException | APIResponseException e) {
                 throw new EPSCommonException("Could not get scripts state for test script with id + {" + testScriptId + '}', e);
@@ -773,7 +779,6 @@ public class ExecutorClient {
                 monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder,
                         reportDownloadNeeded, isMasterSf);
 
-                apiClient.deleteMatrix((int)matrixId);
             } catch (InterruptedException e) {
                 throw  e;
             } catch (Exception e) {
@@ -990,6 +995,7 @@ public class ExecutorClient {
 					
 					idleTime = 0;
 
+					deleteMatrix();
                     cleanScriptListEnvironment(); // Cleanup
 
 				} catch (InterruptedException e) { //TODO ?
@@ -1166,29 +1172,71 @@ public class ExecutorClient {
             toErrorState(e);
         }
     }
+
     private void stopRunningTestScripts() {
         try {
             // currentList may be null when BB end to running all test scripts.
             // When BB execute action Interrupt currentList is not null
             if (currentList != null) {
-                currentList
+
+                List<Script> notExecutedScripts = currentList
                         .getScripts()
                         .stream()
                         .filter(script -> !script.isFinished())
-                        .forEach(script -> {
-                            try {
-                                apiClient.stopTestScriptRun((int)script.getRemoteInformation().getTestScriptId());
-                                apiClient.deleteTestScriptRun((int) script.getRemoteInformation().getTestScriptId());
-                                apiClient.deleteMatrix((int)script.getRemoteInformation().getMatrixId());
-                            } catch (APICallException | APIResponseException e) {
-                                throw new EPSCommonException("Could not perform api call", e);
-                            }
-                        });
+                        .collect(Collectors.toList());
+
+                notExecutedScripts.forEach(script -> {
+                    try {
+                        apiClient.stopTestScriptRun((int)script.getRemoteInformation().getTestScriptId());
+                    } catch (APICallException | APIResponseException e) {
+                        throw new EPSCommonException("Could not perform api call for stop test script with id: " + script.getRemoteInformation().getTestScriptId(), e);
+                    }
+                });
+
+                notExecutedScripts.forEach(script -> {
+                    int testScriptId = (int)script.getRemoteInformation().getTestScriptId();
+                    try {
+                        waitForStopTestScript(testScriptId);
+                        if (apiClient.getTestScriptRunInfo(testScriptId).getScriptStatus() == CANCELED) {
+                            apiClient.deleteTestScriptRun(testScriptId);
+                        }
+                    } catch (InterruptedException | APICallException | APIResponseException e) {
+                        throw new EPSCommonException("Could not perform api call for delete test script with id: " + script.getRemoteInformation().getTestScriptId(), e);
+                    }
+                });
             }
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             toErrorState(e);
         }
     }
 
+    private void waitForStopTestScript(int testScriptId) throws InterruptedException {
+        try {
+            //FIXME: !!! isTerminateState in ScriptState is mean that TestScriptRunReport may not locked.
+            // If report isn`t locked we can`t delete testScript
+            while (apiClient.getTestScriptRunShortReport(testScriptId).isLocked()) {
+                Thread.sleep(TIMEOUT_FOR_CHECK_TEST_SCRIPT_STATUS);
+            }
+        } catch (APIResponseException | APICallException e) {
+            throw new EPSCommonException("Could not perform api call for getting test script status with id: " + testScriptId, e);
+        }
+    }
+
+    private void deleteMatrix() {
+        try {
+            if (currentList != null) {
+                currentList.getScripts().forEach(script -> {
+                    int matrixId = (int)script.getRemoteInformation().getMatrixId();
+                    try {
+                        apiClient.deleteMatrix(matrixId);
+                    } catch (APICallException | APIResponseException e) {
+                        throw new EPSCommonException("Could not perform api call for delete matrix with id: " + matrixId, e);
+                    }
+                });
+            }
+        } catch (RuntimeException e) {
+            toErrorState(e);
+        }
+    }
 
 }
