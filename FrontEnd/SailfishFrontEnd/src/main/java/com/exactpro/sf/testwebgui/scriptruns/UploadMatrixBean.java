@@ -140,7 +140,7 @@ public class UploadMatrixBean implements Serializable {
 
             for (MatrixWrapper wrapper : linked) {
                 try {
-                    MatrixUtil.addMatrixByLink(getMatrixProviderHolder(), wrapper.getPath(), wrapper.getProviderURI());
+                    MatrixUtil.addMatrixByLink(BeanUtil.getSfContext().getMatrixStorage(), getMatrixProviderHolder(), wrapper.getPath(), wrapper.getProviderURI());
                     links.add(wrapper.getPath());
                 } catch (Exception e) {
                     String message = "Could not store uploaded file: " + e.getMessage();

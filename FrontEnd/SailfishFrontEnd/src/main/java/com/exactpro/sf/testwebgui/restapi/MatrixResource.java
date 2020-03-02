@@ -211,8 +211,8 @@ public class MatrixResource {
         }
 
         try {
-            uploaded = MatrixUtil.addMatrixByLink(SFLocalContext.getDefault().getMatrixProviderHolder(), link,
-                                                  SailfishURI.parse(providerURI));
+            uploaded = MatrixUtil.addMatrixByLink(SFLocalContext.getDefault().getMatrixStorage(), SFLocalContext.getDefault().getMatrixProviderHolder(),
+                    link, SailfishURI.parse(providerURI));
 
             XmlMatrixLinkUploadResponse matrixUploadResponse = new XmlMatrixLinkUploadResponse();
 

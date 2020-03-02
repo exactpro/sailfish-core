@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.exactpro.sf.testwebgui.BeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,7 @@ public class MatrixUtil {
 		logger.info("Reload finished");
 	}
 
-    public static List<IMatrix> addMatrixByLink(MatrixProviderHolder holder, String link, SailfishURI providerURI)
+    public static List<IMatrix> addMatrixByLink(IMatrixStorage matrixStorage, MatrixProviderHolder holder, String link, SailfishURI providerURI)
             throws Exception {
 		logger.info("Upload started");
         Map<String, IMatrixProvider> matrixProviders = holder.getMatrixProviders(link, providerURI);
@@ -67,8 +66,7 @@ public class MatrixUtil {
         List<IMatrix> result = new ArrayList<>();
         for (Entry<String, IMatrixProvider> entry : matrixProviders.entrySet()) {
             try (InputStream inputStream = entry.getValue().getMatrix()) {
-                result.add(BeanUtil.getSfContext().getMatrixStorage()  //FIXME
-                                       .addMatrix(inputStream, entry.getValue().getName(), null, "Linked", null,
+                result.add(matrixStorage.addMatrix(inputStream, entry.getValue().getName(), null, "Linked", null,
                                                      entry.getKey(), providerURI));
             }
         }
