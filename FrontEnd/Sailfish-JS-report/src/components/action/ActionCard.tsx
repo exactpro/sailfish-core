@@ -58,6 +58,15 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
         outcome
     } = action;
 
+    const isEmptyParameters = parameters === null,
+          isSingleEmptyMessage = !isEmptyParameters && parameters.length == 1 && parameters[0].name === "Message" &&
+                                 parameters[0].value === "" && parameters[0].subParameters.length == 0,
+          showParams = !isEmptyParameters && !isSingleEmptyMessage,
+          isDisbled = !showParams && 
+                      !action.isTruncated &&
+                      !children.length && 
+                      !(action.status.status == StatusType.FAILED && action.status.cause != null)
+
     const rootClassName = createStyleSelector(
         "action-card",
         status.status,
@@ -79,16 +88,12 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
-    const isEmptyParameters = parameters === null,
-          isSingleEmptyMessage = !isEmptyParameters && parameters.length == 1 && parameters[0].name === "Message" &&
-                                 parameters[0].value === "" && parameters[0].subParameters.length == 0,
-          showParams = !isEmptyParameters && !isSingleEmptyMessage
-
     return (
         <div className={rootClassName}
             onClick={stopPropagationHandler(onSelect, action)}
             key={action.id}>
             <ExpandablePanel
+                isExpandDisabled={isDisbled}
                 isExpanded={isExpanded}
                 onExpand={isExpanded => onRootExpand(isExpanded)}>
                 {
@@ -167,50 +172,48 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                 }
 
                 <div className="ac-body">
-                    {showParams && <div className={inputParametersClassName}>
-                        <SearchExpandablePanel
-                            searchKeyPrefix={keyForAction(id, 'parameters')}
-                            stateKey={keyForAction(id, 'parameters')}>
-                            {toggleExpand => (
-                                <div className="ac-body__item-title"
-                                    onClick={stopPropagationHandler(toggleExpand)}>
-                                        Input parameters</div>
-                            )}
-                            <ParamsTable
-                                actionId={action.id}
-                                stateKey={action.id + '-input-params-nodes'}
-                                params={parameters}
-                                name={name} />
-                        </SearchExpandablePanel>
-                    </div>}
-
-                    {action.isTruncated ? (
+                    {showParams && 
+                        <div className={inputParametersClassName}>
+                            <SearchExpandablePanel
+                                searchKeyPrefix={keyForAction(id, 'parameters')}
+                                stateKey={keyForAction(id, 'parameters')}>
+                                {toggleExpand => (
+                                    <div className="ac-body__item-title"
+                                        onClick={stopPropagationHandler(toggleExpand)}>
+                                            Input parameters</div>
+                                )}
+                                <ParamsTable
+                                    actionId={action.id}
+                                    stateKey={action.id + '-input-params-nodes'}
+                                    params={parameters}
+                                    name={name} />
+                            </SearchExpandablePanel>
+                        </div>
+                    }
+                    {action.isTruncated &&
                         <div className="ac-body__truncated-warning">
                             {action.verificationCount - action.subNodes.filter(node => isVerification(node)).length} verifications were truncated
                         </div>
-                    ) : null}
-
+                    }
                     {
                         // rendering inner nodes
                         children
                     }
 
-                    {
-                        action.status.status == StatusType.FAILED && action.status.cause != null ? (
-                            <div className="action-card-status">
-                                <RecoverableExpandablePanel
-                                    stateKey={keyForAction(id, 'status')}>
-                                    {toggleExpand => (
-                                        <div className="ac-body__item-title"
-                                            onClick={stopPropagationHandler(toggleExpand)}>
-                                                Status</div>
-                                    )}
-                                    <RecoverableExceptionChain
-                                        exception={action.status.cause}
-                                        stateKey={`${keyForAction(id, 'status')}-exception`} />
-                                </RecoverableExpandablePanel>
-                            </div>
-                        ) : null
+                    {action.status.status == StatusType.FAILED && action.status.cause != null &&
+                        <div className="action-card-status">
+                            <RecoverableExpandablePanel
+                                stateKey={keyForAction(id, 'status')}>
+                                {toggleExpand => (
+                                    <div className="ac-body__item-title"
+                                        onClick={stopPropagationHandler(toggleExpand)}>
+                                            Status</div>
+                                )}
+                                <RecoverableExceptionChain
+                                    exception={action.status.cause}
+                                    stateKey={`${keyForAction(id, 'status')}-exception`} />
+                            </RecoverableExpandablePanel>
+                        </div>
                     }
                 </div>
             </ExpandablePanel>

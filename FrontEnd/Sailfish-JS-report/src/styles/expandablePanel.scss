@@ -41,3 +41,9 @@
         }
     }
 }
+
+.disabled .expandable-panel {
+    &__icon {
+        opacity: 0.2;
+    }
+}

@@ -26,24 +26,35 @@ interface PanelProps {
     isExpanded?: boolean;
     onExpand?: (isExpanded: boolean) => void;
     children: [React.ReactNode | ((onExpand: () => void) => React.ReactNode), React.ReactNode];
+    isExpandDisabled?: boolean;
 }
 
-export const ExpandablePanel = ({ children, isExpanded, onExpand }: PanelProps) => {
+export const ExpandablePanel = ({ children, isExpanded, onExpand, isExpandDisabled }: PanelProps) => {
+    const rootClass = createStyleSelector(
+        "expandable-panel",
+        isExpandDisabled? "disabled": null
+    )
     const iconClass = createStyleSelector(
         "expandable-panel__icon", 
         !isExpanded ? "hidden" : null
     );
 
+    const expand = (isExpanded: boolean) => {
+        if (!isExpandDisabled) {
+            onExpand(isExpanded)
+        }
+    }
+
     const [header, body] = children;
 
     return (
-        <div className="expandable-panel">
+        <div className={rootClass}>
             <div className="expandable-panel__header">
                 <div className={iconClass} 
-                    onClick={stopPropagationHandler(onExpand, !isExpanded)}/>
+                    onClick={stopPropagationHandler(expand, !isExpanded)}/>
                 { 
                     typeof header == 'function' ? 
-                        header(() => onExpand(!isExpanded)) :
+                        header(() => expand(!isExpanded)) :
                         header
                 }
             </div>
