@@ -28,19 +28,29 @@ import '../styles/layout.scss';
 import { stopWatchingTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
+import PanelSide from "../util/PanelSide";
+import { setClosedPanelSide } from "../actions/actionCreators";
 
-interface TestCaseLayoutProps {
+interface StateProps {
     testCaseLoadingProgress: number;
     isConnectionError: boolean;
-    stopWatchingTestCase: () => void;
+    closedPanel: PanelSide | null;
 }
 
-const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchingTestCase }: TestCaseLayoutProps) => {
+interface DispatchProps {
+    stopWatchingTestCase: () => void;
+    setClosedPanelSide: (panelSide: PanelSide | null) => void;
+}
+
+interface Props extends StateProps, DispatchProps {}
+
+const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchingTestCase, setClosedPanelSide, closedPanel }: Props) => {
     React.useEffect(() => {
         return () => {
             stopWatchingTestCase();
         }
     }, []);
+
     return (
         <div className="layout">
             <div className="layout__header">
@@ -49,7 +59,9 @@ const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchi
                 <Header/>
             </div>
             <div className="layout__body">
-                <SplitView>
+                <SplitView
+                    closedPanel={closedPanel}
+                    onClosedPanelChanged={setClosedPanelSide}>
                     <LeftPanel/>
                     <RightPanel/>
                 </SplitView>
@@ -59,11 +71,13 @@ const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchi
 }
 
 export default connect(
-    (state: AppState) => ({
-    testCaseLoadingProgress: getTestCaseLoadingProgress(state),
-    isConnectionError: getIsConnectionError(state),
-}),
-    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
-        stopWatchingTestCase: () => dispatch(stopWatchingTestCase())
+    (state: AppState) : StateProps=> ({
+        testCaseLoadingProgress: getTestCaseLoadingProgress(state),
+        isConnectionError: getIsConnectionError(state),
+        closedPanel: state.view.closedPanelSide
+    }),
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
+        stopWatchingTestCase: () => dispatch(stopWatchingTestCase()),
+        setClosedPanelSide: panelSide => dispatch(setClosedPanelSide(panelSide))
     })
 )(TestCaseLayout);

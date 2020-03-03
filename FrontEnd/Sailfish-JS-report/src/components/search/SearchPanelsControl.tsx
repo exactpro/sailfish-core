@@ -19,12 +19,15 @@ import { connect } from "react-redux";
 import AppState from "../../state/models/AppState";
 import { setSearchLeftPanelEnabled, setSearchRightPanelEnabled } from "../../actions/actionCreators";
 import Panel from "../../util/Panel";
+import PanelSide from "../../util/PanelSide";
+import { createBemElement } from "../../helpers/styleCreators";
 
 interface StateProps {
     leftPanelEnabled: boolean;
     leftPanel: Panel;
     rightPanelEnabled: boolean;
     rightPanel: Panel;
+    closedPanel: PanelSide | null;
 }
 
 interface DispatchProps {
@@ -34,27 +37,54 @@ interface DispatchProps {
 
 interface Props extends StateProps, DispatchProps {}
 
-function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPanelEnable, onLeftPanelEnable, leftPanel, rightPanel }: Props) {
+function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPanelEnable, onLeftPanelEnable, leftPanel, rightPanel, closedPanel }: Props) {
+    const onLeftPanelSelect = () => {
+        if (closedPanel != PanelSide.LEFT) {
+            onLeftPanelEnable(!leftPanelEnabled);
+        }
+    };
+
+    const onRightPanelSelect = () => {
+        if (closedPanel != PanelSide.RIGHT) {
+            onRightPanelEnable(!rightPanelEnabled);
+        }
+    };
+
+    const leftControlClassName = createBemElement(
+        'search-panel-controls',
+        'checkbox-wrapper',
+        closedPanel == PanelSide.LEFT ? 'disabled' : null
+    );
+    const rightControlClassName = createBemElement(
+        'search-panel-controls',
+        'checkbox-wrapper',
+        closedPanel == PanelSide.RIGHT ? 'disabled' : null
+    );
+
     return (
         <div className="search-panel-controls">
-            <input
-                className="search-panel-controls__checkbox"
-                type="checkbox"
-                id="left-panel"
-                checked={leftPanelEnabled}
-                onChange={() => onLeftPanelEnable(!leftPanelEnabled)}/>
-            <label htmlFor="left-panel" className="search-panel-controls__label">
-                {leftPanel.toLowerCase().replace('_', ' ')}
-            </label>
-            <input
-                className="search-panel-controls__checkbox"
-                type="checkbox"
-                id="right-panel"
-                checked={rightPanelEnabled}
-                onChange={() => onRightPanelEnable(!rightPanelEnabled)}/>
-            <label htmlFor="right-panel" className="search-panel-controls__label">
-                {rightPanel.toLowerCase().replace('_', ' ')}
-            </label>
+            <div className={leftControlClassName}>
+                <input
+                    className="search-panel-controls__checkbox"
+                    type="checkbox"
+                    id="left-panel"
+                    checked={leftPanelEnabled}
+                    onChange={onLeftPanelSelect}/>
+                <label htmlFor="left-panel" className="search-panel-controls__label">
+                    {leftPanel.toLowerCase().replace('_', ' ')}
+                </label>
+            </div>
+            <div className={rightControlClassName}>
+                <input
+                    className="search-panel-controls__checkbox"
+                    type="checkbox"
+                    id="right-panel"
+                    checked={rightPanelEnabled}
+                    onChange={onRightPanelSelect}/>
+                <label htmlFor="right-panel" className="search-panel-controls__label">
+                    {rightPanel.toLowerCase().replace('_', ' ')}
+                </label>
+            </div>
         </div>
     )
 }
@@ -64,7 +94,8 @@ const SearchPanelControl = connect(
         leftPanelEnabled: state.selected.search.leftPanelEnabled,
         leftPanel: state.view.leftPanel,
         rightPanelEnabled: state.selected.search.rightPanelEnabled,
-        rightPanel: state.view.rightPanel
+        rightPanel: state.view.rightPanel,
+        closedPanel: state.view.closedPanelSide
     }),
     (dispatch): DispatchProps => ({
         onLeftPanelEnable: isEnabled => dispatch(setSearchLeftPanelEnabled(isEnabled)),

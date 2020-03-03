@@ -41,6 +41,13 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
             }
         }
 
+        case StateActionTypes.SET_CLOSED_PANEL_SIDE: {
+            return {
+                ...state,
+                closedPanelSide: stateAction.panelSide
+            }
+        }
+
         case StateActionTypes.SET_TEST_CASE: {
             return  {
                 ...state, 

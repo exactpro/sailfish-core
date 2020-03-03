@@ -22,6 +22,7 @@ import { getLogs } from "./logs";
 import Panel from "../util/Panel";
 import { getKnownBugs } from "./knownBugs";
 import { getCategoryBugChains } from "../helpers/knownbug";
+import PanelSide from "../util/PanelSide";
 
 const EMPTY_ARRAY = [];
 
@@ -30,6 +31,7 @@ const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanel
 const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
 const getLeftPanel = (state: AppState) => state.view.leftPanel;
 const getRightPanel = (state: AppState) => state.view.rightPanel;
+const getClosedPanel = (state: AppState) => state.view.closedPanelSide;
 
 export const getSearchContent = createSelector(
     [
@@ -40,15 +42,24 @@ export const getSearchContent = createSelector(
         getLeftPanelEnabled,
         getRightPanelEnabled,
         getLeftPanel,
-        getRightPanel
+        getRightPanel,
+        getClosedPanel
     ],
     (
-        actions, messages,logs , knownBugs, leftPanelEnabled, rightPanelEnabled, leftPanel, rightPanel
+        actions,
+        messages,
+        logs ,
+        knownBugs,
+        leftPanelEnabled,
+        rightPanelEnabled,
+        leftPanel,
+        rightPanel,
+        closedPanel
     ): SearchContent => ({
-        actions: leftPanelEnabled && leftPanel == Panel.ACTIONS ? actions : EMPTY_ARRAY,
-        messages: rightPanelEnabled && rightPanel == Panel.MESSAGES ? messages : EMPTY_ARRAY,
-        logs: rightPanelEnabled && rightPanel == Panel.LOGS ? logs : EMPTY_ARRAY,
-        bugs: rightPanelEnabled && rightPanel == Panel.KNOWN_BUGS ?
+        actions: leftPanelEnabled && leftPanel == Panel.ACTIONS && closedPanel != PanelSide.LEFT ? actions : EMPTY_ARRAY,
+        messages: rightPanelEnabled && rightPanel == Panel.MESSAGES && closedPanel != PanelSide.RIGHT ? messages : EMPTY_ARRAY,
+        logs: rightPanelEnabled && rightPanel == Panel.LOGS && closedPanel != PanelSide.RIGHT ? logs : EMPTY_ARRAY,
+        bugs: rightPanelEnabled && rightPanel == Panel.KNOWN_BUGS && closedPanel != PanelSide.RIGHT ?
             // we need to place it in chains first to receive list of bugs in correct order
             getCategoryBugChains(knownBugs).reduce((acc, { categoryBugs }) => [...acc, ...categoryBugs], []) :
             EMPTY_ARRAY

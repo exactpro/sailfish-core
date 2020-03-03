@@ -107,12 +107,23 @@
     border-top: 1px solid #CCCCCC;
     margin-top: 3px;
     cursor: default;
+    
+    &__checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        
+        &.disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    }
 
     &__checkbox {
         @include disable-appearance;
         @include icon(url(../../resources/icons/checkbox-unchecked.svg), 16px, 16px);
 
-        cursor: pointer;
+        cursor: inherit;
 
         &:checked {
             @include icon(url(../../resources/icons/checkbox-checked.svg), 16px, 16px)
@@ -130,8 +141,8 @@
         font-size: 12px;
         font-weight: bold;
         color: $primaryTextColor;
-        cursor: pointer;
         text-transform: capitalize;
+        cursor: inherit;
     }
 }
 
