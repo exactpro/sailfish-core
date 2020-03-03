@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 import { replaceNonPrintableCharsWithDot } from './stringUtils';
+import Message from '../models/Message';
 
  /**
  * Generates columns for rendering and copying.
@@ -30,7 +31,7 @@ export function getRawContent([offset, hexadecimal, humanReadable]: string[][]):
     return [
         offset.map(offsetRow => offsetRow + ":").join("\n"), 
         hexadecimal.join("\n"), 
-        humanReadable.join("\n"),
+        humanReadable.join(""),
         humanReadable.map(replaceNonPrintableCharsWithDot).join("\n"),
     ]
 }
@@ -47,7 +48,7 @@ export function getAllRawContent([offset, hexadecimal, humanReadable]: string[][
         const row = [
             offset[i] + ':',
             hexadecimal[i] + " ".repeat(minHexadecimalColumnLength - hexadecimal[i].length),
-            replaceNonPrintableCharsWithDot(humanReadable[i]),
+            humanReadable[i],
             "\n"
         ].join(" ");
         allContent += row;
@@ -180,4 +181,45 @@ export function mapHumanReadableOffsetsToOctetOffsets(start: number, end: number
         Math.max(0, Math.floor((end % 17 -1) / 2));
         
     return start == end ? [startOffset, startOffset] : [startOffset, endOffset];
+}
+
+/**
+ * This function takes messages and required contentTypes as parameters
+ * and returns messages content joined by empty line
+ */
+export function getMessagesContent(
+    messages: Message[], 
+    contentTypes: ('contentHumanReadable' | 'hexadecimal' | 'raw')[]
+    ): string {
+    return messages
+        .map(msg =>
+            contentTypes
+                .filter(type => {
+                    // 'hexadecimal' isn't a message property and relies on 'raw' field
+                    if (type === 'hexadecimal') {
+                        return msg['raw'] !== null;
+                    }
+
+                    return msg[type] !== null;
+                })
+                .map(type => {
+                    switch(type) {
+                        case 'contentHumanReadable':
+                            return msg[type];
+                        case 'hexadecimal': {
+                            const decodedRawMessage = decodeBase64RawContent(msg['raw']);
+                            return getAllRawContent(decodedRawMessage).replace(/\n$/, '');
+                        }
+                        case 'raw': {
+                            const [,,humanReadable] = decodeBase64RawContent(msg['raw']);
+                            return humanReadable.join('');
+                        }
+                        default:
+                            return '';
+                    }
+                })
+                .join('\n')
+        )
+        .filter(Boolean)
+        .join('\n\n');
 }

@@ -35,7 +35,7 @@ import { downloadTxtFile } from '../helpers/files/downloadTxt';
 import { getFilteredMessages } from '../selectors/messages';
 import Message from '../models/Message';
 import Dropdown from './Dropdown';
-import { decodeBase64RawContent, getAllRawContent } from '../helpers/rawFormatter';
+import { getMessagesContent } from '../helpers/rawFormatter';
 
 interface StateProps {
     testCase: TestCase;
@@ -113,21 +113,8 @@ export const HeaderBase = ({
             !showFilter && isFilterApplied ? "applied" : null
         );
 
-    const downloadMessages = (fields: ('contentHumanReadable' | 'raw')[]) => {
-        const content = messages
-            .map(msg =>
-                fields
-                    .filter(field => msg[field] !== null)
-                    .map(field => {
-                        if (field === 'raw') {
-                            return getAllRawContent(decodeBase64RawContent(msg.raw)).replace(/\n$/, '');
-                        }
-                        return msg[field];
-                    })
-                    .join('\n')
-          )
-          .filter(Boolean)
-          .join('\n\n');
+    const downloadMessages = (contentTypes: ('contentHumanReadable' | 'hexadecimal' | 'raw')[]) => {
+        const content = getMessagesContent(messages, contentTypes);
         const fileName = `${testCase.name}_messages_${new Date().toISOString()}.txt`;
         downloadTxtFile([content], fileName);
     }
@@ -155,12 +142,16 @@ export const HeaderBase = ({
                                 Human-Readable
                             </Dropdown.MenuItem>
                             <Dropdown.MenuItem
-                                onClick={() => downloadMessages(['raw'])}>
-                                Raw Data
+                                onClick={() => downloadMessages(['hexadecimal'])}>
+                                Hexadecimal
                             </Dropdown.MenuItem>
                             <Dropdown.MenuItem
-                                onClick={() => downloadMessages(['contentHumanReadable', 'raw'])}>
-                                Both
+                                onClick={() => downloadMessages(['raw'])}>
+                                Raw
+                            </Dropdown.MenuItem>
+                            <Dropdown.MenuItem
+                                onClick={() => downloadMessages(['contentHumanReadable', 'hexadecimal'])}>
+                                All
                             </Dropdown.MenuItem>
                         </Dropdown.Menu>
                     </Dropdown>

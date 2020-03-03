@@ -123,7 +123,7 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
                 <div className="mc-raw__column primary">
                     <pre ref={humanReadableRef}>{renderHumanReadable(beautifiedHumanReadable)}</pre>
                     <div className="mc-raw__copy-btn   mc-raw__copy-icon"
-                        onClick={() => copyHandler(Raw.getUnformattedContent(humanReadable))}
+                        onClick={() => copyHandler(humanReadable)}
                         title="Copy to clipboard" />
                 </div>
             </div>

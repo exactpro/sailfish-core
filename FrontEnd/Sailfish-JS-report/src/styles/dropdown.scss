@@ -18,9 +18,12 @@
 
 .dropdown {
 	position: relative;
-
+	cursor: pointer;
+	@include unselectable;
+	
 	&.disabled {
-		opacity: 0.8;
+		opacity: 0.5;
+		cursor: default;
 	}
 
 	&__trigger {
@@ -28,7 +31,6 @@
 		align-items: center;
 		color: $primaryTextColor;
 		white-space: nowrap;
-		cursor: pointer;
 		font-weight: bold;
 		font-size: 14px;
 	}
