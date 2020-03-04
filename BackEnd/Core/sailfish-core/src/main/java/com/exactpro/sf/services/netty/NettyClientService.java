@@ -60,10 +60,12 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.util.internal.TypeParameterMatcher;
 
 public abstract class NettyClientService implements IInitiatorService {
 
@@ -420,13 +422,18 @@ public abstract class NettyClientService implements IInitiatorService {
      * Can be used to consume outgoing objects if there is no terminal handler for them
      * @param <T> handled object type
      */
-    protected static final class OutboundBlackholeHandler<T> extends MessageToMessageEncoder<T> {
-        public OutboundBlackholeHandler() {
+    protected static final class OutboundBlackholeHandler<T> extends ChannelOutboundHandlerAdapter {
+        private final TypeParameterMatcher matcher;
+
+        public OutboundBlackholeHandler(Class<? extends T> outboundMessageType) {
+            matcher = TypeParameterMatcher.get(outboundMessageType);
         }
 
         @Override
-        protected final void encode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
-            // do nothing
+        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+            if (!matcher.match(msg)) {
+                ctx.write(msg, promise);
+            }
         }
     }
 }
