@@ -178,29 +178,11 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
 
         case StateActionTypes.SET_SEARCH_RIGHT_PANEL_ENABLED:
         case StateActionTypes.SET_SEARCH_LEFT_PANEL_ENABLED:
+        case StateActionTypes.SET_SEARCH_RESULTS:
         case StateActionTypes.SET_SEARCH_TOKENS: {
             return {
                 ...state,
                 search: searchReducer(state.search, stateAction)
-            }
-        }
-
-        case StateActionTypes.SET_SEARCH_RESULTS: {
-            const { searchResults } = stateAction, 
-                searchResultsCount = searchResults.sum(),  
-                searchIndex = searchResultsCount > 0 ? 0 : null,
-                [
-                    actionId = state.scrolledActionId,
-                    msgId = state.scrolledMessageId,
-                    logIndex = state.scrolledLogIndex
-                ] = getScrolledIndex(searchResults, searchIndex);
-
-            return {
-                ...state,
-                search: searchReducer(state.search, stateAction),
-                scrolledActionId: actionId,
-                scrolledMessageId: msgId,
-                scrolledLogIndex: logIndex
             }
         }
 

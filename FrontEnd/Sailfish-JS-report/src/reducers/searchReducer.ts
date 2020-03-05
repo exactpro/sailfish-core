@@ -32,14 +32,13 @@ export default function searchReducer(state: SearchState = initialSearchState, s
 
         case StateActionTypes.SET_SEARCH_RESULTS: {
             const { searchResults: results } = stateAction,
-                resultsCount = results.sum(),
-                index = resultsCount > 0 ? 0 : null;
+                resultsCount = results.sum();
 
             return {
                 ...state,
                 results,
-                index,
                 resultsCount,
+                index: initialSearchState.index
             }
         }
 
@@ -50,7 +49,9 @@ export default function searchReducer(state: SearchState = initialSearchState, s
         }
 
         case StateActionTypes.NEXT_SEARCH_RESULT: {
-            const targetIndex = (state.index + 1) % state.resultsCount;
+            const targetIndex = state.index != null ?
+                (state.index + 1) % state.resultsCount :
+                0;
 
             return {
                 ...state,
@@ -60,7 +61,9 @@ export default function searchReducer(state: SearchState = initialSearchState, s
         }
 
         case StateActionTypes.PREV_SEARCH_RESULT: {
-            const targetIndex = (state.resultsCount + state.index - 1) % state.resultsCount;
+            const targetIndex = state.index != null ?
+                (state.resultsCount + state.index - 1) % state.resultsCount :
+                state.resultsCount - 1;
 
             return {
                 ...state,
