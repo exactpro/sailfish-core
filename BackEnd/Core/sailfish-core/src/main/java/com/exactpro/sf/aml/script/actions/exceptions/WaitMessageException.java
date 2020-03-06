@@ -16,46 +16,25 @@
 
 package com.exactpro.sf.aml.script.actions.exceptions;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-import java.util.Collection;
-import java.util.Collections;
-
-import org.apache.commons.lang3.ObjectUtils;
-
-import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 public class WaitMessageException extends EPSCommonException {
     private static final long serialVersionUID = 8951980266755385168L;
 
-    private final Collection<IMessage> similarMessages;
 
-    public WaitMessageException(Collection<IMessage> similarMessages) {
-        this.similarMessages = similarMessages;
-    }
-
-    public WaitMessageException(String message, Collection<IMessage> similarMessages) {
+    public WaitMessageException(String message) {
         super(message);
-        this.similarMessages = similarMessages;
     }
 
-    public WaitMessageException(Throwable cause, Collection<IMessage> similarMessages) {
+    public WaitMessageException(Throwable cause) {
         super(cause);
-        this.similarMessages = similarMessages;
     }
 
-    public WaitMessageException(String message, Throwable cause, Collection<IMessage> similarMessages) {
+    public WaitMessageException(String message, Throwable cause) {
         super(message, cause);
-        this.similarMessages = similarMessages;
     }
 
-    public WaitMessageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, Collection<IMessage> similarMessages) {
+    public WaitMessageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.similarMessages = similarMessages;
-    }
-
-    public Collection<IMessage> getSimilarMessages() {
-        return defaultIfNull(similarMessages, Collections.emptyList());
     }
 }

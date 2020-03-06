@@ -211,8 +211,7 @@ public class WaitAction {
         List<Pair<IMessage, ComparisonResult>> partialList = new ArrayList<>();
         List<Pair<IMessage, ComparisonResult>> conditionallyPassedMessage = null;
         if (!storedMessageTypes.isEmpty() && (invertStoredMessageTypes == storedMessageTypes.contains(filter.getName()))) {
-            throw new WaitMessageException(String.format("Message - '%s' is not allowed. Check the 'Stored Message Type' and 'Invert Stored Message Types' options in your service settings", filter.getName()),
-                    Collections.emptyList());
+            throw new WaitMessageException(String.format("Message - '%s' is not allowed. Check the 'Stored Message Type' and 'Invert Stored Message Types' options in your service settings", filter.getName()));
         }
 
         while(messagesIterator.hasNext(endTime - System.currentTimeMillis())) {
@@ -703,7 +702,7 @@ public class WaitAction {
 
     		IMessage message = result.getFirst();
     		if (countFailed != 0) {
-                throw new WaitMessageException(createWaitExceptionMessage(false, checkPoint), Collections.singletonList(message));
+                throw new WaitMessageException(createWaitExceptionMessage(false, checkPoint));
             } else if (countCP != 0) {
                 Throwable exception = result.getSecond().getException();
                 if (exception instanceof KnownBugException) {
@@ -711,7 +710,7 @@ public class WaitAction {
                     throw new MessageKnownBugException(StringUtils.defaultString(knownBugException.getMessage()),
                             getReorderMessage(message, settings, messageFilter), knownBugException.getPotentialDescriptions());
                 } else {
-                    throw new WaitMessageException("Timeout. Known bugs were partially reproduced, but there are also unknown bugs (" + StringUtils.defaultString(exception.getMessage()) + ')', Collections.singletonList(message));
+                    throw new WaitMessageException("Timeout. Known bugs were partially reproduced, but there are also unknown bugs (" + StringUtils.defaultString(exception.getMessage()) + ')');
                 }
             }
             return getReorderMessage(message, settings, messageFilter);
@@ -723,7 +722,7 @@ public class WaitAction {
     	}
         processFailed(results, report, serviceName, description, addToReport);
 
-        throw new WaitMessageException(createWaitExceptionMessage(results.isEmpty(), checkPoint), results.stream().map(Pair::getFirst).collect(Collectors.toList()));
+        throw new WaitMessageException(createWaitExceptionMessage(results.isEmpty(), checkPoint));
     }
 
     public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IActionReport report,
