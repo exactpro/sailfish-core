@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************/
+
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { getFilteredActions } from "./actions";
@@ -23,22 +24,14 @@ import Panel from "../util/Panel";
 import { getKnownBugs } from "./knownBugs";
 import { getCategoryBugChains } from "../helpers/knownbug";
 import PanelSide from "../util/PanelSide";
+import { getFilterTokens } from "./filter";
+import { PanelSearchToken } from "../models/search/SearchToken";
+import { getClosedPanel, getLeftPanel, getLeftPanelEnabled, getRightPanel, getRightPanelEnabled } from "./view";
 
-const EMPTY_ARRAY = [];
+const getSearchTokens = (state: AppState) => state.selected.search.tokens;
 
-export const getSearchTokens = (state: AppState) => state.selected.search.tokens;
-const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanelEnabled;
-const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
-const getLeftPanel = (state: AppState) => state.view.leftPanel;
-const getRightPanel = (state: AppState) => state.view.rightPanel;
-const getClosedPanel = (state: AppState) => state.view.closedPanelSide;
-
-export const getSearchContent = createSelector(
+const getActivePanels = createSelector(
     [
-        getFilteredActions,
-        getFilteredMessages,
-        getLogs,
-        getKnownBugs,
         getLeftPanelEnabled,
         getRightPanelEnabled,
         getLeftPanel,
@@ -46,22 +39,54 @@ export const getSearchContent = createSelector(
         getClosedPanel
     ],
     (
-        actions,
-        messages,
-        logs ,
-        knownBugs,
         leftPanelEnabled,
         rightPanelEnabled,
         leftPanel,
         rightPanel,
         closedPanel
+    ): Panel[] => [
+        leftPanelEnabled && closedPanel != PanelSide.LEFT ? leftPanel : null,
+        rightPanelEnabled && closedPanel != PanelSide.RIGHT ? rightPanel : null
+    ].filter(Boolean)
+);
+
+const getSearchPanelTokens = createSelector(
+    [
+        getSearchTokens,
+        getActivePanels
+    ],
+    (
+        searchTokens,
+        activePanels
+    ): PanelSearchToken[] => searchTokens.map(token => ({
+        ...token,
+        panels: activePanels
+    }))
+);
+
+export const getTokens = createSelector(
+    [getSearchPanelTokens, getFilterTokens],
+    (searchTokens, filterTokens) => [...filterTokens, ...searchTokens]
+);
+
+export const getSearchContent = createSelector(
+    [
+        getFilteredActions,
+        getFilteredMessages,
+        getLogs,
+        getKnownBugs
+    ],
+    (
+        actions,
+        messages,
+        logs,
+        knownBugs
     ): SearchContent => ({
-        actions: leftPanelEnabled && leftPanel == Panel.ACTIONS && closedPanel != PanelSide.LEFT ? actions : EMPTY_ARRAY,
-        messages: rightPanelEnabled && rightPanel == Panel.MESSAGES && closedPanel != PanelSide.RIGHT ? messages : EMPTY_ARRAY,
-        logs: rightPanelEnabled && rightPanel == Panel.LOGS && closedPanel != PanelSide.RIGHT ? logs : EMPTY_ARRAY,
-        bugs: rightPanelEnabled && rightPanel == Panel.KNOWN_BUGS && closedPanel != PanelSide.RIGHT ?
-            // we need to place it in chains first to receive list of bugs in correct order
-            getCategoryBugChains(knownBugs).reduce((acc, { categoryBugs }) => [...acc, ...categoryBugs], []) :
-            EMPTY_ARRAY
+        actions,
+        messages,
+        logs,
+        // we need to place it in chains first to receive list of bugs in correct order
+        bugs: getCategoryBugChains(knownBugs)
+            .reduce((acc, { categoryBugs }) => [...acc, ...categoryBugs], [])
     })
 );

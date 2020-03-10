@@ -38,4 +38,4 @@ const appendMapByActionNode = (actionNode: ActionNode, actionsMapRef: Map<number
     if (actionNode.subNodes) {
         actionNode.subNodes.forEach(subNode => appendMapByActionNode(subNode, actionsMapRef));
     }
-}
+};

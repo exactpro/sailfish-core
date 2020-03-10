@@ -16,6 +16,12 @@
 
 import AppState from '../state/models/AppState';
 
+export const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanelEnabled;
+export const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
+export const getLeftPanel = (state: AppState) => state.view.leftPanel;
+export const getRightPanel = (state: AppState) => state.view.rightPanel;
+export const getClosedPanel = (state: AppState) => state.view.closedPanelSide;
+
 export const getIsConnectionError = (state: AppState) => state.view.isConnectionError;
 
 export const getTestCaseLoadingProgress = (state: AppState) => {

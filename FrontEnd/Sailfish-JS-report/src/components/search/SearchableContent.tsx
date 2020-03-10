@@ -23,6 +23,7 @@ import '../../styles/search.scss';
 import SearchSplitResult from "../../models/search/SearchSplitResult";
 import { createStyleSelector } from "../../helpers/styleCreators";
 import multiTokenSplit from "../../helpers/search/multiTokenSplit";
+import { getTokens } from "../../selectors/search";
 
 interface OwnProps {
     content: string;
@@ -71,10 +72,10 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchResult,
     const internalTargetIndex = targetIndex != null ? targetIndex - startIndex : -1;
     let foundPartIndex = -1;
 
-    const renderContentPart = ({ color, content }: SearchSplitResult, index: number) => {
-        const isFound = color != null,
-            isTarget = isFound && ++foundPartIndex == internalTargetIndex,
-            className = createStyleSelector(
+    const renderContentPart = ({ token, content }: SearchSplitResult, index: number) => {
+        const isFound = token != null;
+        const isTarget = isFound && token.isScrollable && ++foundPartIndex == internalTargetIndex;
+        const className = createStyleSelector(
             '',
             isFound ? 'found' : null,
             isTarget ? 'target' : null
@@ -84,7 +85,7 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchResult,
             <span
                 key={index}
                 className={className}
-                style={{ backgroundColor: color }}
+                style={{ backgroundColor: token?.color }}
                 ref={isTarget ? targetElement : undefined}>
                 {content}
             </span>
@@ -104,7 +105,7 @@ const SearchableContent = connect(
             // in some cases (e. g. message's beautified content) we need to split content again, instead of using redux value
             // because content passed in own props differ from the original.
             ownProps.shouldPerformSplit ?
-                multiTokenSplit(ownProps.content, state.selected.search.tokens) :
+                multiTokenSplit(ownProps.content, getTokens(state)) :
                 state.selected.search.results.get(ownProps.contentKey)
         ) : undefined,
         needsScroll: state.selected.search.shouldScrollToItem

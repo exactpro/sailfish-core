@@ -14,10 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNode, isAction } from "../models/Action";
-import Action from '../models/Action';
+import Action, { ActionNode, ActionNodeType, isAction } from "../models/Action";
 import { StatusType } from "../models/Status";
 import { intersection } from "./array";
+import { keyForAction, keyForVerification } from "./keys";
 
 const ACTION_CHECKPOINT_NAME = "Checkpoint";
 
@@ -58,4 +58,37 @@ export function getActionCheckpointName(action: Action): string {
         name = nameParam != null ? nameParam.value : '';
 
     return name;
+}
+
+export function filterActionNode(actionNode: ActionNode, filterResults: string[], parentActionId: number | null = null): ActionNode | null {
+    switch (actionNode.actionNodeType) {
+        case ActionNodeType.ACTION: {
+            if (isCheckpointAction(actionNode)) {
+                return actionNode;
+            }
+
+            if (filterResults.includes(keyForAction(actionNode.id))) {
+                return {
+                    ...actionNode,
+                    subNodes: actionNode.subNodes
+                        ?.map(subNode => filterActionNode(subNode, filterResults, actionNode.id))
+                        .filter(Boolean)
+                }
+            }
+
+            return null;
+        }
+
+        case ActionNodeType.VERIFICATION: {
+            if (filterResults.includes(keyForVerification(parentActionId, actionNode.messageId))) {
+                return actionNode;
+            }
+
+            return null;
+        }
+
+        default: {
+            return actionNode;
+        }
+    }
 }

@@ -30,9 +30,9 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
          const result = multiTokenSplit(content, tokens);
 
-         expect(result).toEqual([{
+         expect(result).toEqual<SearchSplitResult[]>([{
              content: content,
-             color: null
+             token: null
          }])
     });
 
@@ -45,13 +45,13 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: start,
-            color: null
+            token: null
         }, {
             content: 'sit',
-            color: 'default'
+            token: tokens[0]
         }, {
             content: end,
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -66,19 +66,19 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: firstPart,
-            color: null
+            token: null
         }, {
             content: tokens[0].pattern,
-            color: tokens[0].color
+            token: tokens[0]
         }, {
             content: secondPart,
-            color: null
+            token: null
         }, {
             content: tokens[0].pattern,
-            color: tokens[0].color
+            token: tokens[0]
         }, {
             content: thirdPart,
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -94,16 +94,16 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: 'Lorem',
-            color: 'first'
+            token: tokens[0]
         }, {
             content: ' ipsum ',
-            color: null
+            token: null
         }, {
             content: 'dolor',
-            color: 'second'
+            token: tokens[1]
         }, {
             content: content.split(new RegExp('dolor', 'g'))[1],
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -123,16 +123,16 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: startPart,
-            color: null
+            token: null
         }, {
             content: 'consec',
-            color: tokens[0].color
+            token: tokens[0]
         }, {
             content: 'tetur',
-            color: tokens[1].color
+            token: tokens[1]
         }, {
             content: endPart,
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -153,28 +153,28 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: startPart.split(tokens[2].pattern)[0],
-            color: null
+            token: null
         }, {
             content: tokens[2].pattern,
-            color: tokens[2].color
+            token: tokens[2]
         }, {
             content: startPart.split(tokens[2].pattern)[1],
-            color: null
+            token: null
         }, {
             content: 'consec',
-            color: tokens[0].color
+            token: tokens[0]
         }, {
             content: 'tetur',
-            color: tokens[1].color
+            token: tokens[1]
         }, {
             content: endPart.split(tokens[2].pattern)[0],
-            color: null
+            token: null
         }, {
             content: tokens[2].pattern,
-            color: tokens[2].color
+            token: tokens[2]
         }, {
             content: endPart.split(tokens[2].pattern)[1],
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -187,7 +187,7 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResult: SearchSplitResult[] = [{
             content: content,
-            color: null
+            token: null
         }];
 
         expect(result).toEqual(expectedResult);
@@ -200,10 +200,10 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResults: SearchSplitResult[] = [{
             content: content.substring(0, content.length - tokens[0].pattern.length),
-            color: null
+            token: null
         }, {
             content: tokens[0].pattern,
-            color: tokens[0].color
+            token: tokens[0]
         }];
 
         expect(result).toEqual(expectedResults);
@@ -219,17 +219,46 @@ describe('[Helpers] Search - multiTokenSearch', () => {
 
         const expectedResults: SearchSplitResult[] = [{
             content: tokens[0].pattern,
-            color: tokens[0].color
+            token: tokens[0]
         }, {
             content: content.substring(tokens[0].pattern.length, content.length - tokens[1].pattern.length),
-            color: null
+            token: null
         }, {
             content: tokens[1].pattern,
-            color: tokens[1].color
+            token: tokens[1]
         }];
 
         expect(result).toEqual(expectedResults);
-    })
+    });
+
+    test('Results produced by not scrollable tokens should be overridden by others.', () => {
+        const target = 'consectetur';
+
+        const tokens: SearchToken[] = [
+            createSearchToken('consectet', 'first'),
+            createSearchToken('tetur', 'second', false, false)
+        ];
+
+        const result = multiTokenSplit(content, tokens);
+
+        const [startPart, endPart] = content.split(target);
+
+        const expectedResult: SearchSplitResult[] = [{
+            content: startPart,
+            token: null
+        }, {
+            content: 'consectet',
+            token: tokens[0]
+        }, {
+            content: 'ur',
+            token: tokens[1]
+        }, {
+            content: endPart,
+            token: null
+        }];
+
+        expect(result).toEqual(expectedResult);
+    });
 
 });
 

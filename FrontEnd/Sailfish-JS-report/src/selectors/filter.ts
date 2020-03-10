@@ -16,11 +16,41 @@
 
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
-import { isKeyForAction, isKeyForMessage, isKeyForVerification } from "../helpers/keys";
+import { isKeyForAction, isKeyForMessage } from "../helpers/keys";
 import FilterType from '../models/filter/FilterType';
+import FilterPath from "../models/filter/FilterPath";
+import { PanelSearchToken } from "../models/search/SearchToken";
+import Panel from "../util/Panel";
+
+const FILTER_HIGHLIGHT_COLOR = '#00BBCC';
 
 export const getFilterBlocks = (state: AppState) => state.filter.blocks;
 export const getFilterResults = (state: AppState) => state.filter.results;
+
+const mapFilterTypeToPanel = (type: FilterType): Panel => {
+    switch (type) {
+        case FilterType.ACTION:
+            return Panel.ACTIONS;
+        case FilterType.MESSAGE:
+            return Panel.MESSAGES;
+    }
+};
+
+export const getFilterTokens = createSelector(
+    [getFilterResults, getFilterBlocks],
+    (results, blocks) =>
+        blocks
+            .filter(({ path }) => path == FilterPath.ALL)
+            .flatMap(({values, types}): PanelSearchToken[] =>
+                values.map(val => ({
+                    pattern: val,
+                    color: FILTER_HIGHLIGHT_COLOR,
+                    panels: types.map(mapFilterTypeToPanel),
+                    isActive: false,
+                    isScrollable: false
+                }))
+            )
+);
 
 export const getIsFilterApplied = createSelector(
     [getFilterBlocks],

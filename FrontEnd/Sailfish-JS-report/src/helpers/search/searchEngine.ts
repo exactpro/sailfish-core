@@ -31,12 +31,13 @@ import Verification from '../../models/Verification';
 import { isCheckpointAction } from '../action';
 import { asyncFlatMap } from '../array';
 import multiTokenSplit from "./multiTokenSplit";
-import SearchToken from "../../models/search/SearchToken";
+import SearchToken, { PanelSearchToken } from "../../models/search/SearchToken";
 import SearchSplitResult from "../../models/search/SearchSplitResult";
 import SearchContent from "../../models/search/SearchContent";
 import Log from "../../models/Log";
 import KnownBug, { KnownBugNode } from "../../models/KnownBug";
 import { isKnownBugCategory } from "../../models/KnownBugCategory";
+import Panel from "../../util/Panel";
 
 // list of fields that will be used to search (order is important!)
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'contentHumanReadable'],
@@ -44,12 +45,12 @@ export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'c
     LOG_FIELDS: Array<keyof Log> = ['thread', 'class', 'message'],
     KNOWN_BUG_FIELDS: Array<keyof KnownBug> = ['subject'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
-    VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
+    VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', 'actualType', 'expectedType'],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
     // we need to ignore all fields besides 'name' in parent nodes because it doesn't render
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 
-export async function findAll(tokens: ReadonlyArray<SearchToken>, content: SearchContent): Promise<SearchResult> {
+export async function findAll(tokens: ReadonlyArray<PanelSearchToken>, content: SearchContent): Promise<SearchResult> {
     if (!tokens) {
         return new SearchResult();
     }
@@ -58,10 +59,15 @@ export async function findAll(tokens: ReadonlyArray<SearchToken>, content: Searc
         actionNode => isAction(actionNode) && !isCheckpointAction(actionNode)
     ) as Action[];
 
-    const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, tokens));
-    const messageResults = await asyncFlatMap(content.messages, item => findAllInMessage(item, tokens));
-    const kbResults = await asyncFlatMap(content.bugs, item => findAllInKnownBugNode(item, tokens));
-    const logResults = await asyncFlatMap(content.logs, (item, index) => findAllInLog(item, tokens, index));
+    const actionsTokens = tokens.filter(({panels}) => panels.includes(Panel.ACTIONS));
+    const messageTokens = tokens.filter(({panels}) => panels.includes(Panel.MESSAGES));
+    const kbTokens = tokens.filter(({panels}) => panels.includes(Panel.KNOWN_BUGS));
+    const logTokens = tokens.filter(({panels}) => panels.includes(Panel.LOGS));
+
+    const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, actionsTokens));
+    const messageResults = await asyncFlatMap(content.messages, item => findAllInMessage(item, messageTokens));
+    const kbResults = await asyncFlatMap(content.bugs, item => findAllInKnownBugNode(item, kbTokens));
+    const logResults = await asyncFlatMap(content.logs, (item, index) => findAllInLog(item, logTokens, index));
 
     return new SearchResult([
         ...actionResults,
@@ -215,7 +221,7 @@ export function findAllInObject<T>(
 
         const searchResultsCount = multiTokenSplit(targetField, searchTokens);
 
-        if (searchResultsCount.some(({ color }) => color != null)) {
+        if (searchResultsCount.some(({ token }) => token != null)) {
             results.push([`${resultKeyPrefix}-${fieldName}`, searchResultsCount]);
         }
     });

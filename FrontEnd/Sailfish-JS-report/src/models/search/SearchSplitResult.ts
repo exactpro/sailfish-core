@@ -14,14 +14,16 @@
  *  limitations under the License.
  ******************************************************************************/
 
+import SearchToken from "./SearchToken";
+
 /**
  * Result of multi - token search
  */
 export default interface SearchSplitResult {
     content: string;
     /**
-     * Color of split content part. 'null' color stands for entries that doesn't match any token. 
+     * 'null' color stands for entries that doesn't match any token.
      * Such content will not be highlighted.
      */
-    color: string | null;
+    token: SearchToken | null;
 }

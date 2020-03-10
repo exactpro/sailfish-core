@@ -54,7 +54,9 @@ export default class SearchResult {
     mapValues = <T>(fn: (value: SearchSplitResult[]) => T): Array<T> => this.values.map(fn);
 
     sum = () => this.values.reduce((sum, value) =>
-        sum + value.filter(res => res.color != null).length
+        sum + value
+            .filter(res => res.token != null && res.token.isScrollable)
+            .length
     , 0);
 
     /**
@@ -65,7 +67,9 @@ export default class SearchResult {
         let count = 0;
 
         const targetEntry = this.entries.find(([key, result]) => {
-            count += result.filter(res => res.color != null).length;
+            count += result
+                .filter(res => res.token != null && res.token.isScrollable)
+                .length;
             return index < count;
         });
 
@@ -84,7 +88,9 @@ export default class SearchResult {
         return this.values
             .slice(0, this.keys.findIndex(key => key === targetKey))
             .reduce((acc, result) =>
-                acc + result.filter(res => res.color != null).length
+                acc + result
+                    .filter(res => res.token != null && res.token.isScrollable)
+                    .length
             , 0);
     }
 }

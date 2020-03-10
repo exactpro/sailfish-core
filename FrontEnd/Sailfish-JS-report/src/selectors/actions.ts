@@ -16,12 +16,11 @@
 
 import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
-import { ActionNode, isAction } from "../models/Action";
-import { keyForAction } from "../helpers/keys";
+import { ActionNode } from "../models/Action";
 import { getFilterBlocks, getFilterResults, getIsFilterApplied, getIsFilterTransparent } from "./filter";
 import FilterType from "../models/filter/FilterType";
 import { getCheckpointActions as filterCheckpointsActions } from "../helpers/checkpointFilter";
-import { isCheckpointAction, removeNonexistingRelatedMessages } from "../helpers/action";
+import { filterActionNode, removeNonexistingRelatedMessages } from "../helpers/action";
 import { getMessagesIds } from './messages';
 
 const EMPTY_ACTIONS_ARRAY = new Array<ActionNode>();
@@ -38,8 +37,8 @@ export const getFilteredActions = createSelector(
     (actions, blocks, results) => {
         if (blocks.some(({ types }) => types.includes(FilterType.ACTION))) {
             return actions
-                .filter(isAction)
-                .filter(action => isCheckpointAction(action) || results.includes(keyForAction(action.id)))
+                .map(action => filterActionNode(action, results))
+                .filter(Boolean);
         }
 
         return actions;

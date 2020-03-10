@@ -38,7 +38,6 @@ const COLORS = [
     '#FF5500',
     '#1F66AD',
     '#45A155',
-    '#00BBCC',
     '#987DB3'
 ];
 
@@ -337,6 +336,7 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
         return {
             pattern: value.trim(),
             color: color ?? this.getNextColor(),
+            isScrollable: true,
             isActive
         }
     }

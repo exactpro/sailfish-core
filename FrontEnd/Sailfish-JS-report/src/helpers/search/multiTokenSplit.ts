@@ -19,22 +19,34 @@ import SearchToken from "../../models/search/SearchToken";
 import SearchSplitResult from "../../models/search/SearchSplitResult";
 
 export default function multiTokenSplit(content: string, tokens: ReadonlyArray<SearchToken>): SearchSplitResult[] {
-    // we are sorting tokens from longer to shorter one because in case of intersected tokens will truncate longer tokens
+    const sortRule = (a: SearchToken, b: SearchToken): number => {
+        if (a.isScrollable == b.isScrollable) {
+            // we are sorting tokens from longer to shorter one because in case of intersected tokens will truncate longer tokens
+            return a.pattern.length < b.pattern.length ? 1 : -1;
+        }
+
+        // also not scrollable items must be truncated by others
+        return a.isScrollable ? 1 : -1;
+    };
+
+    const splitContent = (token: SearchToken) => {
+        return {
+            content: content
+                .split(createCaseInsensitiveRegexp(token.pattern))
+                .slice(0, -1),
+            token
+        }
+    };
+
     const tokenSplitResults = [...tokens]
         .filter(({ pattern }) => pattern.length > 0)
-        .sort((a, b) => a.pattern.length < b.pattern.length ? 1 : -1)
-        .map(({ pattern, color }) => ({
-            content: content
-                .split(createCaseInsensitiveRegexp(pattern))
-                .slice(0, -1),
-            patternSource: pattern,
-            color
-        }))
+        .sort(sortRule)
+        .map(splitContent)
         .filter(res => res.content.length > 0);
 
     const result: SearchSplitResult[] = [{
         content,
-        color: null
+        token: null
     }];
 
     for (const splitResult of tokenSplitResults) {
@@ -45,8 +57,8 @@ export default function multiTokenSplit(content: string, tokens: ReadonlyArray<S
 
             const appendingResult: SearchSplitResult = {
                 // we need to get original part of content, not pattern in case of case insensitive
-                content: content.substring(currentContentIndex, currentContentIndex + splitResult.patternSource.length),
-                color: splitResult.color
+                content: content.substring(currentContentIndex, currentContentIndex + splitResult.token.pattern.length),
+                token: splitResult.token
             };
 
             let acc = 0,
@@ -70,8 +82,8 @@ export default function multiTokenSplit(content: string, tokens: ReadonlyArray<S
             const endIndex = result.findIndex(res => {
                 acc += res.content.length;
 
-                if (acc >= currentContentIndex + splitResult.patternSource.length) {
-                    endBlockOffset = res.content.length - (acc - (currentContentIndex + splitResult.patternSource.length));
+                if (acc >= currentContentIndex + splitResult.token.pattern.length) {
+                    endBlockOffset = res.content.length - (acc - (currentContentIndex + splitResult.token.pattern.length));
 
                     return true;
                 }
@@ -83,7 +95,7 @@ export default function multiTokenSplit(content: string, tokens: ReadonlyArray<S
             const blocks = result.slice(startIndex, endIndex + 1);
 
             if (blocks.length == 0) {
-                throw new Error(`Can't merge search results with token "${splitResult.patternSource}"`);
+                throw new Error(`Can't merge search results with token "${splitResult.token.pattern}"`);
             }
 
             let nextResults: SearchSplitResult[] = [];
@@ -121,7 +133,7 @@ export default function multiTokenSplit(content: string, tokens: ReadonlyArray<S
             }
 
             result.splice(startIndex, blocks.length, ...nextResults);
-            currentContentIndex += splitResult.patternSource.length
+            currentContentIndex += splitResult.token.pattern.length;
         }
     }
 

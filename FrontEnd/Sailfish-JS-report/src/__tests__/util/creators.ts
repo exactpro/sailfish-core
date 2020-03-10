@@ -21,12 +21,14 @@ import { StatusType } from "../../models/Status";
 import ActionParameter from "../../models/ActionParameter";
 import Verification from "../../models/Verification";
 import VerificationEntry from "../../models/VerificationEntry";
-import SearchToken from "../../models/search/SearchToken";
+import SearchToken, { PanelSearchToken } from "../../models/search/SearchToken";
 import KnownBug, { KnownBugNode } from "../../models/KnownBug";
 import { KnownBugStatus } from "../../models/KnownBugStatus";
 import KnownBugCategory from "../../models/KnownBugCategory";
 import Report from '../../models/Report';
 import { TestCaseMetadata } from '../../models/TestcaseMetadata';
+import SearchSplitResult from "../../models/search/SearchSplitResult";
+import Panel from "../../util/Panel";
 
 export function createAction(
     id: number = 0, 
@@ -111,11 +113,26 @@ export function createMessage(id: number = 0, msgName: string = 'test'): Message
     }
 }
 
-export function createSearchToken(pattern = 'test', color = 'default', isActive = false): SearchToken {
+export function createSearchToken(
+    pattern = 'test',
+    color = 'default',
+    isActive = false,
+    isScrollable = true,
+    panels: Panel[] = [Panel.ACTIONS, Panel.MESSAGES, Panel.KNOWN_BUGS, Panel.LOGS]
+): PanelSearchToken {
     return {
         pattern,
         color,
-        isActive
+        isActive,
+        isScrollable,
+        panels
+    }
+}
+
+export function createSearchSplitResult(content: string = '', token: SearchToken | null = null): SearchSplitResult {
+    return {
+        content,
+        token
     }
 }
 

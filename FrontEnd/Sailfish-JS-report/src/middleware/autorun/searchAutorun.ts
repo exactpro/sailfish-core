@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 import createAutorunMiddleware from "./autorun";
-import { getSearchContent, getSearchTokens } from "../../selectors/search";
+import { getSearchContent, getTokens } from "../../selectors/search";
 import { findAll } from "../../helpers/search/searchEngine";
 import { setSearchResults } from "../../actions/actionCreators";
 
 const searchAutorun = createAutorunMiddleware(
-    [getSearchContent, getSearchTokens],
+    [getSearchContent, getTokens],
     async (content, searchTokens) => {
         const results = await findAll(searchTokens, content);
 
