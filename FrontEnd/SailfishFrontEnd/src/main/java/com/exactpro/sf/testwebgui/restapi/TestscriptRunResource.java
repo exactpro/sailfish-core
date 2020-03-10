@@ -480,6 +480,7 @@ public class TestscriptRunResource {
         xmlDescr.setWorkFolder(testScriptDescr.getWorkFolder());
         xmlDescr.setSubFolder(testScriptDescr.getSubFolder());
         xmlDescr.setLocked(testScriptDescr.isLocked());
+        xmlDescr.setTotal(testScriptDescr.getContext().getScriptProgress().getLoaded());
 
         xmlDescr.setProblem(testScriptDescr.getProblem());
         xmlDescr.setCause(testScriptDescr.getCauseMessage());
