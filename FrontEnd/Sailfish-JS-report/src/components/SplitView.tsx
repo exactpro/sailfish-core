@@ -162,7 +162,7 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
         if (this.state.closedPanel === PanelSide.LEFT) {
             this.splitter.current.style.left = '0px';
         } else {
-            this.splitter.current.style.left = this.leftPanel.current.scrollWidth.toString() + 'px';
+            this.splitter.current.style.left = this.leftPanel.current.clientWidth.toString() + 'px';
         }
 
         this.setState({
@@ -315,7 +315,7 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
         return (
             <div className={rootClassName} ref={this.root}
                  style={rootStyle}>
-                <div className={leftPreviewAreaClassName} ref={this.leftPreviewArea}/>
+                <div className={leftPreviewAreaClassName} id="panel" ref={this.leftPreviewArea}/>
                 <div className={rightPreviewAreaClassName} ref={this.rightPreviewArea}/>
                 <div className={leftClassName}
                      ref={this.leftPanel}>

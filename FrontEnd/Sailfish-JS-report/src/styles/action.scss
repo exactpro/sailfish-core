@@ -327,7 +327,6 @@
     &__list {
         height: 100%;
         padding: 0 5px;
-        overflow: hidden;
 
         &.filter-applied {
             height: calc(100% - #{$filterCountHeight});

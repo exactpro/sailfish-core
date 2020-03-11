@@ -20,13 +20,19 @@ body {
     margin: 0;
 }
 
+#index {
+    padding: 8px;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
 .root {
     font-family: Open sans;
     display: block;
     box-sizing: border-box;
-    width: 100vw;
-    height: 100vh;
-    padding: 8px;
+    width: 100%;
+    height: 100%;
 
     div {
         box-sizing: border-box;

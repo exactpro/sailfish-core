@@ -39,7 +39,6 @@
 
         &.smart {
             display: block;
-            overflow-y: hidden;
         }
 
         &-track {
@@ -61,6 +60,7 @@
             border: 2px solid transparent;
             border-radius: 4px;
             opacity: 0.7;
+            height: 100%;
 
             &.smart {
                 position: absolute;
@@ -93,5 +93,83 @@
                 border-color: $primaryTextColor;
             }
         }
+    }
+}
+
+.scroll-hint {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    height: 64px;
+    transform: translate(0, -32px);
+    background-color: white;
+    border: 2px solid $primaryTextColor;
+    border-radius: 6px;
+    line-height: 22px;
+    font-size: 16px;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 8px 25px;
+    white-space: nowrap;
+    font-weight: 600;
+    box-sizing: border-box;
+
+    &:before, &:after {
+        content: "";
+        position: absolute;
+        border-top: 12px solid transparent;
+        border-bottom: 12px solid transparent;
+        top: 50%;
+        left: 0;
+        z-index: -1;
+        transform: translate(-100%, -50%);
+    }
+
+    &:before {
+        border-right: 12px solid $primaryTextColor;;
+    }
+
+    &:after {
+        border-right: 12px solid white;
+        margin-left: 2px;
+    }
+
+    &.left {
+        right: 28px;
+        left: unset;
+
+        &:before, &:after {
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            right: 0;
+            left: unset;
+            transform: translate(100%, -50%);
+        }
+    
+        &:before {
+            border-left: 12px solid $primaryTextColor;
+            border-right: none;
+        }
+    
+        &:after {
+            border-left: 12px solid white;
+            margin-right: 2px;
+            border-right: none;
+        }
+    }
+
+    &__title {
+        color: $primaryTextColor;
+        text-align: inherit;
+        font-size: inherit;
+        line-height: inherit;
+    }
+
+    &__id {
+        color: $errorMsgBackgroundColor;
+        text-decoration: underline;
+        font-size: inherit;
+        line-height: inherit;
+        cursor: pointer;
     }
 }

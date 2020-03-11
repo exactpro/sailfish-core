@@ -16,6 +16,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
 import '../styles/layout.scss';
 import Panel from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
@@ -27,15 +28,25 @@ import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './action/ActionsList';
 import { createStyleSelector } from '../helpers/styleCreators';
 import CheckpointCarousel from './CheckpointCarousel';
-import { getCheckpointActions } from '../selectors/actions';
+import { getCheckpointActions, getIsActionsEmpty } from '../selectors/actions';
+import StateAction from '../actions/stateActions';
 
-interface Props {
+interface StateProps {
     panel: Panel;
-    isCheckpointsEnabled: boolean;
     statusEnabled: boolean;
-    panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => void;
-    currentCheckpointHandler: () => void;
+    selectedCheckpointId: number;
+    checkpointActions: any[];
 }
+
+interface DispatchProps {
+    panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => any;
+    setSelectedCheckpoint:  (checkpointAction: Action) => any;
+}
+
+type Props = {
+    currentCheckpointHandler: () => any;
+    isCheckpointsEnabled: boolean;
+} & Omit<DispatchProps, "setSelectedCheckpoint"> & Omit<StateProps, "checkpointActions"|"selectedCheckpointId">;
 
 class LeftPanelBase extends React.Component<Props> {
 
@@ -130,17 +141,16 @@ class LeftPanelBase extends React.Component<Props> {
 }
 
 export const LeftPanel = connect(
-    (state: AppState) => {
-        const isActionsEmpty = !(state.selected.testCase.actions && state.selected.testCase.actions.length > 0)
-        return ({
+    (state: AppState): StateProps => {
+        const isActionsEmpty = getIsActionsEmpty(state);
+        return {
             selectedCheckpointId: state.selected.checkpointActionId,
             checkpointActions: getCheckpointActions(state),
             statusEnabled: !!state.selected.testCase.status.cause,
-            isActionsEmpty: isActionsEmpty,
-            panel: state.view.leftPanel == Panel.ACTIONS && isActionsEmpty? Panel.STATUS: state.view.leftPanel
-        })
+            panel: state.view.leftPanel == Panel.ACTIONS && isActionsEmpty ? Panel.STATUS : state.view.leftPanel,
+        }
     },
-    dispatch => ({
+    (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => dispatch(setLeftPane(panel)),
         setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpointAction(checkpointAction))
     }),

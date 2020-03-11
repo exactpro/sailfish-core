@@ -18,15 +18,17 @@ import * as React from 'react';
 import { StatusType } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { raf } from '../helpers/raf';
-import { Virtuoso, TScrollContainer } from 'react-virtuoso';
+import { Virtuoso, TScrollContainer, VirtuosoMethods,  } from 'react-virtuoso';
 import ResizeObserver from 'resize-observer-polyfill';
+import { ScrollHint } from '../models/util/ScrollHint';
 
 const DEFAULT_ITEM_HEIGHT = 60;
 
 const { Provider, Consumer } = React.createContext({
     rowCount: 0,
     rowHeightMap: {},
-    selectedElements: new Map<number, StatusType>()
+    selectedElements: new Map<number, StatusType>(),
+    scrollHints: [],
 });
 
 interface Props {
@@ -36,6 +38,7 @@ interface Props {
 
     // for heatmap scrollbar
     selectedElements: Map<number, StatusType>;
+    scrollHints?: ScrollHint[];
 
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
@@ -60,13 +63,12 @@ export class VirtualizedList extends React.Component<Props, State> {
                 stateUpdate[index] = height;
             }
         });
-
         if (Object.entries(stateUpdate).length > 0) {
             this.setState(stateUpdate);
         }
     });
 
-    private virtuoso = React.createRef<Virtuoso>();
+    private virtuoso = React.createRef<VirtuosoMethods>();
 
     componentDidUpdate(prevProps: Props) {
         // Here we handle a situation, when primitive value of Number object doesn't changed
@@ -92,10 +94,10 @@ export class VirtualizedList extends React.Component<Props, State> {
     }
 
     render() {
-        const { rowCount, selectedElements, computeItemKey } = this.props;
+        const { rowCount, selectedElements, computeItemKey, scrollHints = [] } = this.props;
 
         return (
-            <Provider value={{ selectedElements, rowCount, rowHeightMap: this.state }}>
+            <Provider value={{ selectedElements, rowCount, rowHeightMap: this.state, scrollHints }}>
                 <Virtuoso
                     totalCount={rowCount}
                     ref={this.virtuoso}
@@ -144,20 +146,21 @@ function ElementWrapper({ index, onMount, onUnmount, children }: WrapperProps) {
 const ScrollContainer: TScrollContainer = ({ reportScrollTop, scrollTo, children }) => {
     const elRef = React.useRef<HeatmapScrollbar>(null);
 
-    scrollTo((scrollTop: number) => {
-        elRef.current.scrollTop(scrollTop);
+    scrollTo((scrollOptions: ScrollToOptions) => {
+        elRef.current.scrollTop(scrollOptions);
     });
 
     return (
         <Consumer>
             {
-                ({ rowCount, rowHeightMap, selectedElements }) => (
+                ({ rowCount, rowHeightMap, selectedElements, scrollHints }) => (
                     <HeatmapScrollbar
                         ref={elRef}
                         heightMapper={index => rowHeightMap[index] ?? DEFAULT_ITEM_HEIGHT}
                         onScroll={(e: any) => reportScrollTop(e.target.scrollTop)}
                         selectedElements={selectedElements}
-                        elementsCount={rowCount}>
+                        elementsCount={rowCount}
+                        scrollHints={scrollHints}>
                         {children}
                     </HeatmapScrollbar>
                 )

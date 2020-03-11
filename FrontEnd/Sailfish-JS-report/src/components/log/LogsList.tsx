@@ -18,7 +18,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { getLogsCount } from '../../selectors/logs';
-import { Virtuoso } from 'react-virtuoso';
+import { Virtuoso, VirtuosoMethods } from 'react-virtuoso';
 import { loadLogs } from '../../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
@@ -52,7 +52,7 @@ const LogsListBase = React.forwardRef<LogListActions, Props>(({
     scrolledIndex
 }: Props, ref: React.MutableRefObject<LogListActions>) => {
     const [loadingLogs, setLoadingLogs] = React.useState(false);
-    const virtuosoRef = React.createRef<Virtuoso>();
+    const virtuosoRef = React.useRef<VirtuosoMethods>();
 
     React.useEffect(() => {
         if (isActive && !loadingLogs) {

@@ -14,27 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-import SelectedState from '../models/SelectedState';
-import Action from '../../models/Action';
-import { StatusType } from '../../models/Status';
-import initialSearchState from "./initialSearchState";
-
-export const initialSelectedState: SelectedState = {
-    testCase: null,
-    actionsId: [],
-    scrolledActionId: null,
-    messagesId: [],
-    scrolledMessageId: null,
-    scrolledLogIndex: null,
-    verificationId: null,
-    selectedActionStatus: StatusType.NA,
-    checkpointMessageId: null,
-    checkpointActionId: null,
-    rejectedMessageId: null,
-    actionsMap: new Map<number, Action>(),
-    activeActionId: null,
-    selectedTestCaseId: null,
-    search: initialSearchState,
-    actionsScrollHintsIds: [],
-    messagesScrollHintsIds: [],
-};
+export interface ScrollHint {
+	index: number;
+	id: number;
+	type: 'Action' | 'Message';
+}

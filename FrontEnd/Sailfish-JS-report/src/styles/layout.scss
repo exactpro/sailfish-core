@@ -26,6 +26,8 @@
 
     &__header {
         grid-area: header;
+        position: relative;
+        z-index: 100;
     }
 
     &__body {

@@ -16,7 +16,7 @@
 
 import { ThunkAction } from "redux-thunk";
 import AppState from '../state/models/AppState';
-import { setTestCase, setIsLoading, setIsConnectionError, addTestCaseLogs } from "../actions/actionCreators";
+import { setTestCase, setIsLoading, setIsConnectionError, addTestCaseLogs, resetTestCase } from "../actions/actionCreators";
 import { addTestCaseActions, addTestCaseMessages } from '../actions/actionCreators'
 import StateAction from '../actions/stateActions';
 import TestCase, { TestCaseFiles } from '../models/TestCase';
@@ -34,7 +34,10 @@ export const CURRENT_TESTCASE_ORDER = 'CURRENT_TESTCASE_ORDER';
 export function loadTestCase(testCasePath: string): ThunkAction<void, AppState, ThunkExtraArgument, StateAction> {
     return (dispatch, getState, { liveUpdateService }) => {
         dispatch(setIsLoading(true));
-        const { report: { metadata } } = getState();
+        const { report: { metadata }, selected: { testCase } } = getState();
+        if (testCase) {
+            dispatch(resetTestCase());
+        };
         const { order, finishTime } = metadata.find(meta => meta.jsonpFileName === testCasePath);
         const isLiveTestCase = finishTime === null;
         window[CURRENT_TESTCASE_ORDER] = order;

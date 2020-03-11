@@ -21,7 +21,6 @@ import { getScrolledId } from '../helpers/array';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/action';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
-import initialSearchState from "../state/initial/initialSearchState";
 import searchReducer from "./searchReducer";
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
@@ -40,8 +39,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                         cause: null,
                         description: null
                     }
-                },
-                search: initialSearchState
+                }
             }
         }
 
@@ -81,11 +79,13 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 selectedActionStatus: stateAction.action.status.status,
                 messagesId: stateAction.action.relatedMessages,
                 verificationId: initialSelectedState.verificationId,
-                scrolledActionId: initialSelectedState.scrolledActionId,
+                scrolledActionId: stateAction.shouldScrollIntoView ? new Number(stateAction.action.id) : initialSelectedState.scrolledActionId,
                 scrolledMessageId: getScrolledId(stateAction.action.relatedMessages, +state.messagesId),
                 activeActionId: stateAction.action.id,
                 checkpointActionId: initialSelectedState.checkpointActionId,
-                checkpointMessageId: initialSelectedState.checkpointMessageId
+                checkpointMessageId: initialSelectedState.checkpointMessageId,
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -95,7 +95,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsId: [stateAction.actionId],
                 selectedActionStatus: initialSelectedState.selectedActionStatus,
                 scrolledActionId: new Number(stateAction.actionId),
-                activeActionId: stateAction.actionId
+                activeActionId: stateAction.actionId,
             }
         }
 
@@ -115,10 +115,12 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsId: relatedActions,
                 verificationId: stateAction.message.id,
                 scrolledActionId: getScrolledId(relatedActions, +state.scrolledActionId),
-                scrolledMessageId: initialSelectedState.scrolledMessageId,
+                scrolledMessageId: stateAction.shouldScrollIntoView ? new Number(stateAction.message.id) : initialSelectedState.scrolledMessageId,
                 activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId,
                 checkpointActionId: initialSelectedState.checkpointActionId,
                 checkpointMessageId: initialSelectedState.checkpointMessageId,
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -132,7 +134,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 scrolledMessageId: new Number(stateAction.messageId),
                 activeActionId: stateAction.rootActionId,
                 checkpointActionId: initialSelectedState.checkpointActionId,
-                checkpointMessageId: initialSelectedState.checkpointMessageId
+                checkpointMessageId: initialSelectedState.checkpointMessageId,
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -149,6 +153,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsId:initialSelectedState.actionsId,
                 messagesId:initialSelectedState.messagesId,
                 verificationId: initialSelectedState.verificationId,
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -164,7 +170,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 messagesId: initialSelectedState.messagesId,
                 activeActionId: initialSelectedState.activeActionId,
                 actionsId: initialSelectedState.actionsId,
-                verificationId: initialSelectedState.verificationId
+                verificationId: initialSelectedState.verificationId,
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -259,7 +267,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 selectedActionStatus: stateAction.status,
                 actionsId,
-                scrolledActionId: getScrolledId(actionsId, +state.scrolledActionId)
+                scrolledActionId: getScrolledId(actionsId, +state.scrolledActionId),
+                actionsScrollHintsIds: initialSelectedState.actionsScrollHintsIds,
+                messagesScrollHintsIds: initialSelectedState.messagesScrollHintsIds,
             }
         }
 
@@ -306,6 +316,20 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
             
             return state;
+        }
+
+        case StateActionTypes.SELECT_ACTIONS_SCROLL_HINT_IDS: {
+            return {
+                ...state,
+                actionsScrollHintsIds: [stateAction.actionId]
+            }
+        }
+
+        case StateActionTypes.SELECT_MESSAGES_SCROLL_HINT_IDS: {
+            return {
+                ...state,
+                messagesScrollHintsIds: [stateAction.messageId]
+            }
         }
 
         default: {

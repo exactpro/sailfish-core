@@ -20,15 +20,14 @@ import AppState from '../../state/models/AppState';
 import ActionCardSkeleton from './ActionCardSkeleton';
 import { ActionTree } from './ActionTree';
 import { ActionNode } from '../../models/Action';
-import { getFilteredActions, getActionsWithoutNonexistingRelatedMessages } from '../../selectors/actions';
-import { getIsFilterApplied } from '../../selectors/filter';
+import { getCurrentActions } from '../../selectors/actions';
 
 interface OwnProps {
 	index: number;
 }
 
 interface MappedProps {
-	action: ActionNode | undefined;
+	action: ActionNode | null;
 }
 
 export interface SkeletonedActionTreeProps extends OwnProps, MappedProps { }
@@ -43,8 +42,6 @@ function SkeletonedActionTree({ action }: SkeletonedActionTreeProps ){
 
 export default connect(
 	(state: AppState, ownProps: OwnProps): MappedProps => ({
-		action: getIsFilterApplied(state) && !state.filter.isTransparent ?
-			getFilteredActions(state)[ownProps.index] : 
-			getActionsWithoutNonexistingRelatedMessages(state)[ownProps.index]
+		action: getCurrentActions(state)[ownProps.index] ?? null
 	})
 )(SkeletonedActionTree);

@@ -14,14 +14,15 @@
  *  limitations under the License.
  ******************************************************************************/
 
-import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
-import { ActionNode } from "../models/Action";
+import AppState from "../state/models/AppState";
+import { ActionNode, isAction } from "../models/Action";
 import { getFilterBlocks, getFilterResults, getIsFilterApplied, getIsFilterTransparent } from "./filter";
 import FilterType from "../models/filter/FilterType";
 import { getCheckpointActions as filterCheckpointsActions } from "../helpers/checkpointFilter";
 import { filterActionNode, removeNonexistingRelatedMessages } from "../helpers/action";
 import { getMessagesIds } from './messages';
+import { ScrollHint } from '../models/util/ScrollHint';
 
 const EMPTY_ACTIONS_ARRAY = new Array<ActionNode>();
 
@@ -52,8 +53,36 @@ export const getCheckpointActions = createSelector(
 
 export const getActionsFilesCount = (state: AppState) => state.selected.testCase.files?.action.count || 0;
 
+export const getCurrentActions = createSelector(
+    [getIsFilterApplied, getIsFilterTransparent, getFilteredActions, getActionsWithoutNonexistingRelatedMessages],
+    (filterIsApllied, isTransparent, filteredActions, actions) =>
+        filterIsApllied && !isTransparent ? filteredActions : actions
+);
+
 export const getActionsCount = createSelector(
     [getIsFilterApplied, getIsFilterTransparent, getFilteredActions, getActionsFilesCount],
     (isFilterApplied, isTransparent, filteredActions, actionsFilesCount) => 
         isFilterApplied  && !isTransparent ? filteredActions.length : actionsFilesCount
 );
+
+export const getActionScrollHintsIds = (state: AppState) => state.selected.actionsScrollHintsIds;
+
+export const getActionsScrollHints = createSelector(
+    [getCurrentActions, getActionScrollHintsIds],
+    (actions, scrollHintsIds) => {
+        const scrollHints: ScrollHint[] = [];
+        actions.filter(isAction)
+            .forEach(({ id }, index) => {
+                if (scrollHintsIds.includes(id)) {
+                    scrollHints.push({
+                        index,
+                        id,
+                        type: 'Action',
+                    })
+                }
+            })
+        return scrollHints;
+    }
+);
+
+export const getIsActionsEmpty = (state: AppState) => state.selected.testCase?.files.action.count == 0;

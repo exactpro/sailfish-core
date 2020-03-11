@@ -19,14 +19,17 @@ import { StatusType } from "../../models/Status";
 import { createStyleSelector } from '../../helpers/styleCreators';
 import { rangeSum } from '../../helpers/range';
 import ResizeObserver from "resize-observer-polyfill";
+import ScrollHintWindow from '../ScrollHintWindow';
+import { ScrollHint } from '../../models/util/ScrollHint';
 
 interface SmartHeatmapProps {
     elementsCount: number;
     selectedElements: Map<number, StatusType>;
     elementHeightMapper: (index: number) => number;
+    scrollHints?: ScrollHint[];
 }
 
-function SmartHeatmap({ selectedElements, ...props }: SmartHeatmapProps) {
+function SmartHeatmap({ selectedElements, scrollHints, ...props }: SmartHeatmapProps) {
     const [rootHeight, setRootHeight] = React.useState<number>(0);
     const root = React.useRef<HTMLDivElement>();
 
@@ -55,7 +58,9 @@ function SmartHeatmap({ selectedElements, ...props }: SmartHeatmapProps) {
                         rootHeight={rootHeight}
                         key={index}
                         index={index}
-                        status={status}/>
+                        status={status}
+                        scrollHint={scrollHints.find(scrollHint => scrollHint.index === index) ?? null}
+                    />
                 ))
             }
         </div>
@@ -66,9 +71,10 @@ interface SmartHeatmapElementProps extends Omit<SmartHeatmapProps, 'selectedElem
     index: number;
     status: StatusType;
     rootHeight: number;
+    scrollHint: ScrollHint | null;
 }
 
-const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHeight, status }: SmartHeatmapElementProps) => {
+const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHeight, status, scrollHint }: SmartHeatmapElementProps) => {
     const topOffset = rangeSum(0, index - 1, elementHeightMapper),
         elementHeight = elementHeightMapper(index),
         totalHeight = rangeSum(0, elementsCount, elementHeightMapper),
@@ -79,13 +85,17 @@ const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHe
     const className = createStyleSelector("heatmap-scrollbar-item", "smart", status),
         style: React.CSSProperties = {
             top: topOffsetScaled,
-            height: elementHeightScaled
+            height: elementHeightScaled,
+            right: 0,
+            left: 0,
+            position: 'absolute',
         };
 
     return (
-        <div
-            className={className}
-            style={style}/>
+        <div style={style}>
+            <div className={className} />
+            {scrollHint && <ScrollHintWindow scrollHint={scrollHint} />}
+        </div>
     );
 };
 

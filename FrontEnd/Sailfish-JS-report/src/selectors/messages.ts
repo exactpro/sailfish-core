@@ -21,6 +21,7 @@ import { keyForMessage } from "../helpers/keys";
 import { isCheckpointMessage, isRejected } from "../helpers/messageType";
 import FilterType from "../models/filter/FilterType";
 import Message from "../models/Message";
+import { ScrollHint } from '../models/util/ScrollHint';
 
 const EMPTY_MESSAGES_ARRAY = new Array<Message>();
 
@@ -65,6 +66,32 @@ export const getMessagesFilesCount = (state: AppState) => state.selected.testCas
 
 export const getMessagesCount = createSelector(
     [getIsMessageFilterApplied, getIsFilterTransparent, getFilteredMessages, getMessagesFilesCount],
-    (isMessageFilterApplied, isTransparent, getFilteredMessages, messagesFileCount) => 
-        isMessageFilterApplied && !isTransparent ? getFilteredMessages.length : messagesFileCount
+    (isMessageFilterApplied, isTransparent, filteredMessages, messagesFileCount) => 
+        isMessageFilterApplied && !isTransparent ? filteredMessages.length : messagesFileCount
 );
+
+export const getCurrentMessages = createSelector(
+    [getIsMessageFilterApplied, getIsFilterTransparent, getFilteredMessages, getMessages],
+    (isMessageFilterApplied, isTransparent, filteredMessages, messages) =>
+        isMessageFilterApplied && !isTransparent ? filteredMessages : messages
+)
+
+export const getMessagesScrollHintsIds = (state: AppState) => state.selected.messagesScrollHintsIds;
+
+export const getMessagesScrollHints = createSelector(
+    [getCurrentMessages, getMessagesScrollHintsIds],
+    (messages, scrollHintsIds) => {
+        const scrollHints: ScrollHint[] = [];
+        messages
+            .forEach(({ id }, index) => {
+                if (scrollHintsIds.includes(id)) {
+                    scrollHints.push({
+                        index,
+                        id,
+                        type: 'Message',
+                    })
+                }
+            })
+        return scrollHints;
+    }
+)

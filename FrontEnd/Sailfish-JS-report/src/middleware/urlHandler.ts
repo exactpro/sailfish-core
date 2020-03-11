@@ -56,7 +56,7 @@ function handleStateUpdate(prevState: AppState, nextState: AppState, action: Sta
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
         nextUrl = getNextUrl(window.location.href, searchString, nextSearchParams);
 
-    // handle goBack and goForward browswer buttons clicks - we don't need to update current url
+    // handle goBack and goForward browser buttons clicks - we don't need to update current url
     const currentUrl = window.location.href;
 
     if (currentUrl !== nextUrl) {
@@ -66,28 +66,42 @@ function handleStateUpdate(prevState: AppState, nextState: AppState, action: Sta
 
 // returns new search params, based on state change
 function getNextSearchParams(searchParams: URLSearchParams, prevState: AppState, nextState: AppState): URLSearchParams {
-    if (prevState.selected.testCase != nextState.selected.testCase) {
-        if (nextState.selected.testCase) {
-            searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.order.toString());
-        } else {
-            searchParams.delete(TEST_CASE_PARAM_KEY);
-        }
+    if (
+        (prevState.selected.testCase && nextState.selected.testCase) && 
+        prevState.selected.testCase.order !== nextState.selected.testCase.order
+        ) {
+        searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.order.toString());
+        searchParams.delete(MESSAGE_PARAM_KEY);
+        searchParams.delete(ACTION_PARAM_KEY);
+        return searchParams;
+    }
+
+    if (!prevState.selected.testCase && nextState.selected.testCase) {
+        searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.order.toString());
+    }
+
+    if (prevState.selected.testCase && !nextState.selected.testCase) {
+        searchParams.delete(TEST_CASE_PARAM_KEY);
+        searchParams.delete(MESSAGE_PARAM_KEY);
+        searchParams.delete(ACTION_PARAM_KEY);
+
+        return searchParams;
     }
 
     if (prevState.selected.actionsId != nextState.selected.actionsId) {
-        if (nextState.selected.actionsId.length > 0) {
-            searchParams.set(ACTION_PARAM_KEY, nextState.selected.actionsId.toString());
-            // removing verification message id from url
+        if (nextState.selected.actionsId.length == 1) {
+            const actionId = nextState.selected.actionsId[0].toString();
+            searchParams.set(ACTION_PARAM_KEY, actionId);
             searchParams.delete(MESSAGE_PARAM_KEY);
         } else {
             searchParams.delete(ACTION_PARAM_KEY);
         }
     }
 
-    // verification message selection handling
-    if (nextState.selected.actionsId.length == 0 && prevState.selected.messagesId != nextState.selected.messagesId) {
-        if (nextState.selected.messagesId && nextState.selected.messagesId.length != 0) {
-            searchParams.set(MESSAGE_PARAM_KEY, nextState.selected.messagesId[0].toString());
+    if (prevState.selected.messagesId != nextState.selected.messagesId) {
+        if (nextState.selected.messagesId.length == 1 && nextState.selected.actionsId.length !== 1) {
+            const messageId = nextState.selected.messagesId[0].toString();
+            searchParams.set(MESSAGE_PARAM_KEY, messageId);
         } else {
             searchParams.delete(MESSAGE_PARAM_KEY);
         }

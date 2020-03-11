@@ -23,11 +23,12 @@ import AppState from '../../state/models/AppState';
 import { messagesHeatmap } from '../../helpers/heatmapCreator';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { VirtualizedList } from '../VirtualizedList';
-import { getFilteredMessages } from "../../selectors/messages";
-import { getIsFilterApplied, getMessagesFilterResultsCount, getIsMessageFilterApplied } from "../../selectors/filter";
+import { getCurrentMessages, getMessagesScrollHints } from "../../selectors/messages";
+import { getMessagesFilterResultsCount, getIsMessageFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
 import SkeletonedMessageCardListItem from './SkeletonedMessageCardListItem';
 import { getMessagesCount } from '../../selectors/messages';
+import { ScrollHint } from '../../models/util/ScrollHint';
 
 interface StateProps {
     messages: Message[];
@@ -37,6 +38,7 @@ interface StateProps {
     isFilterApplied: boolean;
     filteredCount: number;
     messagesCount: number;
+    messagesScrollHints: ScrollHint[];
 }
 
 interface Props extends StateProps {}
@@ -83,7 +85,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { messages, selectedMessages, selectedStatus, isFilterApplied, filteredCount, messagesCount } = this.props,
+        const { messages, selectedMessages, selectedStatus, isFilterApplied, filteredCount, messagesCount, messagesScrollHints } = this.props,
             { scrolledIndex } = this.state;
 
         const listClassName = createBemElement(
@@ -109,6 +111,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
                             renderElement={this.renderMessage}
                             computeItemKey={this.computeKey}
                             scrolledIndex={scrolledIndex}
+                            scrollHints={messagesScrollHints}
                         />
                     </StateSaverProvider>
                 </div>
@@ -128,16 +131,15 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
 }
 
 export const MessagesCardList = connect<StateProps, {}, OwnProps, StateProps & OwnProps>(
-    (state: AppState) => ({
-        messages: getIsFilterApplied(state) && !state.filter.isTransparent ?
-            getFilteredMessages(state) :
-            state.selected.testCase.messages,
+    (state: AppState): StateProps => ({
+        messages: getCurrentMessages(state),
         messagesCount: getMessagesCount(state),
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
         selectedStatus: state.selected.selectedActionStatus,
         isFilterApplied: getIsMessageFilterApplied(state),
-        filteredCount: getMessagesFilterResultsCount(state)
+        filteredCount: getMessagesFilterResultsCount(state),
+        messagesScrollHints: getMessagesScrollHints(state),
     }),
     () => ({}),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),

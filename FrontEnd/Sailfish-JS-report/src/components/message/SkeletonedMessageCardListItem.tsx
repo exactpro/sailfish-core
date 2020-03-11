@@ -23,15 +23,14 @@ import { AdminMessageWrapper } from './AdminMessageWrapper';
 import CheckpointMessage from './CheckpointMessage';
 import MessageCard from './MessageCard';
 import Message from '../../models/Message';
-import { getIsFilterApplied } from '../../selectors/filter';
-import { getFilteredMessages } from '../../selectors/messages';
+import { getCurrentMessages } from '../../selectors/messages';
 
 interface OwnProps {
 	index: number;
 }
 
 interface MappedProps {
-	message: Message | undefined;
+	message: Message | null;
 }
 
 export interface SkeletonedMessageCardListItemProps extends OwnProps, MappedProps { }
@@ -62,8 +61,6 @@ function SkeletonedMessageCardListItem({ message }: SkeletonedMessageCardListIte
 
 export default connect(
 	(state: AppState, ownProps: OwnProps): MappedProps => ({
-		message: getIsFilterApplied(state) && !state.filter.isTransparent ?
-			getFilteredMessages(state)[ownProps.index] :
-			state.selected.testCase.messages[ownProps.index],
+		message: getCurrentMessages(state)[ownProps.index] ?? null
 	})
 )(SkeletonedMessageCardListItem);

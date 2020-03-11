@@ -21,7 +21,13 @@ import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
-import { selectActionById, selectVerification, setSubmittedMlData } from "../actions/actionCreators";
+import {
+    selectActionById,
+    selectVerification,
+    setSubmittedMlData,
+    selectActionsScrollHintIds,
+    selectMessagesScrollHintIds 
+} from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
@@ -55,6 +61,8 @@ interface AppDispatchProps {
     selectMessage: (messageId: number) => any;
     loadReport: () => any;
     loadTestCase: (metadata: TestCaseMetadata) => any;
+    selectActionsScrollHintIds: (actionId: Number) => void;
+    selectMessagesScrollHintIds: (messageId: Number) => void;
 }
 
 interface AppProps extends AppStateProps, AppDispatchProps {}
@@ -90,17 +98,19 @@ class AppBase extends React.Component<AppProps, {}> {
         const testCaseOrder = this.searchParams.get(TEST_CASE_PARAM_KEY),
             actionId = this.searchParams.get(ACTION_PARAM_KEY),
             msgId = this.searchParams.get(MESSAGE_PARAM_KEY);
-
+        
         if (testCaseOrder != null) {
             this.selectTestCaseByOrder(Number.parseInt(testCaseOrder))
         }
 
         if (msgId !== null && !isNaN(Number(msgId))) {
             this.props.selectMessage(Number(msgId))
+            this.props.selectMessagesScrollHintIds(Number(msgId));
         }
 
         if (actionId !== null && !isNaN(Number(actionId))) {
             this.props.selectAction(Number(actionId));
+            this.props.selectActionsScrollHintIds(Number(actionId));
         }
     }
 
@@ -186,7 +196,8 @@ const App = connect(
 
         //FIXME: I guess we need a dedicated action for this
         selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
-
+        selectActionsScrollHintIds: (actionId: Number) => dispatch(selectActionsScrollHintIds(actionId)),
+        selectMessagesScrollHintIds: (actionId: Number) => dispatch(selectMessagesScrollHintIds(actionId)),
         fetchToken: () => dispatch(fetchToken()),
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
         loadReport: () => dispatch(initReport()),

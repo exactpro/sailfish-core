@@ -16,7 +16,7 @@
 
 import TestCase from "../models/TestCase";
 import { StateActionTypes } from "./stateActions";
-import Action, { ActionNode } from '../models/Action';
+import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import Panel from "../util/Panel";
@@ -43,9 +43,10 @@ export const resetTestCase = () => (<const>{
     type: StateActionTypes.RESET_TEST_CASE
 })
 
-export const selectAction = (action: Action) => (<const>{
+export const selectAction = (action: Action, shouldScrollIntoView: boolean = false) => (<const>{
     type: StateActionTypes.SELECT_ACTION,
-    action
+    action,
+    shouldScrollIntoView
 })
 
 export const selectActionById = (actionId: number) => (<const>{
@@ -53,10 +54,11 @@ export const selectActionById = (actionId: number) => (<const>{
     actionId
 })
 
-export const selectMessage = (message: Message, status: StatusType = null) => (<const>{
+export const selectMessage = (message: Message, status: StatusType = null, shouldScrollIntoView: boolean = false) => (<const>{
     type: StateActionTypes.SELECT_MESSAGE,
     message,
-    status
+    status,
+    shouldScrollIntoView
 })
 
 export const selectVerification = (messageId: number, rootActionId: number = null, status: StatusType = StatusType.NA) => (<const>{
@@ -243,4 +245,14 @@ export const updateTestCase = (testCase: TestCase) => (<const>{
 export const setIsConnectionError = (isConnectionError: boolean) => (<const>{
     type: StateActionTypes.SET_IS_CONNECTION_ERROR,
     isConnectionError
+})
+
+export const selectActionsScrollHintIds = (actionId: Number) => (<const>{
+    type: StateActionTypes.SELECT_ACTIONS_SCROLL_HINT_IDS,
+    actionId
+})
+
+export const selectMessagesScrollHintIds = (messageId: Number) => (<const>{
+    type: StateActionTypes.SELECT_MESSAGES_SCROLL_HINT_IDS,
+    messageId
 })

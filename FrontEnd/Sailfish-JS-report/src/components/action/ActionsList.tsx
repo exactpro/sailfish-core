@@ -22,12 +22,13 @@ import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
-import { getFilteredActions, getActionsWithoutNonexistingRelatedMessages } from "../../selectors/actions";
+import { getActionsScrollHints, getCurrentActions } from "../../selectors/actions";
 import { getActionsFilterResultsCount, getIsFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
 import { getActions } from '../../helpers/action';
 import SkeletonedActionTree from './SkeletonedActionTree';
 import { getActionsCount } from '../../selectors/actions';
+import { ScrollHint } from '../../models/util/ScrollHint';
 
 interface Props {
     actions: Array<ActionNode>;
@@ -36,6 +37,7 @@ interface Props {
     isFilterApplied: boolean;
     filteredActionsCount: number;
     actionsCount: number;
+    actionsScrollHints: ScrollHint[];
 }
 
 interface State {
@@ -84,9 +86,8 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { actions, selectedActions, isFilterApplied, filteredActionsCount, actionsCount } = this.props,
+        const { actions, selectedActions, isFilterApplied, filteredActionsCount, actionsCount, actionsScrollHints } = this.props,
             { scrolledIndex } = this.state;
-
         const listRootClass = createBemElement(
             "actions",
             "list",
@@ -111,6 +112,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                             computeItemKey={this.computeKey}
                             scrolledIndex={scrolledIndex}
                             selectedElements={actionsHeatmap(getActions(actions), selectedActions)}
+                            scrollHints={actionsScrollHints}
                         />
                     </StateSaverProvider>
                 </div>
@@ -131,17 +133,16 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
 
 export const ActionsList = connect<Props, {}, OwnProps, Props & OwnProps>(
     (state: AppState): Props => ({
-        actions: getIsFilterApplied(state) && !state.filter.isTransparent ?
-            getFilteredActions(state) :
-            getActionsWithoutNonexistingRelatedMessages(state),
+        actions: getCurrentActions(state),
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         filteredActionsCount: getActionsFilterResultsCount(state),
         isFilterApplied: getIsFilterApplied(state),
         actionsCount: getActionsCount(state),
+        actionsScrollHints: getActionsScrollHints(state)
     }),
     dispatch => ({}),
-    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps }),
+    (stateProps, dispatchProps, ownProps) => ({...stateProps, ...dispatchProps,...ownProps}),
     {
         forwardRef: true
     }

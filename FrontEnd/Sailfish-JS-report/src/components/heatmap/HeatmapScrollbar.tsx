@@ -20,6 +20,7 @@ import { StatusType } from '../../models/Status';
 import '../../styles/heatmap.scss';
 import SmartHeatmap from './SmartHeatmap';
 import Heatmap from './Heatmap';
+import { ScrollHint } from '../../models/util/ScrollHint';
 
 const SCROLLBAR_TRACK_WIDTH = 11;
 
@@ -30,6 +31,7 @@ interface HeatmapScrollbarProps {
     height?: number;
     width?: number;
     onScroll?: React.UIEventHandler<any>;
+    scrollHints?: ScrollHint[];
 }
 
 export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps> {
@@ -40,12 +42,12 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
         this.scrollbar.current?.scrollToTop();
     }
 
-    scrollTop(top: number = 0) {
-        this.scrollbar.current?.scrollTop(top);
+    scrollTop(scrollOptions: ScrollToOptions) {
+        this.scrollbar.current?.scrollTop(scrollOptions.top);
     }
 
     render() {
-        const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper } = this.props,
+        const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper, scrollHints = [] } = this.props,
             style = height !== undefined || width !== undefined ? { height, width } : undefined;
 
         return (
@@ -72,7 +74,9 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                         <SmartHeatmap
                             elementsCount={elementsCount}
                             selectedElements={selectedElements}
-                            elementHeightMapper={heightMapper} /> :
+                            elementHeightMapper={heightMapper}
+                            scrollHints={scrollHints}
+                            /> :
                         <Heatmap
                             elementsCount={elementsCount}
                             selectedElements={selectedElements} />

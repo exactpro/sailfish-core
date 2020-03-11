@@ -43,4 +43,6 @@ export default interface SelectedState {
     scrolledMessageId: Number | null;
     scrolledLogIndex: Number | null;
     activeActionId: number;
+    actionsScrollHintsIds: Number[];
+    messagesScrollHintsIds: Number[];
 }
