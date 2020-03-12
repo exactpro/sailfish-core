@@ -26,6 +26,8 @@ const FILTER_HIGHLIGHT_COLOR = '#00BBCC';
 
 export const getFilterBlocks = (state: AppState) => state.filter.blocks;
 export const getFilterResults = (state: AppState) => state.filter.results;
+export const getIsFilterHighlighted = (state: AppState) => state.filter.isHighlighted;
+export const getIsFilterTransparent = (state: AppState) => state.filter.isTransparent;
 
 const mapFilterTypeToPanel = (type: FilterType): Panel => {
     switch (type) {
@@ -37,11 +39,15 @@ const mapFilterTypeToPanel = (type: FilterType): Panel => {
 };
 
 export const getFilterTokens = createSelector(
-    [getFilterResults, getFilterBlocks],
-    (results, blocks) =>
-        blocks
+    [getFilterResults, getFilterBlocks, getIsFilterHighlighted],
+    (results, blocks, isHighlighted): PanelSearchToken[] => {
+        if (!isHighlighted) {
+            return [];
+        }
+
+        return blocks
             .filter(({ path }) => path == FilterPath.ALL)
-            .flatMap(({values, types}): PanelSearchToken[] =>
+            .flatMap(({values, types}) =>
                 values.map(val => ({
                     pattern: val,
                     color: FILTER_HIGHLIGHT_COLOR,
@@ -50,6 +56,7 @@ export const getFilterTokens = createSelector(
                     isScrollable: false
                 }))
             )
+    }
 );
 
 export const getIsFilterApplied = createSelector(
@@ -73,4 +80,3 @@ export const getIsMessageFilterApplied = createSelector(
     (isFilterApplied, filterBlocks) =>
         isFilterApplied && filterBlocks.some(({ types }) => types.includes(FilterType.MESSAGE))
 );
-export const getIsFilterTransparent = (state: AppState) => state.filter.isTransparent;

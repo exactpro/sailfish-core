@@ -29,7 +29,12 @@ import SearchInput from './search/SearchInput';
 import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
 import LiveTimer from './LiveTimer';
 import FilterPanel from "./filter/FilterPanel";
-import { getIsFilterApplied, getIsMessageFilterApplied } from "../selectors/filter";
+import {
+    getActionsFilterResultsCount,
+    getIsFilterApplied,
+    getIsMessageFilterApplied,
+    getMessagesFilterResultsCount
+} from "../selectors/filter";
 import useOutsideClickListener from "../hooks/useOutsideClickListener";
 import { downloadTxtFile } from '../helpers/files/downloadTxt';
 import { getFilteredMessages } from '../selectors/messages';
@@ -39,10 +44,12 @@ import { getMessagesContent } from '../helpers/rawFormatter';
 
 interface StateProps {
     testCase: TestCase;
+    messages: Message[];
+    filterResultsCount: number;
     isNavigationEnabled: boolean;
     isFilterApplied: boolean;
-    messages: Message[];
     isMessageFilterApplied: boolean;
+    isFilterHighlighted: boolean;
 }
 
 interface DispatchProps {
@@ -61,7 +68,9 @@ export const HeaderBase = ({
    prevTestCaseHandler,
    backToListHandler,
    messages,
-   isMessageFilterApplied
+   isMessageFilterApplied,
+   isFilterHighlighted,
+   filterResultsCount
 }: Props) => {
     const {
         name = 'Test Case',
@@ -117,7 +126,7 @@ export const HeaderBase = ({
         const content = getMessagesContent(messages, contentTypes);
         const fileName = `${testCase.name}_messages_${new Date().toISOString()}.txt`;
         downloadTxtFile([content], fileName);
-    }
+    };
 
     return (
         <div className={rootClass}>
@@ -193,6 +202,17 @@ export const HeaderBase = ({
                                             "Show Filter"
                                 }
                             </div>
+                            {
+                                isFilterApplied && isFilterHighlighted ? (
+                                    <div className="header-button__filter-counter">
+                                        {
+                                            filterResultsCount > 99 ?
+                                                '99+' :
+                                                filterResultsCount
+                                        }
+                                    </div>
+                                ) : null
+                            }
                         </div>
                         {
                             showFilter ? (
@@ -246,10 +266,14 @@ export const HeaderBase = ({
 export const Header = connect(
     (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
+        messages: getIsMessageFilterApplied(state) ?
+            getFilteredMessages(state) :
+            state.selected.testCase.messages,
+        filterResultsCount: getMessagesFilterResultsCount(state) + getActionsFilterResultsCount(state),
         isNavigationEnabled: state.report.metadata.length > 1,
         isFilterApplied: getIsFilterApplied(state),
-        messages: getIsMessageFilterApplied(state) ? getFilteredMessages(state): state.selected.testCase.messages,
-        isMessageFilterApplied: getIsMessageFilterApplied(state)
+        isMessageFilterApplied: getIsMessageFilterApplied(state),
+        isFilterHighlighted: state.filter.isHighlighted
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),

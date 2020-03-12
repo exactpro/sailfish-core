@@ -21,6 +21,7 @@ import { setSearchLeftPanelEnabled, setSearchRightPanelEnabled } from "../../act
 import Panel from "../../util/Panel";
 import PanelSide from "../../util/PanelSide";
 import { createBemElement } from "../../helpers/styleCreators";
+import Checkbox from "../util/Checkbox";
 
 interface StateProps {
     leftPanelEnabled: boolean;
@@ -50,41 +51,22 @@ function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPa
         }
     };
 
-    const leftControlClassName = createBemElement(
-        'search-panel-controls',
-        'checkbox-wrapper',
-        closedPanel == PanelSide.LEFT ? 'disabled' : null
-    );
-    const rightControlClassName = createBemElement(
-        'search-panel-controls',
-        'checkbox-wrapper',
-        closedPanel == PanelSide.RIGHT ? 'disabled' : null
-    );
-
     return (
         <div className="search-panel-controls">
-            <div className={leftControlClassName}>
-                <input
-                    className="search-panel-controls__checkbox"
-                    type="checkbox"
-                    id="left-panel"
-                    checked={leftPanelEnabled}
-                    onChange={onLeftPanelSelect}/>
-                <label htmlFor="left-panel" className="search-panel-controls__label">
-                    {leftPanel.toLowerCase().replace('_', ' ')}
-                </label>
-            </div>
-            <div className={rightControlClassName}>
-                <input
-                    className="search-panel-controls__checkbox"
-                    type="checkbox"
-                    id="right-panel"
-                    checked={rightPanelEnabled}
-                    onChange={onRightPanelSelect}/>
-                <label htmlFor="right-panel" className="search-panel-controls__label">
-                    {rightPanel.toLowerCase().replace('_', ' ')}
-                </label>
-            </div>
+            <Checkbox
+                className='search-panel-controls__checkbox'
+                id='left-panel'
+                checked={leftPanelEnabled}
+                label={leftPanel.toLowerCase().replace('_', ' ')}
+                onChange={onLeftPanelSelect}
+                isDisabled={closedPanel == PanelSide.LEFT}/>
+            <Checkbox
+                className='search-panel-controls__checkbox'
+                id='right-panel'
+                checked={rightPanelEnabled}
+                label={rightPanel.toLowerCase().replace('_', ' ')}
+                onChange={onRightPanelSelect}
+                isDisabled={closedPanel == PanelSide.RIGHT}/>
         </div>
     )
 }

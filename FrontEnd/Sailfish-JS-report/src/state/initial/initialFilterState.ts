@@ -20,7 +20,8 @@ import FilterType from "../../models/filter/FilterType";
 const initialFilterState : FilterState = {
     results: [],
     blocks: [],
-    isTransparent: false
+    isTransparent: false,
+    isHighlighted: true
 };
 
 export default initialFilterState;

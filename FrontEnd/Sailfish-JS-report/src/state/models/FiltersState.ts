@@ -20,4 +20,5 @@ export default interface FilterState {
     results: string[];
     blocks: FilterBlock[];
     isTransparent: boolean;
+    isHighlighted: boolean;
 }

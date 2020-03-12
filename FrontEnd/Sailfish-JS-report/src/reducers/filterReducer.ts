@@ -43,6 +43,13 @@ export function filterReducer(state: FilterState = initialFilterState, stateActi
             }
         }
 
+        case StateActionTypes.SET_FILTER_IS_HIGHLIGHTED: {
+            return {
+                ...state,
+                isHighlighted: stateAction.isHighlighted
+            }
+        }
+
         case StateActionTypes.SET_TEST_CASE:
         case StateActionTypes.RESET_FILTER: {
             return {

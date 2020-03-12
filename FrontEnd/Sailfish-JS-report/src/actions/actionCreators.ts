@@ -102,6 +102,11 @@ export const setFilterIsTransparent = (isTransparent: boolean) => (<const>{
     isTransparent
 })
 
+export const setFilterIsHighlighted = (isHighlighted: boolean) => (<const>{
+    type: StateActionTypes.SET_FILTER_IS_HIGHLIGHTED,
+    isHighlighted
+})
+
 export const setAdminMsgEnabled = (adminEnabled: boolean) => (<const>{
     type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
     adminEnabled

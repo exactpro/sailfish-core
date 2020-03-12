@@ -51,17 +51,12 @@ const getActivePanels = createSelector(
 );
 
 const getSearchPanelTokens = createSelector(
-    [
-        getSearchTokens,
-        getActivePanels
-    ],
-    (
-        searchTokens,
-        activePanels
-    ): PanelSearchToken[] => searchTokens.map(token => ({
-        ...token,
-        panels: activePanels
-    }))
+    [getSearchTokens, getActivePanels],
+    (searchTokens, activePanels): PanelSearchToken[] =>
+        searchTokens.map(token => ({
+            ...token,
+            panels: activePanels
+        }))
 );
 
 export const getTokens = createSelector(
@@ -70,18 +65,8 @@ export const getTokens = createSelector(
 );
 
 export const getSearchContent = createSelector(
-    [
-        getFilteredActions,
-        getFilteredMessages,
-        getLogs,
-        getKnownBugs
-    ],
-    (
-        actions,
-        messages,
-        logs,
-        knownBugs
-    ): SearchContent => ({
+    [getFilteredActions, getFilteredMessages, getLogs, getKnownBugs],
+    (actions, messages, logs, knownBugs): SearchContent => ({
         actions,
         messages,
         logs,

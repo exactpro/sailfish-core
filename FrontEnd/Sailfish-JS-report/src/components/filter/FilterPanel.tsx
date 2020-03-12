@@ -24,17 +24,19 @@ import { performFilter } from "../../thunks/filter";
 import FilterRow from "./FilterRow";
 import { removeByIndex, replaceByIndex } from "../../helpers/array";
 import FilterType from "../../models/filter/FilterType";
-import { resetFilter, setFilterIsTransparent } from "../../actions/actionCreators";
+import { resetFilter, setFilterIsHighlighted, setFilterIsTransparent } from "../../actions/actionCreators";
 import {
     getActionsFilterResultsCount, getIsFilterApplied,
     getMessagesFilterResultsCount
 } from "../../selectors/filter";
 import { FilterBlock } from "../../models/filter/FilterBlock";
+import Checkbox from "../util/Checkbox";
 
 interface StateProps {
     blocks: FilterBlock[];
     isTransparent: boolean;
     isFilterApplied: boolean;
+    isHighlighted: boolean;
     actionsResultsCount: number;
     messagesResultsCount: number;
 }
@@ -42,13 +44,26 @@ interface StateProps {
 interface DispatchProps {
     updateFilterBlocks: (blocks: FilterBlock[]) => void;
     setIsTransparent: (isTransparent: boolean) => void;
+    setIsHighlighted: (isHighlighted: boolean) => void;
     resetFilter: () => void;
 }
 
 interface Props extends StateProps, DispatchProps {
 }
 
-function FilterPanelBase({ blocks, isFilterApplied, isTransparent, updateFilterBlocks, setIsTransparent, actionsResultsCount, messagesResultsCount, resetFilter }: Props) {
+function FilterPanelBase(props: Props) {
+    const {
+        blocks,
+        isFilterApplied,
+        isTransparent,
+        isHighlighted,
+        updateFilterBlocks,
+        setIsTransparent,
+        setIsHighlighted,
+        actionsResultsCount,
+        messagesResultsCount,
+        resetFilter
+    } = props;
 
     const onBlockChangeFor = (blockIndex: number) => (nextBlock: FilterBlock) => {
         updateFilterBlocks(replaceByIndex(blocks, blockIndex, nextBlock));
@@ -111,6 +126,11 @@ function FilterPanelBase({ blocks, isFilterApplied, isTransparent, updateFilterB
                         ].filter(Boolean).join(' and ') + 'Filtered' : null
                     }
                 </div>
+               <Checkbox
+                   checked={isHighlighted}
+                   label='Highlight'
+                   onChange={() => setIsHighlighted(!isHighlighted)}
+                   id='filter-highlight'/>
                 <div className="filter-controls__transparency">
                     Filtered out
                     <input
@@ -141,6 +161,7 @@ const FilterPanel = connect(
     (state: AppState): StateProps => ({
         blocks: state.filter.blocks,
         isTransparent: state.filter.isTransparent,
+        isHighlighted: state.filter.isHighlighted,
         isFilterApplied: getIsFilterApplied(state),
         actionsResultsCount: getActionsFilterResultsCount(state),
         messagesResultsCount: getMessagesFilterResultsCount(state)
@@ -148,6 +169,7 @@ const FilterPanel = connect(
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         updateFilterBlocks: config => dispatch(performFilter(config)),
         setIsTransparent: isTransparent => dispatch(setFilterIsTransparent(isTransparent)),
+        setIsHighlighted: isHighlighted => dispatch(setFilterIsHighlighted(isHighlighted)),
         resetFilter: () => dispatch(resetFilter())
     })
 )(FilterPanelBase);

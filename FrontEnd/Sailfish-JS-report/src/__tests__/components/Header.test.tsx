@@ -30,6 +30,8 @@ describe('[React] <HeaderBase/>', () => {
         isNavigationEnabled: true,
         isFilterApplied: false,
         isMessageFilterApplied: false,
+        isFilterHighlighted: false,
+        filterResultsCount: 0,
         messages: []
     };
 

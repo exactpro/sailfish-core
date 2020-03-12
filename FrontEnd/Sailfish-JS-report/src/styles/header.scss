@@ -231,6 +231,18 @@
         }
     }
 
+    &__filter-counter {
+        width: 30px;
+        background-color: $filterPrimaryColor;
+        color: $filterTextColor;
+        font-weight: bold;
+        border-radius: 3px;
+        font-size: 14px;
+        text-align: center;
+        margin: 0 5px;
+        padding: 0 5px;
+    }
+
     &__title {
         color: $primaryTextColor;
         font-size: 14px;
