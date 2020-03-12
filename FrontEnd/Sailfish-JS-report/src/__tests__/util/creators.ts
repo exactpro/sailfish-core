@@ -181,6 +181,9 @@ export function createTestCaseMetadata(
         description: '',
         jsonFileName: '',
         jsonpFileName: '',
-        bugs: []
+        bugs: [],
+        failedActionCount: 0,
+        firstActionId: 0,
+        lastActionId: 0
     }
 }
