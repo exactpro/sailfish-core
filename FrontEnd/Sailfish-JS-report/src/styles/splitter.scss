@@ -21,7 +21,7 @@
     height: 100%;
     display: grid;
     // Default values. Will be overwritten by style at SplitView component.
-    grid-template-columns: calc(50% - 13px) 25px calc(50% - 13px);
+    grid-template-columns: calc(50% - 13px) $splitterBarWidth calc(50% - 13px);
     grid-template-areas: "left-pane splitter-bar right-pane";
     position: relative;
     overflow: hidden;
@@ -33,6 +33,7 @@
     &-bar {
         grid-area: splitter-bar;
         height: 100%;
+        width: $splitterBarWidth;
         cursor: col-resize;
         display: flex;
         align-items: center;
@@ -56,7 +57,7 @@
         &:hover:after {
             content: "";
             height: calc(100% - 55px);
-            width: 0px;
+            width: 0;
             border: 1.5px solid $splitterColor;
             position: absolute;
             left: 11px;
@@ -68,45 +69,31 @@
             background-image: url('../../resources/icons/splitter-active.svg');
         }
     }
-    
-    &-preview-area-left {
-        left: 0%;
-    }
 
-    &-preview-area-right {
-        right: 0%;
-    }
-
-    &-preview-area-left, &-preview-area-right {
-        height: 100%;
+    &-preview {
         position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         z-index: 1;
-        background-color: #000000;
-        border-radius: 5px;
-        opacity: 0.1;
 
-        &.hidden {
-            visibility: hidden;
+        display: grid;
+        grid-template-columns: calc(50% - 13px) $splitterBarWidth calc(50% - 13px);
+        grid-template-areas: "left-preview _ right-preview";
+
+        &-left {
+            grid-area: left-preview;
         }
 
-        &.w0 {
-            width: 0;
+        &-right {
+            grid-area: right-preview;
         }
 
-        &.w25 {
-            width: calc(25% - 17px);
-        }
-
-        &.w50 {
-            width: calc(50% - 17px);
-        }
-
-        &.w75 {
-            width: calc(75% - 17px);
-        }
-
-        &.w100 {
-            width: calc(100% - 40px);
+        &-left, &-right {
+            background-color: #000000;
+            border-radius: 5px;
+            opacity: 0.1;
         }
     }
 

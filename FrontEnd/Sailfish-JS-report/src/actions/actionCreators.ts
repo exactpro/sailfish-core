@@ -27,7 +27,7 @@ import KnownBug from '../models/KnownBug';
 import { FilterBlock } from "../models/filter/FilterBlock";
 import Log from '../models/Log';
 import SearchToken from "../models/search/SearchToken";
-import PanelSide from "../util/PanelSide";
+import PanelArea from "../util/PanelArea";
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -128,9 +128,9 @@ export const setRightPane = (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LO
     panel
 })
 
-export const setClosedPanelSide = (panelSide: PanelSide | null) => (<const>{
-    type: StateActionTypes.SET_CLOSED_PANEL_SIDE,
-    panelSide
+export const setPanelArea = (panelArea: PanelArea) => (<const>{
+    type: StateActionTypes.SET_PANEL_AREA,
+    panelArea
 })
 
 export const setMlToken = (token: string) => (<const>{

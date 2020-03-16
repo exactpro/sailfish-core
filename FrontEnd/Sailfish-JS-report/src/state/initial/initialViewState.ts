@@ -16,6 +16,7 @@
 
 import Panel from "../../util/Panel";
 import ViewState from '../models/ViewState';
+import PanelArea from "../../util/PanelArea";
 
 const initialViewState : ViewState = {
     isLoading: true,
@@ -23,8 +24,8 @@ const initialViewState : ViewState = {
     beautifiedMessages: [],
     leftPanel: Panel.ACTIONS,
     rightPanel: Panel.MESSAGES,
-    closedPanelSide: null,
+    panelArea: PanelArea.P50,
     isConnectionError: false
-}
+};
 
 export default initialViewState;

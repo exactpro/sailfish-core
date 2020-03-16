@@ -23,10 +23,16 @@ import { getLogs } from "./logs";
 import Panel from "../util/Panel";
 import { getKnownBugs } from "./knownBugs";
 import { getCategoryBugChains } from "../helpers/knownbug";
-import PanelSide from "../util/PanelSide";
 import { getFilterTokens } from "./filter";
 import { PanelSearchToken } from "../models/search/SearchToken";
-import { getClosedPanel, getLeftPanel, getLeftPanelEnabled, getRightPanel, getRightPanelEnabled } from "./view";
+import {
+    getIsLeftPanelClosed,
+    getIsRightPanelClosed,
+    getLeftPanel,
+    getLeftPanelEnabled,
+    getRightPanel,
+    getRightPanelEnabled
+} from "./view";
 
 const getSearchTokens = (state: AppState) => state.selected.search.tokens;
 
@@ -36,17 +42,19 @@ const getActivePanels = createSelector(
         getRightPanelEnabled,
         getLeftPanel,
         getRightPanel,
-        getClosedPanel
+        getIsLeftPanelClosed,
+        getIsRightPanelClosed
     ],
     (
         leftPanelEnabled,
         rightPanelEnabled,
         leftPanel,
         rightPanel,
-        closedPanel
+        isLeftPanelClosed,
+        isRightPanelClosed
     ): Panel[] => [
-        leftPanelEnabled && closedPanel != PanelSide.LEFT ? leftPanel : null,
-        rightPanelEnabled && closedPanel != PanelSide.RIGHT ? rightPanel : null
+        leftPanelEnabled && !isLeftPanelClosed ? leftPanel : null,
+        rightPanelEnabled && !isRightPanelClosed ? rightPanel : null
     ].filter(Boolean)
 );
 

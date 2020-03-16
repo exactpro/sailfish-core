@@ -15,13 +15,13 @@
  ******************************************************************************/
 
 import Panel from '../../util/Panel';
-import PanelSide from "../../util/PanelSide";
+import PanelArea from "../../util/PanelArea";
 
 export default interface ViewState {
     isLoading: boolean;
     leftPanel: Panel.ACTIONS | Panel.STATUS;
     rightPanel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS;
-    closedPanelSide: PanelSide | null,
+    panelArea: PanelArea,
     beautifiedMessages: number[];
 
     // We use Boolean object here. It's the way we handle flag changes after component unmount.

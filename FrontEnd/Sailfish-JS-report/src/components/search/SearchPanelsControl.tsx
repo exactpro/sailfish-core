@@ -19,16 +19,16 @@ import { connect } from "react-redux";
 import AppState from "../../state/models/AppState";
 import { setSearchLeftPanelEnabled, setSearchRightPanelEnabled } from "../../actions/actionCreators";
 import Panel from "../../util/Panel";
-import PanelSide from "../../util/PanelSide";
-import { createBemElement } from "../../helpers/styleCreators";
 import Checkbox from "../util/Checkbox";
+import {getIsLeftPanelClosed, getIsRightPanelClosed} from "../../selectors/view";
 
 interface StateProps {
     leftPanelEnabled: boolean;
     leftPanel: Panel;
     rightPanelEnabled: boolean;
     rightPanel: Panel;
-    closedPanel: PanelSide | null;
+    isLeftPanelClosed: boolean;
+    isRightPanelClosed: boolean;
 }
 
 interface DispatchProps {
@@ -38,15 +38,26 @@ interface DispatchProps {
 
 interface Props extends StateProps, DispatchProps {}
 
-function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPanelEnable, onLeftPanelEnable, leftPanel, rightPanel, closedPanel }: Props) {
+function SearchPanelControlBase(props: Props) {
+    const {
+        leftPanelEnabled,
+        rightPanelEnabled,
+        onRightPanelEnable,
+        onLeftPanelEnable,
+        leftPanel,
+        rightPanel,
+        isLeftPanelClosed,
+        isRightPanelClosed
+    } = props;
+
     const onLeftPanelSelect = () => {
-        if (closedPanel != PanelSide.LEFT) {
+        if (!isLeftPanelClosed) {
             onLeftPanelEnable(!leftPanelEnabled);
         }
     };
 
     const onRightPanelSelect = () => {
-        if (closedPanel != PanelSide.RIGHT) {
+        if (!isRightPanelClosed) {
             onRightPanelEnable(!rightPanelEnabled);
         }
     };
@@ -59,14 +70,14 @@ function SearchPanelControlBase({ leftPanelEnabled, rightPanelEnabled, onRightPa
                 checked={leftPanelEnabled}
                 label={leftPanel.toLowerCase().replace('_', ' ')}
                 onChange={onLeftPanelSelect}
-                isDisabled={closedPanel == PanelSide.LEFT}/>
+                isDisabled={isLeftPanelClosed}/>
             <Checkbox
                 className='search-panel-controls__checkbox'
                 id='right-panel'
                 checked={rightPanelEnabled}
                 label={rightPanel.toLowerCase().replace('_', ' ')}
                 onChange={onRightPanelSelect}
-                isDisabled={closedPanel == PanelSide.RIGHT}/>
+                isDisabled={isRightPanelClosed}/>
         </div>
     )
 }
@@ -77,7 +88,8 @@ const SearchPanelControl = connect(
         leftPanel: state.view.leftPanel,
         rightPanelEnabled: state.selected.search.rightPanelEnabled,
         rightPanel: state.view.rightPanel,
-        closedPanel: state.view.closedPanelSide
+        isLeftPanelClosed: getIsLeftPanelClosed(state),
+        isRightPanelClosed: getIsRightPanelClosed(state)
     }),
     (dispatch): DispatchProps => ({
         onLeftPanelEnable: isEnabled => dispatch(setSearchLeftPanelEnabled(isEnabled)),

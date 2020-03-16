@@ -28,23 +28,23 @@ import '../styles/layout.scss';
 import { stopWatchingTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
-import PanelSide from "../util/PanelSide";
-import { setClosedPanelSide } from "../actions/actionCreators";
+import { setPanelArea } from "../actions/actionCreators";
+import PanelArea from "../util/PanelArea";
 
 interface StateProps {
     testCaseLoadingProgress: number;
     isConnectionError: boolean;
-    closedPanel: PanelSide | null;
+    panelArea: PanelArea;
 }
 
 interface DispatchProps {
     stopWatchingTestCase: () => void;
-    setClosedPanelSide: (panelSide: PanelSide | null) => void;
+    setPanelArea: (panelArea: PanelArea) => void;
 }
 
 interface Props extends StateProps, DispatchProps {}
 
-const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchingTestCase, setClosedPanelSide, closedPanel }: Props) => {
+const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchingTestCase, setPanelArea, panelArea }: Props) => {
     React.useEffect(() => {
         return () => {
             stopWatchingTestCase();
@@ -60,24 +60,26 @@ const TestCaseLayout = ({ testCaseLoadingProgress, isConnectionError, stopWatchi
             </div>
             <div className="layout__body">
                 <SplitView
-                    closedPanel={closedPanel}
-                    onClosedPanelChanged={setClosedPanelSide}>
+                    panelArea={panelArea}
+                    onPanelAreaChange={setPanelArea}
+                    leftPanelMinWidth={500}
+                    rightPanelMinWidth={620}>
                     <LeftPanel/>
                     <RightPanel/>
                 </SplitView>
             </div>
         </div>
     )
-}
+};
 
 export default connect(
     (state: AppState) : StateProps=> ({
         testCaseLoadingProgress: getTestCaseLoadingProgress(state),
         isConnectionError: getIsConnectionError(state),
-        closedPanel: state.view.closedPanelSide
+        panelArea: state.view.panelArea
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         stopWatchingTestCase: () => dispatch(stopWatchingTestCase()),
-        setClosedPanelSide: panelSide => dispatch(setClosedPanelSide(panelSide))
+        setPanelArea: panelArea => dispatch(setPanelArea(panelArea))
     })
 )(TestCaseLayout);

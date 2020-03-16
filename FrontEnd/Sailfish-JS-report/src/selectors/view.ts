@@ -15,12 +15,14 @@
  ******************************************************************************/
 
 import AppState from '../state/models/AppState';
+import PanelArea from "../util/PanelArea";
 
 export const getLeftPanelEnabled = (state: AppState) => state.selected.search.leftPanelEnabled;
 export const getRightPanelEnabled = (state: AppState) => state.selected.search.rightPanelEnabled;
 export const getLeftPanel = (state: AppState) => state.view.leftPanel;
 export const getRightPanel = (state: AppState) => state.view.rightPanel;
-export const getClosedPanel = (state: AppState) => state.view.closedPanelSide;
+export const getIsLeftPanelClosed = (state: AppState) => state.view.panelArea == PanelArea.P0;
+export const getIsRightPanelClosed = (state: AppState) => state.view.panelArea == PanelArea.P100;
 
 export const getIsConnectionError = (state: AppState) => state.view.isConnectionError;
 
