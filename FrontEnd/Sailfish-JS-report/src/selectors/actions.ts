@@ -27,6 +27,7 @@ import { ScrollHint } from '../models/util/ScrollHint';
 const EMPTY_ACTIONS_ARRAY = new Array<ActionNode>();
 
 export const getActions = (state: AppState) => state.selected.testCase?.actions ?? EMPTY_ACTIONS_ARRAY;
+const getSelectedCheckpointId = (state: AppState) => state.selected.checkpointActionId;
 
 export const getActionsWithoutNonexistingRelatedMessages = createSelector(
     [getActions, getMessagesIds],
@@ -49,6 +50,11 @@ export const getFilteredActions = createSelector(
 export const getCheckpointActions = createSelector(
     [getActions],
     actions => filterCheckpointsActions(actions)
+);
+
+export const getSelectedCheckpoint = createSelector(
+    [getCheckpointActions, getSelectedCheckpointId],
+    (checkpoints, selectedId) => checkpoints.find(cp => cp.id == selectedId)
 );
 
 export const getActionsFilesCount = (state: AppState) => state.selected.testCase.files?.action.count || 0;

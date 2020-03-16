@@ -18,49 +18,33 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import '../styles/layout.scss';
 import Panel from '../util/Panel';
-import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardList';
 import LogsList, { LogListActions } from './log/LogsList';
 import AppState from '../state/models/AppState';
-import { isAdmin, isRejected } from '../helpers/messageType';
-import {
-    selectRejectedMessageId,
-    setAdminMsgEnabled,
-    setRightPane,
-    togglePredictions,
-    uglifyAllMessages
-} from '../actions/actionCreators';
-import { createStyleSelector, createTriStateControlClassName, createBemElement } from '../helpers/styleCreators';
-import { isAction } from "../models/Action";
+import { setRightPane } from '../actions/actionCreators';
+import { createBemElement, createStyleSelector } from '../helpers/styleCreators';
 import { KnownBugPanel } from "./knownbugs/KnownBugPanel";
-import { StatusType } from '../models/Status';
-import RejectedMessagesCarousel from './RejectedMessagesCarousel';
 import ResizeObserver from "resize-observer-polyfill";
+import { getRejectedMessages } from "../selectors/messages";
+import MessagePanelControl from "./message/MessagePanelControls";
 
 const MIN_CONTROLS_WIDTH = 850,
     MIN_CONTROLS_WIDTH_WITH_REJECTED = 900;
 
+type RightPanelType = Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS;
+
 interface StateProps {
-    panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS;
-    adminMessages: Message[];
-    adminMessagesEnabled: boolean;
+    panel: RightPanelType;
     rejectedMessagesEnabled: boolean;
-    predictionsEnabled: boolean;
-    predictionsAvailable: boolean;
-    hasKnownBugs: boolean;
-    beautifiedMessagesEnabled: boolean;
     hasLogs: boolean;
     hasErrorLogs: boolean;
     hasWarningLogs: boolean;
+    hasKnownBugs: boolean;
 }
 
 interface DispatchProps {
-    panelSelectHandler: (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => void;
-    selectCurrentRejectedMessage: () => void;
-    adminEnabledHandler: (adminEnabled: boolean) => void;
-    togglePredictions: () => void;
-    uglifyAllHandler: () => void;
+    panelSelectHandler: (panel: RightPanelType) => void;
 }
 
 interface Props extends StateProps, DispatchProps {}
@@ -118,28 +102,25 @@ class RightPanelBase extends React.Component<Props, State> {
     }
 
     render() {
-        const {
-            panel, rejectedMessagesEnabled, adminMessages, adminMessagesEnabled, adminEnabledHandler, selectCurrentRejectedMessage,
-            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler, hasLogs, hasKnownBugs,
-            hasErrorLogs, hasWarningLogs
-        } = this.props;
+        const { panel, hasLogs, hasErrorLogs, hasWarningLogs, hasKnownBugs } = this.props;
 
-        const adminControlEnabled = adminMessages.length != 0;
-
-        const logChipClassName = createBemElement('log-button', 'chip', hasErrorLogs? 'error': hasWarningLogs? 'warning': 'hiden')
-
-        const adminRootClass = createTriStateControlClassName("layout-control", adminMessagesEnabled, adminControlEnabled),
-            adminIconClass = createTriStateControlClassName("layout-control__icon admin", adminMessagesEnabled, adminControlEnabled),
-            adminTitleClass = createTriStateControlClassName("layout-control__title selectable", adminMessagesEnabled, adminControlEnabled),
-
-            rejectedRootClass = createTriStateControlClassName("layout-control", true, rejectedMessagesEnabled),
-            rejectedIconClass = createTriStateControlClassName("layout-control__icon rejected", true, rejectedMessagesEnabled),
-            rejectedTitleClass = createTriStateControlClassName("layout-control__title", true, rejectedMessagesEnabled),
-
-            predictionRootClass = createTriStateControlClassName("layout-control", predictionsEnabled, predictionsAvailable),
-            predictionIconClass = createTriStateControlClassName("layout-control__icon prediction", predictionsEnabled, predictionsAvailable),
-            predictionTitleClass = createTriStateControlClassName("layout-control__title prediction selectable", predictionsEnabled, predictionsAvailable);
-
+        const logChipClassName = createBemElement(
+                'log-button',
+                'chip',
+                hasErrorLogs ? 'error' : hasWarningLogs ? 'warning' : 'hidden'
+            ),
+            messagesRootClass = createStyleSelector(
+                "layout-panel__content-wrapper",
+                panel == Panel.MESSAGES ? null : "disabled"
+            ),
+            knownBugsRootClass = createStyleSelector(
+                "layout-panel__content-wrapper",
+                panel == Panel.KNOWN_BUGS ? null : "disabled"
+            ),
+            logsRootClass = createStyleSelector(
+                "layout-panel__content-wrapper",
+                panel == Panel.LOGS ? null : "disabled"
+            );
 
         return (
             <div className="layout-panel" ref={this.root}>
@@ -148,162 +129,75 @@ class RightPanelBase extends React.Component<Props, State> {
                         <ToggleButton
                             isToggled={panel == Panel.MESSAGES}
                             onClick={() => this.selectPanel(Panel.MESSAGES)}>
-                                Messages
+                            Messages
                         </ToggleButton>
                         <ToggleButton
                             isToggled={panel == Panel.KNOWN_BUGS}
                             isDisabled={!hasKnownBugs}
                             onClick={() => this.selectPanel(Panel.KNOWN_BUGS)}>
-                                Known bugs
+                            Known bugs
                         </ToggleButton>
                         <ToggleButton
                             isDisabled={!hasLogs}
                             isToggled={panel == Panel.LOGS}
                             onClick={() => this.selectPanel(Panel.LOGS)}>
-                                <div className="log-button">
-                                    <p>Logs</p>
-                                    <div className={logChipClassName}/>
-                                </div>
+                            <div className="log-button">
+                                <p>Logs</p>
+                                <div className={logChipClassName}/>
+                            </div>
                         </ToggleButton>
                     </div>
-                    {
-                        beautifiedMessagesEnabled ? (
-                            <div className="layout-control"
-                                 title="Back to plain text"
-                                 onClick={() => uglifyAllHandler()}>
-                                <div className="layout-control__icon beautifier"/>
-                            </div>
-                        ) : null
-                    }
-                    <div className={adminRootClass}
-                         onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
-                         title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
-                        <div className={adminIconClass}/>
-                        {
-                            this.state.showTitles ?
-                                <div className={adminTitleClass}>
-                                    <p>{adminControlEnabled ? "" : "No"} Admin Messages</p>
-                                </div> :
-                                null
-                        }
-                    </div>
-                    <div className={rejectedRootClass}>
-                        <div className={rejectedIconClass}
-                             onClick={() => rejectedMessagesEnabled && selectCurrentRejectedMessage()}
-                             style={{ cursor: rejectedMessagesEnabled ? 'pointer' : 'unset' }}
-                             title={rejectedMessagesEnabled ? "Scroll to current rejected message" : null}/>
-                        {
-                            this.state.showTitles ?
-                                <div className={rejectedTitleClass}>
-                                    <p>{rejectedMessagesEnabled ? "" : "No "}Rejected</p>
-                                </div> :
-                                null
-                        }
-                        {
-                            rejectedMessagesEnabled ?
-                                <RejectedMessagesCarousel/> :
-                                null
-                        }
-                    </div>
-                    <div className={predictionRootClass}
-                         title={predictionsEnabled ? "Hide predictions" : "Show predictions"}
-                         onClick={this.onPredictionClick}>
-                        <div className={predictionIconClass}/>
-                        <div className={predictionTitleClass}>
-                            {
-                                this.state.showTitles ?
-                                    <p>{predictionsAvailable ? "Predictions" : "No predictions"}</p> :
-                                    null
-                            }
-                        </div>
-                    </div>
+                    {this.getCurrentPanelControls()}
                 </div>
                 <div className="layout-panel__content">
-                    {this.renderPanels(panel)}
+                    <div className={messagesRootClass}>
+                        <MessagesCardList
+                            ref={this.messagesPanel}/>
+                    </div>
+                    <div className={logsRootClass}>
+                        <LogsList
+                            ref={this.logsPanel}
+                            isActive={panel === Panel.LOGS}/>
+                    </div>
+                    <div className={knownBugsRootClass}>
+                        <KnownBugPanel/>
+                    </div>
                 </div>
             </div>
         )
     }
 
-    private renderPanels(selectedPanel: Panel): React.ReactNode {
-        const messagesRootClass = createStyleSelector(
-            "layout-panel__content-wrapper",
-            selectedPanel == Panel.MESSAGES ? null : "disabled"
-            ),
-            knownBugsRootClass = createStyleSelector(
-                "layout-panel__content-wrapper",
-                selectedPanel == Panel.KNOWN_BUGS ? null : "disabled"
-            ),
-            logsRootClass = createStyleSelector(
-                "layout-panel__content-wrapper",
-                selectedPanel == Panel.LOGS ? null : "disabled"
-            );
-
-        return (
-            <React.Fragment>
-                <div className={messagesRootClass}>
-                    <MessagesCardList
-                        ref={this.messagesPanel}/>
-                </div>
-                <div className={logsRootClass}>
-                    <LogsList
-                        ref={this.logsPanel}
-                        isActive={this.props.panel === Panel.LOGS} />
-                </div>
-                <div className={knownBugsRootClass}>
-                    <KnownBugPanel/>
-                </div>
-            </React.Fragment>
-        );
-    }
-
-    private selectPanel(panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) {
+    private selectPanel(panel: RightPanelType) {
         if (panel == this.props.panel) {
             this.scrollPanelToTop(panel);
         } else {
             this.props.panelSelectHandler(panel);
         }
     }
+    
+    private getCurrentPanelControls = () => {
+        switch (this.props.panel) {
+            case Panel.MESSAGES: {
+                return <MessagePanelControl showTitles={this.state.showTitles}/>;
+            }
 
-    private onPredictionClick = () => {
-        if (this.props.predictionsAvailable) {
-            this.props.togglePredictions();
+            default: {
+                return null;
+            }
         }
     }
 }
 
 export const RightPanel = connect(
-    (state: AppState): StateProps & { selectedRejectedMessageId: number } => ({
-        adminMessages: state.selected.testCase.messages.filter(isAdmin),
-        rejectedMessagesEnabled: state.selected.testCase.messages.filter(isRejected).length > 0,
-        selectedRejectedMessageId: state.selected.rejectedMessageId,
-        adminMessagesEnabled: state.view.adminMessagesEnabled.valueOf(),
+    (state: AppState): StateProps => ({
+        rejectedMessagesEnabled: getRejectedMessages(state).length > 0,
         panel: state.view.rightPanel,
-        beautifiedMessagesEnabled: state.view.beautifiedMessages.length > 0,
-        predictionsAvailable:
-            state.machineLearning.token != null
-            && state.selected.testCase.messages.length > 0
-            && state.selected.testCase.actions.some((action) => {
-                return isAction(action) && action.status.status == StatusType.FAILED;
-            }),
-
-        predictionsEnabled: state.machineLearning.predictionsEnabled,
-        hasKnownBugs: state.selected.testCase.bugs.length > 0,
         hasLogs: state.selected.testCase.files.logentry.count > 0,
         hasErrorLogs: state.selected.testCase.hasErrorLogs,
-        hasWarningLogs: state.selected.testCase.hasWarnLogs
+        hasWarningLogs: state.selected.testCase.hasWarnLogs,
+        hasKnownBugs: state.selected.testCase.bugs.length > 0
     }),
     (dispatch) => ({
-        panelSelectHandler: (panel: Panel.MESSAGES | Panel.KNOWN_BUGS | Panel.LOGS) => dispatch(setRightPane(panel)),
-        selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId)),
-        adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled)),
-        togglePredictions: () => dispatch(togglePredictions()),
-        uglifyAllHandler: () => dispatch(uglifyAllMessages()),
-    }),
-    ({ selectedRejectedMessageId, ...stateProps }, { selectRejectedMessage, ...dispatchProps }, ownProps): Props => ({
-        ...stateProps,
-        ...dispatchProps,
-        ...ownProps,
-        selectCurrentRejectedMessage: () => selectRejectedMessage(selectedRejectedMessageId)
+        panelSelectHandler: (panel: RightPanelType) => dispatch(setRightPane(panel))
     })
 )(RightPanelBase);

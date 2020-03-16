@@ -18,7 +18,7 @@ import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { getFilterBlocks, getFilterResults, getIsFilterTransparent, getIsMessageFilterApplied } from "./filter";
 import { keyForMessage } from "../helpers/keys";
-import { isCheckpointMessage, isRejected } from "../helpers/messageType";
+import { isAdmin, isCheckpointMessage, isRejected } from "../helpers/messageType";
 import FilterType from "../models/filter/FilterType";
 import Message from "../models/Message";
 import { ScrollHint } from '../models/util/ScrollHint';
@@ -58,8 +58,13 @@ export const getTransparentMessages = createSelector(
 );
 
 export const getRejectedMessages = createSelector(
-    [getMessages],
+    [getFilteredMessages],
     (messages) => messages.filter(isRejected)
+);
+
+export const getAdminMessages = createSelector(
+    [getFilteredMessages],
+    (messages) => messages.filter(isAdmin)
 );
 
 export const getMessagesFilesCount = (state: AppState) => state.selected.testCase.files?.message.count || 0;

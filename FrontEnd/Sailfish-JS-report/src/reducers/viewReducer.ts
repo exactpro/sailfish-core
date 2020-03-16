@@ -16,7 +16,8 @@
 
 import ViewState from '../state/models/ViewState';
 import initialViewState from '../state/initial/initialViewState';
-import StateActionType, { StateActionTypes } from '../actions/stateActions';
+import StateActionType, {StateActionTypes} from '../actions/stateActions';
+import Panel from "../util/Panel";
 
 export function viewReducer(state : ViewState = initialViewState, stateAction: StateActionType) : ViewState {
     switch(stateAction.type) {
@@ -49,11 +50,24 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
         }
 
         case StateActionTypes.SET_TEST_CASE: {
-            return  {
-                ...state, 
+            let nextLeftPanel = state.leftPanel;
 
-                // reset active panel to default when there is no status info to show
-                leftPanel: stateAction.testCase.status?.cause ? state.leftPanel : initialViewState.leftPanel
+            // set active panel to status when testCase has ended with exception
+            if (state.leftPanel == Panel.ACTIONS &&
+                stateAction.testCase.files.action.count == 0 &&
+                stateAction.testCase.status?.cause != null
+            ) {
+                nextLeftPanel = Panel.STATUS;
+            }
+
+            // set active panel to actions list when there is no status info to show
+            if (state.leftPanel == Panel.STATUS && stateAction.testCase.status?.cause == null) {
+                nextLeftPanel = Panel.ACTIONS;
+            }
+
+            return  {
+                ...state,
+                leftPanel: nextLeftPanel
             }
         }
 

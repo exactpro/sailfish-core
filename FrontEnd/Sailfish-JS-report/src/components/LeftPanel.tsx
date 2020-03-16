@@ -20,42 +20,36 @@ import { ThunkDispatch } from 'redux-thunk';
 import '../styles/layout.scss';
 import Panel from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
-import Action from '../models/Action';
-import { ActionsList } from './action/ActionsList';
+import { ActionsList, ActionsListBase } from './action/ActionsList';
 import AppState from '../state/models/AppState';
-import { setLeftPane, selectCheckpointAction } from '../actions/actionCreators';
+import { setLeftPane } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPanel';
-import { ActionsListBase } from './action/ActionsList';
 import { createStyleSelector } from '../helpers/styleCreators';
-import CheckpointCarousel from './CheckpointCarousel';
-import { getCheckpointActions, getIsActionsEmpty } from '../selectors/actions';
-import StateAction from '../actions/stateActions';
+import ActionPanelControl from "./action/ActionPanelControls";
+
+type LeftPanelType = Panel.ACTIONS | Panel.STATUS;
 
 interface StateProps {
     panel: Panel;
     statusEnabled: boolean;
-    selectedCheckpointId: number;
-    checkpointActions: any[];
+    actionsEnabled: boolean;
 }
 
 interface DispatchProps {
-    panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => any;
-    setSelectedCheckpoint:  (checkpointAction: Action) => any;
+    panelSelectHandler: (panel: LeftPanelType) => void;
 }
 
-type Props = {
-    currentCheckpointHandler: () => any;
-    isCheckpointsEnabled: boolean;
-} & Omit<DispatchProps, "setSelectedCheckpoint"> & Omit<StateProps, "checkpointActions"|"selectedCheckpointId">;
+interface Props extends StateProps, DispatchProps {
+}
 
 class LeftPanelBase extends React.Component<Props> {
 
     private actionPanel = React.createRef<ActionsListBase>();
-    
+
     scrollPanelToTop(panel: Panel) {
         switch (panel) {
             case Panel.ACTIONS: {
-                this.actionPanel.current && this.actionPanel.current.scrollToTop();
+                this.actionPanel.current?.scrollToTop();
                 break;
             }
             default: {
@@ -65,7 +59,16 @@ class LeftPanelBase extends React.Component<Props> {
     }
 
     render() {
-        const { panel, isCheckpointsEnabled, statusEnabled, currentCheckpointHandler } = this.props;
+        const { panel, statusEnabled, actionsEnabled } = this.props;
+
+        const actionRootClass = createStyleSelector(
+                "layout-panel__content-wrapper",
+                panel == Panel.ACTIONS && actionsEnabled ? null : "disabled"
+            ),
+            statusRootClass = createStyleSelector(
+                "layout-panel__content-wrapper",
+                panel == Panel.STATUS && statusEnabled ? null : "disabled"
+            );
 
         return (
             <div className="layout-panel">
@@ -73,65 +76,45 @@ class LeftPanelBase extends React.Component<Props> {
                     <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.ACTIONS}
-                            onClick={() => this.selectPanel(Panel.ACTIONS)}>
-                                Actions
+                            isDisabled={!actionsEnabled}
+                            onClick={() => actionsEnabled && this.selectPanel(Panel.ACTIONS)}>
+                            Actions
                         </ToggleButton>
                         <ToggleButton
                             isToggled={panel == Panel.STATUS}
                             isDisabled={!statusEnabled}
-                            onClick={statusEnabled ? (() => this.selectPanel(Panel.STATUS)) : undefined}
-                            title={statusEnabled ? null : "No status info"}>
-                                Status
+                            onClick={() => statusEnabled && this.selectPanel(Panel.STATUS)}>
+                            Status
                         </ToggleButton>
                     </div>
-                    {
-                        isCheckpointsEnabled ? (
-                            <div className="layout-control">
-                                <div className="layout-control__icon cp"
-                                    onClick={() => currentCheckpointHandler()}
-                                    title="Scroll to current checkpoint"/>
-                                <div className="layout-control__title">Checkpoints</div>
-                                <CheckpointCarousel/>
-                            </div>
-                        ) : (
-                            <div className="layout-control disabled">
-                                <div className="layout-control__icon cp"/>
-                                <div className="layout-control__title">No Checkpoints</div>
-                            </div>
-                        )
-                    }
+                    {this.getCurrentPanelControls()}
                 </div>
                 <div className="layout-panel__content">
-                    {this.renderPanels(panel)}
+                    <div className={actionRootClass}>
+                        <ActionsList
+                            ref={this.actionPanel}/>
+                    </div>
+                    <div className={statusRootClass}>
+                        <StatusPanel/>
+                    </div>
                 </div>
             </div>
         )
     }
 
-    private renderPanels(selectedPanel: Panel): React.ReactNode {
-        const actionRootClass = createStyleSelector(
-                "layout-panel__content-wrapper",
-                selectedPanel == Panel.ACTIONS ? null : "disabled"
-            ),
-            statusRootClass = createStyleSelector(
-                "layout-panel__content-wrapper",
-                selectedPanel == Panel.STATUS ? null : "disabled"
-            );
-    
-        return (
-            <React.Fragment>
-                <div className={actionRootClass}>
-                    <ActionsList
-                        ref={this.actionPanel}/>
-                </div>
-                <div className={statusRootClass}>
-                    <StatusPanel/>
-                </div>
-            </React.Fragment>
-        )
-    }
+    private getCurrentPanelControls = () => {
+        switch (this.props.panel) {
+            case Panel.ACTIONS: {
+                return <ActionPanelControl/>
+            }
 
-    private selectPanel(panel: Panel.ACTIONS | Panel.STATUS) {
+            default: {
+                return null;
+            }
+        }
+    };
+
+    private selectPanel(panel: LeftPanelType) {
         if (panel == this.props.panel) {
             this.scrollPanelToTop(panel);
         } else {
@@ -141,24 +124,12 @@ class LeftPanelBase extends React.Component<Props> {
 }
 
 export const LeftPanel = connect(
-    (state: AppState): StateProps => {
-        const isActionsEmpty = getIsActionsEmpty(state);
-        return {
-            selectedCheckpointId: state.selected.checkpointActionId,
-            checkpointActions: getCheckpointActions(state),
-            statusEnabled: !!state.selected.testCase.status.cause,
-            panel: state.view.leftPanel == Panel.ACTIONS && isActionsEmpty ? Panel.STATUS : state.view.leftPanel,
-        }
-    },
-    (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        panelSelectHandler: (panel: Panel.ACTIONS | Panel.STATUS) => dispatch(setLeftPane(panel)),
-        setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpointAction(checkpointAction))
+    (state: AppState): StateProps => ({
+        statusEnabled: state.selected.testCase.status.cause != null,
+        actionsEnabled: state.selected.testCase.files.action.count > 0,
+        panel: state.view.leftPanel
     }),
-    ({ checkpointActions, selectedCheckpointId, ...stateProps }, { setSelectedCheckpoint, ...dispatchProps}, ownProps): Props => ({
-        ...stateProps,
-        ...dispatchProps, 
-        ...ownProps,
-        currentCheckpointHandler: () => setSelectedCheckpoint(checkpointActions.find(action => action.id === selectedCheckpointId)),
-        isCheckpointsEnabled: checkpointActions.length > 0
+    (dispatch): DispatchProps => ({
+        panelSelectHandler: (panel: LeftPanelType) => dispatch(setLeftPane(panel))
     })
 )(LeftPanelBase);

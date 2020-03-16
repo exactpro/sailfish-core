@@ -18,7 +18,10 @@ import Action, { ActionNode, isAction } from '../models/Action';
 import { isCheckpointAction } from './action';
 
 export function getCheckpointActions(actions: ActionNode[]) {
-    return actions.reduce((checkpoints, action) => [...checkpoints, ...getActionCheckpoints(action)], []);
+    return actions.reduce(
+        (checkpoints, action) => [...checkpoints, ...getActionCheckpoints(action)],
+        new Array<Action>()
+    );
 }
 
 function getActionCheckpoints(actionNode: ActionNode, checkpoints: Action[] = []): Action[]  {
