@@ -825,14 +825,14 @@ public class WaitAction {
         if (isEmpty) {
             messageBuilder.append("No messages matching filter ");
         } else {
-            messageBuilder.append("No messages fully matched the filter");
+            messageBuilder.append("No messages fully matched the filter ");
         }
 
         if (checkPoint != null) {
             messageBuilder.append("from the checkpoint ");
             if (!checkPoint.isSmart()) {
 
-                messageBuilder.append("appx ")
+                messageBuilder.append("appxrox. ")
                         .append(DateTimeUtility.toLocalDate(checkPoint.getTimestamp()))
                         .append(" at ")
                         .append(DateTimeUtility.toLocalTime(checkPoint.getTimestamp()))
@@ -844,7 +844,7 @@ public class WaitAction {
         messageBuilder.append("till the timeout is exceeded ");
 
         long currentTime = System.currentTimeMillis();
-        messageBuilder.append("appx ")
+        messageBuilder.append("appxrox. ")
                 .append(DateTimeUtility.toLocalDate(currentTime))
                 .append(" at ")
                 .append(DateTimeUtility.toLocalTime(currentTime))
