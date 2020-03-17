@@ -52,6 +52,9 @@ node {
 }
 
 task installDependencies(type: NpmTask) {
+    inputs.file("${project.projectDir}/package-lock.json")
+    outputs.dir(node_modules)
+
     // running 'npm ci', same as 'npm install', but uses package-lock.json instead of package.json
     args = ['ci']
 
@@ -60,7 +63,16 @@ task installDependencies(type: NpmTask) {
 }
 
 task buildProd(type: NpmTask, dependsOn: ['installDependencies', 'runTests']) {
-	args = ['run', 'build']
+    inputs.file("${project.projectDir}/jest.config.js")
+    inputs.file("${project.projectDir}/package.json")
+    inputs.file("${project.projectDir}/package-lock.json")
+    inputs.file("${project.projectDir}/postcss.config.js")
+    inputs.file("${project.projectDir}/tsconfig.json")
+    inputs.file("${project.projectDir}/webpack.config.js")
+    inputs.dir("${project.projectDir}/src")
+    outputs.dir("${project.buildDir}/out")
+
+    args = ['run', 'build']
 }
 
 task buildDev(type: NpmTask, dependsOn: 'installDependencies') {

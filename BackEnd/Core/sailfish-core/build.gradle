@@ -62,7 +62,9 @@ dependencies {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
         testCompile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}:tests@jar"
     } else {
-        js_report files("${project(':FrontEnd:Sailfish-JS-report').buildDir}/out")
+        project(':FrontEnd:Sailfish-JS-report').afterEvaluate { Project project ->
+            js_report files(project.tasks.findByPath('buildProd'))
+        }
 
         compile project(':BackEnd:Core:sailfish-common')
         compile project(':FrontEnd:Sailfish-REST-API-client')
