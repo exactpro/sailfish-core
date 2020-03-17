@@ -15,7 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.tcpip;
 
+import static java.lang.String.join;
+import static java.lang.System.lineSeparator;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.util.CloseSessionException;
 
 public class TCPIPServerSession implements ISession, Runnable {
 
@@ -104,8 +109,23 @@ public class TCPIPServerSession implements ISession, Runnable {
 
 	@Override
 	public void close() {
-		this.isClosed = true;
-	}
+        Collection<String> errors = new HashSet<>();
+
+        server.sessionMap.forEach((ioSession, minaSession) -> {
+            try {
+                minaSession.close();
+            } catch (RuntimeException e) {
+                logger.warn("Failed to close session: {}", minaSession);
+                errors.add(ioSession.toString());
+            }
+        });
+
+        this.isClosed = true;
+
+        if (!errors.isEmpty()) {
+            throw new CloseSessionException("Failed to close following client sessions: " + lineSeparator() + join(lineSeparator(), errors));
+        }
+    }
 
 	@Override
 	public boolean isClosed() {
