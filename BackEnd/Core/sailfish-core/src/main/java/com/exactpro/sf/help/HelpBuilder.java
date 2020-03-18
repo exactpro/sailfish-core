@@ -306,7 +306,7 @@ public class HelpBuilder {
         }
 
         PluginLoader pluginLoader = new PluginLoader(wd, staticServiceManager, actionManager, dictionaryManager, preprocessorLoader, validatorLoader,
-                adapterManager, dataManager, languageManager, matrixProviderHolder, matrixConverterManager, statisticsReportLoader, null, version, null);
+                adapterManager, dataManager, languageManager, matrixProviderHolder, matrixConverterManager, statisticsReportLoader, null, version, null, null);
 
         pluginLoader.load();
 

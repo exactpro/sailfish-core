@@ -109,6 +109,8 @@ public class PluginLoader {
 
     private final List<IVersion> pluginVersions;
 
+    private final ILoadableManager scriptReportLoader;
+
 	public PluginLoader(
             IWorkspaceDispatcher wd,
             ILoadableManager staticServiceManager,
@@ -124,7 +126,8 @@ public class PluginLoader {
             ILoadableManager statisticsReportsLoader,
             PluginServiceLoader pluginServiceLoader,
             IVersion coreVersion,
-            ILoadableManager messageStorageLoader) {
+            ILoadableManager messageStorageLoader,
+            ILoadableManager scriptReportLoader) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
 		}
@@ -144,6 +147,7 @@ public class PluginLoader {
         this.pluginServiceLoader = pluginServiceLoader;
         this.coreVersion = coreVersion;
         this.messageStorageLoader = messageStorageLoader;
+        this.scriptReportLoader = scriptReportLoader;
 
 		this.pluginVersions = new ArrayList<>();
 	}
@@ -515,6 +519,19 @@ public class PluginLoader {
             }
         } else {
             logger.info("Ignore message storages [No MessageStorageLoader]. Plugin: {}", pluginPath);
+        }
+
+        //
+        // Load IScriptReport in plugins
+        //
+        if (scriptReportLoader != null) {
+            try {
+                scriptReportLoader.load(loadableContext);
+            } catch (Exception e) {
+                throw new EPSCommonException(e);
+            }
+        } else {
+            logger.info("Ignore scripts reports [No ScriptReportLoader]. Plugin: {}", pluginPath);
         }
 
         // Collect service description files

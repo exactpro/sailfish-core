@@ -41,6 +41,7 @@ import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
+import com.exactpro.sf.scriptrunner.IScriptReportLoader;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
@@ -121,4 +122,5 @@ public interface ISFContext {
     SfInstanceInfo getSfInstanceInfo();
 
     ServiceMarshalManager getServiceMarshalManager();
+    IScriptReportLoader getScriptReportLoader();
 }

@@ -280,6 +280,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
                 reportListeners.addAll(userListeners);
             }
 
+            reportListeners.addAll(sfContext.getScriptReportLoader().createScriptReports(reportFolder, workspaceDispatcher, dictionaryManager, scriptDescription.getId()));
+
             // NOTE: ZipReport must be latest
             reportListeners.add(new ZipReport(reportFolder, workspaceDispatcher, scriptDescription,  ReportOutputFormat.ZIP));
             

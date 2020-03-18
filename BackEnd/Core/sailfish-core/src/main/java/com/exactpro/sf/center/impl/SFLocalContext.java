@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import com.exactpro.sf.configuration.CleanupConfiguration;
-import com.exactpro.sf.configuration.CleanupService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -44,6 +42,7 @@ import com.exactpro.sf.center.SFException;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.CleanupConfiguration;
+import com.exactpro.sf.configuration.CleanupService;
 import com.exactpro.sf.configuration.DataManager;
 import com.exactpro.sf.configuration.DefaultAdapterManager;
 import com.exactpro.sf.configuration.DictionaryManager;
@@ -68,7 +67,9 @@ import com.exactpro.sf.scriptrunner.AsyncScriptRunner;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings.StorageType;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
+import com.exactpro.sf.scriptrunner.IScriptReportLoader;
 import com.exactpro.sf.scriptrunner.PreprocessorLoader;
+import com.exactpro.sf.scriptrunner.ScriptReportLoader;
 import com.exactpro.sf.scriptrunner.ScriptRunnerSettings;
 import com.exactpro.sf.scriptrunner.SyncScriptRunner;
 import com.exactpro.sf.scriptrunner.ValidatorLoader;
@@ -192,6 +193,7 @@ public class SFLocalContext implements ISFContext {
     private final IServiceStorage serviceStorage;
 
     private final ServiceMarshalManager serviceMarshalManager;
+    private final IScriptReportLoader scriptReportLoader;
 
 
     /**
@@ -311,6 +313,7 @@ public class SFLocalContext implements ISFContext {
 
         PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
         MessageStorageLoader messageStorageLoader = new MessageStorageLoader();
+        scriptReportLoader = new ScriptReportLoader();
 
         // 5) Load core & plugins
         PluginLoader pluginLoader = new PluginLoader(
@@ -328,7 +331,8 @@ public class SFLocalContext implements ISFContext {
                 statisticsService,
                 pluginServiceLoader,
                 version,
-                messageStorageLoader);
+                messageStorageLoader,
+                scriptReportLoader);
 
         LoadInfo loadInfo = pluginLoader.load();
         loadInfo.appendClassPath(compilerClassPath);
@@ -727,5 +731,10 @@ public class SFLocalContext implements ISFContext {
     @Override
     public ServiceMarshalManager getServiceMarshalManager() {
         return serviceMarshalManager;
+    }
+
+    @Override
+    public IScriptReportLoader getScriptReportLoader() {
+        return scriptReportLoader;
     }
 }
