@@ -435,7 +435,9 @@ public abstract class NettyClientService implements IInitiatorService {
 
         @Override
         public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-            if (!matcher.match(msg)) {
+            if (matcher.match(msg)) {
+                promise.setSuccess();
+            } else {
                 ctx.write(msg, promise);
             }
         }
