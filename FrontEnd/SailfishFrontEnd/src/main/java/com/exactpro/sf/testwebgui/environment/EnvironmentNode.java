@@ -149,7 +149,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
         this.id = type == Type.SERVICE ? parent.toString() : parent + name;
 
         if(type == Type.PARAMETER) {
-            if("dictionaryName".equals(name)) {
+            if(paramClassType == SailfishURI.class) {
 				serviceParamRenderComponent = "dictionaryNameSelect";
             } else if("amlVersion".equals(name)) {
 				serviceParamRenderComponent = "amlVersionSelect";
