@@ -22,21 +22,21 @@ import { getHashCode } from '../../helpers/stringHash';
 import { MessageCardActionChips } from './MessageCardActionChips';
 import { MlUploadButton } from '../machinelearning/MlUploadButton';
 import '../../styles/messages.scss';
-import { createBemElement } from '../../helpers/styleCreators';
-import { createBemBlock } from '../../helpers/styleCreators';
+import { createBemBlock, createBemElement } from '../../helpers/styleCreators';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage, toggleMessageBeautifier } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
 import SearchableContent from '../search/SearchableContent';
 import { keyForMessage } from '../../helpers/keys';
-import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicator";
+import { MessagePredictionIndicator } from "../machinelearning/MlPredictionIndicator";
 import StateSaver from '../util/StateSaver';
 import ErrorBoundary from '../util/ErrorBoundary';
 import BeautifiedContent from './BeautifiedContent';
 import { PredictionData } from '../../models/MlServiceResponse';
-import {getRejectedMessages, getTransparentMessages} from "../../selectors/messages";
+import { getRejectedMessages, getTransparentMessages } from "../../selectors/messages";
 import { getIsFilterApplied } from "../../selectors/filter";
+import PanelArea from "../../util/PanelArea";
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -46,13 +46,14 @@ export interface MessageCardOwnProps {
 
 export interface RecoveredProps {
     showRaw: boolean;
-    showRawHandler: (showRaw: boolean) => any;
+    showRawHandler: (showRaw: boolean) => void;
 }
 
 export interface MessageCardStateProps {
     rejectedMessagesCount: number;
     isSelected: boolean;
     isTransparent: boolean;
+    panelArea: PanelArea;
     status: StatusType;
     adminEnabled: Boolean;
     isContentBeautified: boolean;
@@ -60,36 +61,43 @@ export interface MessageCardStateProps {
 }
 
 export interface MessageCardDispatchProps {
-    selectHandler: (status?: StatusType) => any;
+    selectHandler: (status?: StatusType) => void;
     toggleBeautify: () => void;
 }
 
-export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps { }
+export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps {
+}
 
-export function MessageCardBase({ 
-        message, 
+export function MessageCardBase(props: MessageCardProps) {
+
+    const {
+        message,
         isSelected,
         isTransparent,
-        status, 
-        rejectedMessagesCount, 
-        selectHandler, 
-        showRaw, 
-        showRawHandler, 
-        isContentBeautified, 
-        toggleBeautify, 
-        prediction
-    }: MessageCardProps) {
-
+        status,
+        rejectedMessagesCount,
+        selectHandler,
+        showRaw,
+        showRawHandler,
+        isContentBeautified,
+        toggleBeautify,
+        prediction,
+        panelArea
+    } = props;
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
     const rejectedTitle = message.content.rejectReason,
         labels = renderMessageTypeLabels(message, prediction),
         labelsCount = labels.length;
 
     const rootClass = createBemBlock(
-            "message-card",
-            status,
-            isSelected ? "selected" : null,
-            !isSelected && isTransparent ? "transparent" : null
+        "message-card",
+        status,
+        isSelected ? "selected" : null,
+        !isSelected && isTransparent ? "transparent" : null
+        ),
+        headerClass = createBemBlock(
+            'mc-header',
+            panelArea
         ),
         showRawClass = createBemElement(
             "mc-show-raw",
@@ -101,7 +109,7 @@ export function MessageCardBase({
             "icon",
             isContentBeautified ? "plain" : "beautify"
         ),
-        // session arrow color, we calculating it for each session from-to pair, based on hash 
+        // session arrow color, we calculating it for each session from-to pair, based on hash
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
 
     return (
@@ -109,8 +117,8 @@ export function MessageCardBase({
             <div className="message-card__labels">
                 {labels}
             </div>
-            <div className="mc-header default" 
-                onClick={() => selectHandler()}>
+            <div className={headerClass}
+                 onClick={() => selectHandler()}>
                 {
                     rejectedMessagesCount && !(message.relatedActions?.length > 0) ?
                         (
@@ -119,14 +127,14 @@ export function MessageCardBase({
                             </div>
                         ) : (
                             <MessageCardActionChips
-                                message={message} />
+                                message={message}/>
                         )
                 }
                 <div className="mc-header__name">
                     <span>Name</span>
                 </div>
                 <div className="mc-header__name-value">
-                    <SearchableContent  
+                    <SearchableContent
                         content={msgName}
                         contentKey={keyForMessage(id, 'msgName')}/>
                 </div>
@@ -136,18 +144,16 @@ export function MessageCardBase({
                 <div className="mc-header__session">
                     <span>Session</span>
                 </div>
-                <div className="mc-header__from">
+                <div className="mc-header__session-value">
                     <SearchableContent
                         content={from}
                         contentKey={keyForMessage(id, 'from')}/>
-                </div>
-                {
-                    from && to ?
-                        <div className="mc-header__session-icon"
-                            style={sessionArrowStyle} />
-                        : null
-                }
-                <div className="mc-header__to">
+                    {
+                        from && to ?
+                            <div className="mc-header__session-icon"
+                                 style={sessionArrowStyle}/>
+                            : null
+                    }
                     <SearchableContent
                         content={to}
                         contentKey={keyForMessage(id, 'to')}/>
@@ -175,31 +181,31 @@ export function MessageCardBase({
                                     msgId={id}/>
                             </ErrorBoundary>
                         ) : (
-                            <SearchableContent 
-                                content={contentHumanReadable} 
+                            <SearchableContent
+                                content={contentHumanReadable}
                                 contentKey={keyForMessage(id, 'contentHumanReadable')}/>
                         )
                     }
                     {
                         (raw && raw !== 'null') ? (
                             <div className="mc-show-raw"
-                                onClick={() => showRawHandler(!showRaw)}>
+                                 onClick={() => showRawHandler(!showRaw)}>
                                 <div className="mc-show-raw__title">RAW</div>
-                                <div className={showRawClass} />
+                                <div className={showRawClass}/>
                             </div>
                         ) : null
                     }
                     {
                         showRaw ?
                             <MessageRaw
-                                rawContent={raw} />
+                                rawContent={raw}/>
                             : null
                     }
                 </div>
             </div>
         </div>
     );
-};
+}
 
 function renderMessageTypeLabels(message: Message, prediction: PredictionData): React.ReactNodeArray {
     let labels = [];
@@ -213,7 +219,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
     if (message.content.rejectReason !== null) {
         labels.push(
             <div className="mc-label rejected" key="rejected">
-                <div className="mc-label__icon rejected" />
+                <div className="mc-label__icon rejected"/>
             </div>
         );
     }
@@ -221,7 +227,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
     if (message.content.admin) {
         labels.push(
             <div className="mc-label admin" key="admin">
-                <div className="mc-label__icon admin" />
+                <div className="mc-label__icon admin"/>
             </div>
         )
     }
@@ -255,19 +261,26 @@ export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCar
 
 export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
-        isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
-        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null,
-        isTransparent: getIsFilterApplied(state) ? getTransparentMessages(state).includes(ownProps.message.id) : false,
-        rejectedMessagesCount: isRejected(ownProps.message) ? getRejectedMessages(state).indexOf(ownProps.message) + 1 : null,
+        isSelected: state.selected.messagesId.includes(ownProps.message.id) ||
+            state.selected.rejectedMessageId === ownProps.message.id,
+        status: state.selected.messagesId.includes(ownProps.message.id) ?
+            state.selected.selectedActionStatus :
+            null,
+        isTransparent: getIsFilterApplied(state) ?
+            getTransparentMessages(state).includes(ownProps.message.id) :
+            false,
+        rejectedMessagesCount: isRejected(ownProps.message) ?
+            getRejectedMessages(state).indexOf(ownProps.message) + 1 :
+            null,
         adminEnabled: state.view.adminMessagesEnabled,
+        panelArea: state.view.panelArea,
         isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id),
-        prediction: state.machineLearning.predictionsEnabled ? 
-            state.machineLearning.predictionData.find(prediction => 
+        prediction: state.machineLearning.predictionsEnabled ?
+            state.machineLearning.predictionData.find(prediction =>
                 prediction.actionId == state.selected.activeActionId && prediction.messageId == ownProps.message.id
-            ) 
-            : null
+            ) : null
     }),
-    (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
+    (dispatch, ownProps: MessageCardOwnProps): MessageCardDispatchProps => ({
         selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status)),
         toggleBeautify: () => dispatch(toggleMessageBeautifier(ownProps.message.id))
     })

@@ -20,7 +20,7 @@
 .message-card {
     @include status-card;
 
-    // lb-count - number of displaying labels - to make offset for name and session 
+    // lb-count - number of displaying labels - to make offset for name and session
     --lb-count: 0;
     // lb-count variable assignment through the custom html property
     &[data-lb-count="0"] { --lb-count: 0; }
@@ -31,7 +31,7 @@
     display: grid;
     grid-template: auto auto / auto calc(100% - var(--lb-count) * 20px);
     grid-template-areas: "mc-labels mc-header"
-                         "mc-labels mc-body";
+    "mc-labels mc-body";
     width: 100%;
     margin: 6px 0;
 
@@ -125,40 +125,55 @@
 
 .mc-header {
     grid-area: mc-header;
+    display: grid;
+    position: relative;
+    padding: 7px 5px 9px 10px;
+    color: $primaryTextColor;
 
-    &.default {
-        padding: 7px 5px 9px 10px;
-        position: relative;
-        display: grid;
-        grid-template-rows: auto auto;
-        grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
-        grid-template-areas: "info name name-value name-value name-value prediction"
-                             "timestamp session from session-icon to prediction";
-        align-items: center;
-
-        &::after {
-            border-bottom: 2px solid var(--status-primary-delimeter-color);
-            padding: 0 20px;
-            content: '';
-            position: absolute;
-            bottom: 0px;
-            left: 10px;
-            right: 10px;
-        }
+    &::after {
+        border-bottom: 2px solid var(--status-primary-delimeter-color);
+        padding: 0 20px;
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10px;
+        right: 10px;
     }
 
-    &.small {
-        display: grid;
-        grid-template: 35px / calc(230px - (var(--lb-count) * 20px)) 40px auto 1fr 40px;
+    &.p25, &.p50, &.p0 {
+        grid-template-rows: auto auto;
+        grid-template-columns: calc(200px - (var(--lb-count) * 20px)) 60px 1fr 40px;
+        grid-template-areas: "info name name-value prediction"
+                             "timestamp session session-value prediction";
+    }
+
+    &.p75 {
+        grid-template-rows: auto auto auto;
+        grid-template-columns: 50px 50px 1fr 40px;
+        grid-template-areas: "info info timestamp prediction"
+                             "name name-value name-value prediction"
+                             "session session-value session-value session-value";
+
+    }
+
+    &.admin {
+        grid-template-rows: 35px;
+        grid-template-columns: calc(210px - (var(--lb-count) * 20px)) 60px auto 1fr 40px;
         grid-template-areas: "info name name-value empty expand-icon";
+        padding: 0;
+
+        &::after {
+            border: none;
+            padding: 0;
+        }
     }
 
     &__info {
         grid-area: info;
         display: flex;
         justify-content: flex-start;
-        align-items: center;  
-        
+        align-items: center;
+
         &.rejected {
             font-weight: bold;
             font-size: 13px;
@@ -173,7 +188,7 @@
             color: $secondaryTextColor;
         }
     }
-    
+
     &__name {
         grid-area: name;
     }
@@ -184,6 +199,9 @@
 
     .ml__submit {
         grid-area: prediction;
+        justify-self: flex-end;
+        padding-right: 7px;
+
         display: flex;
         justify-content: center;
         align-items: center;
@@ -202,13 +220,12 @@
         grid-area: session;
     }
 
-    &__from {
-        grid-area: from;
-        margin-right: 20px;
-    }
-
-    &__to {
-        grid-area: to;
+    &__session-value {
+        grid-area: session-value;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
     }
 
     &__session-icon {
@@ -217,18 +234,18 @@
         height: 25px;
         width: 25px;
         background-size: 100%;
+        margin: 0 5px;
     }
 
-    &__session, &__name, &__timestamp, &__name-value, &__from, &__to {
+    &__session, &__name, &__timestamp, &__name-value {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
         padding: 3px;
-        color: $primaryTextColor;
     }
-    
-    &__name-value, &__from, &__to {
+
+    &__name-value, &__session-value {
         padding-left: 8px;
         font-size: 13px;
         font-weight: bold;
@@ -265,7 +282,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-      
+
     &__title {
         color: $primaryTextColor;
         font-size: 14px;
@@ -273,15 +290,15 @@
         padding-bottom: 2px;
         padding-top: 5px;
     }
-    
+
     &__human {
         padding-top: 5px;
         word-break: break-word;
         line-height: 21px;
         margin: 0px;
-        font-size: 13px;    
+        font-size: 13px;
     }
-    
+
     &__raw {
         width: 100%
     }
@@ -312,7 +329,7 @@
         width: 14px;
         background-size: 100%;
         margin-left: 5px;
-        
+
         &.expanded {
             background-image: url(../../resources/icons/arr4-up.svg);
         }
@@ -399,7 +416,7 @@
         display: inline-block;
         margin: 4px 4px 4px 10px;
         cursor: pointer;
-        
+
         &:hover {
             filter: opacity(1);
         }
@@ -514,7 +531,7 @@
     &__icons, &__timestamp, &__session, &__name, &__submit, &__icons-el, &__session-el {
         @include skeleton;
         height: 100%;
-    } 
+    }
 
     &__icons {
         grid-area: icons;
@@ -553,7 +570,7 @@
         justify-self: end;
         align-self: center;
     }
-    
+
     &__delimiter {
         height: 2px;
         background-color: $skeletonBackgroundColor;

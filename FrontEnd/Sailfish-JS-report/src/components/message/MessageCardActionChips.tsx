@@ -57,7 +57,7 @@ function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: 
                         actions={actions}
                         selectedStatus={selectedStatus}
                         onStatusSelect={selectHandler}/> : 
-                    <p>Not related to any actions</p>
+                    <p>No related actions</p>
             }
         </div>
     )

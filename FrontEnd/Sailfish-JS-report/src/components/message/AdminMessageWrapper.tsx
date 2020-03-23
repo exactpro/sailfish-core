@@ -64,7 +64,7 @@ function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: Wrappe
             <div className="message-card__labels">
                 {renderMessageTypeLabels(props.message)}
             </div>
-            <div className="message-card__header   mc-header small">
+            <div className="message-card__header   mc-header admin">
                 <div className="mc-header__info">
                     <MessageCardActionChips
                         message={props.message}/>

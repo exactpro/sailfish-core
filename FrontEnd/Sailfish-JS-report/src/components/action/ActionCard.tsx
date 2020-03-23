@@ -62,7 +62,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
           isSingleEmptyMessage = !isEmptyParameters && parameters.length == 1 && parameters[0].name === "Message" &&
                                  parameters[0].value === "" && parameters[0].subParameters.length == 0,
           showParams = !isEmptyParameters && !isSingleEmptyMessage,
-          isDisbled = !showParams && 
+          isDisabled = !showParams &&
                       !action.isTruncated &&
                       !children.length && 
                       !(action.status.status == StatusType.FAILED && action.status.cause != null)
@@ -93,7 +93,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
             onClick={stopPropagationHandler(onSelect, action)}
             key={action.id}>
             <ExpandablePanel
-                isExpandDisabled={isDisbled}
+                isExpandDisabled={isDisabled}
                 isExpanded={isExpanded}
                 onExpand={isExpanded => onRootExpand(isExpanded)}>
                 {
