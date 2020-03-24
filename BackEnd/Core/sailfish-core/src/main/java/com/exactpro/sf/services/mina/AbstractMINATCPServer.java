@@ -32,6 +32,7 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.codecs.CodecFactory;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.AbstractInitiatorService;
 import com.exactpro.sf.services.IAcceptorService;
 import com.exactpro.sf.services.ISession;
@@ -66,13 +67,17 @@ public abstract class AbstractMINATCPServer extends AbstractInitiatorService imp
             throw new ServiceException("Can`t configure server`s acceptor", e);
         }
 
-        CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getSettings());
+        CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getCodecSettings());
         tmpAcceptor.setHandler(this);
         tmpAcceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
         tmpAcceptor.bind(new InetSocketAddress(getSettings().getHost(), getSettings().getPort()));
 
         acceptor.set(tmpAcceptor);
         serverSession.set(createServerSession());
+    }
+
+    protected ICommonSettings getCodecSettings() {
+        return getSettings();
     }
 
     @Override
