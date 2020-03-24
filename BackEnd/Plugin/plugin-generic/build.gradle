@@ -30,9 +30,10 @@ validateDictionary {
 }
 
 convertFixOrchestraToSailfishDictionary {
+    enabled = false // disabled because we have to update Sailfish Gradle plugin first
 
     fixtXml = uri('https://raw.githubusercontent.com/quickfix/quickfix/master/spec/FIXT11.xml')
-    orchestraXml = uri('https://raw.githubusercontent.com/FIXTradingCommunity/orchestrations/master/FIX%20Standard/FixRepository50SP2.xml')
+    orchestraXml = uri('https://raw.githubusercontent.com/FIXTradingCommunity/orchestrations/master/FIX%20Standard/OrchestraEP255.xml')
     fileSuffix = 'GENERIC'
     outputDirectory = genDictionaryDir
 }
