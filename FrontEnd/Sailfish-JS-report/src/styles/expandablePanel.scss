@@ -28,22 +28,21 @@
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
-        min-height: 40px;
+        min-height: 25px;
     }
 
     &__icon {
-        @include icon(url(../../resources/icons/expand-on.svg), 15px, 16px);
-        margin-right: 15px;
+        @include icon(url(../../resources/icons/expand-on.svg), 16px, 16px);
         cursor: pointer;
+        flex-shrink: 0;
+        margin-right: 10px;
 
         &.hidden {
             background-image: url(../../resources/icons/expand-off.svg);
         }
-    }
-}
 
-.disabled .expandable-panel {
-    &__icon {
-        opacity: 0.2;
+        &.disabled {
+            opacity: 0.2;
+        }
     }
 }

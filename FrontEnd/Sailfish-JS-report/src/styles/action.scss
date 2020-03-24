@@ -91,21 +91,47 @@
     width: 100%;
     padding: 3px;
     display: grid;
-    grid-template-columns: 1fr 185px 70px;
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "action-title action-controls action-controls"
-                            "action-title action-start-time action-elapsed-time";
-
     word-break: break-all;
+
+    &.p50, &.p75 {
+        grid-template-columns: 1fr auto 70px;
+        grid-template-rows: auto 1fr;
+        grid-template-areas: "title controls controls"
+                             "title start-time elapsed-time";
+    }
+
+    &.p25 {
+        grid-template-columns: 1fr auto auto;
+        grid-template-rows: 1fr;
+        grid-template-areas: "title elapsed-time controls"
+    }
+
+    &.p25.expanded {
+        grid-template-columns: 1fr 55px 53px;
+        grid-template-rows: auto 1fr;
+        grid-template-areas: "title elapsed-time controls"
+                             "title start-time start-time";
+    }
+
+    &.p100 {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto auto auto;
+        grid-template-areas: "title start-time elapsed-time controls";
+    }
 
     &.transparent {
         opacity: 0.3;
     }
 
     &__title {
-        grid-area: action-title;
+        grid-area: title;
         display: flex;
         flex-direction: column;
+    }
+
+    &.p100 &__title {
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
     &__name, &__description, &__status, &__elapsed-time {
@@ -165,50 +191,57 @@
     }
 
     &__elapsed-time {
-        grid-area: action-elapsed-time;
+        grid-area: elapsed-time;
         color: var(--status-primary-color);
         display: flex;
         flex-direction: row-reverse
     }
 
     &__start-time {
-        grid-area: action-start-time;
+        grid-area: start-time;
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
         align-items: flex-start;
-        padding-right: 8px;
         padding-top: 4px;
+    }
 
-        span {
-            font-size: 11px;
-            color: $secondaryLightTextColor;
-            padding-right: 10px;
-            padding-top: 1px;
-        }
+    &.p100 &__start-time {
+        padding-right: 10px;
+    }
 
-        p {
-            font-size: 12px;
-            color: $secondaryTextColor;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+    &__time-label {
+        font-size: 11px;
+        color: $secondaryLightTextColor;
+        padding-right: 10px;
+        white-space: nowrap;
+    }
+
+    &__time-value {
+        font-size: 12px;
+        color: $secondaryTextColor;
+        font-weight: bold;
+        word-break: break-word;
+        text-align: right;
     }
 
     &__controls {
-        grid-area: action-controls;
+        grid-area: controls;
         display: flex;
         flex-direction: row-reverse;
         justify-content: flex-start;
         align-items: center;
+        padding-left: 5px;
+    }
+
+    &.p100 &__controls {
+        align-items: flex-start;
     }
     
     &__status {
         color: var(--status-primary-color);
-    }
-    
-    &__chips {
-        padding-right: 8px;
+        min-width: 20px;
+        text-align: right;
     }
 
     .ml-action__submit {

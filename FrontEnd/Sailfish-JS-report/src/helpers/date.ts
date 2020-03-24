@@ -37,7 +37,10 @@ export function formatTime(time: string) {
         return '';
     }
 
-    return new Date(time).toISOString().replace('T', ' ').replace('Z', '');
+    return new Date(time)
+        .toISOString()
+        .replace('T', ' ')
+        .replace('Z', '');
 }
 
 export function isDateEqual(first: string | Date, second: string | Date): boolean {

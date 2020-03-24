@@ -90,10 +90,10 @@ export function MessageCardBase(props: MessageCardProps) {
         labelsCount = labels.length;
 
     const rootClass = createBemBlock(
-        "message-card",
-        status,
-        isSelected ? "selected" : null,
-        !isSelected && isTransparent ? "transparent" : null
+            "message-card",
+            status,
+            isSelected ? "selected" : null,
+            !isSelected && isTransparent ? "transparent" : null
         ),
         headerClass = createBemBlock(
             'mc-header',
@@ -149,10 +149,10 @@ export function MessageCardBase(props: MessageCardProps) {
                         content={from}
                         contentKey={keyForMessage(id, 'from')}/>
                     {
-                        from && to ?
+                        from && to ? (
                             <div className="mc-header__session-icon"
                                  style={sessionArrowStyle}/>
-                            : null
+                        ) : null
                     }
                     <SearchableContent
                         content={to}

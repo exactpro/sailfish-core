@@ -29,9 +29,11 @@ import { getSubTree } from '../../helpers/tree';
 import CheckpointAction from './CheckpointAction';
 import CustomLink from './CustomLink';
 import { keyForAction, keyForVerification } from "../../helpers/keys";
+import PanelArea from "../../util/PanelArea";
 
 interface Props {
     action: ActionNode;
+    panelArea: PanelArea;
     isRoot?: boolean;
     parentAction?: Action | null;
     selectedActionsId: number[];
@@ -52,6 +54,7 @@ export default function ActionTreeNode(props: Props) {
         action,
         isRoot = false,
         parentAction = null,
+        panelArea,
         onActionSelect,
         onVerificationSelect,
         selectedActionsId,
@@ -84,6 +87,7 @@ export default function ActionTreeNode(props: Props) {
             return (
                 <ActionCard
                     action={action}
+                    panelArea={panelArea}
                     isSelected={selectedActionsId.includes(action.id)}
                     isTransparent={isTransparent}
                     onSelect={onActionSelect}
@@ -154,7 +158,7 @@ export default function ActionTreeNode(props: Props) {
 
         default: {
             console.warn("WARNING: unknown action node type");
-            return <div></div>;
+            return <div/>;
         }
     }
 }

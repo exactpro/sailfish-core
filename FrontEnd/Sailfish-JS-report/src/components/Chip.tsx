@@ -22,12 +22,13 @@ import { createStyleSelector } from '../helpers/styleCreators';
 
 interface Props {
     text: string;
+    title?: string;
     status?: StatusType;
     isSelected?: boolean;
     onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
-export function Chip({ status, text, isSelected, onClick }: Props) {
+export function Chip({ status, text, isSelected, onClick, title }: Props) {
 
     const rootClass = createStyleSelector(
         "chip",
@@ -36,11 +37,9 @@ export function Chip({ status, text, isSelected, onClick }: Props) {
         onClick ? "clickable" : null
     );
 
-    const description = status ? getStatusChipDescription(status) : "";
-
     return (
-        <div className={rootClass} 
-            title={description}
+        <div className={rootClass}
+            title={title ?? getStatusChipDescription(status)}
             onClick={e => onClick && onClick(e)}>
             <div className="chip__title">
                 <p>{text}</p>

@@ -33,6 +33,7 @@ import StateAction from '../../actions/stateActions';
 import ActionTreeNode from './ActionTreeNode';
 import { getIsFilterApplied } from "../../selectors/filter";
 import FilterType from "../../models/filter/FilterType";
+import PanelArea from "../../util/PanelArea";
 
 interface OwnProps {
     action: ActionNode;
@@ -41,6 +42,7 @@ interface OwnProps {
 interface StateProps {
     selectedVerificationId: number;
     selectedActionsId: number[];
+    panelArea: PanelArea;
     filter: {
         results: string[];
         isActive: boolean;
@@ -104,6 +106,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         return (
             <ActionTreeNode
                 action={props.action}
+                panelArea={props.panelArea}
                 isRoot
                 selectedActionsId={props.selectedActionsId}
                 selectedVerificationId={props.selectedVerificationId}
@@ -121,7 +124,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         }
 
         this.props.actionSelectHandler(selectedAction);
-    }
+    };
 
     private onVerificationSelect = (messageId: number, actionId: number, status: StatusType) => {
         if (status == StatusType.FAILED && !this.props.mlDataActionIds.has(actionId)) {
@@ -129,7 +132,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         }
         
         this.props.verificationSelectHandler(messageId, actionId, status);
-    }
+    };
 
     private onRootExpand = (actionId: number, isExpanded: boolean) => {
         this.setState({
@@ -177,6 +180,7 @@ export const ActionTree = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
         selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
+        panelArea: state.view.panelArea,
         filter: {
             results: state.filter.results,
             isActive: getIsFilterApplied(state) && state.filter.blocks.some(({ types }) => types.includes(FilterType.ACTION)),

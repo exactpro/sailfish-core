@@ -24,55 +24,54 @@ import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 import ChipsList from '../ChipsList';
+import { Chip } from "../Chip";
 
 type SelectHandler = (status: StatusType) => void;
 
-interface ActionChipsOwnProps {
+interface OwnProp {
     message: Message;
 }
 
-interface ActionChipsStateProps {
+interface StateProps {
     actions: Action[];
     selectedStatus?: StatusType;
 }
 
-interface ActionChipsDispatchProps {
+interface DispatchProps {
     selectHandler: SelectHandler;
 }
 
-interface ActionChipsProps extends ActionChipsOwnProps, ActionChipsStateProps, ActionChipsDispatchProps {}
+interface Props extends OwnProp, StateProps, DispatchProps {
+}
 
-function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: ActionChipsProps) {
-
-    const className = createStyleSelector(
-        "mc-header__info",
-        actions.length ? null : "empty"
-    );
+function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: Props) {
 
     return (
-        <div className={className}>
+        <div className="mc-header__info">
             {
-                actions.length ? 
+                actions.length ? (
                     <ChipsList
                         actions={actions}
                         selectedStatus={selectedStatus}
-                        onStatusSelect={selectHandler}/> : 
-                    <p>No related actions</p>
+                        onStatusSelect={selectHandler}/>
+                ) : (
+                    <Chip text='0' title='No related actions'/>
+                )
             }
         </div>
     )
 }
 
 export const MessageCardActionChips = connect(
-    (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({
+    (state: AppState, ownProps: OwnProp): StateProps => ({
         actions: ownProps.message.relatedActions
-            .reduce((actions, actionId) => 
-                state.selected.actionsMap.get(actionId) ? 
-                    [...actions, state.selected.actionsMap.get(actionId)] : 
+            .reduce((actions, actionId) =>
+                state.selected.actionsMap.get(actionId) ?
+                    [...actions, state.selected.actionsMap.get(actionId)] :
                     actions, []),
         selectedStatus: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null
     }),
-    (dispatch, ownProps: ActionChipsOwnProps): ActionChipsDispatchProps => ({
+    (dispatch, ownProps: OwnProp): DispatchProps => ({
         selectHandler: (status: StatusType) => dispatch(selectMessage(ownProps.message, status))
     })
 )(MessageCardActionChipsBase);

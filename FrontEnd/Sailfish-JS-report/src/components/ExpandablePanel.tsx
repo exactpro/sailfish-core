@@ -30,25 +30,22 @@ interface PanelProps {
 }
 
 export const ExpandablePanel = ({ children, isExpanded, onExpand, isExpandDisabled }: PanelProps) => {
-    const rootClass = createStyleSelector(
-        "expandable-panel",
-        isExpandDisabled? "disabled": null
-    )
     const iconClass = createStyleSelector(
         "expandable-panel__icon", 
-        !isExpanded ? "hidden" : null
+        !isExpanded ? "hidden" : null,
+        isExpandDisabled? "disabled": null
     );
 
     const expand = (isExpanded: boolean) => {
         if (!isExpandDisabled) {
             onExpand(isExpanded)
         }
-    }
+    };
 
     const [header, body] = children;
 
     return (
-        <div className={rootClass}>
+        <div className="expandable-panel">
             <div className="expandable-panel__header">
                 <div className={iconClass} 
                     onClick={stopPropagationHandler(expand, !isExpanded)}/>

@@ -73,6 +73,15 @@ export class SplitView extends React.Component<Props, State> {
         this.resizeObserver.unobserve(this.root.current)
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>) {
+        if (this.props.leftPanelMinWidth != prevProps.leftPanelMinWidth ||
+            this.props.rightPanelMinWidth != prevProps.rightPanelMinWidth) {
+            this.setState({
+                steps: this.calculateSteps()
+            })
+        }
+    }
+
     get panelsAvailableWidth() {
         return this.root.current?.offsetWidth - this.splitter.current?.offsetWidth;
     }

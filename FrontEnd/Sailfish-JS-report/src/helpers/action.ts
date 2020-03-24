@@ -29,11 +29,23 @@ export function isCheckpointAction(action: Action): boolean {
     return action.parameters?.some(param => param.name === ACTION_CHECKPOINT_NAME);
 }
 
-export function getStatusChipDescription(status: StatusType): string {
+export function getStatusChipDescription(status?: StatusType): string {
+    if (!status) {
+        return '';
+    }
+
     const statusFormatted = status.toLowerCase().replace('_', ' '),
         statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
 
     return `${statusCapitalized} actions count. Click to select related ${statusFormatted} actions.`;
+}
+
+export function getMinifiedStatus(status: StatusType): string {
+    return status
+        .split('_')
+        .map(str => str[0])
+        .join('')
+        .toUpperCase();
 }
 
 export function removeNonexistingRelatedMessages(action: ActionNode, messagesIds: number[]): ActionNode {
