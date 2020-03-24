@@ -22,11 +22,11 @@ import { resetTestCase } from '../../actions/actionCreators';
 /**
  * Handles goBack and goForward browser history actions - 
  * just returns appliction in previous state using 
- * redux aciton passed with window.history.pushState 
+ * redux action passed with window.history.pushState 
  * (see urlHandler redux middleware). 
  * @param store target redux store
  */
-export default function initBroserHistoryEventSource(store: Store<AppState, StateAction>) {
+export default function initBrowserHistoryEventSource(store: Store<AppState, StateAction>) {
     window.onpopstate = (e: PopStateEvent) => {
         const action = e.state;
 

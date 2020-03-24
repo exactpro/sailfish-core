@@ -18,6 +18,7 @@ import AppState from "../state/models/AppState";
 import StateActionType from "../actions/stateActions";
 import { Middleware } from "redux";
 import StateAction from "../actions/stateActions";
+import { isScrollableStateAction } from '../models/util/ScrollableStateAction';
 
 export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'ac',
@@ -46,7 +47,7 @@ export const urlHandler: Middleware<never, AppState> = store => next => (action:
 function handleStateUpdate(prevState: AppState, nextState: AppState, action: StateAction) {
     if (prevState.selected.actionsId == nextState.selected.actionsId &&
         prevState.selected.messagesId == nextState.selected.messagesId &&
-        prevState.selected.testCase == nextState.selected.testCase) {
+        prevState.selected.testCase?.order == nextState.selected.testCase?.order) {
 
         return;
     }
@@ -55,12 +56,15 @@ function handleStateUpdate(prevState: AppState, nextState: AppState, action: Sta
         searchParams = new URLSearchParams(searchString),
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
         nextUrl = getNextUrl(window.location.href, searchString, nextSearchParams);
-
     // handle goBack and goForward browser buttons clicks - we don't need to update current url
     const currentUrl = window.location.href;
-
-    if (currentUrl !== nextUrl) {
-        window.window.history.pushState(action, "", nextUrl);
+    if (currentUrl == nextUrl) return;
+    // setting action to null will navigate to test case list
+    action = prevState.selected.testCase ? action : null;
+    if (action && isScrollableStateAction(action)) {
+        window.history.pushState({...action, shouldScrollIntoView: true }, "", nextUrl);
+    } else { 
+        window.history.pushState(action, "", nextUrl);
     }
 }
 

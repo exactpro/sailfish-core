@@ -20,10 +20,8 @@ import * as FetcherModule from '../../../helpers/files/fetcher';
 import LiveUpdateService from '../../../helpers/files/LiveUpdateService';
 import { createAction, createMessage, createTestCase, createReport, createTestCaseMetadata } from '../../util/creators';
 import LiveTestCase from '../../../models/LiveTestCase';
+import { Writable } from '../../../models/util/WritableFields';
 
-type Writable<T> = {
-    -readonly [K in keyof T]: T[K]
-}
 
 const jsonpModule = JsonpModule as Writable<typeof JsonpModule>,
     successInitWatchReportMock = jest.fn<ReturnType<typeof JsonpModule.watchReport>, Parameters<typeof JsonpModule.watchReport>>(() => null),
