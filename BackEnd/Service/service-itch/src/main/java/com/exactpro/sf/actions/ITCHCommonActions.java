@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import java.util.HashMap;
+
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.Description;
@@ -229,10 +231,10 @@ public class ITCHCommonActions extends AbstractCaller {
         @CommonColumn(value = Column.Timeout, required = true)
     })
     @ActionMethod
-    public void ITCH_CountAdminTotalWithoutUH(IActionContext actionContext)
+    public HashMap<String, Integer> ITCH_CountAdminTotalWithoutUH(IActionContext actionContext)
         throws Exception
     {
-            WaitAction.countMessages(actionContext);
+            return WaitAction.countMessages(actionContext);
     }
 
 

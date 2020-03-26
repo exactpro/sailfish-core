@@ -185,7 +185,9 @@ public class TestActions extends AbstractCaller {
     }
 
     @Description("Count nearest messages in the past which matched with filter. <br/>"
-                         + "Execution may be slow, because we load message from message storage")
+                         + "Execution may be slow, because we load message from message storage.<br/>"
+            + "Returns the actual message count that is available in " + WaitAction.ACTUAL_COUNT_FIELD + " field.<br/>"
+            + "Example: ${ref." + WaitAction.ACTUAL_COUNT_FIELD + "}")
     @MessageDirection(direction = Direction.RECEIVE)
     @CommonColumns({
             @CommonColumn(value = Column.MessageCount, required = true),
@@ -196,7 +198,7 @@ public class TestActions extends AbstractCaller {
             @CustomColumn(value = TO_TIMESTAMP, type = LocalDateTime.class)
     })
     @ActionMethod
-    public void countStored(IActionContext actionContext, IMessage message) throws InterruptedException {
+    public HashMap<String, Integer> countStored(IActionContext actionContext, IMessage message) throws InterruptedException {
         IService service = ActionUtil.getService(actionContext, IService.class);
         ICSHIterator<IMessage> iterator = new JsonMessageIterator(actionContext, service, message);
         ComparatorSettings compSettings = WaitAction.createCompareSettings(actionContext, null, message);
@@ -205,7 +207,11 @@ public class TestActions extends AbstractCaller {
         Object expectedMessageCount = ObjectUtils.defaultIfNull(actionContext.getMessageCountFilter(), actionContext.getMessageCount());
 
         WaitAction.countMessages(message, iterator, compSettings, allResults);
-        WaitAction.addResultToReport(report, expectedMessageCount, "", allResults, allResults.size(), true);
+
+        int actualCount = allResults.size();
+        WaitAction.addResultToReport(report, expectedMessageCount, "", allResults, actualCount, true);
+
+        return WaitAction.countResult(actualCount);
 	}
 
 	@MessageDirection(direction=Direction.RECEIVE)
@@ -213,30 +219,39 @@ public class TestActions extends AbstractCaller {
         @CommonColumn(value = Column.MessageCount, required = true),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
+    @Description("Checks that count of messages matched to the declared filter equals to the expected one. "
+            + "If it is then returns the actual message count that is available in " + WaitAction.ACTUAL_COUNT_FIELD + " field.<br/>"
+            + "Example: ${ref." + WaitAction.ACTUAL_COUNT_FIELD + "}")
 	@ActionMethod
-    public void count(IActionContext actionContext, IMessage msg) throws Exception
+    public HashMap<String, Integer> count(IActionContext actionContext, IMessage msg) throws Exception
 	{
-		WaitAction.countMessages(actionContext, msg, !msg.getMetaData().isAdmin());
+		return WaitAction.countMessages(actionContext, msg, !msg.getMetaData().isAdmin());
 	}
 
 	@CommonColumns({
         @CommonColumn(value = Column.MessageCount, required = true),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
+    @Description("Checks that count of application messages equals to the expected one. "
+            + "If it is then returns the actual message count that is available in " + WaitAction.ACTUAL_COUNT_FIELD + " field.<br/>"
+            + "Example: ${ref." + WaitAction.ACTUAL_COUNT_FIELD + "}")
 	@ActionMethod
-    public void countApp(IActionContext actionContext) throws Exception
+    public HashMap<String, Integer> countApp(IActionContext actionContext) throws Exception
 	{
-	    WaitAction.countMessages(actionContext, null, true);
+	    return WaitAction.countMessages(actionContext, null, true);
 	}
 
 	@CommonColumns({
         @CommonColumn(value = Column.MessageCount, required = true),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
+    @Description("Checks that count of admin messages equals to the expected one. "
+            + "If it is then returns the actual message count that is available in " + WaitAction.ACTUAL_COUNT_FIELD + " field.<br/>"
+            + "Example: ${ref." + WaitAction.ACTUAL_COUNT_FIELD + "}")
     @ActionMethod
-    public void countAdmin(IActionContext actionContext) throws Exception
+    public HashMap<String, Integer> countAdmin(IActionContext actionContext) throws Exception
     {
-        WaitAction.countMessages(actionContext, null, false);
+        return WaitAction.countMessages(actionContext, null, false);
     }
 
 	@CommonColumns({
@@ -406,7 +421,7 @@ public class TestActions extends AbstractCaller {
         @CustomColumn("MessageTypes")
     })
     @ActionMethod
-    public void countFilter(IActionContext actionContext, HashMap<?,?> inputData) throws InterruptedException {
+    public HashMap<String, Integer> countFilter(IActionContext actionContext, HashMap<?,?> inputData) throws InterruptedException {
         Boolean isAdmin = Boolean.valueOf(unwrapFilters(inputData.get("IsAdmin")).toString());
         Boolean isIgnore = Boolean.valueOf(unwrapFilters(inputData.get("IsIgnore")).toString());
         String types = unwrapFilters(inputData.get("MessageTypes"));
@@ -423,7 +438,7 @@ public class TestActions extends AbstractCaller {
             }
         }
 
-        WaitAction.countMessages(actionContext, messageTypes, isIgnore, !isAdmin);
+        return WaitAction.countMessages(actionContext, messageTypes, isIgnore, !isAdmin);
     }
 	@Description("Marks the matrix as AML 3, if the script consists only of universal actions and the AML version<br/>"
 			+ "auto-detection parameter is selected when running.")

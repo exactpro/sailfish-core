@@ -22,12 +22,14 @@ import static java.util.Arrays.stream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +70,9 @@ import com.exactpro.sf.util.KnownBugPostValidation;
 import com.exactpro.sf.util.MessageKnownBugException;
 
 public class WaitAction {
+    public static final String ACTUAL_COUNT_FIELD = "ActualCount";
 
-	static Logger log = LoggerFactory.getLogger(WaitAction.class);
+    static Logger log = LoggerFactory.getLogger(WaitAction.class);
 
     public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp) throws InterruptedException {
         return waitForMessage(actionContext, messageFilter, fromApp, "");
@@ -265,9 +268,10 @@ public class WaitAction {
      * @param isApp is {@code true} for application messages and {@code false}
      * for administration messages
      * @throws Exception
+     * @return
      */
-    public static void countMessages(IActionContext actionContext, IMessage message, boolean isApp) throws Exception {
-        countMessages(actionContext, message, isApp, "");
+    public static HashMap<String, Integer> countMessages(IActionContext actionContext, IMessage message, boolean isApp) throws Exception {
+        return countMessages(actionContext, message, isApp, "");
     }
 
 	/**
@@ -281,9 +285,9 @@ public class WaitAction {
 	 * @param description
 	 * @throws Exception
 	 */
-	public static void countMessages(IActionContext actionContext, IMessage message, boolean isApp, String description) throws Exception
+	public static HashMap<String, Integer> countMessages(IActionContext actionContext, IMessage message, boolean isApp, String description) throws Exception
 	{
-		countMessages(actionContext, message, isApp, null, description);
+		return countMessages(actionContext, message, isApp, null, description);
 	}
 
     /**
@@ -293,8 +297,8 @@ public class WaitAction {
      *
      * @throws Exception
      */
-    public static void countMessages(IActionContext actionContext) throws Exception {
-        countMessages(actionContext, "");
+    public static HashMap<String, Integer> countMessages(IActionContext actionContext) throws Exception {
+        return countMessages(actionContext, "");
     }
 
 	/**
@@ -305,7 +309,7 @@ public class WaitAction {
      * @param actionContext contains action context
 	 * @throws Exception
 	 */
-	public static void countMessages(IActionContext actionContext, String description) throws Exception
+	public static HashMap<String, Integer> countMessages(IActionContext actionContext, String description) throws Exception
 	{
 		IInitiatorService service = ActionUtil.getService(actionContext, IInitiatorService.class);
         IServiceHandler handler = getServiceHandler(service);
@@ -351,6 +355,8 @@ public class WaitAction {
 			throw new EPSCommonException("Expected messages quantity did not match actual messages quantity."
                     + " Expected=" + expected + ", actual=" + receivedMessages);
 		}
+
+        return countResult(receivedMessages);
 	}
 
     /**
@@ -363,9 +369,10 @@ public class WaitAction {
      * for administration messages
      * @param postValidation do custom validation after standard validation
      * @throws Exception
+     * @return
      */
-    public static void countMessages(IActionContext actionContext, IMessage message, boolean isApp, IPostValidation postValidation) throws Exception {
-        countMessages(actionContext, message, isApp, postValidation, "");
+    public static HashMap<String, Integer> countMessages(IActionContext actionContext, IMessage message, boolean isApp, IPostValidation postValidation) throws Exception {
+        return countMessages(actionContext, message, isApp, postValidation, "");
     }
 
 	/**
@@ -381,8 +388,8 @@ public class WaitAction {
 	 * @throws Exception
 	 */
     @SuppressWarnings("deprecation")
-    public static void countMessages(IActionContext actionContext, IMessage message, boolean isApp, IPostValidation postValidation, String description) throws Exception
-	{
+    public static HashMap<String, Integer> countMessages(IActionContext actionContext, IMessage message, boolean isApp,
+            IPostValidation postValidation, String description) throws Exception {
 		String serviceName = actionContext.getServiceName();
 
 		IInitiatorService service = ActionUtil.getService(actionContext, IInitiatorService.class);
@@ -402,12 +409,16 @@ public class WaitAction {
             compSettings.setDictionaryStructure(actionContext.getDictionary(dictionaryURI));
         }
 
-		if (message != null) {
-            countMessages(actionContext.getReport(), serviceName, message, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, compSettings, description);
-		} else {
-            countMessages(actionContext.getReport(), serviceName, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, description);
-		}
-	}
+        int actualCount;
+        if (message != null) {
+            actualCount = countMessages(actionContext.getReport(), serviceName, message, messageCount, handler, isession,
+                    actionContext.getCheckPoint(), isApp, compSettings, description);
+        } else {
+            actualCount = countMessages(actionContext.getReport(), serviceName, messageCount, handler, isession,
+                    actionContext.getCheckPoint(), isApp, description);
+        }
+        return countResult(actualCount);
+    }
 
     /**
      * Count all application or administration messages received after checkpoint and
@@ -611,11 +622,11 @@ public class WaitAction {
 		return receivedMessages;
 	}
 
-    public static void countMessages(IActionContext actionContext, List<String> messageTypes, boolean isIgnore, boolean isApp) {
-        countMessages(actionContext, messageTypes, isIgnore, isApp, "");
+    public static HashMap<String, Integer> countMessages(IActionContext actionContext, List<String> messageTypes, boolean isIgnore, boolean isApp) {
+        return countMessages(actionContext, messageTypes, isIgnore, isApp, "");
     }
 
-	public static void countMessages(IActionContext actionContext, List<String> messageTypes, boolean isIgnore, boolean isApp, String description) {
+	public static HashMap<String, Integer> countMessages(IActionContext actionContext, List<String> messageTypes, boolean isIgnore, boolean isApp, String description) {
         CheckPoint checkPoint = actionContext.getCheckPoint();
         @SuppressWarnings("deprecation")
         Object mc = ObjectUtils.defaultIfNull(actionContext.getMessageCountFilter(), actionContext.getMessageCount());
@@ -658,6 +669,7 @@ public class WaitAction {
         if(status == StatusType.FAILED) {
             throw new EPSCommonException("Expected messages quantity did not match actual messages quantity. Expected = " + expected + ", actual = " + actualCount);
         }
+        return countResult(actualCount);
 	}
 
     public static ComparatorSettings createCompareSettings(IActionContext actionContext, IPostValidation postValidation, IMessage messageFilter) {
@@ -851,5 +863,12 @@ public class WaitAction {
                 .append(' ');
 
         return messageBuilder.toString();
+    }
+
+    @NotNull
+    public static HashMap<String, Integer> countResult(int actualCount) {
+        HashMap<String, Integer> result = new HashMap<>();
+        result.put(ACTUAL_COUNT_FIELD, actualCount);
+        return result;
     }
 }
