@@ -40,7 +40,7 @@ import { isKnownBugCategory } from "../../models/KnownBugCategory";
 import Panel from "../../util/Panel";
 
 // list of fields that will be used to search (order is important!)
-export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'contentHumanReadable'],
+export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to', 'contentHumanReadable', 'rawHex', 'rawHumanReadable'],
     ACTION_FIELDS: Array<keyof Action> = ['matrixId', 'serviceName', 'name', 'messageType', 'description'],
     LOG_FIELDS: Array<keyof Log> = ['thread', 'class', 'message'],
     KNOWN_BUG_FIELDS: Array<keyof KnownBug> = ['subject'],

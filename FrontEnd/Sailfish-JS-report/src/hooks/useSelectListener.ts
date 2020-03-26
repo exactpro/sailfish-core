@@ -16,9 +16,38 @@
 
 import * as React from 'react';
 
-export default function useSelectListener(ref: React.MutableRefObject<HTMLElement>, handler: (e: MouseEvent) => void) {
-    const onSelectionChanged = (e: MouseEvent) => {
-        handler(e);
+export default function useSelectListener(ref: React.MutableRefObject<HTMLElement>): [number | null, number | null] {
+    const [startOffset, setStartOffset] = React.useState<number | null>(null);
+    const [endOffset, setEndOffset] = React.useState<number | null>(null);
+
+    const onSelectionChanged = () => {
+        const selection = window.getSelection();
+
+        const refIsAnchorNode = ref.current.contains(selection.anchorNode),
+            refIsFocusNode = ref.current.contains(selection.focusNode);
+
+        if (selection.rangeCount == 0 || (!refIsAnchorNode && !refIsFocusNode)) {
+            setStartOffset(null);
+            setEndOffset(null);
+            return;
+        }
+
+        const range = selection.getRangeAt(0);
+
+        if (selection.focusNode == selection.anchorNode) {
+            setStartOffset(range.startOffset);
+            setEndOffset(range.endOffset);
+            return;
+        }
+
+        if (refIsAnchorNode || refIsFocusNode) {
+            setStartOffset(range.startOffset);
+            setEndOffset(ref.current.textContent.length);
+            return;
+        }
+
+        setStartOffset(null);
+        setEndOffset(null);
     };
 
     React.useEffect(() => {
@@ -28,4 +57,6 @@ export default function useSelectListener(ref: React.MutableRefObject<HTMLElemen
             document.removeEventListener("selectionchange", onSelectionChanged);
         }
     }, []);
+
+    return [startOffset, endOffset];
 }

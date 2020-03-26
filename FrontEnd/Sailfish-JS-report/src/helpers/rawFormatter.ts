@@ -44,7 +44,7 @@ export function getRawContent([offset, hexadecimal, humanReadable]: string[][]):
 export function getAllRawContent([offset, hexadecimal, humanReadable]: string[][]): string {
     let allContent = '';
     for (let i = 0; i < offset.length; i++) {
-        const minHexadecimalColumnLength = 8*4+7;
+        const minHexadecimalColumnLength = 8 * 4 + 7;
         const row = [
             offset[i] + ':',
             hexadecimal[i] + " ".repeat(minHexadecimalColumnLength - hexadecimal[i].length),
@@ -107,51 +107,13 @@ export function decodeBase64RawContent(rawBase64Content: string): string[][] {
 }
 
 /**
- * Removes all '\r' and '\n' symbols from string.
- * @param content content string
- */
-export function getUnformattedContent(content: string): string {
-    return content.replace(/\r|\n/g, '');
-}
-
-/**
- * Converts HEX content to raw using 'String.fromCharCode' (may contain unreadable symbols).
- * @param hexString HEX string
- */
-export function getRawContentByHex(hexString: string): string {
-    // filter out line breaks
-    const unforamttedString = hexString.replace(/\r|\n/g, ' '),
-        // split hex string to array of string - pairs of char codes
-        hexSymbols = unforamttedString.split(' '),
-        filtredSymbols  = hexSymbols.filter(Boolean),
-        // splitting pairs of char codes in single char codes array
-        charCodes = filtredSymbols.reduce(
-            (acc, charCodes) => {
-                const firstCode = charCodes.substring(0, 2),
-                    secondCode = charCodes.substring(2),
-                    result = secondCode ? [firstCode, secondCode] : [firstCode];
-
-                return acc.concat(result);
-            },
-            []
-        ),
-        // converting hex char code to string
-        charsArray = charCodes.map(
-            hexCharCode => String.fromCharCode(parseInt(hexCharCode, 16))
-        ),
-        resultString = charsArray.join('');
-
-    return resultString;
-}
-
-/**
  * This function returns pair of offsets that form range [startOffset, endOffset] of
  * human readable symbols to be highlited (endOffset not incluede).
  */
 export function mapOctetOffsetsToHumanReadableOffsets(start: number, end: number) {
     // legend:
     // 40 = length of octet line
-    // 17 = length of humen-readable line: 16 human readable chars + '\n'
+    // 17 = length of human-readable line: 16 human readable chars + '\n'
     const startOffset =
         Math.floor(start / 40) * 17 +    // line
         Math.floor(start % 40 / 5) * 2 + // symbols
@@ -170,7 +132,7 @@ export function mapOctetOffsetsToHumanReadableOffsets(start: number, end: number
 export function mapHumanReadableOffsetsToOctetOffsets(start: number, end: number) {
     // legend:
     // 40 = length of octet line
-    // 17 = length of humen-readable line: 16 human readable chars + '\n'
+    // 17 = length of human-readable line: 16 human readable chars + '\n'
     const startOffset =
         Math.floor(start / 17) * 40 +   // lines 
         start % 17 * 2 +                // symbols

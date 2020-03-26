@@ -243,6 +243,13 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
         }
 
         if (e.keyCode == KeyCodes.SPACE && e.currentTarget.value != "") {
+            if (e.ctrlKey) {
+                this.setState({
+                    inputValue: this.state.inputValue + ' '
+                });
+                return;
+            }
+
             const [lastItem, ...restItems] = [...this.props.searchTokens].reverse();
 
             if (lastItem?.isActive) {

@@ -26,9 +26,9 @@ import { createBemBlock, createBemElement } from '../../helpers/styleCreators';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage, toggleMessageBeautifier } from '../../actions/actionCreators';
-import { isRejected } from '../../helpers/messageType';
+import { isRejected } from '../../helpers/message';
 import SearchableContent from '../search/SearchableContent';
-import { keyForMessage } from '../../helpers/keys';
+import { getKeyField, keyForMessage } from '../../helpers/keys';
 import { MessagePredictionIndicator } from "../machinelearning/MlPredictionIndicator";
 import StateSaver from '../util/StateSaver';
 import ErrorBoundary from '../util/ErrorBoundary';
@@ -37,6 +37,7 @@ import { PredictionData } from '../../models/MlServiceResponse';
 import { getRejectedMessages, getTransparentMessages } from "../../selectors/messages";
 import { getIsFilterApplied } from "../../selectors/filter";
 import PanelArea from "../../util/PanelArea";
+import { getCurrentScrolledSearchKey } from "../../selectors/search";
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -58,6 +59,7 @@ export interface MessageCardStateProps {
     adminEnabled: Boolean;
     isContentBeautified: boolean;
     prediction: PredictionData;
+    searchField: keyof Message | null;
 }
 
 export interface MessageCardDispatchProps {
@@ -65,7 +67,10 @@ export interface MessageCardDispatchProps {
     toggleBeautify: () => void;
 }
 
-export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps {
+export interface MessageCardProps extends MessageCardOwnProps,
+    Omit<MessageCardStateProps, 'searchField'>,
+    MessageCardDispatchProps,
+    RecoveredProps {
 }
 
 export function MessageCardBase(props: MessageCardProps) {
@@ -90,10 +95,10 @@ export function MessageCardBase(props: MessageCardProps) {
         labelsCount = labels.length;
 
     const rootClass = createBemBlock(
-            "message-card",
-            status,
-            isSelected ? "selected" : null,
-            !isSelected && isTransparent ? "transparent" : null
+        "message-card",
+        status,
+        isSelected ? "selected" : null,
+        !isSelected && isTransparent ? "transparent" : null
         ),
         headerClass = createBemBlock(
             'mc-header',
@@ -198,7 +203,8 @@ export function MessageCardBase(props: MessageCardProps) {
                     {
                         showRaw ?
                             <MessageRaw
-                                rawContent={raw}/>
+                                rawContent={raw}
+                                messageId={message.id}/>
                             : null
                     }
                 </div>
@@ -238,7 +244,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 function calculateHueValue(from: string, to: string): number {
     const hashCode = getHashCode(
         [from, to]
-            .filter(str => str)
+            .filter(Boolean)
             .sort((a, b) => a.localeCompare(b))
             .join('')
     );
@@ -246,14 +252,17 @@ function calculateHueValue(from: string, to: string): number {
     return (hashCode % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
 }
 
-export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCardOwnProps & MessageCardDispatchProps) => (
+const MESSAGE_RAW_FIELDS: (keyof Message)[] = ['rawHex', 'rawHumanReadable'];
+
+export const RecoverableMessageCard = ({ searchField, ...props}: MessageCardStateProps & MessageCardOwnProps & MessageCardDispatchProps) => (
     <StateSaver
         stateKey={keyForMessage(props.message.id)}
         getDefaultState={() => false}>
         {(state, saveState) => (
             <MessageCardBase
                 {...props}
-                showRaw={state}
+                // we should always show raw content if something found in it
+                showRaw={MESSAGE_RAW_FIELDS.includes(searchField) || state}
                 showRawHandler={saveState}/>
         )}
     </StateSaver>
@@ -278,7 +287,10 @@ export const MessageCardContainer = connect(
         prediction: state.machineLearning.predictionsEnabled ?
             state.machineLearning.predictionData.find(prediction =>
                 prediction.actionId == state.selected.activeActionId && prediction.messageId == ownProps.message.id
-            ) : null
+            ) : null,
+        searchField: getCurrentScrolledSearchKey(state)?.startsWith(keyForMessage(ownProps.message.id)) ?
+            getKeyField(getCurrentScrolledSearchKey(state)) as keyof Message:
+            null
     }),
     (dispatch, ownProps: MessageCardOwnProps): MessageCardDispatchProps => ({
         selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status)),

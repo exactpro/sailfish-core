@@ -20,22 +20,27 @@ import { copyTextToClipboard } from '../../helpers/copyHandler';
 import { showNotification } from '../../helpers/showNotification';
 import useSelectListener from '../../hooks/useSelectListener';
 import '../../styles/messages.scss';
+import SearchableContent from "../search/SearchableContent";
+import { keyForMessage } from "../../helpers/keys";
 
 const COPY_NOTIFICATION_TEXT = 'Text copied to the clipboard!';
 
-export interface MessageRawProps {
+interface Props {
     rawContent: string;
+    messageId: number;
 }
 
-export function MessageRaw({ rawContent }: MessageRawProps) {
-    const [hexSelectionStart, setHexSelectionStart] = React.useState<number | null>(null);
-    const [hexSelectionEnd, setHexSelectionEnd] = React.useState<number | null>(null);
-    const [humanSelectionStart, setHumanSelectionStart] = React.useState<number | null>(null);
-    const [humanSelectionEnd, setHumanSelectionEnd] = React.useState<number | null>(null);
+export function MessageRaw({ rawContent, messageId }: Props) {
     const hexadecimalRef = React.useRef<HTMLPreElement>();
     const humanReadableRef = React.useRef<HTMLPreElement>();
+    const [hexSelectionStart, hexSelectionEnd] = useSelectListener(hexadecimalRef);
+    const [humanSelectionStart, humanSelectionEnd] = useSelectListener(humanReadableRef);
 
-    const decodedRawContent = Raw.decodeBase64RawContent(rawContent);
+    const decodedRawContent = React.useMemo(
+        () => Raw.decodeBase64RawContent(rawContent),
+        [rawContent]
+    );
+
     const [
         offset,
         hexadecimal,
@@ -43,57 +48,49 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
         beautifiedHumanReadable
     ] = Raw.getRawContent(decodedRawContent);
 
-    useSelectListener(hexadecimalRef, e => {
-        const sel = window.getSelection();
-        if (sel.rangeCount === 0 || sel.anchorNode != sel.focusNode || !hexadecimalRef.current.contains(sel.anchorNode)) {
-            setHexSelectionStart(null);
-            setHexSelectionEnd(null);
-            return;
-        }
-        const range = sel.getRangeAt(0);
-        setHexSelectionStart(range.startOffset);
-        setHexSelectionEnd(range.endOffset);
-    });
-
-    useSelectListener(humanReadableRef, e => {
-        const sel = window.getSelection();
-        if (sel.rangeCount === 0 || sel.anchorNode != sel.focusNode || !humanReadableRef.current.contains(sel.anchorNode)) {
-            setHumanSelectionStart(null);
-            setHumanSelectionEnd(null);
-            return
-        }
-        const range = sel.getRangeAt(0);
-        setHumanSelectionStart(range.startOffset);
-        setHumanSelectionEnd(range.endOffset);
-    });
-
     const renderHumanReadable = (content: string) => {
-        if (hexSelectionStart === null || hexSelectionEnd === null) {
-            return content;
+        if (hexSelectionStart == hexSelectionEnd) {
+            return (
+                <SearchableContent
+                    contentKey={keyForMessage(messageId, 'rawHumanReadable')}
+                    content={content}/>
+            );
         }
+
         const [startOffset, endOffset] = Raw.mapOctetOffsetsToHumanReadableOffsets(hexSelectionStart, hexSelectionEnd);
 
-        return (<React.Fragment>
+        return (
+            <React.Fragment>
                 {content.slice(0, startOffset)}
-                <strong className="highlited">{content.slice(startOffset, endOffset)}</strong>
+                <mark className="mc-raw__highlighted-content">
+                    {content.slice(startOffset, endOffset)}
+                </mark>
                 {content.slice(endOffset)}
             </React.Fragment>
         );
-    }
+    };
 
     const renderOctet = (content: string) => {
-        if (humanSelectionStart === null || humanSelectionEnd === null) {
-            return content;
+        if (humanSelectionStart == humanSelectionEnd) {
+            return (
+                <SearchableContent
+                    contentKey={keyForMessage(messageId, 'rawHex')}
+                    content={content}/>
+            );
         }
+
         const [startOffset, endOffset] = Raw.mapHumanReadableOffsetsToOctetOffsets(humanSelectionStart, humanSelectionEnd);
 
-        return (<React.Fragment>
+        return (
+            <React.Fragment>
                 {content.slice(0, startOffset)}
-                <strong className="highlited">{content.slice(startOffset, endOffset)}</strong>
+                <mark className="mc-raw__highlighted-content">
+                    {content.slice(startOffset, endOffset)}
+                </mark>
                 {content.slice(endOffset)}
             </React.Fragment>
         );
-    }
+    };
 
     const copyAll = () => copyHandler(Raw.getAllRawContent(decodedRawContent));
 
@@ -115,13 +112,19 @@ export function MessageRaw({ rawContent }: MessageRawProps) {
                     <pre>{offset}</pre>
                 </div>
                 <div className="mc-raw__column primary">
-                    <pre ref={hexadecimalRef}>{renderOctet(hexadecimal)}</pre>
+                    <pre className="mc-raw__content-part"
+                         ref={hexadecimalRef}>
+                        {renderOctet(hexadecimal)}
+                    </pre>
                     <div className="mc-raw__copy-btn   mc-raw__copy-icon"
                         onClick={() => copyHandler(hexadecimal)}
                         title="Copy to clipboard" />
                 </div>
                 <div className="mc-raw__column primary">
-                    <pre ref={humanReadableRef}>{renderHumanReadable(beautifiedHumanReadable)}</pre>
+                    <pre className="mc-raw__content-part"
+                        ref={humanReadableRef}>
+                        {renderHumanReadable(beautifiedHumanReadable)}
+                    </pre>
                     <div className="mc-raw__copy-btn   mc-raw__copy-icon"
                         onClick={() => copyHandler(humanReadable)}
                         title="Copy to clipboard" />

@@ -15,17 +15,11 @@
  ******************************************************************************/
 
 import Message from '../models/Message';
+import { decodeBase64RawContent, getRawContent } from "./rawFormatter";
 
 const CHECKPOINT_NAME = 'checkpoint';
 
-export enum MessageType {
-    MESSAGE = '',
-    CHECKPOINT = 'checkpoint',
-    REJECTED = 'rejected',
-    ADMIN = 'admin'
-}
-
-export function isCheckpointMessage(message: Message) : boolean {
+export function isCheckpointMessage(message: Message): boolean {
     const name = message.content['name'] as string;
 
     if (!name) {
@@ -35,22 +29,24 @@ export function isCheckpointMessage(message: Message) : boolean {
     return name.toLowerCase() == CHECKPOINT_NAME;
 }
 
-export function isRejected(message: Message) : boolean {
+export function isRejected(message: Message): boolean {
     return message.content.rejectReason !== null;
 }
 
-export function isAdmin(message: Message) : boolean {
+export function isAdmin(message: Message): boolean {
     return message.content.admin !== false;
 }
 
-export function getMessageType(message: Message) : MessageType {
-    if (isCheckpointMessage(message)) {
-        return MessageType.CHECKPOINT;
+export function appendRawContent(message: Message): Message {
+    if (message.raw == null || message.raw == 'null') {
+        return message;
     }
 
-    if (message.content.rejectReason !== null) {
-        return MessageType.REJECTED;
-    }
+    const [, hex, , humanReadable] = getRawContent(decodeBase64RawContent(message.raw));
 
-    return MessageType.MESSAGE;
+    return {
+        ...message,
+        rawHex: hex,
+        rawHumanReadable: humanReadable
+    }
 }

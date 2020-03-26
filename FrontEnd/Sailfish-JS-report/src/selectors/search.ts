@@ -35,6 +35,8 @@ import {
 } from "./view";
 
 const getSearchTokens = (state: AppState) => state.selected.search.tokens;
+const getSearchResults = (state: AppState) => state.selected.search.results;
+const getSearchIndex = (state: AppState) => state.selected.search.index;
 
 const getActivePanels = createSelector(
     [
@@ -82,4 +84,9 @@ export const getSearchContent = createSelector(
         bugs: getCategoryBugChains(knownBugs)
             .reduce((acc, { categoryBugs }) => [...acc, ...categoryBugs], [])
     })
+);
+
+export const getCurrentScrolledSearchKey = createSelector(
+    [getSearchResults, getSearchIndex],
+    (results, index) => results.getByIndex(index)[0]
 );

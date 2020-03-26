@@ -399,6 +399,7 @@
         display: flex;
         padding-left: 5px;
         margin-left: 10px;
+        cursor: text;
 
         &.primary {
             color: $primaryTextColor;
@@ -451,12 +452,17 @@
         }
     }
 
-    &::selection {
-        background-color: #338FFF;
+    &__content-part {
+        &::selection {
+            background-color: #338FFF;
+            color: white;
+        }
     }
 
-    & .highlited {
+    &__highlighted-content {
         background-color: #99C7FF;
+        font-weight: bold;
+        color: $primaryTextColor;
     }
 }
 

@@ -94,3 +94,9 @@ export function keyForLog(index: number, fieldName?: keyof Log): string {
 export function keyForKnownBug(knownBug: KnownBug, fieldName?: keyof KnownBug): string {
     return `known-bug-${knownBug.id}` + (fieldName ? `-${fieldName}` : '');
 }
+
+export function getKeyField(key: string): string | null {
+    const [type, id, field] = key.split('-');
+
+    return field ?? null;
+}

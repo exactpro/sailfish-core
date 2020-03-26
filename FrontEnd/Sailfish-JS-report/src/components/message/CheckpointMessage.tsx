@@ -18,7 +18,7 @@ import { connect } from "react-redux";
 import AppState from "../../state/models/AppState";
 import Checkpoint, { CheckpointStateProps, CheckpointDispatchProps } from "../Checkpoint";
 import Message from "../../models/Message";
-import { isCheckpointMessage } from "../../helpers/messageType";
+import { isCheckpointMessage } from "../../helpers/message";
 import { selectCheckpointMessage } from "../../actions/actionCreators";
 
 interface OwnProps {

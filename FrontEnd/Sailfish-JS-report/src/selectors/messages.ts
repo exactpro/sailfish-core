@@ -18,7 +18,7 @@ import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { getFilterBlocks, getFilterResults, getIsFilterTransparent, getIsMessageFilterApplied } from "./filter";
 import { keyForMessage } from "../helpers/keys";
-import { isAdmin, isCheckpointMessage, isRejected } from "../helpers/messageType";
+import { isCheckpointMessage, isRejected, isAdmin } from "../helpers/message";
 import FilterType from "../models/filter/FilterType";
 import Message from "../models/Message";
 import { ScrollHint } from '../models/util/ScrollHint';

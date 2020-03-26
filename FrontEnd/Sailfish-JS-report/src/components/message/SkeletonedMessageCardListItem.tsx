@@ -18,7 +18,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import MessageCardSkeleton from './MessageCardSkeleton';
-import { isAdmin, isCheckpointMessage } from '../../helpers/messageType';
+import { isAdmin, isCheckpointMessage } from '../../helpers/message';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import CheckpointMessage from './CheckpointMessage';
 import MessageCard from './MessageCard';

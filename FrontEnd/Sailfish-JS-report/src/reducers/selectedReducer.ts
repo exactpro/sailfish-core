@@ -22,6 +22,7 @@ import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/action';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
 import searchReducer from "./searchReducer";
+import { appendRawContent } from "../helpers/message";
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -310,7 +311,10 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                     ...state,
                     testCase: {
                         ...state.testCase,
-                        messages: [...state.testCase.messages, ...stateAction.messages],
+                        messages: [
+                            ...state.testCase.messages,
+                            ...stateAction.messages.map(appendRawContent)
+                        ],
                     }
                 }
             }

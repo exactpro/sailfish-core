@@ -17,7 +17,7 @@
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import SelectionCarousel, { SelectionCarouselProps } from './SelectionCarousel';
-import { isRejected } from '../helpers/messageType';
+import { isRejected } from '../helpers/message';
 import { selectRejectedMessageId } from '../actions/actionCreators';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 
