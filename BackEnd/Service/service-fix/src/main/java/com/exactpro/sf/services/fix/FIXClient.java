@@ -420,7 +420,9 @@ public class FIXClient implements IInitiatorService {
             this.isPerformance = true;
         }
         SessionID sessionID = new SessionID(fixSettings.getBeginString(),
-                fixSettings.getSenderCompID(), fixSettings.getTargetCompID(), serviceName.toString().replace(':', '-'));
+                fixSettings.getSenderCompID(), fixSettings.getSenderSubID(), SessionID.NOT_SET,
+                fixSettings.getTargetCompID(), fixSettings.getTargetSubID(), SessionID.NOT_SET,
+                serviceName.toString().replace(':', '-'));
 
         this.messagesLogFile = workspaceDispatcher.createFolder(FolderType.LOGS, logConfigurator.getLogsPath(serviceName)).getCanonicalPath();
         settings.setString(sessionID, FileLogFactory.SETTING_FILE_LOG_PATH, messagesLogFile);

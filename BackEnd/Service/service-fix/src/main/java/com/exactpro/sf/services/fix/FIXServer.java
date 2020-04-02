@@ -18,6 +18,7 @@ package com.exactpro.sf.services.fix;
 import static quickfix.Acceptor.SETTING_ACCEPTOR_TEMPLATE;
 import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_ADDRESS;
 import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_PORT;
+import static quickfix.mina.acceptor.DynamicAcceptorSessionProvider.WILDCARD;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -136,7 +137,7 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 
     @Override
     protected void initFixApplication() throws IOException {
-        SessionID sessionID = new SessionID(fixSettings.getBeginString(), "*", "*");
+        SessionID sessionID = new SessionID(fixSettings.getBeginString(), WILDCARD, WILDCARD, WILDCARD, WILDCARD);
 
         configureCommonSettings(fixSettings, sessionID, settings, serviceName);
 
@@ -174,8 +175,10 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 
     @Override
     protected void setSenderTargetIDs(SessionID sessionID, FIXCommonSettings commonSettings, SessionSettings sessionSettings) {
-        setString(SessionSettings.SENDERCOMPID, "*");
-        setString(SessionSettings.TARGETCOMPID, "*");
+        setString(SessionSettings.SENDERCOMPID, WILDCARD);
+        setString(SessionSettings.SENDERSUBID, WILDCARD);
+        setString(SessionSettings.TARGETCOMPID, WILDCARD);
+        setString(SessionSettings.TARGETSUBID, WILDCARD);
     }
 
     private void setString(String name, String value) {
