@@ -1386,7 +1386,7 @@ public class HtmlReport implements IScriptReport {
 
     private List<VerificationParameter> convert(ComparisonResult result, String verificationId) {
         if(result == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         IMessageStructure structure = getMessageStructure(result.getMetaData());

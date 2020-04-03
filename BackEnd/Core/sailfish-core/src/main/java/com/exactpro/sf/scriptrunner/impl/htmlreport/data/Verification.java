@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,7 +36,7 @@ public class Verification extends BaseEntity {
     private int id;
     private long messageId;
     private StatusDescription statusDescription;
-    private List<VerificationParameter> parameters;
+    private List<VerificationParameter> parameters = Collections.emptyList();
     private ContextType context;
     private boolean hasHeaders;
 
