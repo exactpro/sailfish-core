@@ -25,7 +25,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -575,9 +583,14 @@ public class JsonReport implements IScriptReport {
 
             if (currentNode instanceof TestCase) {
                 for (Message message : messages) {
-                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent (message.getId(), k -> new HashSet<>()));
+                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
                 }
-                messages.forEach(jsonpTestcaseWriter::write);
+
+                // If current thread is interrupted we won't be able to write messages to file, because Files.write(Path, byte[])
+                // will throw a ClosedByInterruptException and we will only pollute our logs with it
+                if (!Thread.currentThread().isInterrupted()) {
+                    messages.forEach(jsonpTestcaseWriter::write);
+                }
             }
             currentNode.addSubNodes(messages);
         } else {
