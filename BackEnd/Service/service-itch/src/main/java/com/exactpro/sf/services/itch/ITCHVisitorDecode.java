@@ -174,36 +174,41 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+    	msg.addField(fieldName,decodeString(fieldName,fldStruct));
+	}
+
+	protected String decodeString(String fieldName, IFieldStructure fldStruct) {
+		ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+		int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
+		String result = null;
 
 		if (type == ProtocolType.ALPHA || type == ProtocolType.DATE || type == ProtocolType.TIME || type == ProtocolType.DATE_TIME) {
 			// if you edit this lines, please edit ALPHA_NOTRIM too
-            byte[] array = new byte[(Integer)getAttributeValue(fldStruct, LENGTH_ATTRIBUTE)];
+			byte[] array = new byte[length];
 
 			buffer.get(array); // FIXME: slice?
 
 			try {
-				msg.addField(fieldName, decoder.get().decode(ByteBuffer.wrap(array)).toString().trim());
+				result = decoder.get().decode(ByteBuffer.wrap(array)).toString().trim();
 			} catch (CharacterCodingException e) {
 				throw new EPSCommonException(e);
 			}
 
-        } else if (type == ProtocolType.ALPHA_NOTRIM) {
-            byte[] array = new byte[(Integer)getAttributeValue(fldStruct, LENGTH_ATTRIBUTE)];
+		} else if (type == ProtocolType.ALPHA_NOTRIM) {
+			byte[] array = new byte[length];
 			buffer.get(array);
 			try {
-				msg.addField(fieldName, decoder.get().decode(ByteBuffer.wrap(array)).toString());
+				result = decoder.get().decode(ByteBuffer.wrap(array)).toString();
 			} catch (CharacterCodingException e) {
 				throw new EPSCommonException(e);
 			}
 		} else if (type == ProtocolType.STUB) {
 			buffer.skip(length);
 		} else {
-			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
+			throw new EPSCommonException("Incorrect type = " + type + " for " +  fieldName + " field");
 		}
 
 		int pos2 = buffer.position();
@@ -211,6 +216,8 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		if (read != length) {
 			throw new EPSCommonException("Read " + read + " bytes, but length = " + length + " for " + fieldName + " field");
 		}
+
+		return result;
 	}
 
 	@Override
