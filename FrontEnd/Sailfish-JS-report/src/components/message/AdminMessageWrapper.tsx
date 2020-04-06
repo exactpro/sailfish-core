@@ -45,18 +45,10 @@ interface WrapperProps extends MessageCardOuterProps, RecoveredProps {
 
 function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: WrapperProps) {
     if (isExpanded) {
-        const expandButtonClass = createBemBlock(
-            "mc-expand-btn",
-            props.message.content.rejectReason != null ? "rejected" : null
-        );
-
         return (
-            <div style={{ position: "relative" }}>
-                <RecoverableMessageCard {...props}/>
-                <div className={expandButtonClass}>
-                    <div className="mc-expand-btn__icon" onClick={() => expandHandler(!isExpanded)}/>
-                </div>
-            </div>
+            <RecoverableMessageCard
+                {...props}
+                onClose={() => expandHandler(false)}/>
         );
     }
 
@@ -85,9 +77,7 @@ function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: Wrappe
                         content={props.message.msgName}
                         contentKey={keyForMessage(props.message.id, 'msgName')}/>
                 </div>
-                <div className="mc-header__expand">
-                    <div className="mc-header__expand-icon" onClick={() => expandHandler(!isExpanded)}/>
-                </div>
+                <div className="mc-header__expand-icon" onClick={() => expandHandler(true)}/>
             </div>
         </div>
     );
@@ -156,6 +146,6 @@ const RecoverableAdminMessageWrapper = (props: MessageCardOuterProps) => (
                 })}/>
         )}
     </StateSaver>
-)
+);
 
 export const AdminMessageWrapper = MessageCardContainer(RecoverableAdminMessageWrapper);

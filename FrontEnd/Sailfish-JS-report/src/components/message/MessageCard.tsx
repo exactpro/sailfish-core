@@ -43,6 +43,8 @@ const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardOwnProps {
     message: Message;
+    // admin wrapper close handler
+    onClose?: () => void;
 }
 
 export interface RecoveredProps {
@@ -77,6 +79,7 @@ export function MessageCardBase(props: MessageCardProps) {
 
     const {
         message,
+        onClose,
         isSelected,
         isTransparent,
         status,
@@ -109,10 +112,10 @@ export function MessageCardBase(props: MessageCardProps) {
             "icon",
             showRaw ? "expanded" : "hidden"
         ),
-        beautifyIconClass = createBemElement(
-            "mc-beautify",
-            "icon",
-            isContentBeautified ? "plain" : "beautify"
+        beautifyClass = createBemElement(
+            "mc-body",
+            "beautify-icon",
+            isContentBeautified ? "plain" : null
         ),
         // session arrow color, we calculating it for each session from-to pair, based on hash
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
@@ -174,9 +177,12 @@ export function MessageCardBase(props: MessageCardProps) {
                     ) : null
                 }
                 <div className="mc-body__human">
-                    <div className="mc-beautify" onClick={() => toggleBeautify()}>
-                        <div className={beautifyIconClass}/>
-                    </div>
+                    {
+                        onClose ? (
+                            <div className="mc-body__close-icon" onClick={onClose}/>
+                        ) : null
+                    }
+                    <div className={beautifyClass} onClick={() => toggleBeautify()}/>
                     {
                         isContentBeautified ? (
                             <ErrorBoundary

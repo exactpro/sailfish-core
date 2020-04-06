@@ -230,11 +230,8 @@
     }
 
     &__session-icon {
+        @include icon(url('../../resources/icons/session-icon.svg'), 25px, 25px);
         grid-area: session-icon;
-        background-image: url('../../resources/icons/session-icon.svg');
-        height: 25px;
-        width: 25px;
-        background-size: 100%;
         margin: 0 5px;
     }
 
@@ -260,11 +257,11 @@
         color: $secondaryTextColor;
     }
 
-    &__expand {
+    &__expand-icon {
+        @include round-button(url(../../resources/icons/arr4-down.svg), 19px);
         grid-area: expand-icon;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        justify-self: center;
+        align-self: center;
 
         &-icon {
             height: 19px;
@@ -308,6 +305,27 @@
         @include scrollbar;
         overflow-x: scroll;
     }
+
+    &__beautify-icon {
+        @include clickable;
+        @include icon(url(../../resources/icons/beautified-text.svg), 26px, 26px);
+
+        float: right;
+        background-origin: content-box;
+        padding: 2px;
+        margin: 0 0 5px 10px;
+
+        &.plain {
+            background-image: url(../../resources/icons/plain-text.svg);
+        }
+    }
+
+    &__close-icon {
+        @include round-button(url(../../resources/icons/arr4-up.svg), 19px);
+
+        float: right;
+        margin: 3px 0 0 9px;
+    }
 }
 
 .mc-show-raw {
@@ -320,6 +338,7 @@
     font-size: 13px;
     color: $primaryTextColor;
     padding: 0 4px;
+    clear: right;
 
     &__title {
         font-weight: bold;
@@ -337,31 +356,6 @@
 
         &.hidden {
             background-image: url(../../resources/icons/arr4-down.svg);
-        }
-    }
-}
-
-.mc-beautify {
-    @include clickable;
-
-    float: right;
-    height: 26px;
-    width: 26px;
-    padding: 2px;
-    margin: 0 0 5px 10px;
-
-    &__icon {
-        background-size: 100%;
-        background-repeat: no-repeat;
-        height: 100%;
-        width: 100%;
-
-        &.beautify {
-            background-image: url(../../resources/icons/beautified-text.svg);
-        }
-
-        &.plain {
-            background-image: url(../../resources/icons/plain-text.svg);
         }
     }
 }
@@ -463,25 +457,6 @@
         background-color: #99C7FF;
         font-weight: bold;
         color: $primaryTextColor;
-    }
-}
-
-.mc-expand-btn {
-    position: absolute;
-    top: 67px;
-    right: 12px;
-    padding-right: 5px;
-
-    &.rejected {
-        top: 80px;
-    }
-
-    &__icon {
-        height: 19px;
-        width: 19px;
-        background-image: url(../../resources/icons/arr4-up.svg);
-        background-size: 100%;
-        cursor: pointer;
     }
 }
 
