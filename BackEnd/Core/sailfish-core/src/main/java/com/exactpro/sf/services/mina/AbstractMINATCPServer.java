@@ -61,6 +61,8 @@ public abstract class AbstractMINATCPServer extends AbstractInitiatorService imp
     protected void internalStart() throws IOException {
         WrapperNioSocketAcceptor tmpAcceptor = new WrapperNioSocketAcceptor(taskExecutor);
 
+        tmpAcceptor.setReuseAddress(true);
+
         try {
             configureAcceptor(tmpAcceptor);
         } catch (Exception e) {
