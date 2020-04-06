@@ -17,7 +17,7 @@
 import React from 'react'
 
 import Alert from '../models/Alert';
-import {createBemBlock, createBemElement} from '../helpers/styleCreators';
+import { createBemBlock, createBemElement } from '../helpers/styleCreators';
 import '../styles/alert.scss';
 
 interface AlertProps extends Alert {}
@@ -28,14 +28,8 @@ export const AlertCard = ({
 	message,
 	type
 }: AlertProps) => {
-	const rootClassName = createBemBlock(
-		"alert",
-		type,
-	),	iconClassName = createBemElement(
-		'alert',
-		'icon',
-		type
-	);
+	const rootClassName = createBemBlock('alert', type),
+    	iconClassName = createBemElement('alert', 'icon', type);
 
 	return (
 		<div className={rootClassName}>

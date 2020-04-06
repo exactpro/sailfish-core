@@ -49,45 +49,47 @@ const ReportSummary = ({ report }: ReportSummaryProps) => {
     const filteredMetadata = report.metadata.filter(isTestCaseMetadata);
     const tags = report.tags || [];
     const alerts = report.alerts || [];
+
     return (
-    <React.Fragment>
-        <div className="report-summary__block">
-            <div className="report-summary__element">
-                <div className="report-summary__element-title">Test Cases</div>
-                <div className="report-summary__element-value">{report.metadata.length}</div>
+        <React.Fragment>
+            <div className="report-summary__block">
+                <div className="report-summary__element">
+                    <div className="report-summary__element-title">Test Cases</div>
+                    <div className="report-summary__element-value">{report.metadata.length}</div>
+                </div>
+                {
+                    statusValues.map(statusValue => renderStatusInfo(statusValue, filteredMetadata))
+                }
             </div>
+            <div className="report-summary__divider"/>
             {
-                statusValues.map(statusValue => renderStatusInfo(statusValue, filteredMetadata))
+                tags.length ?
+                    (
+                        <div className="report-summary__tags">
+                            <div className="report-summary__element report-summary__tags-header">
+                                <div className="report-summary__element-title">Tags</div>
+                                <div className="report-summary__element-value">{tags.length}</div>
+                            </div>
+                            <div className="report-summary__tags-list">
+                                {tags.map(tag => <Tag tag={tag}/>)}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">No tags</div>
+                        </div>
+                    )
             }
-        </div>
-        <div className="report-summary__divider"/>
-        {
-            tags.length ?
-                (
-                    <div className="report-summary__tags">
-                        <div className="report-summary__element report-summary__tags-header">
-                            <div className="report-summary__element-title">Tags</div>
-                            <div className="report-summary__element-value">{tags.length}</div>
-                        </div>
-                        <div className="report-summary__tags-list">
-                            {tags.map(tag => <Tag tag={tag}/>)}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="report-summary__element">
-                        <div className="report-summary__element-title">No tags</div>
-                    </div>
-                )
-        }
-        <div className="report-summary__divider"/>
-        <div className="report-summary__element">
-            <div className="report-summary__element-title">Errors and Warnings</div>
-            <div className="report-summary__element-value">{alerts.length}</div>
-        </div>
-        <div className="report-summary__alerts">
-            {alerts.map((alert, i) => <AlertCard {...alert} key={i}/>)}
-        </div>
-    </React.Fragment>)
+            <div className="report-summary__divider"/>
+            <div className="report-summary__element">
+                <div className="report-summary__element-title">Errors and Warnings</div>
+                <div className="report-summary__element-value">{alerts.length}</div>
+            </div>
+            <div className="report-summary__alerts">
+                {alerts.map((alert, i) => <AlertCard {...alert} key={i}/>)}
+            </div>
+        </React.Fragment>
+    )
 }
 
 export default ReportSummary;

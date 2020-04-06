@@ -66,11 +66,11 @@ export default function LogCard({ log , index }: LogCardProps){
 				}
 			</div>
 			<div className="log-card__delimiter" />
-			<pre className="log-card__message">
+			<div className="log-card__content">
 				<SearchableContent
 					contentKey={keyForLog(index, 'message')}
-					content={message}/>
-			</pre>
+					content={message} />
+			</div>
 		</div>
 	)
 }

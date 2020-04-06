@@ -40,7 +40,7 @@
 	display: grid;
     grid-template-areas: "lc-head"
                          "delimiter"
-                         "lc-message";
+                         "lc-content";
     grid-row-gap: 12px;
 	border: 2px solid transparent;
 	border-color: var(--lc-border-color);
@@ -117,11 +117,10 @@
 		background-color: var(--lc-border-color);
 	}
 
-	&__message {
-		grid-area: lc-message;
+	&__content {
+		grid-area: lc-content;
 		line-height: 22px;
         font-size: 13px;
-        white-space: pre-wrap;
         font-family: Open sans;
         overflow-x: auto;
         @include scrollbar;

@@ -69,18 +69,9 @@
 	}
 
 	&__message {
-		width: 70%;
+		width: 80%;
 		margin-right: 0px;
-	}
-	
-	&.warning {
-		border-color: $passedBorderColorSecondary;
-		color: $conditionallyPassedSecondaryTextColor;
-	}
-	
-	&.error {
-		border-color: $failedBorderColorSecondary;
-		color: $failedSecondaryTextColor;
+		word-break: break-word;
 	}
 
 	&__icon {
@@ -90,5 +81,15 @@
         &.warning {
 			@include icon(url(../../resources/icons/report-summary-warning.svg), 20px, 20px);
         }
-    }
+	}
+	
+	&.warning {
+		border-color: $alertWarningBackgroundColor;
+		color: $alertWarningTextColor;
+	}
+	
+	&.error {
+		border-color: $alertErrorBackgroundColor;
+		color: $alertErrorTextColor;
+	}
 }

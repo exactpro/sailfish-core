@@ -119,8 +119,6 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             failedTestCasesEnabled = filteredMetadata.some(({status}) => status.status === StatusType.FAILED),
             failedTcTitleClass = createBemElement('report', 'title', failedTestCasesEnabled ? 'failed': 'disabled'),
             isLive = report.finishTime == null,
-            alerts = report.alerts || [],
-            tags = report.tags || [],
             mlStatsClass = createStyleSelector('ml-stats', this.props.mlEnabled? null: "hidden");
 
         const knownBugsButton = (
