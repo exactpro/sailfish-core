@@ -586,10 +586,17 @@ public class JsonReport implements IScriptReport {
                     message.setRelatedActions(messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
                 }
 
-                // If current thread is interrupted we won't be able to write messages to file, because Files.write(Path, byte[])
-                // will throw a ClosedByInterruptException and we will only pollute our logs with it
-                if (!Thread.currentThread().isInterrupted()) {
-                    messages.forEach(jsonpTestcaseWriter::write);
+                Thread currentThread = Thread.currentThread();
+
+                for (Message message : messages) {
+                    // If current thread is interrupted we won't be able to write messages to file, because Files.write(Path, byte[])
+                    // will throw a ClosedByInterruptException and we will only pollute our logs with it
+                    if (currentThread.isInterrupted()) {
+                        logger.warn("Interrupted message write due to thread interruption");
+                        break;
+                    }
+
+                    jsonpTestcaseWriter.write(message);
                 }
             }
             currentNode.addSubNodes(messages);
