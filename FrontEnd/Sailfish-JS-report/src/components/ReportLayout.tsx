@@ -31,9 +31,7 @@ import ReportState from '../state/models/ReportState';
 import { ToggleButton } from './ToggleButton';
 import RunInformation from './RunInformation';
 import ReportSummary from './ReportSummary';
-import Tag from './Tag';
 import { SubmittedData } from '../models/MlServiceResponse';
-import TestCase from '../models/TestCase';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -97,7 +95,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         const { submittedData, report } = this.props;
 
         let uniqueActionId = new Set(submittedData.map(m => m.actionId)).size,
-            failedActions = report.metadata.map(m => m.failedActionCount).reduce((a,b) => a + b, 0);
+            failedActions = report.metadata.map(m => m.failedActionCount).reduce((a, b) => a + b, 0);
 
         return uniqueActionId / failedActions
     }
