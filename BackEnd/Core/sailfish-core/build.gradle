@@ -95,7 +95,7 @@ dependencies {
 
 	//compile 'org.apache.httpcomponents:httpcore:4.4.4'
     //compile 'org.jsoup:jsoup:1.6.3'
-    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.1'
+    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.3'
 
     // Hibernate
     compile "org.hibernate:hibernate-c3p0:$version_hibernate"

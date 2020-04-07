@@ -169,7 +169,7 @@ dependencies {
 
     compile 'net.sf.json-lib:json-lib:2.4:jdk15'
 
-    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.1'
+    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.3'
 
     compile 'org.apache.poi:poi:4.0.0'
 
