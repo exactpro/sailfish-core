@@ -127,8 +127,11 @@ interface RecoverableState {
 const RecoverableAdminMessageWrapper = (props: MessageCardOuterProps) => (
     <StateSaver
         stateKey={keyForMessage(props.message.id) + '-admin'}
-        getDefaultState={(): RecoverableState => ({ isExpanded: false, lastAdminEnabled: props.adminEnabled })}>
-        {({ isExpanded, lastAdminEnabled }: RecoverableState, saveState) => (
+        getDefaultState={(): RecoverableState => ({
+            isExpanded: props.adminEnabled.valueOf(),
+            lastAdminEnabled: props.adminEnabled
+        })}>
+        {({ isExpanded, lastAdminEnabled }, saveState) => (
             // We pass in adminEnabled flag only if it was changed since last component update.
             // It works because adminEnabled is Boolean object and we can use reference comparison.
             // (same logic in Actions / Messages lists with scrolled indexes)
