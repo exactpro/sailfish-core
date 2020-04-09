@@ -18,18 +18,22 @@ package com.exactpro.sf.actions;
 import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.Converter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.WordUtils;
 
 import com.exactpro.sf.aml.CommonColumn;
@@ -167,7 +171,7 @@ public class ServiceActions extends AbstractCaller {
 
 	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
-    public void initService(IActionContext actionContext, HashMap<?, ?> message) {
+    public void initService(IActionContext actionContext, HashMap<?, ?> message) throws IllegalAccessException, InvocationTargetException, InterruptedException, IOException {
 		ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());
 		IActionServiceManager serviceManager = actionContext.getServiceManager();
 
@@ -179,14 +183,8 @@ public class ServiceActions extends AbstractCaller {
 			for (Entry<?, ?> entry : message.entrySet()) {
 				String property = convertProperty(entry.getKey().toString());
 				if (beanMap.containsKey(property)){
-					try {
-                        BeanUtils.setProperty(serviceSettings, property, converter.get().convert((Object)unwrapFilters(entry.getValue()), beanMap.getType(property)));
-                        editedProperty.add(property);
-					} catch (IllegalAccessException e) {
-						throw new EPSCommonException(e);
-					} catch (InvocationTargetException e) {
-						throw new EPSCommonException(e);
-					}
+					BeanUtils.setProperty(serviceSettings, property, converter.get().convert((Object)unwrapFilters(entry.getValue()), beanMap.getType(property)));
+                    editedProperty.add(property);
 				} else {
 					incorrectProperty.add(property);
 				}
@@ -196,18 +194,14 @@ public class ServiceActions extends AbstractCaller {
 				throw new EPSCommonException(serviceSettings.getClass().getName() + " does not contain properties: " + incorrectProperty);
 			}
 
-			serviceManager.updateService(serviceName, serviceSettings, null);
-
-			serviceManager.initService(serviceName, null).get();
+            serviceManager.updateService(serviceName, serviceSettings, null).get();
 
 			try (FileOutputStream out = new FileOutputStream(actionContext.getReport().createFile(StatusType.NA, servicesFolder, changingSettingFolder, serviceName + FORMATTER.format(DateTimeUtility.nowLocalDateTime()) + servicesFileExpression))) {
                 actionContext.getServiceManager().serializeServiceSettings(serviceName, out);
             }
-        } catch (EPSCommonException e) {
-			throw e;
-		} catch (Exception e){
-			throw new EPSCommonException(e);
-		}
+        } catch (ExecutionException e) {
+            ExceptionUtils.rethrow(ObjectUtils.defaultIfNull(e.getCause(), e));
+        }
 	}
 
     @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))

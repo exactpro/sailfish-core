@@ -574,7 +574,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     service.init(serviceContext, environmentMonitor, serviceContainer.getHandlerWrapper(), settings, serviceName);
                 }
             } else {
-                logger.debug("Cannot init service {} because it has status {}", serviceName, curStatus);
+                throw new IllegalStateException("Cannot init service in " + curStatus + " state: " + serviceName);
             }
         } catch (Exception e) {
             exceptionNotify(notifyListener, e);
