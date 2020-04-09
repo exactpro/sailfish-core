@@ -820,7 +820,7 @@ public class CommonActions extends AbstractCaller {
 
 		compResult.setStatus(StatusType.PASSED);
 
-		Throwable problem = null;
+		Exception problem = null;
 
         for(Entry<?, ?> entry : filterData.entrySet()) {
             ComparisonResult curResult = new ComparisonResult(entry.getKey().toString());
@@ -839,12 +839,12 @@ public class CommonActions extends AbstractCaller {
 					compResult.setStatus(StatusType.FAILED);
 				}
 			}
-			catch ( Throwable th ) {
+			catch ( Exception e ) {
 				curResult.setStatus(StatusType.FAILED);
 				compResult.setStatus(StatusType.FAILED);
-				problem = th;
+				problem = e;
 
-				actionContext.getLogger().error("CheckMessage problem", th);
+				actionContext.getLogger().error("CheckMessage problem", e);
 			}
 
             compResult.addResult(curResult);

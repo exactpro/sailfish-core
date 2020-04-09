@@ -400,7 +400,7 @@ public class TypeConverter {
 					if (objArg.equals(cvalue)) {
 						return type.getCanonicalName()+"."+constant.getName();
 					}
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					logger.warn("Value '{}' can not be converted to type {}", value, constant.getType());
 				}
 			}

@@ -109,7 +109,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
                                         }
 									}
 									descrForCompile.scriptReady();
-								} catch (Throwable e) {
+								} catch (Exception e) {
 									scriptExceptionProcessing(descrForCompile, e);
 								}
 							}
@@ -174,7 +174,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 		@Override
         public void run() {
 
-			Map<Long, Future<Throwable>> runningScriptMap = new HashMap<>();
+			Map<Long, Future<Exception>> runningScriptMap = new HashMap<>();
 			try {
 
 				while (!isDisposing) {
@@ -241,16 +241,16 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
             }
         }
 
-        private void  stopScripts(Map<Long, Future<Throwable>> runningScriptMap) throws InterruptedException {
+        private void  stopScripts(Map<Long, Future<Exception>> runningScriptMap) throws InterruptedException {
 			boolean localShutdown = shutdown;
 
-			for (Entry<Long, Future<Throwable>> scriptFeature : runningScriptMap.entrySet()) {
+			for (Entry<Long, Future<Exception>> scriptFeature : runningScriptMap.entrySet()) {
 				Long scriptId = scriptFeature.getKey();
 
 				TestScriptDescription description = testScripts.get(scriptId);
 				if (localShutdown || (description != null && description.isSetCancelFlag())) {
 					logger.warn("Shutdown script {}", scriptId);
-					Future<Throwable> future = scriptFeature.getValue();
+					Future<Exception> future = scriptFeature.getValue();
 
 					if (!future.isDone()) {
 						future.cancel(true);
@@ -263,10 +263,10 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 			}
 		}
 
-		private void interuptScripts(Map<Long, Future<Throwable>> runningScriptMap) {
-			for (Entry<Long, Future<Throwable>> scriptFeature : runningScriptMap.entrySet()) {
+		private void interuptScripts(Map<Long, Future<Exception>> runningScriptMap) {
+			for (Entry<Long, Future<Exception>> scriptFeature : runningScriptMap.entrySet()) {
 				Long currentTestScript = scriptFeature.getKey();
-				Future<Throwable> future = scriptFeature.getValue();
+				Future<Exception> future = scriptFeature.getValue();
 
 				TestScriptDescription descr = testScripts.get(currentTestScript);
 
@@ -290,7 +290,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
             prepared.clear();
 		}
 
-		private void startScript(Map<Long, Future<Throwable>> runningScriptMap) throws InterruptedException {
+		private void startScript(Map<Long, Future<Exception>> runningScriptMap) throws InterruptedException {
             if(prepared.isEmpty()) {
                 return;
             }
@@ -334,7 +334,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 
             					descr.scriptRan();
 
-            			} catch (Throwable e) {
+            			} catch (Exception e) {
                             descr.scriptInitFailed(e);
                             onRunFinished(descr);
 
@@ -344,12 +344,12 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
     		    }
 		}
 
-		private void resultScript(Map<Long, Future<Throwable>> runningScriptMap) throws InterruptedException {
-			Iterator<Entry<Long, Future<Throwable>>> iterator = runningScriptMap.entrySet().iterator();
+		private void resultScript(Map<Long, Future<Exception>> runningScriptMap) throws InterruptedException {
+			Iterator<Entry<Long, Future<Exception>>> iterator = runningScriptMap.entrySet().iterator();
 
 			while (iterator.hasNext()) {
-				Entry<Long, Future<Throwable>> scriptFeature = iterator.next();
-				Future<Throwable> future = scriptFeature.getValue();
+				Entry<Long, Future<Exception>> scriptFeature = iterator.next();
+				Future<Exception> future = scriptFeature.getValue();
 
 				if (future.isDone()) {
 					iterator.remove();

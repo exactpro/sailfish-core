@@ -307,7 +307,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
             return scriptDescription.getId();
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error("Error during script preparation", e);
             return -1; // FIXME: no way to determine reason
         }
@@ -522,7 +522,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
             for(IScriptRunListener listener : listeners) {
                 try {
                     listener.onScriptRunEvent(testScriptDescription);
-                } catch ( Throwable e ) {
+                } catch ( Exception e ) {
                     logger.error("Listener {} threw exception", listener, e);
                 }
             }
@@ -940,7 +940,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         }
     }
 
-    protected class InternalScript implements Callable<Throwable> {
+    protected class InternalScript implements Callable<Exception> {
 
         private final Class<? extends SailFishTestCase> testCaseClass;
 
@@ -955,20 +955,20 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
 
         @Override
-        public Throwable call() throws Exception
+        public Exception call() throws Exception
         {
 
             logger.info("Call started");
 
             SFJUnitRunner runner = new SFJUnitRunner();
 
-            Throwable result = null;
+            Exception result = null;
 
             try
             {
                 runner.run(testCaseClass, scriptContext);
             }
-            catch (Throwable e)
+            catch (Exception e)
             {
                 logger.error(e.getMessage(), e);
                 scriptContext.getScriptConfig().getLogger().error("Problem during testscript running", e);

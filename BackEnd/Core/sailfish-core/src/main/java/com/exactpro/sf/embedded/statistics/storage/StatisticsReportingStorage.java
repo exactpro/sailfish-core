@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage;
 
-import static com.exactpro.sf.embedded.statistics.storage.utils.Conditions.*;
+import static com.exactpro.sf.embedded.statistics.storage.utils.Conditions.and;
+import static com.exactpro.sf.embedded.statistics.storage.utils.Conditions.create;
+import static com.exactpro.sf.embedded.statistics.storage.utils.Conditions.wrap;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -33,9 +35,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
-import com.exactpro.sf.embedded.statistics.StatisticsException;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
-import com.google.common.collect.Iterables;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.embedded.statistics.StatisticsException;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
@@ -57,6 +57,7 @@ import com.exactpro.sf.embedded.statistics.storage.reporting.ActionInfoRow;
 import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
 import com.exactpro.sf.embedded.statistics.storage.reporting.KnownBugRow;
 import com.exactpro.sf.embedded.statistics.storage.reporting.ScriptWeatherRow;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportParameters;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonResult;
@@ -68,6 +69,7 @@ import com.exactpro.sf.embedded.statistics.storage.utils.ICondition;
 import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.DateTimeUtility;
+import com.google.common.collect.Iterables;
 
 public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
@@ -1371,7 +1373,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 	            String[] rankReasonSplitted = fAction.split(ACTION_RANK_FREASON_SPLITTER);
 	            result.put(Long.valueOf(rankReasonSplitted[0]), rankReasonSplitted[1]);
 	        }
-	    } catch (Throwable e) {
+	    } catch (Exception e) {
 	        logger.error("Can not exctract failed action info. Incorrect return from Storage: <{}>", dbString);
         }
 

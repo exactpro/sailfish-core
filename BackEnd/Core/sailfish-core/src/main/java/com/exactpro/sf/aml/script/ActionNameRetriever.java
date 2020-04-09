@@ -62,7 +62,7 @@ public class ActionNameRetriever {
             return proxy.getMethodName();
         } catch (Exception e) {
             throw e;
-        } catch (Throwable t) {
+        } catch (@SuppressWarnings("ProhibitedExceptionCaught") Throwable t) {
             return ExceptionUtils.rethrow(t);
         }
     }

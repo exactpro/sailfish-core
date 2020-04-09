@@ -124,10 +124,10 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
 
             logger.info("Initiliazing service {} ... done", this);
             changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
-        } catch (Throwable t) {
-            logger.error("Exception during service [{}] initializing", serviceName, t);
-            changeStatus(ServiceStatus.ERROR, "", t);
-            throw new ServiceException("Problem during service [" + serviceName + "] initializing", t);
+        } catch (Exception e) {
+            logger.error("Exception during service [{}] initializing", serviceName, e);
+            changeStatus(ServiceStatus.ERROR, "", e);
+            throw new ServiceException("Problem during service [" + serviceName + "] initializing", e);
         }
     }
 

@@ -149,7 +149,7 @@ public class ServiceResource {
 			    return createResponse("unknown service");
 			}
 		}
-		catch ( Throwable e ) {
+		catch ( Exception e ) {
 		    logger.error(e.getMessage(), e);
 		    return createResponse(e);
 		}
@@ -181,7 +181,7 @@ public class ServiceResource {
                         build();
             }
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
 	        return createResponse(e);
 	    }

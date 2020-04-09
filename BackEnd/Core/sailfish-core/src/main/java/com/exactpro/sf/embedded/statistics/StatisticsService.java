@@ -369,9 +369,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             storage.update(matrixRun);
 
-        } catch(Throwable t) {
+        } catch(Exception e) {
 
-            logger.error(t.getMessage(), t);
+            logger.error(e.getMessage(), e);
 
             this.exceptionEncountered = true;
 
@@ -411,9 +411,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             storage.update(matrixRun);
 
-		} catch(Throwable t) {
+		} catch(Exception e) {
 
-			logger.error(t.getMessage(), t);
+			logger.error(e.getMessage(), e);
 
 			this.exceptionEncountered = true;
 
@@ -453,9 +453,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             runningTestCases.put(matrixName, tcRun);
 
-		} catch(Throwable t) {
+		} catch(Exception e) {
 
-			logger.error(t.getMessage(), t);
+			logger.error(e.getMessage(), e);
 
 			this.exceptionEncountered = true;
 
@@ -494,9 +494,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             storage.update(tcRun);
 
-		} catch(Throwable t) {
+		} catch(Exception e) {
 
-			logger.error(t.getMessage(), t);
+			logger.error(e.getMessage(), e);
 
 			exceptionEncountered = true;
 
@@ -555,7 +555,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 		} catch (InterruptedException e) {
 			logger.error("Put interrupted", e);
 			Thread.currentThread().interrupt();
-		} catch (Throwable e) {
+		} catch (Exception e) {
 		    logger.error(e.getMessage(), e);
         }
 
@@ -716,9 +716,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 					logger.error("Interrupted", e);
 					break;
 
-				} catch(Throwable t) {
+				} catch(Exception e) {
 
-					logger.error(t.getMessage(), t);
+					logger.error(e.getMessage(), e);
 
 					exceptionEncountered = true;
 

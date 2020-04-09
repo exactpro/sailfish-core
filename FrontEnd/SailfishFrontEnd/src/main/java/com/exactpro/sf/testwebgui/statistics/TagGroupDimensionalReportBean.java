@@ -300,7 +300,7 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
     public Set<String> getDimensionsFileNames() {
         try {
             return BeanUtil.getSfContext().getWorkspaceDispatcher().listFiles(null, FolderType.CFG, DIMENSIONS_DIR);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return Collections.emptySet();
         }
     }
@@ -337,7 +337,7 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
                         .unmarshal(BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, DIMENSIONS_DIR, dimensionsFileName));
                 this.selectedDemensions = wrapper.getSelectedDemensions();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(buildErrorMessage(), e);
             BeanUtil.addErrorMessage(buildErrorMessage(), e.getMessage());
         }

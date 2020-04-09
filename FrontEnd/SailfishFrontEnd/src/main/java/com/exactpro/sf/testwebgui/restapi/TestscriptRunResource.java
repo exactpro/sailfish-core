@@ -284,7 +284,7 @@ public class TestscriptRunResource {
 			} else {
                 errorMessage = "unknown testscriptrun";
             }
-		} catch ( Throwable e ) {
+		} catch ( Exception e ) {
 		    logger.error(e.getMessage(), e);
 		    errorMessage = e.getMessage();
 			rootCause = ( e.getCause() != null ) ?  e.getCause().getMessage() : null;
@@ -345,7 +345,7 @@ public class TestscriptRunResource {
                 return Response.status(Status.OK).entity(xmlResponse).build();
             }
         }
-        catch ( Throwable e ) {
+        catch ( Exception e ) {
             logger.error(e.getMessage(), e);
             errorMessage = e.getMessage();
             rootCause = ( e.getCause() != null ) ?  e.getCause().getMessage() : null;
@@ -392,7 +392,7 @@ public class TestscriptRunResource {
 
             return Response.status(Status.OK).entity(xmlResponse).build();
         }
-        catch ( Throwable e ) {
+        catch ( Exception e ) {
             logger.error(e.getMessage(), e);
             errorMessage = e.getMessage();
             rootCause = ( e.getCause() != null ) ?  e.getCause().getMessage() : null;
@@ -433,7 +433,7 @@ public class TestscriptRunResource {
                 SFLocalContext.getDefault().getStatisticsService().getStorage().updateSfCurrentID(matrixRunId, sfCurrentID);
                 message = String.format("sf current id was successfully set for test script run [%s]", testScriptRunId);
             }
-        } catch ( Throwable e ) {
+        } catch ( Exception e ) {
             logger.error("Could not update test script run with [{}] id. Message: {}", testScriptRunId, e.getMessage(), e);
             String rootCause = ( e.getCause() != null ) ?  e.getCause().getMessage() : null;
             message = e.getMessage();

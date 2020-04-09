@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import javax.ws.rs.DELETE;
@@ -29,8 +31,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.impl.SFLocalContext;
@@ -63,7 +63,7 @@ public class InternalResources {
             xmlResponse.setRootCause("");
 
             return Response.status(Status.OK).entity(xmlResponse).build();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
 
             XmlResponse xmlResponse = new XmlResponse();

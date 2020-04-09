@@ -74,7 +74,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 			connect();
 
 			changeStatus(ServiceStatus.STARTED, "Service " + serviceName + " started", null);
-		} catch (Throwable ex) {
+		} catch (Exception ex) {
 			changeStatus(ServiceStatus.ERROR, ex.getMessage(), ex);
 		}
 	}

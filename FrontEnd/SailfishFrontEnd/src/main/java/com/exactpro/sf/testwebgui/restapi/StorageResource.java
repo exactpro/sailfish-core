@@ -44,7 +44,7 @@ public class StorageResource {
             xmlResponse.setRootCause("");
 
             return Response.status(Status.OK).entity(xmlResponse).build();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             XmlResponse xmlResponse = new XmlResponse();
             xmlResponse.setMessage(e.getMessage());

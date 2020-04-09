@@ -1003,10 +1003,10 @@ public class ExecutorClient {
 					logger.error("Interrupted", e);
 					break;
 					
-				} catch(Throwable t) {
+				} catch(Exception e) {
 					
-					logger.error(t.getMessage(), t);
-					toErrorState(t);
+					logger.error(e.getMessage(), e);
+					toErrorState(e);
 					break; // Unknown exception. Executor becomes inactive 
 					
 				} finally {

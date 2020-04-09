@@ -150,7 +150,7 @@ public class AbstractTest {
                         return new ServiceInfo(serviceName.toString(), serviceName);
                     });
 		        }
-		    } catch (Throwable e) {
+		    } catch (Exception e) {
 		    	System.err.println(e);
 	            logger.error(e.getMessage(), e);
 	            throw e;
@@ -179,7 +179,7 @@ public class AbstractTest {
 			return new XMLConfiguration(file);
 		} catch (ConfigurationException e) {
 			throw new ScriptRunException("Exception during configuration loading", e);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error("Exception during environment initialization", e);
 			throw new ScriptRunException("Exception during environment initialization", e);
 		}

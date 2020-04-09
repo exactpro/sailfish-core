@@ -189,7 +189,7 @@ public class FIXClient implements IInitiatorService {
                 application.stopLogging();
             }
 
-        } catch (Throwable e)	{
+        } catch (Exception e)	{
             changeStatus(ServiceStatus.ERROR, "Service failed upon closing the resources: " + e.getMessage(), e);
             logger.error("Service failed upon closing the resources", e);
         } finally {

@@ -280,7 +280,7 @@ public class PluginLoader {
 		    logger.info("Loading logger configuration: {{}}/{}/{}", folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    try {
                 new PropertyConfigurator().doConfigure(file.getPath(), LogManager.getLoggerRepository());
-		    } catch (Throwable e) {
+		    } catch (Exception e) {
 		        throw new EPSCommonException("Failed to configure logger. {" + folderType + "}/" + pluginPath + "/" + LOG4J_PROPERTIES_FILE_NAME, e);
 		    }
 		} catch (FileNotFoundException ex) {
@@ -530,8 +530,8 @@ public class PluginLoader {
                         pluginServiceLoader.addDescription(file);
                     }
                 }
-            } catch(Throwable t) {
-                throw new EPSCommonException("Failed to collect service descriptions from: {" + folderType + "}/" + pluginPath + "/" + SERVICES_FOLDER_NAME, t);
+            } catch(Exception e) {
+                throw new EPSCommonException("Failed to collect service descriptions from: {" + folderType + "}/" + pluginPath + "/" + SERVICES_FOLDER_NAME, e);
             }
         } else {
             logger.info("Ignore plugin service descriptions [No PluginServiceLoader]. Plugin: {}", pluginPath);

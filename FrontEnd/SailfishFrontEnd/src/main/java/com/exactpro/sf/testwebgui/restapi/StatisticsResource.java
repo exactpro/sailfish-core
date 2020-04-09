@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,16 +46,13 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.embedded.statistics.entities.SfInstance;
-import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.embedded.statistics.DimensionMap;
 import com.exactpro.sf.embedded.statistics.MatrixInfo;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
@@ -64,6 +60,7 @@ import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.entities.TagGroup;
+import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
 import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
 import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
 import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
@@ -525,12 +522,12 @@ public class StatisticsResource {
             xmlResponse.setMigrationRequired(service.isMigrationRequired());
             xmlResponse.setSailfishUpdateRequired(service.isSfUpdateRequired());
 			
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			
-			logger.error(t.getMessage(), t);
+			logger.error(e.getMessage(), e);
 			status = Status.INTERNAL_SERVER_ERROR;
 			xmlResponse.setMessage("Unexpected error");
-			xmlResponse.setRootCause(t.getMessage());
+			xmlResponse.setRootCause(e.getMessage());
 			
 		}
 		
@@ -602,12 +599,12 @@ public class StatisticsResource {
 				
 			}
 			
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			
-			logger.error(t.getMessage(), t);
+			logger.error(e.getMessage(), e);
 			status = Status.OK;
 			xmlResponse.setMessage("Migration failed");
-			xmlResponse.setRootCause(t.getCause() != null ? t.getCause().getMessage() : "");
+			xmlResponse.setRootCause(e.getCause() != null ? e.getCause().getMessage() : "");
 			
 		}
 		
@@ -628,7 +625,7 @@ public class StatisticsResource {
         try {
             List<TagGroupDimension> selectedDimensions = parseDimensions(dimensionMap);
             return generateStatsPerTags(selectedDimensions);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             status = Status.INTERNAL_SERVER_ERROR;
             xmlResponse.setMessage(e.getMessage());
@@ -660,7 +657,7 @@ public class StatisticsResource {
             StatisticsUtils.loadTagIdsFromDb(statisticsStorage, parameters);
             StatisticsUtils.generateAggregatedReport(statisticsService, parameters, statisticsReportHandler);
             return generateAggregatedReport(statisticsReportHandler, parameters);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             status = Status.INTERNAL_SERVER_ERROR;
             xmlResponse.setMessage(e.getMessage());

@@ -40,9 +40,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
-import com.exactpro.sf.configuration.CleanupServiceCallback;
-import com.exactpro.sf.configuration.workspace.ResourceCleaner;
-import com.exactpro.sf.storage.IMatrixListener;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -63,10 +60,12 @@ import com.exactpro.sf.center.impl.CoreVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.configuration.CleanupServiceCallback;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceDispatcherBuilder;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
 import com.exactpro.sf.embedded.mail.EMailService;
@@ -81,6 +80,7 @@ import com.exactpro.sf.scriptrunner.IScriptRunListener;
 import com.exactpro.sf.storage.IAuthStorage;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.storage.IMappableSettingsSerializer;
+import com.exactpro.sf.storage.IMatrixListener;
 import com.exactpro.sf.storage.auth.PasswordHasher;
 import com.exactpro.sf.storage.auth.User;
 import com.exactpro.sf.storage.util.PropertiesSettingsReaderSerializer;
@@ -159,7 +159,7 @@ public class SFContextServlet implements Servlet {
 	            }
 	        }
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error("Could not determine http port", e);
         }
 
@@ -187,27 +187,27 @@ public class SFContextServlet implements Servlet {
 
             try {
                 statisticsService.init();
-            } catch(Throwable t) {
+            } catch(Exception e) {
 
-			    logger.error("Init of statistics service failed", t);
+			    logger.error("Init of statistics service failed", e);
 
     		}
 
     		try {
                 MachineLearningService service = sFcontext.getMachineLearningService();
                 service.init();
-            } catch(Throwable t) {
+            } catch(Exception e) {
 
-                logger.error("Init of statistics service failed", t);
+                logger.error("Init of statistics service failed", e);
 
             }
 
             initEmailService(sFcontext, allStoredOptions);
 
             initUpdateService(sFcontext, allStoredOptions);
-	    } catch(Throwable t) {
-            logger.error("Init options failed", t);
-            throw new SFException("Problem during reading settings for embedded services", t);
+	    } catch(Exception e) {
+            logger.error("Init options failed", e);
+            throw new SFException("Problem during reading settings for embedded services", e);
 		}
 
 	}
@@ -220,8 +220,8 @@ public class SFContextServlet implements Servlet {
             eMailService.setSettings(settings);
             eMailService.init();
 
-        } catch(Throwable t) {
-            logger.error("Init of email service failed", t);
+        } catch(Exception e) {
+            logger.error("Init of email service failed", e);
         }
     }
 
@@ -233,8 +233,8 @@ public class SFContextServlet implements Servlet {
             UpdateService updateService = context.getUpdateService();
             updateService.setSettings(settings);
             updateService.init();
-        } catch (Throwable t) {
-            logger.error("Init update service failed", t);
+        } catch (Exception e) {
+            logger.error("Init update service failed", e);
         }
     }
 
@@ -393,7 +393,7 @@ public class SFContextServlet implements Servlet {
                 BigDecimal comparisonPrecision = environmentSettings.getComparisonPrecision();
                 MathProcessor.COMPARISON_PRECISION = comparisonPrecision;
                 MessageComparator.COMPARISON_PRECISION = comparisonPrecision.doubleValue();
-    		} catch (Throwable ex) {
+    		} catch (Exception ex) {
     			logger.error("Failed to create SFLocalContext instance.", ex);
     			setFatalError(getExceptionMessageChain(ex));
     		}
@@ -459,7 +459,7 @@ public class SFContextServlet implements Servlet {
             }
 
             logger.info("Application initialization finished\n");
-	    } catch (Throwable e) {
+	    } catch (Exception e) {
 	        logger.error(e.getMessage(), e);
 	        e.printStackTrace();
 	        setFatalError(getExceptionMessageChain(e));

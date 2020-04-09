@@ -27,12 +27,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.exactpro.sf.center.impl.PluginLoader;
-import com.exactpro.sf.center.impl.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -178,7 +177,7 @@ public class MachineLearningService implements IEmbeddedService {
         } catch (InterruptedException e) {
             logger.error("Put interrupted", e);
             Thread.currentThread().interrupt();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
     }
@@ -199,7 +198,7 @@ public class MachineLearningService implements IEmbeddedService {
             mlPredictor.init(dataManager, dictionaryManager);
             mlVersion = PluginLoader.extractVersion(workspaceDispatcher, "ml");
             predictorStatus = ServiceStatus.Connected;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             predictorStatus = ServiceStatus.Error;
         }
@@ -260,8 +259,8 @@ public class MachineLearningService implements IEmbeddedService {
                 } catch (InterruptedException e) {
                     logger.error("Interrupted", e);
                     break;
-                } catch(Throwable t) {
-                    logger.error(t.getMessage(), t);
+                } catch(Exception e) {
+                    logger.error(e.getMessage(), e);
                 }
             }
 

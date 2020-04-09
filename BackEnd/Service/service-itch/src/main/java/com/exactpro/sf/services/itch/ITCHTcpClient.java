@@ -218,7 +218,7 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 			try {
                 disposeResources();
 			}
-			catch (Throwable e ) {
+			catch (Exception e ) {
 				logger.error("Problem while disconnecting session", e);
 			}
 

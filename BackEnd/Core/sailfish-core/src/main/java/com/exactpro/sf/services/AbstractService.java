@@ -65,7 +65,7 @@ public abstract class AbstractService implements IService {
             getSettings();
             internalInit();
             changeStatus(ServiceStatus.INITIALIZED, "Service initialized");
-        } catch(Throwable e) {
+        } catch(Exception e) {
             initCleanup();
             changeStatus(ServiceStatus.ERROR, "Failed to initialize service", e);
             throw new ServiceException("Failed to initialize service", e);
@@ -88,7 +88,7 @@ public abstract class AbstractService implements IService {
             loggingConfigurator.createAndRegister(getServiceName(), this);
             internalStart();
             changeStatus(ServiceStatus.STARTED, "Started service");
-        } catch(Throwable e) {
+        } catch(Exception e) {
             startCleanup();
             changeStatus(ServiceStatus.ERROR, "Failed to start service", e);
             throw new ServiceException("Failed to start service", e);
@@ -105,7 +105,7 @@ public abstract class AbstractService implements IService {
             changeStatus(ServiceStatus.DISPOSING, "Disposing service");
             internalDispose();
             changeStatus(ServiceStatus.DISPOSED, "Disposed service");
-        } catch(Throwable e) {
+        } catch(Exception e) {
             changeStatus(ServiceStatus.ERROR, "Failed to dispose service", e);
             throw new ServiceException("Failed to dispose service", e);
         }

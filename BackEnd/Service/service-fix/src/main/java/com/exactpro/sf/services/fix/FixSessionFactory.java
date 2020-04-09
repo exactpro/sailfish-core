@@ -245,7 +245,7 @@ public class FixSessionFactory implements SessionFactory {
                 if(ret != null) {
                     return ret;
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new ConfigError(e);
             }
         }
@@ -259,7 +259,7 @@ public class FixSessionFactory implements SessionFactory {
                 String raw = settings.getString(sessionID,
                         Session.SETTING_ALLOWED_REMOTE_ADDRESSES);
                 return SessionSettings.parseRemoteAddresses(raw);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new ConfigError(e);
             }
         }

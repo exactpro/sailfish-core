@@ -124,7 +124,7 @@ public class AML3PluginTest {
 
 					context = SFLocalContext.createContext(wd, settings, new SfInstanceInfo("localhost", 80, "sfgui"));
 				}
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				System.err.println(e);
 				logger.error(e.getMessage(), e);
 				throw e;
@@ -140,7 +140,7 @@ public class AML3PluginTest {
 			return new XMLConfiguration(file);
 		} catch (ConfigurationException e) {
 			throw new ScriptRunException("Exception during configuration loading", e);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error("Exception during environment initialization", e);
 			throw new ScriptRunException("Exception during environment initialization", e);
 		}

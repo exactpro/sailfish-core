@@ -1317,7 +1317,7 @@ public class DictionaryEditorModel {
 
         try {
             newAttribute.setCastValue(StructureUtils.castValueToJavaType(newAttribute.getValue(), newAttribute.getType()));
-        } catch (Throwable e) {
+        } catch (Exception e) {
             newAttribute.setCastValue(null);
         }
 
@@ -1416,7 +1416,7 @@ public class DictionaryEditorModel {
 
         try {
             original.setCastValue(StructureUtils.castValueToJavaType(actual.getValue(), actual.getType()));
-        } catch (Throwable e) {
+        } catch (Exception e) {
             original.setCastValue(null);
         }
 

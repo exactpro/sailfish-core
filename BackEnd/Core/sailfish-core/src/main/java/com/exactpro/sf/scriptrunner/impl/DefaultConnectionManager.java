@@ -200,7 +200,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     				logger.info("Disposing [{}] service finished", entry.getKey());
 
-    			} catch ( Throwable e ) {
+    			} catch ( Exception e ) {
     				logger.error("Exception during service = [{}] disposing", entry.getKey(), e);
     			}
     		}

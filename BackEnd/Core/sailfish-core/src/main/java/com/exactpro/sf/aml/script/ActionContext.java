@@ -651,7 +651,7 @@ public class ActionContext implements IActionContext {
             }
 
             return new ActionCallResult<>(null, StatusType.FAILED, Collections.emptySet(), e);
-        } catch (Throwable t) {
+        } catch (@SuppressWarnings("ProhibitedExceptionCaught") Throwable t) {
             return ExceptionUtils.rethrow(t);
         }
     }

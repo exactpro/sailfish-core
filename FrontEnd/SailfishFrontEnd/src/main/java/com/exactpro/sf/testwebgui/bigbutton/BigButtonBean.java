@@ -58,9 +58,9 @@ import com.exactpro.sf.bigbutton.library.Executor;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
-import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 
 @ManagedBean(name="bbBean")
 @SessionScoped
@@ -132,7 +132,7 @@ public class BigButtonBean implements Serializable {
 
                 runner.prepare(libraryImportResult);
             }
-		} catch(Throwable e) {
+		} catch(Exception e) {
             BeanUtil.addErrorMessage("Upload failed", e.getMessage());
 			logger.error(e.getMessage(), e);
 		}

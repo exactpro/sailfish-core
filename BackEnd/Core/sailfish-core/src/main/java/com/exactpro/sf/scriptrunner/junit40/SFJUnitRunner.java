@@ -24,7 +24,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,7 +182,7 @@ public class SFJUnitRunner
                                 method.invoke(sfTestCase);
                             }
 						}
-					} catch (Throwable e) {
+					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 						throw new ScriptRunException("Problem during testcase initialization", e);
 					}
@@ -191,7 +193,7 @@ public class SFJUnitRunner
                 catch (InvocationTargetException e) {
                     exception = (e.getCause() != null) ? e.getCause() : e;
                     failed = true;
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     exception = e;
                     failed = true;
                 }
@@ -202,7 +204,7 @@ public class SFJUnitRunner
                         for(Method method : methodsCalledAfterTestCase) {
                             try {
                                 method.invoke(sfTestCase);
-                            } catch(Throwable e) {
+                            } catch(Exception e) {
                                 logger.error(e.getMessage(), e);
                                 exception = e;
                                 failed = true;
@@ -232,13 +234,20 @@ public class SFJUnitRunner
 				}
 			}
 
-		}
-		catch (Throwable e) {
-			logger.error(e.getMessage(), e);
+		} catch (InvocationTargetException e) {
+            Throwable throwable = ObjectUtils.defaultIfNull(e.getCause(),e);
 
-			if (e instanceof InvocationTargetException) {
-				e = (e.getCause() != null) ? e.getCause() : e;
-			}
+            if (!(throwable instanceof Exception)) {
+                ExceptionUtils.rethrow(throwable);
+                return;
+            }
+
+            IScriptReport report = context.getReport(); // we believe, that executeBeforeScript was called
+            report.createException(throwable);
+
+            throw new ScriptRunException("Problem during testscript execution", throwable);
+        } catch (Exception e) {
+			logger.error(e.getMessage(), e);
 
 			IScriptReport report = context.getReport(); // we believe, that executeBeforeScript was called
 			report.createException(e);
@@ -250,7 +259,7 @@ public class SFJUnitRunner
 				for (Method method : methodsCalledAfterScript) {
                     try {
                         method.invoke(null);
-                    } catch (Throwable e) {
+                    } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                         exception = e;
                     }
@@ -428,7 +437,7 @@ public class SFJUnitRunner
 
 			status = "success";
 
-		} catch (Throwable e) {
+		} catch (Exception e) {
 		    scriptContext.getScriptConfig().getLogger().error("Exception during script closing", e);
 		} finally {
 		    scriptContext.getScriptConfig().getLogger().info("shutdown {}", status);
@@ -436,14 +445,14 @@ public class SFJUnitRunner
 	}
 
 
-	private void executeBeforeTestCase(ScriptContext context, TestCaseDescription testcaseDescription) throws Throwable {
+	private void executeBeforeTestCase(ScriptContext context, TestCaseDescription testcaseDescription) {
 	    logger.debug("executeBeforeTestCase start");
 		cleanupServices(context.getEnvironmentManager().getConnectionManager(), context.getServiceList());
         context.reset();
 		logger.debug("executeBeforeTestCase end");
 	}
 
-	private void onTestCaseStart(ScriptContext context, TestCaseDescription testcaseDescription) throws Throwable {
+	private void onTestCaseStart(ScriptContext context, TestCaseDescription testcaseDescription) {
         if(!testcaseDescription.isAddToReport()) {
             return;
         }

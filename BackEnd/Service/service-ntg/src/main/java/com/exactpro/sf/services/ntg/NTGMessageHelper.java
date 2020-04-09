@@ -218,8 +218,8 @@ public class NTGMessageHelper extends MessageHelper {
             if(transactTime != null) {
                 return getMillisecond(getTransactTimeAsDate(transactTime));
             }
-        } catch(Throwable t) {
-            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        } catch(Exception e) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, e);
         }
 
         return super.getSenderTime(message);

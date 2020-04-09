@@ -131,8 +131,8 @@ public class FixMessageHelper extends MessageHelper {
         try {
             LocalDateTime sendingTime = message.<IMessage>getField(HEADER).getField(SENDING_TIME_FIELD);
             return getMillisecond(sendingTime);
-        } catch(Throwable t) {
-            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        } catch(Exception e) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, e);
         }
 
         return super.getSenderTime(message);

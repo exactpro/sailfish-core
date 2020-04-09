@@ -371,10 +371,10 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 			BeanUtil.addInfoMessage("Saved", "");
 
-		} catch(Throwable t) {
+		} catch(Exception e) {
 
-			logger.error(t.getMessage(), t);
-			BeanUtil.addErrorMessage("Error", t.getMessage());
+			logger.error(e.getMessage(), e);
+			BeanUtil.addErrorMessage("Error", e.getMessage());
 
 		}
 
@@ -841,7 +841,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
             }
             BeanUtil.getSfContext().getStatisticsService().manageTagToRows(filteredRows, action.getTargetAction(), tags);
             BeanUtil.addInfoMessage("Action applied", "");
-        } catch(Throwable e) {
+        } catch(Exception e) {
             logger.error(e.getMessage(), e);
             BeanUtil.addErrorMessage(e.getMessage(), "");
         }

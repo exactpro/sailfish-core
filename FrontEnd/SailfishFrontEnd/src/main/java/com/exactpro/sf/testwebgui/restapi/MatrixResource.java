@@ -170,7 +170,7 @@ public class MatrixResource {
 			matrixUploadResponse.setId(uploaded.getId());
 
 			reqResponse = Response.ok(matrixUploadResponse).build();
-		} catch (Throwable e) {
+		} catch (Exception e) {
             logger.error("Could not store matrice [{}]", (fileDetail != null) ? fileDetail.getFileName() : "null", e);
 			errorMessage = e.getMessage();
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
@@ -220,7 +220,7 @@ public class MatrixResource {
                                                      .collect(Collectors.toMap(IMatrix::getName, IMatrix::getId)));
 
             reqResponse = Response.ok(matrixUploadResponse).build();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error("Could not store matrix [{}]", link, e);
             errorMessage = e.getMessage();
             rootCause = ExceptionUtils.getRootCauseMessage(e);
@@ -269,7 +269,7 @@ public class MatrixResource {
 			matrixUploadResponse.setId(convertedMatrixId);
 
 			return Response.ok(matrixUploadResponse).build();
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage() , e);
 			XmlResponse xmlResponse = new XmlResponse();
 
@@ -320,7 +320,7 @@ public class MatrixResource {
 								"attachment; filename = "
 										+ file.getName()).build();
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage() , e);
 			errorMessage = e.getMessage();
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
@@ -515,7 +515,7 @@ public class MatrixResource {
                 errorMessage = "unknown action";
             }
 		}
-		catch ( Throwable e ) {
+		catch ( Exception e ) {
 			logger.error(e.getMessage() , e);
 			errorMessage = e.getMessage();
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
@@ -596,7 +596,7 @@ public class MatrixResource {
                 errorMessage = "unknown action";
             }
 		}
-		catch ( Throwable e ) {
+		catch ( Exception e ) {
 			logger.error(e.getMessage() , e);
 			errorMessage = e.getMessage();
 			rootCause = ExceptionUtils.getRootCauseMessage(e);

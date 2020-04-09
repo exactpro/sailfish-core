@@ -242,7 +242,7 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
             ((AbstractIoService) session.getService()).getListeners().fireSessionCreated(session);
             notified = true;
             bufSize = session.getConfig().getReadBufferSize();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (notified)
             {
                 // Clear the DefaultIoFilterChain.CONNECT_FUTURE attribute
@@ -348,9 +348,9 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
         				}
         			}
 
-        		} catch (Throwable t) {
+        		} catch (Exception e) {
 
-        			ExceptionMonitor.getInstance().exceptionCaught(t);
+        			ExceptionMonitor.getInstance().exceptionCaught(e);
 
         			try {
         				Thread.sleep(1000);

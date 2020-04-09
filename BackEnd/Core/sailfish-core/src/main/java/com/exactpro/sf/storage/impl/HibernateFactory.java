@@ -80,7 +80,7 @@ public class HibernateFactory {
                             config.getProperty(AvailableSettings.USER), config.getProperty(AvailableSettings.URL));
                     sessionFactory = config.buildSessionFactory();
 					sessionFactories.put(cfgFolder, sessionFactory);
-				} catch ( Throwable e ) {
+				} catch ( Exception e ) {
 					throw new EPSCommonException("Could not initialize DB Storage", e);
 				}
 			}

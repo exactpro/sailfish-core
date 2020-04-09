@@ -15,18 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import com.exactpro.sf.center.IVersion;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.suri.SailfishURIException;
-import com.exactpro.sf.externalapi.IMessageFactoryProxy;
-import com.exactpro.sf.externalapi.IServiceFactory;
-import com.exactpro.sf.externalapi.IServiceProxy;
-import com.exactpro.sf.externalapi.ISettingsProxy;
-import com.exactpro.sf.externalapi.ServiceFactory;
-import com.exactpro.sf.externalapi.impl.EmptyListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -39,14 +36,18 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
+import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.externalapi.IMessageFactoryProxy;
+import com.exactpro.sf.externalapi.IServiceFactory;
+import com.exactpro.sf.externalapi.IServiceProxy;
+import com.exactpro.sf.externalapi.ISettingsProxy;
+import com.exactpro.sf.externalapi.ServiceFactory;
+import com.exactpro.sf.externalapi.impl.EmptyListener;
 
 /**
  * @author sergey.smirnov
@@ -120,7 +121,7 @@ public class TestExternalApi {
             IMessage simpleMessage = messageFactory.createMessage(newDictionary, "SimpleMessage");
             sp.start();
             sp.send(simpleMessage);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
@@ -135,7 +136,7 @@ public class TestExternalApi {
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
             sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
@@ -154,7 +155,7 @@ public class TestExternalApi {
             sp = sf.createService(serviceName, testServiceType, new EmptyListener());
             sp.getSettings().setParameterValue("dictionaryName", testDictionary);
             sp.start();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
@@ -170,7 +171,7 @@ public class TestExternalApi {
         try {
             ssf = new ServiceFactory(0, 2, 2, new File("src/test/workspace"), Files.createTempDirectory("sf-tests").toFile());
             ssf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
@@ -197,7 +198,7 @@ public class TestExternalApi {
             sp.start();
             Assert.assertEquals(msg, sp.send(msg));
 
-        } catch (Throwable e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
             Assert.fail(e1.getMessage());
         } finally {
@@ -253,7 +254,7 @@ public class TestExternalApi {
             sp.getName();
             sp.getSettings().getParameterNames();
             sp.getType();
-        } catch (Throwable e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
             Assert.fail(e1.getMessage());
         } finally {
@@ -278,7 +279,7 @@ public class TestExternalApi {
                 //Expected
             }
             Assert.assertEquals(sURI, sf.registerDictionary(sURI.getResourceName(), new FileInputStream(new File("src/test/workspace/cfg/dictionaries/example.xml")), true));
-        } catch (Throwable e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
             Assert.fail(e1.getMessage());
         }
@@ -305,7 +306,7 @@ public class TestExternalApi {
                 ssp.setParameterValue(name, val);
                 System.out.println(String.format("%s = %s. type: %s", name, val, klass.getCanonicalName()));
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {

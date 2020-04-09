@@ -165,7 +165,7 @@ public abstract class NettyClientService implements IInitiatorService {
 			initService(this.serviceContext.getDictionaryManager(), settings);
 
 			changeStatus(ServiceStatus.INITIALIZED, "Service " + name + " have been initialized", null);
-		} catch (Throwable ex) {
+		} catch (Exception ex) {
 			changeStatus(ServiceStatus.ERROR, "Service " + name + " failed to init", ex);
 		}
 	}
@@ -181,7 +181,7 @@ public abstract class NettyClientService implements IInitiatorService {
 			connect();
 
 			changeStatus(ServiceStatus.STARTED, "Service " + serviceName + " started", null);
-		} catch (Throwable ex) {
+		} catch (Exception ex) {
 			changeStatus(ServiceStatus.ERROR, ex.getMessage(), ex);
 		}
 	}

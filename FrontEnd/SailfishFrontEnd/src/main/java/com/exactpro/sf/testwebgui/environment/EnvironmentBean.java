@@ -1003,9 +1003,9 @@ public class EnvironmentBean implements Serializable {
     public void changeVariableSet() {
         try {
             BeanUtil.getSfContext().getConnectionManager().setEnvironmentVariableSet(currentEnvironment, currentVariableSet);
-        } catch(Throwable t) {
-            logger.error("Failed to change variable set to: {}", currentVariableSet, t);
-            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to change variable set to: " + currentVariableSet, t.getMessage());
+        } catch(Exception e) {
+            logger.error("Failed to change variable set to: {}", currentVariableSet, e);
+            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to change variable set to: " + currentVariableSet, e.getMessage());
         }
     }
 

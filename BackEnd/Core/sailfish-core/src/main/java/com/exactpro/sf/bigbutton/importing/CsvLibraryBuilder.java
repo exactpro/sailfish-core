@@ -410,7 +410,7 @@ public class CsvLibraryBuilder {
         if (!result.isRejected()) {
             try {
                 result.setName(extractServiceName(path, domBuilder));
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 result.setName(FilenameUtils.getBaseName(path));
                 result.setRejectCause(new ImportError(currentRecordNumber, e.getMessage()));
             }

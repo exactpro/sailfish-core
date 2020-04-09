@@ -180,8 +180,8 @@ public class ITCHMessageHelper extends MessageHelper {
             if(messageTime != null) {
                 return getMillisecond(messageTime);
             }
-        } catch(Throwable t) {
-            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        } catch(Exception e) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, e);
         }
 
         return super.getSenderTime(message);

@@ -241,8 +241,8 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
 
                 // Finish decoding if no exception was thrown.
                 decoderOut.flush(nextFilter, session);
-            } catch (Throwable t) {
-                ProtocolDecoderException pde = t instanceof ProtocolDecoderException ? (ProtocolDecoderException)t : new ProtocolDecoderException(t);
+            } catch (Exception e) {
+                ProtocolDecoderException pde = e instanceof ProtocolDecoderException ? (ProtocolDecoderException)e : new ProtocolDecoderException(e);
 
                 if (pde.getHexdump() == null) {
                     // Generate a message hex dump
@@ -260,7 +260,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
                 // recoverable and the buffer position has changed.
                 // We check buffer position additionally to prevent an
                 // infinite loop.
-                if (!(t instanceof RecoverableProtocolDecoderException) || (in.position() == oldPos)) {
+                if (!(e instanceof RecoverableProtocolDecoderException) || (in.position() == oldPos)) {
                     break;
                 }
             }
@@ -333,9 +333,9 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             nextFilter.filterWrite(session, new MessageWriteRequest(writeRequest));
         } catch(ProtocolEncoderException e) {
             throw e;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // Generate the correct exception
-            throw new ProtocolEncoderException(t);
+            throw new ProtocolEncoderException(e);
         }
     }
 
@@ -349,8 +349,8 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             decoder.finishDecode(session, decoderOut);
         } catch(ProtocolDecoderException e) {
             throw e;
-        } catch (Throwable t) {
-            throw new ProtocolDecoderException(t);
+        } catch (Exception e) {
+            throw new ProtocolDecoderException(e);
         } finally {
             // Dispose everything
             disposeCodec(session);
@@ -476,7 +476,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
 
         try {
             encoder.dispose(session);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             LOGGER.warn("Failed to dispose: {} ({})", encoder.getClass().getName(), encoder);
         }
     }
@@ -494,7 +494,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
 
         try {
             decoder.dispose(session);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             LOGGER.warn("Failed to dispose: {} ({})", decoder.getClass().getName(), decoder);
         }
     }

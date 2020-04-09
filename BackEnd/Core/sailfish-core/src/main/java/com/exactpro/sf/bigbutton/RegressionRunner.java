@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import com.exactpro.sf.center.impl.SfInstanceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,7 @@ import com.exactpro.sf.bigbutton.library.Library;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 import com.exactpro.sf.bigbutton.library.Tag;
 import com.exactpro.sf.center.impl.PluginLoader;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
@@ -325,7 +325,7 @@ public class RegressionRunner implements AutoCloseable {
                     try {
                         client.registerTags(tags);
                         return true;
-                    } catch (Throwable e) {
+                    } catch (Exception e) {
                         continue;
                     }
 				}

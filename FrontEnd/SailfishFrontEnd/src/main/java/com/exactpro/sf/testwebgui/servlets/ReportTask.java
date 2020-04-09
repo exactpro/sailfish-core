@@ -29,7 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -104,7 +103,7 @@ public class ReportTask implements Runnable{
             String query = request.getParameter("action");
             handlers.get(query == null ? "view" : query).accept(request, response);
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             logger.error("failed to run ReportTask - unexpected exception", e);
 
             response.setStatus(500, e.toString());
@@ -213,7 +212,7 @@ public class ReportTask implements Runnable{
                     } else {
                         report = workspaceDispatcher.getFile(FolderType.REPORT, reportFile, reportFile + ZipReport.ZIP);
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     logger.error("Can't read report file {}", reportFile);
                     continue;
                 }

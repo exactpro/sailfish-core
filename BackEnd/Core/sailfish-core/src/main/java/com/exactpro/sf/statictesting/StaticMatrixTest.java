@@ -15,49 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.statictesting;
 
-import com.exactpro.sf.aml.AML;
-import com.exactpro.sf.aml.AMLException;
-import com.exactpro.sf.aml.AMLSettings;
-import com.exactpro.sf.aml.generator.Alert;
-import com.exactpro.sf.aml.generator.AlertType;
-import com.exactpro.sf.aml.generator.GeneratedScript;
-import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
-import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.center.IVersion;
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.workspace.FolderType;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.scriptrunner.IConnectionManager;
-import com.exactpro.sf.scriptrunner.ScriptContext;
-import com.exactpro.sf.scriptrunner.languagemanager.AutoLanguageFactory;
-import com.exactpro.sf.services.ServiceDescription;
-import com.exactpro.sf.services.ServiceMarshalManager;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.qameta.allure.Allure;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.PropertyConfigurator;
-import org.junit.Test;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.RunWith;
-import org.junit.runner.notification.RunListener;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+import static com.google.common.collect.Lists.reverse;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.lang.System.lineSeparator;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static org.apache.commons.io.FilenameUtils.concat;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.isExtension;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,19 +50,51 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
-import static com.google.common.collect.Lists.reverse;
-import static java.lang.String.format;
-import static java.lang.String.join;
-import static java.lang.System.lineSeparator;
-import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static org.apache.commons.io.FilenameUtils.concat;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-import static org.apache.commons.io.FilenameUtils.isExtension;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.log4j.PropertyConfigurator;
+import org.junit.Test;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.RunWith;
+import org.junit.runner.notification.RunListener;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.aml.AML;
+import com.exactpro.sf.aml.AMLException;
+import com.exactpro.sf.aml.AMLSettings;
+import com.exactpro.sf.aml.generator.Alert;
+import com.exactpro.sf.aml.generator.AlertType;
+import com.exactpro.sf.aml.generator.GeneratedScript;
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.scriptrunner.IConnectionManager;
+import com.exactpro.sf.scriptrunner.ScriptContext;
+import com.exactpro.sf.scriptrunner.languagemanager.AutoLanguageFactory;
+import com.exactpro.sf.services.ServiceDescription;
+import com.exactpro.sf.services.ServiceMarshalManager;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import io.qameta.allure.Allure;
 
 @RunWith(Parameterized.class)
 public class StaticMatrixTest extends AbstractStaticTest {
@@ -152,7 +154,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                     .collect(joining(lineSeparator()));
 
             throw new AssertionError("Failed to compile matrix. Errors: " + lineSeparator() + errors, e);
-        } catch(Throwable e) {
+        } catch(Exception e) {
             LOGGER.error("Failed to compile matrix: {}", canonicalPath, e);
             attachFiles();
             throw e;

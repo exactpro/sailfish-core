@@ -119,11 +119,11 @@ public class SyncScriptRunner extends AbstractScriptRunner {
                             }
     					}
                         descr.scriptReady();
-    				} catch (Throwable e) {
+    				} catch (Exception e) {
     					scriptExceptionProcessing(descr, e);
     				}
     			}
-		    } catch (Throwable e) {
+		    } catch (Exception e) {
 		        logger.error(e.getMessage(), e);
 		    } finally {
 	            if (compiler != null) {
@@ -154,7 +154,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 			    logger.info("Thread [{}] start", Thread.currentThread().getName());
 				executor = new ThreadPoolExecutor(1, 1, 1000, TimeUnit.MICROSECONDS, new LinkedBlockingQueue<>());
 
-				Future<Throwable> future = null;
+				Future<Exception> future = null;
 
 				while (!isDisposing) {
 					try {
@@ -228,7 +228,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 
 									descr.scriptRan();
 
-							} catch (Throwable e) {
+							} catch (Exception e) {
 
 								descr.scriptInitFailed(e);
 								onRunFinished(descr);
@@ -243,7 +243,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 
 								TestScriptDescription descr = testScripts.get(currentTestScript);
 
-								Throwable result;
+								Exception result;
 								try {
 									result = future.get();
 								} catch (Exception e) {
@@ -314,7 +314,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 
                 processNotStartedScripts();
 
-			} catch (Throwable e) {
+			} catch (Exception e) {
 			    logger.error(e.getMessage(), e);
 			} finally {
 				if (executor != null) {

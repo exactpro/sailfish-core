@@ -72,7 +72,7 @@ public class TestLibraryResource {
 
 			reqResponse = Response.ok().entity(new XmlResponse()).build();
 
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			logger.error("Could not store test library [{}]", (fileDetail != null) ? fileDetail.getFileName() : "null", e);
 			errorMessage = e.getMessage();
 			rootCause = (e.getCause() != null) ? e.getCause().getMessage() : null;

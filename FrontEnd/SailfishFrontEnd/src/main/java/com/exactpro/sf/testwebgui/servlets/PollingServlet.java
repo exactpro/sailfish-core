@@ -73,7 +73,7 @@ public class PollingServlet extends HttpServlet {
 
 			logger.info("Servlet {} initialized", config.getServletName());
 
-		} catch ( Throwable e )	{
+		} catch ( Exception e )	{
 			logger.error("Could not initialize application", e);
 			throw new RuntimeException(e);
 		}

@@ -84,8 +84,8 @@ public class StatisticsMigration {
                     statisticsFlywayWrapper.migrate();
                     break;
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             System.exit(2);
         }
     }

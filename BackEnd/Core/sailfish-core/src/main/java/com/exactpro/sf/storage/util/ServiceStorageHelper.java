@@ -97,8 +97,8 @@ public class ServiceStorageHelper {
 
             try {
                 BeanUtils.setProperty(serviceSettings, name, converter.convert(value, descriptor.getPropertyType()));
-            } catch(Throwable t) {
-                throw new EPSCommonException(String.format("Failed to set setting '%s' to: %s", name, value), t);
+            } catch(Exception e) {
+                throw new EPSCommonException(String.format("Failed to set setting '%s' to: %s", name, value), e);
             }
         }
     }
