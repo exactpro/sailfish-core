@@ -18,6 +18,7 @@ package com.exactpro.sf.services.fast;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +26,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.openfast.Context;
 import org.openfast.GroupValue;
 import org.openfast.Message;
@@ -38,6 +40,8 @@ import org.openfast.template.TemplateRegistry;
 import org.openfast.template.loader.XMLMessageTemplateLoader;
 
 import com.exactpro.sf.common.util.HexDumper;
+import com.exactpro.sf.services.fast.blockstream.IPacketHandler;
+import com.exactpro.sf.services.fast.blockstream.MulticastProxyInputStream;
 import com.exactpro.sf.services.fast.blockstream.StreamBlockLengthReader;
 
 public class TestFastTemplate {
@@ -66,6 +70,44 @@ public class TestFastTemplate {
                     System.out.println(number + ": " + formatFastMessage(fastMessage));
                     number++;
                 }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed " + number, e);
+        }
+    }
+
+    @Test
+    @Ignore("Manual check for file")
+    public void testTemplateProxy() throws Exception {
+        long number = 1;
+        try {
+            Context context = new FASTContext();
+            context.setTemplateRegistry(loadFastTemplates(templatePath));
+            context.setTraceEnabled(isTraceEnabled);
+            context.setDecodeTrace(new LoggingTrace());
+
+            try (InputStream in = new BufferedInputStream(Files.newInputStream(dataPath, StandardOpenOption.READ))) {
+                Socket socket = Mockito.mock(Socket.class);
+                Mockito.when(socket.getInputStream()).thenReturn(in);
+                Mockito.when(socket.isClosed()).thenReturn(false);
+                MulticastProxyInputStream multicastProxyInputStream = new MulticastProxyInputStream(socket, new IPacketHandler() {
+                    @Override
+                    public void handlePacket(byte[] packetData) {
+
+                    }
+                });
+
+                FASTMessageInputStream msgStream = new FASTMessageInputStream(multicastProxyInputStream, context);
+                msgStream.setBlockReader(multicastProxyInputStream);
+                while (in.available() > 0) {
+                    Message fastMessage = msgStream.readMessage(0);
+                    if (fastMessage == null) {
+                        break;
+                    }
+                    System.out.println(number + ": " + formatFastMessage(fastMessage));
+                    number++;
+                }
+
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed " + number, e);

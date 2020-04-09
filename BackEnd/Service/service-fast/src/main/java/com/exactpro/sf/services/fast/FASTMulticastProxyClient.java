@@ -23,9 +23,11 @@ import org.openfast.session.FastConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.services.fast.blockstream.IPacketHandler;
 import com.exactpro.sf.services.fast.blockstream.MulticastProxyConnection;
 
+@Description("This class should be used for the UDP-to-TCP proxy. 4 bytes of length at the beginning of the message are deleted")
 public class FASTMulticastProxyClient extends FASTTcpClient {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
     private MulticastProxyConnection connection;
