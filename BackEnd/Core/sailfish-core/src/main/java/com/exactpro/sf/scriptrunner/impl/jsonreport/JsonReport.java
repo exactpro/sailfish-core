@@ -15,34 +15,6 @@
 ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.mvel2.math.MathProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
@@ -65,6 +37,7 @@ import com.exactpro.sf.scriptrunner.ReportUtils;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.impl.ReportStats;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
@@ -98,6 +71,33 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.mvel2.math.MathProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection, unused, FieldCanBeLocal")
 public class JsonReport implements IScriptReport {
@@ -637,6 +637,19 @@ public class JsonReport implements IScriptReport {
 
     public void closeReport() {
         assertState(false, null, ContextType.SCRIPT);
+        while (context != null && context.cur != ContextType.SCRIPT) {
+            StatusDescription description = new StatusDescription(StatusType.NA, null);
+            switch (context.cur) {
+                case ACTION:
+                    closeAction(description, null);
+                    break;
+                case ACTIONGROUP:
+                    closeGroup(description);
+                    break;
+                case TESTCASE:
+                    closeTestCase(description);
+            }
+        }
         reportRoot.setFinishTime(Instant.now());
         initProperties();
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME, true);
