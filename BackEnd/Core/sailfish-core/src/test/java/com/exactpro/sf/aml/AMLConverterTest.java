@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
+import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 import com.exactpro.sf.aml.iomatrix.AdvancedMatrixReader;
 import com.exactpro.sf.aml.reader.AMLReader;
@@ -37,6 +38,7 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionRequirements;
 import com.exactpro.sf.util.AbstractTest;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 
 public class AMLConverterTest extends AbstractTest {
@@ -109,6 +111,7 @@ public class AMLConverterTest extends AbstractTest {
             Assert.assertEquals(2, receiveAction.getVerificationsOrder().size());
             Assert.assertEquals("Value1:PASSED", receiveAction.getVerificationsOrder().get(0));
             Assert.assertEquals("Value3:FAILED", receiveAction.getVerificationsOrder().get(1));
+            Assert.assertEquals(ImmutableSet.of("FInteger", "FString"), receiveAction.getKeyFields());
 
             Assert.assertEquals(1, blocks.get(AMLBlockType.LastBlock).size());
 
@@ -140,7 +143,7 @@ public class AMLConverterTest extends AbstractTest {
 
             Collection<Alert> errors = collector.getAlerts();
 
-            Assert.assertEquals(60, errors.size());
+            Assert.assertEquals(64, errors.size());
 
             Alert error = new Alert(2, "29", "#reference", "Variable '29' start with a digit", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
@@ -258,17 +261,24 @@ public class AMLConverterTest extends AbstractTest {
             error = new Alert(43, null, "#verifications_order",
                     "Invalid status name: 1PASSED (Variable '1PASSED' start with a digit)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
-            error = new Alert(44, null, "#messages_count", "Invalid value: -1", AlertType.ERROR);
+            error = new Alert(44, null, Column.KeyFields.getName(), "Key field is not set: FieldA", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
-            error = new Alert(46, null, "#messages_count", "Invalid value: d", AlertType.ERROR);
+            error = new Alert(44, null, Column.KeyFields.getName(), "Key field is not set: FieldB", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
-            error = new Alert(48, null, "#messages_count", "Invalid value: ${toInteger(\"1\")} +  1", AlertType.ERROR);
+            error = new Alert(45, null, Column.KeyFields.getName(), "Variable 'Field A' contain white space", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
-            error = new Alert(50, null, "#messages_count", "Invalid value: [1..4]", AlertType.ERROR);
+            error = new Alert(45, null, Column.KeyFields.getName(), "Variable '///' contain invalid character", AlertType.ERROR);
+            Assert.assertTrue(error.toString(), errors.remove(error));
+            error = new Alert(46, null, "#messages_count", "Invalid value: -1", AlertType.ERROR);
+            Assert.assertTrue(error.toString(), errors.remove(error));
+            error = new Alert(48, null, "#messages_count", "Invalid value: d", AlertType.ERROR);
+            Assert.assertTrue(error.toString(), errors.remove(error));
+            error = new Alert(50, null, "#messages_count", "Invalid value: ${toInteger(\"1\")} +  1", AlertType.ERROR);
+            Assert.assertTrue(error.toString(), errors.remove(error));
+            error = new Alert(52, null, "#messages_count", "Invalid value: [1..4]", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
 
             Assert.assertEquals(0, errors.size());
-
         }
     }
 }

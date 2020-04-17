@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -819,8 +822,26 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
     }
 
+    private static void setKeyFields(StringBuilder builder, String variableName, Collection<String> keyFields) {
+        if (keyFields.isEmpty()) {
+            return;
+        }
+
+        builder.append(TAB2);
+        builder.append(variableName);
+        builder.append(".setKeyFields(new HashSet<>(Arrays.asList(");
+
+        builder.append(keyFields.stream()
+                .map(StringUtil::enclose)
+                .collect(Collectors.joining(", ")));
+
+        builder.append(")));");
+        builder.append(EOL);
+    }
+
     protected void writeMetaContainers(StringBuilder builder, AMLTestCase testCase, AMLAction action, ActionInfo actionInfo, AlertCollector alertCollector, String lastActualFailUnexpected, String... path) {
         String failUnexpected = wrap(trimToNull(action.getFailUnexpected()), '"');
+        Set<String> keyFields = action.getKeyFields();
         boolean hasCustomColumns = action.getServiceFields()
                 .keySet()
                 .stream()
@@ -843,7 +864,8 @@ public class CodeGenerator_new implements ICodeGenerator {
             }
 
             putSystemColumns(builder, "metaContainer", testCase, action, actionInfo, alertCollector);
-        } else if ((failUnexpected != null && !failUnexpected.equals(lastActualFailUnexpected)) || hasCustomColumns) {
+            setKeyFields(builder, "metaContainer", action.getKeyFields());
+        } else if ((failUnexpected != null && !failUnexpected.equals(lastActualFailUnexpected)) || hasCustomColumns || !keyFields.isEmpty()) {
             lastActualFailUnexpected = failUnexpected;
             logger.info("Created record for line '{}' ref '{}' path '{}'", action.getLine(), action.getReference(), Arrays.toString(path));
             builder.append(TAB2);
@@ -859,10 +881,15 @@ public class CodeGenerator_new implements ICodeGenerator {
             builder.append(EOL);
 
             putSystemColumns(builder, "lastMetaContainer", testCase, action, actionInfo, alertCollector);
+            setKeyFields(builder, "lastMetaContainer", action.getKeyFields());
         }
 
+        Map<String, AtomicInteger> indices = new HashMap<>();
+
         for (Pair<String, AMLAction> child : action.getChildren()) {
-            String[] newPath = ArrayUtils.add(path, child.getFirst());
+            String fieldName = child.getFirst();
+            int index = indices.computeIfAbsent(fieldName, it -> new AtomicInteger()).getAndIncrement();
+            String[] newPath = ArrayUtils.addAll(path, fieldName, String.valueOf(index));
             writeMetaContainers(builder, testCase, child.getSecond(), actionInfo, alertCollector, lastActualFailUnexpected, newPath);
         }
     }

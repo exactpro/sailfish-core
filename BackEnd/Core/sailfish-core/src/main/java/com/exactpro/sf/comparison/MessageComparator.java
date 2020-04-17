@@ -19,6 +19,7 @@ import static java.lang.Math.pow;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -66,7 +67,15 @@ public class MessageComparator {
             messageStructure = dictionaryStructure.getMessages().get(name);
         }
 
-        ComparisonResult result = compareValues(name, actual, expected, false, messageStructure, Collections.singletonList(settings.getMetaContainer()), settings);
+        if (settings.getMetaContainer().hasKeyFields()) {
+            ComparisonResult result = compareValues(name, actual, expected, false, true, messageStructure, Collections.singletonList(settings.getMetaContainer()), settings);
+
+            if (ComparisonUtil.getResultCount(result, StatusType.FAILED) > 0) {
+                return null;
+            }
+        }
+
+        ComparisonResult result = compareValues(name, actual, expected, false, false, messageStructure, Collections.singletonList(settings.getMetaContainer()), settings);
 
         if(result != null) {
             Map<String, Boolean> negativeMap = settings.getNegativeMap();
@@ -85,34 +94,34 @@ public class MessageComparator {
         return result.setMetaData(actual.getMetaData());
     }
 
-    protected static ComparisonResult compareValues(String name, Object actual, Object expected, boolean uncheck, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
-        Throwable t = null;
+    protected static ComparisonResult compareValues(String name, Object actual, Object expected, boolean unchecked, boolean keyFieldsOnly, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
+        Exception exception = null;
 
         try {
             if(checkTypes(actual, expected, Object.class, structure)) {
-                return compareObjects(name, actual, expected, uncheck, structure, metaContainers, settings);
+                return compareObjects(name, actual, expected, unchecked, structure, metaContainers, settings);
             }
 
             if(checkTypes(actual, expected, List.class, structure)) {
-                return compareLists(name, actual, expected, uncheck, structure, metaContainers, settings);
+                return compareLists(name, actual, expected, unchecked, keyFieldsOnly, structure, metaContainers, settings);
             }
 
             if(checkTypes(actual, expected, IMessage.class, structure)) {
-                return compareMessages(name, actual, expected, uncheck, structure, metaContainers, settings);
+                return compareMessages(name, actual, expected, unchecked, keyFieldsOnly, structure, metaContainers, settings);
             }
         } catch(Exception e) {
-            t = e;
+            exception = e;
         }
 
-        if(t == null) {
-            t = new Exception(String.format("Value type mismatch - actual: %s, expected: %s", actual.getClass().getName(), expected.getClass().getName()));
+        if (exception == null) {
+            exception = new Exception(String.format("Value type mismatch - actual: %s, expected: %s", actual.getClass().getName(), expected.getClass().getName()));
         }
 
-        return new ComparisonResult(name).setException(t).setStatus(StatusType.FAILED);
+        return new ComparisonResult(name).setException(exception).setStatus(StatusType.FAILED);
     }
 
-    private static ComparisonResult compareObjects(String name, Object actual, Object expected, boolean uncheck, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
-        ComparisonResult result = initialComparison(name, actual, expected, uncheck, structure, metaContainers, settings);
+    private static ComparisonResult compareObjects(String name, Object actual, Object expected, boolean unchecked, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
+        ComparisonResult result = initialComparison(name, actual, expected, unchecked, structure, metaContainers, settings);
 
         if(result.getStatus() != null) {
             return result;
@@ -187,8 +196,8 @@ public class MessageComparator {
         return result.setStatus(expected.equals(actual) ? StatusType.PASSED : StatusType.FAILED);
     }
 
-    private static ComparisonResult compareLists(String name, Object actual, Object expected, boolean uncheck, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
-        ComparisonResult result = initialComparison(name, actual, expected, uncheck, structure, metaContainers, settings);
+    private static ComparisonResult compareLists(String name, Object actual, Object expected, boolean unchecked, boolean keyFieldsOnly, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
+        ComparisonResult result = initialComparison(name, actual, expected, unchecked, structure, metaContainers, settings);
 
         if(result.getStatus() != null && result.getEmbeddedListFilter() == null) {
             return result;
@@ -198,11 +207,8 @@ public class MessageComparator {
         List<?> expectedList = getExpectedList(expected, result.getEmbeddedListFilter());
 
         int maxSize = Math.max(actualList.size(), expectedList.size());
-        boolean checkOrder = settings.isCheckGroupsOrder() || (structure != null && !structure.isComplex());
-
-        if(!checkOrder && !expectedList.isEmpty()) {
-            checkOrder = isObject(expectedList.get(0));
-        }
+        boolean complex = structure != null && structure.isComplex() || !actualList.isEmpty() && !isObject(actualList.get(0));
+        boolean checkOrder = settings.isCheckGroupsOrder() || !complex;
 
         if(checkOrder) {
             for(int i = 0; i < maxSize; i++) {
@@ -213,16 +219,26 @@ public class MessageComparator {
                     continue;
                 }
 
-                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, i);
+                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, i, keyFieldsOnly);
+
+                if (complex && keyFieldsOnly && !subMetaContainers.get(0).hasKeyFields()) {
+                    continue;
+                }
+
                 String subName = Integer.toString(i);
 
-                result.addResult(compareValues(subName, actualElement, expectedElement, uncheck, structure, subMetaContainers, settings));
+                result.addResult(compareValues(subName, actualElement, expectedElement, unchecked, keyFieldsOnly, structure, subMetaContainers, settings));
             }
         } else {
             int[][] countMatrix = new int[maxSize][maxSize];
             ComparisonResult[][] resultMatrix = new ComparisonResult[maxSize][maxSize];
             int actualSize = actualList.size();
             int expectedSize = expectedList.size();
+            List<List<MetaContainer>> metaContainersCache = new ArrayList<>(maxSize);
+
+            for (int i = 0; i < maxSize; i++) {
+                metaContainersCache.add(getMetaContainers(metaContainers, i, keyFieldsOnly));
+            }
 
             for(int actualIndex = 0; actualIndex < actualSize; actualIndex++) {
                 for(int expectedIndex = 0; expectedIndex < expectedSize; expectedIndex++) {
@@ -233,15 +249,22 @@ public class MessageComparator {
                         continue;
                     }
 
-                    List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, expectedIndex);
-                    ComparisonResult subResult = compareValues(DUMMY, actualElement, expectedElement, uncheck, structure, subMetaContainers, settings);
+                    List<MetaContainer> subMetaContainers = metaContainersCache.get(expectedIndex);
+
+                    if (keyFieldsOnly && !subMetaContainers.get(0).hasKeyFields()) {
+                        continue;
+                    }
+
+                    ComparisonResult subResult = compareValues(DUMMY, actualElement, expectedElement, unchecked, keyFieldsOnly, structure, subMetaContainers, settings);
                     ComparisonResult calculationResult = subResult;
+
                     if (settings.getPostValidation() != null &&
                             actualElement instanceof IMessage &&
                             expectedElement instanceof IMessage) {
                         calculationResult = new ComparisonResult(calculationResult);
                         settings.getPostValidation().doValidate((IMessage)actualElement, (IMessage)expectedElement, settings, calculationResult);
                     }
+
                     resultMatrix[actualIndex][expectedIndex] = subResult;
                     countMatrix[actualIndex][expectedIndex] = getCount(calculationResult, StatusType.PASSED) * 1_000_000
                             + getCount(calculationResult, StatusType.CONDITIONALLY_PASSED);
@@ -255,6 +278,11 @@ public class MessageComparator {
                 int maxCount = -1;
                 int maxActualIndex = -1;
                 int maxExpectedIndex = -1;
+
+                if (keyFieldsOnly && !metaContainersCache.get(i).get(0).hasKeyFields()) {
+                    usedExpected[i] = true;
+                    continue;
+                }
 
                 for(int actualIndex = 0; actualIndex < maxSize; actualIndex++) {
                     if(usedActual[actualIndex]) {
@@ -281,10 +309,11 @@ public class MessageComparator {
                 ComparisonResult subResult = null;
 
                 if(maxActualIndex >= actualSize) {
-                    subResult = compareValues(DUMMY, null, expectedList.get(maxExpectedIndex), uncheck, structure, metaContainers, settings);
+                    List<MetaContainer> subMetaContainers = metaContainersCache.get(maxExpectedIndex);
+                    subResult = compareValues(DUMMY, null, expectedList.get(maxExpectedIndex), unchecked, keyFieldsOnly, structure, subMetaContainers, settings);
                 } else if(maxExpectedIndex >= expectedSize) {
-                    List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, maxExpectedIndex);
-                    subResult = compareValues(DUMMY, actualList.get(maxActualIndex), null, uncheck, structure, subMetaContainers, settings);
+                    List<MetaContainer> subMetaContainers = metaContainersCache.get(maxExpectedIndex);
+                    subResult = compareValues(DUMMY, actualList.get(maxActualIndex), null, unchecked, keyFieldsOnly, structure, subMetaContainers, settings);
                 } else {
                     subResult = resultMatrix[maxActualIndex][maxExpectedIndex];
                 }
@@ -297,8 +326,8 @@ public class MessageComparator {
         return result;
     }
 
-    private static ComparisonResult compareMessages(String name, Object actual, Object expected, boolean uncheck, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
-        ComparisonResult result = initialComparison(name, actual, expected, uncheck, structure, metaContainers, settings);
+    private static ComparisonResult compareMessages(String name, Object actual, Object expected, boolean unchecked, boolean keyFieldsOnly, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
+        ComparisonResult result = initialComparison(name, actual, expected, unchecked, structure, metaContainers, settings);
 
         if(result.getStatus() != null) {
             return result;
@@ -307,8 +336,11 @@ public class MessageComparator {
         IMessage actualMessage = (IMessage)actual;
         IMessage expectedMessage = (IMessage)expected;
         Collection<String> fieldNames = null;
+        Map<String, Boolean> keyFields = keyFieldsOnly ? metaContainers.get(0).getKeyFields() : Collections.emptyMap();
 
-        if(structure != null) {
+        if (keyFieldsOnly) {
+            fieldNames = keyFields.keySet();
+        } else if (structure != null) {
             fieldNames = structure.getFields().keySet();
         } else {
             fieldNames = new LinkedHashSet<>();
@@ -324,18 +356,18 @@ public class MessageComparator {
                 continue;
             }
 
-            boolean fieldUncheck = uncheck || settings.getUncheckedFields().contains(fieldName);
-
+            boolean uncheckedField = unchecked || settings.getUncheckedFields().contains(fieldName);
+            boolean checkKeyFieldsOnly = keyFieldsOnly && keyFields.get(fieldName);
             IFieldStructure fieldStructure = structure != null ? structure.getFields().get(fieldName) : null;
-            List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName);
+            List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName, checkKeyFieldsOnly);
 
-            result.addResult(compareValues(fieldName, actualValue, expectedValue, fieldUncheck, fieldStructure, subMetaContainers, settings));
+            result.addResult(compareValues(fieldName, actualValue, expectedValue, uncheckedField, checkKeyFieldsOnly, fieldStructure, subMetaContainers, settings));
         }
 
         return result;
     }
 
-    private static ComparisonResult initialComparison(String name, Object actual, Object expected, boolean uncheck, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
+    private static ComparisonResult initialComparison(String name, Object actual, Object expected, boolean unchecked, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
         ComparisonResult result = new ComparisonResult(name);
 
         result.setActual(getValue(actual));
@@ -365,7 +397,7 @@ public class MessageComparator {
         }
 
         if(expected == null && actual != null) {
-            if(!uncheck && !settings.getUncheckedFields().contains(name)) {
+            if (!unchecked && !settings.getUncheckedFields().contains(name)) {
                 String failUnexpected = StringUtils.lowerCase(metaContainers.get(0).getFailUnexpected());
                 Set<String> allowedValues = Sets.newHashSet(AMLLangConst.ALL);
 
@@ -425,7 +457,7 @@ public class MessageComparator {
 
                 String name = Integer.toString(i);
                 ComparisonResult subResult = new ComparisonResult(name);
-                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, i);
+                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, i, false);
 
                 result.addResult(addToResult(value, subResult, status, structure, subMetaContainers, settings, actual));
             }
@@ -447,7 +479,7 @@ public class MessageComparator {
                 }
 
                 IFieldStructure subStructure = structure != null ? structure.getFields().get(fieldName) : null;
-                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName);
+                List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName, false);
                 ComparisonResult subResult = new ComparisonResult(fieldName);
 
                 result.addResult(addToResult(value, subResult, status, subStructure, subMetaContainers, settings, actual));
@@ -471,13 +503,53 @@ public class MessageComparator {
         return result;
     }
 
-    private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, int index) {
-        return index < metaContainers.size() ? Collections.singletonList(metaContainers.get(index)) : metaContainers;
+    private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, int index, boolean removeInheritedKeyFields) {
+        int size = metaContainers.size();
+
+        if (size == 0) {
+            throw new IllegalStateException("There should be at least one meta container per list");
+        }
+
+        if (index < size) {
+            if (index == 0 && size == 1) {
+                return metaContainers;
+            }
+
+            return Collections.singletonList(metaContainers.get(index));
+        }
+
+        MetaContainer metaContainer = metaContainers.get(0);
+
+        if (removeInheritedKeyFields && metaContainer.hasKeyFields()) {
+            metaContainer = metaContainer.clone().setKeyFields(Collections.emptySet());
+            return Collections.singletonList(metaContainer);
+        }
+
+        if (size == 1) {
+            return metaContainers;
+        }
+
+        return Collections.singletonList(metaContainer);
     }
 
-    private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, String name) {
-        List<MetaContainer> subMetaContainers = metaContainers.get(0).get(name);
-        return subMetaContainers != null ? subMetaContainers : metaContainers;
+    private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, String name, boolean removeInheritedKeyFields) {
+        if (metaContainers.size() != 1) {
+            throw new IllegalStateException("Expected one meta container per message, but got " + metaContainers.size());
+        }
+
+        MetaContainer metaContainer = metaContainers.get(0);
+        List<MetaContainer> subMetaContainers = metaContainer.get(name);
+
+        if (subMetaContainers == null) {
+            if (removeInheritedKeyFields && metaContainer.hasKeyFields()) {
+                metaContainer = metaContainer.clone().setKeyFields(Collections.emptySet());
+                return Collections.singletonList(metaContainer);
+            }
+
+            return metaContainers;
+        }
+
+        return subMetaContainers;
     }
 
     private static boolean checkTypes(Object actual, Object expected, Class<?> clazz, IFieldStructure structure) throws Exception {

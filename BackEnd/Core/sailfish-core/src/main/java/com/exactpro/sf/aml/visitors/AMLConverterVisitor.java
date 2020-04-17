@@ -199,6 +199,17 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                             action.setStaticAction(AMLLangConst.YES.equalsIgnoreCase(cellValue));
                         }
                         break;
+                    case KeyFields:
+                        Set<String> keyFields = new HashSet<>();
+
+                        for (String keyField : cellValue.split("\\s*,\\s*")) {
+                            if (validateVariableName(element, column, keyField)) {
+                                keyFields.add(keyField);
+                            }
+                        }
+
+                        action.setKeyFields(keyFields);
+                        break;
                     case MessageType:
                         if(settings.getLanguageURI().matches(AMLLangConst.AML3)) {
                             action.setMessageTypeColumn(cellValue);
@@ -501,6 +512,15 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
         if(StringUtils.isNotBlank(referenceToFilter) && referenceToFilter.equals(template)) {
             addError(element, Column.ReferenceToFilter, "%s cannot be equal to %s", Column.ReferenceToFilter.getName(), Column.Template.getName());
+        }
+
+        Set<String> keyFields = action.getKeyFields();
+        Map<String, Value> parameters = action.getParameters();
+
+        for (String keyField : keyFields) {
+            if (!parameters.containsKey(keyField)) {
+                addError(element, Column.KeyFields, "Key field is not set: %s", keyField);
+            }
         }
 
         try {

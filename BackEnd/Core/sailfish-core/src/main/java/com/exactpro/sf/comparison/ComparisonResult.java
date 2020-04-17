@@ -15,7 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,7 +41,7 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
     private Double systemPrecision;
     private StatusType status;
     private ExpressionResult expressionResult;
-    private Throwable exception;
+    private Exception exception;
     private final Map<String, ComparisonResult> results = new LinkedHashMap<>();
     private Set<BugDescription> allKnownBugs = Collections.emptySet();
     private Set<BugDescription> reproducedBugs = Collections.emptySet();
@@ -147,11 +154,11 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
         return exception != null ? exception.getMessage() : "";
     }
 
-    public Throwable getException() {
+    public Exception getException() {
         return exception;
     }
 
-    public ComparisonResult setException(Throwable exception) {
+    public ComparisonResult setException(Exception exception) {
         this.exception = exception;
         return this;
     }
