@@ -36,3 +36,10 @@ Note: The 'quickStart' property enables the ability to run Sailfish without conn
 And then, open http://localhost:8080/sfgui
 
 The updated version of Exactpro Sailfish Manual 9.0 is available here: [exactpro.com/sailfish/sailfish_manual.pdf](https://exactpro.com/sailfish/sailfish_manual.pdf)
+
+## tutorials
+
+This set of videos will help you get started with Sailfish and introduce you to its main features.
+* [Installation](https://youtu.be/nEW18P4EH70)
+* [The Development Environment](https://youtu.be/Ns6RH0Gjpmw)
+* [How it Works](https://youtu.be/KmLlXPHOjF4)
