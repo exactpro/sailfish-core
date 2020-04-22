@@ -87,6 +87,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -571,7 +572,11 @@ public class JsonReport implements IScriptReport {
         IJsonReportNode currentNode = getCurrentContextNode();
 
         if("Messages".equals(table.getName())) {
-            List<Message> messages = table.getRows().stream().map(Message::new).collect(Collectors.toList());
+            // Try not to use streams here because they work very slow with large amount of messages
+            List<Message> messages = new ArrayList<>();
+            for (Map<String, String> stringStringMap : table.getRows()) {
+                messages.add(new Message(stringStringMap));
+            }
 
             if (currentNode instanceof Action) {
                 long actionId = ((Action) currentNode).getId();
@@ -588,16 +593,23 @@ public class JsonReport implements IScriptReport {
 
                 Thread currentThread = Thread.currentThread();
 
-                for (Message message : messages) {
+                int messagesCount = messages.size();
+                int messagesWritten = 0;
+
+                logger.info("Start writing {} message(s) to files", messagesCount);
+                while (messagesWritten < messagesCount) {
                     // If current thread is interrupted we won't be able to write messages to file, because Files.write(Path, byte[])
                     // will throw a ClosedByInterruptException and we will only pollute our logs with it
                     if (currentThread.isInterrupted()) {
                         logger.warn("Interrupted message write due to thread interruption");
                         break;
                     }
-
-                    jsonpTestcaseWriter.write(message);
+                    int startIndex = messagesWritten;
+                    int endIndex = Math.min(messagesWritten + JsonpTestcaseWriterKt.MESSAGE_BATCH_SIZE, messagesCount);
+                    jsonpTestcaseWriter.write(messages.subList(startIndex, endIndex));
+                    messagesWritten += endIndex - startIndex;
                 }
+                logger.info("Writing is complete");
             }
             currentNode.addSubNodes(messages);
         } else {

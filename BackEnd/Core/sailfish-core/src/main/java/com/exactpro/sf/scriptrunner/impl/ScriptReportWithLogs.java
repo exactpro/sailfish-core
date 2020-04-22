@@ -261,6 +261,7 @@ public class ScriptReportWithLogs implements IScriptReport {
 
         filter.setServicesIdSet(servicesId);
 
+        getLogger().info("Building messages table...");
 		Iterable<MessageRow> messages = environmentManager.getMessageStorage().getMessages(-1, filter);
 
 		if (messages != null) {
@@ -323,6 +324,7 @@ public class ScriptReportWithLogs implements IScriptReport {
 			}
 
             messagesTable.setHasCheckPoints(hasCheckPoints);
+            getLogger().info("Messages table has been built ({} message(s)). Writing table to the report...", messagesTable.getRows().size());
 
             report.createTable(messagesTable);
 		}

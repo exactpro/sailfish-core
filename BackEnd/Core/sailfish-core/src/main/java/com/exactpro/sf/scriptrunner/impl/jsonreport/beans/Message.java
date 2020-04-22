@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Message implements IJsonReportNode {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private long id;
     private Set<Long> relatedActions;
     private String checkPoint;
@@ -60,7 +62,7 @@ public class Message implements IJsonReportNode {
         String rawMessageData = data.get("ContentJson");
 
         try {
-            new ObjectMapper().readTree(rawMessageData);
+            OBJECT_MAPPER.readTree(rawMessageData);
             this.content = rawMessageData;
         } catch (IOException e) {
             this.content = JsonMessageConverter.toJson(

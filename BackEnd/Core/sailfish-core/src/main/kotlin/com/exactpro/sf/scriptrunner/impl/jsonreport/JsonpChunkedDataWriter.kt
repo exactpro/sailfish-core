@@ -37,7 +37,8 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
 
     private val template = "load$loaderFunctionPrefix(%d, %s);"
     private val rootFileTemplate = "load${loaderFunctionPrefix}Index(%s);"
-    val indexFile: WorkspaceNode get() = dataStreamDirectory.getSubNode("index.js")
+    val indexFile: WorkspaceNode
+        get() = dataStreamDirectory.getSubNode("index.js")
 
     private val dataFiles: MutableList<DataFile> = mutableListOf()
     private var currentDataFile: DataFile? = null
@@ -49,22 +50,64 @@ class JsonpChunkedDataWriter<T : IJsonReportNode>(
     }
 
     fun writeNode(node: T) {
-        if (currentDataFile == null || currentDataFile!!.counter >= perFileItemLimit) {
-            switchToNextFile()
-        }
-
-        try {
+        writeToDataFile { dataFile ->
             increaseItemCounter()
-            write(template.format(currentDataFile!!.counter, mapper.writeValueAsString(node)))
+            write(dataFile, template.format(dataFile.counter, mapper.writeValueAsString(node)))
             updateRootFile()
-        } catch (e: Exception) {
-            logger.error(e) { "unable to write a node" }
         }
     }
 
-    private fun write(data: String) {
+    fun writeNodes(nodes: List<T>) {
+        writeToDataFile { dataFile ->
+            val dataLimit = perFileItemLimit - dataFile.counter
+
+            if (nodes.size > dataLimit) {
+                write(dataFile, nodes.subList(0, dataLimit))
+
+                // write the remaining part recursively
+                // we do that to switch to the new file if it is necessary
+                // or split the list again if the size is greater than limit per file
+                writeNodes(nodes.subList(dataLimit, nodes.size))
+            } else {
+                write(dataFile, nodes)
+            }
+        }
+    }
+
+    private inline fun writeToDataFile(action: (DataFile) -> Unit) {
+        val dataFile = currentDataFile
+        if (dataFile == null || dataFile.counter >= perFileItemLimit) {
+            switchToNextFile()
+        }
+        val currentFile = currentDataFile
+        if (currentFile != null) {
+            try {
+                action.invoke(currentFile)
+            } catch (e: Exception) {
+                logger.error(e) { "unable to write data" }
+            }
+        } else {
+            logger.error { "data file is not set" }
+        }
+    }
+
+    private fun write(dataFile: DataFile, nodes: List<T>) {
         try {
-            Files.write(currentDataFile!!.file.toAbsolutePath(), data.toByteArray(), StandardOpenOption.APPEND)
+            Files.newOutputStream(dataFile.file.toAbsolutePath(), StandardOpenOption.APPEND).use {
+                nodes.forEach { node ->
+                    increaseItemCounter()
+                    it.write(template.format(dataFile.counter, mapper.writeValueAsString(node)).toByteArray())
+                }
+            }
+            updateRootFile()
+        } catch (e: IOException) {
+            logger.error(e) { "cannot write data batch to file" }
+        }
+    }
+
+    private fun write(dataFile: DataFile, data: String) {
+        try {
+            Files.write(dataFile.file.toAbsolutePath(), data.toByteArray(), StandardOpenOption.APPEND)
         } catch (e: IOException) {
             logger.error(e) { "unable to write data to a file" }
         }

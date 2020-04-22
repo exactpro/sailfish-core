@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport
 
-import com.exactpro.sf.configuration.workspace.FolderType
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.JsonpTestcase
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry
@@ -26,15 +24,17 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.helpers.WorkspaceNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-private val TEST_CASE_JSONP_TEMPLATE = "window.loadTestCase(%s);"
+const val MESSAGE_BATCH_SIZE: Int = 500
+const val ACTION_BATCH_SIZE: Int = 50
+const val LOG_ENTRY_BATCH_SIZE: Int = 100
+
+private const val TEST_CASE_JSONP_TEMPLATE = "window.loadTestCase(%s);"
 
 private val mapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .setDateFormat(JsonReport.DATE_FORMAT)
-
 
 class JsonpTestcaseWriter(testcaseNumber: Number, jsonpRoot: WorkspaceNode, private val reportRoot: WorkspaceNode) {
     private val testCaseDirectory = jsonpRoot.getSubNode("testcase-$testcaseNumber")
@@ -42,9 +42,9 @@ class JsonpTestcaseWriter(testcaseNumber: Number, jsonpRoot: WorkspaceNode, priv
     val testCaseFile: WorkspaceNode = testCaseDirectory.getSubNode("testcase.js")
 
     private val dataStreams = mapOf(
-            Message::class.java to JsonpChunkedDataWriter<Message>("Message", testCaseDirectory.getSubNode("messages"), reportRoot, 100, mapper),
-            Action::class.java to JsonpChunkedDataWriter<Action>("Action", testCaseDirectory.getSubNode("actions"), reportRoot, 50, mapper),
-            LogEntry::class.java to JsonpChunkedDataWriter<LogEntry>("LogEntry", testCaseDirectory.getSubNode("logs"), reportRoot, 100, mapper)
+            Message::class.java to JsonpChunkedDataWriter<Message>("Message", testCaseDirectory.getSubNode("messages"), reportRoot, MESSAGE_BATCH_SIZE, mapper),
+            Action::class.java to JsonpChunkedDataWriter<Action>("Action", testCaseDirectory.getSubNode("actions"), reportRoot, ACTION_BATCH_SIZE, mapper),
+            LogEntry::class.java to JsonpChunkedDataWriter<LogEntry>("LogEntry", testCaseDirectory.getSubNode("logs"), reportRoot, LOG_ENTRY_BATCH_SIZE, mapper)
     )
 
     @Suppress("UNCHECKED_CAST")
@@ -60,5 +60,9 @@ class JsonpTestcaseWriter(testcaseNumber: Number, jsonpRoot: WorkspaceNode, priv
 
     fun <T : IJsonReportNode> write(node: T) {
         getReportDataStream(node.javaClass).writeNode(node)
+    }
+
+    fun <T : IJsonReportNode> write(nodes: List<T>) {
+        getReportDataStream(nodes.first().javaClass).writeNodes(nodes)
     }
 }
