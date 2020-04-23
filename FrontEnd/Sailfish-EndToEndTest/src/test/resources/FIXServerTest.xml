@@ -41,5 +41,6 @@
         <startTime>00:00:00</startTime>
         <targetCompID>BANZAI</targetCompID>
         <useDataDictionary>true</useDataDictionary>
+        <checkRequiredTags>false</checkRequiredTags>
     </fixServerSettings>
 </serviceDescription>

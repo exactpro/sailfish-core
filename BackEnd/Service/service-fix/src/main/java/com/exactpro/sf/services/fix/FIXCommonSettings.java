@@ -92,6 +92,9 @@ public class FIXCommonSettings extends AbstractServiceSettings {
     @Description("Save Heartbeats to logs or not.")
     protected boolean logHeartbeats;
 
+    @Description("Check required tags or not.")
+    protected boolean checkRequiredTags = true;
+
     @Description("If set to checked, messages must be received from the counterparty within a defined number of seconds (see MaxLatency).<br>"
             + "It is useful to turn this off if a system uses localtime for it's timestamps instead of GMT.")
     protected boolean CheckLatency;
@@ -339,6 +342,14 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     public void setLogHeartbeats(boolean logHeartbeats) {
         this.logHeartbeats = logHeartbeats;
+    }
+
+    public boolean isCheckRequiredTags() {
+        return checkRequiredTags;
+    }
+
+    public void setCheckRequiredTags(boolean checkRequiredTags) {
+        this.checkRequiredTags = checkRequiredTags;
     }
 
     public boolean isUseLocalTime() {

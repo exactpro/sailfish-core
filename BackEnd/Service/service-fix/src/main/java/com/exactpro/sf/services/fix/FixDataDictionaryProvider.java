@@ -133,6 +133,12 @@ public class FixDataDictionaryProvider implements DataDictionaryProvider {
             public void set(DataDictionary dataDictionary, boolean flag) {
                 dataDictionary.setCheckUserDefinedFields(flag);
             }
+        },
+        VALIDATE_REQUIRED_TAGS(FIXApplication.REQUIRED_TAGS) {
+            @Override
+            public void set(DataDictionary dataDictionary, boolean flag) {
+                ((QFJDictionaryAdapter)dataDictionary).setCheckRequiredFields(flag);
+            }
         };
         
         private final String settingName;

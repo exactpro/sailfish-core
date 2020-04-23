@@ -58,10 +58,25 @@ public class QFJDictionaryAdapterTest {
         when(provider.getApplicationDataDictionary(new ApplVerID(ApplVerID.FIX50SP2))).thenReturn(qfjDictionaryAdapter);
     }
 
+
+    @Test
+    public void testValidateRequiredTags() throws Exception {
+        try {
+            String messageString =  "8=FIXT.1.19=24235=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO1091=Y235=XD268=1279=0453=1448=25948=322=310=202";
+            Message message = MessageUtils.parse(session, messageString);
+            qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
+            qfjDictionaryAdapter.validate(message, false);
+            Assert.fail("Failed negative test to validate required tags, no expected error");
+        } catch (Exception e){
+            Assert.assertEquals("Required tag missing, field=55",e.getMessage());
+        }
+    }
+
+
     @Test
     public void testValidateInsertGroup() throws Exception {
         try {
-            String messageString =  "8=FIXT.1.19=24235=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO1091=Y235=XD268=1279=0453=1448=25910=24";
+            String messageString =  "8=FIXT.1.19=24235=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO1091=Y235=XD268=1279=0453=1448=25948=322=355=310=165";
             Message message = MessageUtils.parse(session, messageString);
             qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
             qfjDictionaryAdapter.validate(message, false);
@@ -89,7 +104,7 @@ public class QFJDictionaryAdapterTest {
     @Test
     public void testAllowOtherValues() throws Exception {
         try {
-            String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=000.1235=XD268=1279=0453=1448=25910=126";
+            String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=000.1235=XD268=1279=0453=1448=25948=322=355=310=11";
             Message message = MessageUtils.parse(session, messageString);
             qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
             qfjDictionaryAdapter.validate(message, false);
@@ -99,7 +114,7 @@ public class QFJDictionaryAdapterTest {
         }
 
         try {
-            String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=XD235=0.001268=1279=0453=1448=25910=126";
+            String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=XD235=0.001268=1279=0453=1448=25948=322=355=310=11";
             Message message = MessageUtils.parse(session, messageString);
             qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
             qfjDictionaryAdapter.validate(message, false);

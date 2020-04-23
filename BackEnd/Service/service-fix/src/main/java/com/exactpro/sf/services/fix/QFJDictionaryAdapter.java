@@ -57,7 +57,6 @@ import quickfix.field.SessionRejectReason;
 import quickfix.field.converter.BooleanConverter;
 import quickfix.field.converter.CharConverter;
 import quickfix.field.converter.DecimalConverter;
-import quickfix.field.converter.DoubleConverter;
 import quickfix.field.converter.IntConverter;
 import quickfix.field.converter.UtcDateOnlyConverter;
 import quickfix.field.converter.UtcTimeOnlyConverter;
@@ -73,6 +72,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	private boolean checkFieldsOutOfOrder = true;
 	private boolean checkFieldsHaveValues = true;
 	private boolean checkUserDefinedFields = true;
+	private boolean checkRequiredFields = true;
     private boolean allowUnknownMessageFields;
     private boolean checkUnorderedGroupFields = true;
     private final IDictionaryStructure iMsgDict;
@@ -236,13 +236,14 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	@Override
 	public void checkHasRequired(FieldMap header, FieldMap body, FieldMap trailer, String msgType,
 			boolean bodyOnly) {
+		if(isCheckRequiredFields()) {
+			if (!bodyOnly) {
+				checkHasRequired(HEADER_ID, header, bodyOnly);
+				checkHasRequired(TRAILER_ID, trailer, bodyOnly);
+			}
 
-		if (!bodyOnly) {
-			checkHasRequired(HEADER_ID, header, bodyOnly);
-			checkHasRequired(TRAILER_ID, trailer, bodyOnly);
+			checkHasRequired(msgType, body, bodyOnly);
 		}
-
-		checkHasRequired(msgType, body, bodyOnly);
 	}
 
 
@@ -693,6 +694,14 @@ public class QFJDictionaryAdapter extends DataDictionary {
     @Override
 	public Map<IntStringPair, GroupInfo> getGroups() {
 		return groups;
+	}
+
+	public void setCheckRequiredFields(boolean checkRequiredFields) {
+		this.checkRequiredFields = checkRequiredFields;
+	}
+
+	public boolean isCheckRequiredFields() {
+		return checkRequiredFields;
 	}
 
 	class GroupDictionary extends DataDictionary {

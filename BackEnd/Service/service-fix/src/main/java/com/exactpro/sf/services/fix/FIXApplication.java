@@ -76,6 +76,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 	public static final String ENCRYPT_PASSWORD = "EncryptPassword";
 	public static final String ADD_NEXT_EXPECTED_SEQ_NUM = "AddNextExpectedMsgSeqNum";
 	public static final String DefaultCstmApplVerID = "DefaultCstmApplVerID";
+	public static final String REQUIRED_TAGS = "RequiredTags";
 	private static final String Username = "Username";
 	private static final String Password = "Password";
 	private static final String NewPassword = "NewPassword";

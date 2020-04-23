@@ -339,6 +339,7 @@ public class FIXClient implements IInitiatorService {
         sessionSettings.setBool(sessionID, Session.SETTING_VALIDATE_USER_DEFINED_FIELDS, commonSettings.isValidateUserDefinedFields() );
         sessionSettings.setBool(sessionID, Session.SETTING_VALIDATE_FIELDS_OUT_OF_ORDER, commonSettings.isValidateFieldsOutOfOrder() );
         sessionSettings.setBool(sessionID, Session.SETTING_VALIDATE_FIELDS_HAVE_VALUES, commonSettings.isValidateFieldsHaveValues() );
+        sessionSettings.setBool(sessionID, FIXApplication.REQUIRED_TAGS, commonSettings.isCheckRequiredTags());
         sessionSettings.setBool(sessionID, Session.SETTING_ALLOW_UNKNOWN_MSG_FIELDS, commonSettings.isAllowUnknownMsgFields() );
         sessionSettings.setBool(sessionID, Session.DUPLICATE_TAGS_ALLOWED, commonSettings.isDuplicateTagsAllowed() );
         sessionSettings.setBool(sessionID, Session.SETTING_REJECT_INVALID_MESSAGE,commonSettings.isRejectInvalidMessage());
