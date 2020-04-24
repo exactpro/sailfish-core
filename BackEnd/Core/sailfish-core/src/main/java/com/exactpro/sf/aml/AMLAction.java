@@ -37,6 +37,7 @@ import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Represent a single action from matrix.
@@ -97,6 +98,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     private String tag;
     private List<String> dependencies = Collections.emptyList();
     private List<String> verificationsOrder = Collections.emptyList();
+    private Set<String> keyFields = Collections.emptySet();
     private final int hash;
     private final long uid;
 
@@ -751,5 +753,13 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
     public void setVerificationsOrder(List<String> verificationsOrder) {
         this.verificationsOrder = verificationsOrder == null ? Collections.emptyList() : ImmutableList.copyOf(verificationsOrder);
+    }
+
+    public Set<String> getKeyFields() {
+        return keyFields;
+    }
+
+    public void setKeyFields(Set<String> keyFields) {
+        this.keyFields = keyFields == null ? Collections.emptySet() : ImmutableSet.copyOf(keyFields);
     }
 }

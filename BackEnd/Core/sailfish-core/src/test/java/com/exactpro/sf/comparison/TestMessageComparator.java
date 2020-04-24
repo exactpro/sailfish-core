@@ -15,18 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.hamcrest.CoreMatchers;
@@ -984,7 +987,7 @@ public class TestMessageComparator extends AbstractTest {
 
     @Test
     public void testIgnoredFields() throws Exception {
-        ComparatorSettings settings = new ComparatorSettings().setIgnoredFields(Collections.singleton("filler"));
+        ComparatorSettings settings = new ComparatorSettings().setIgnoredFields(singleton("filler"));
 
         IMessage message = new MapMessage("TEST", "TestMessage");
         IMessage filter = message.cloneMessage();
@@ -1015,6 +1018,152 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertThat(result.getResult("filler").getStatus(), CoreMatchers.is(StatusType.NA));
         result = result.getResult("filler");
         Assert.assertThat(result.getResult("a").getStatus(), CoreMatchers.is(StatusType.NA));
+    }
+
+    @Test
+    public void testKeyField() {
+        // non matching key field
+        IMessage message = createMessage(msg -> {
+            msg.addField("keyField", 1);
+            msg.addField("nonKeyField", 2);
+        });
+
+        IMessage filter = createMessage(msg -> {
+            msg.addField("keyField", 2);
+            msg.addField("nonKeyField", 3);
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+
+        settings.getMetaContainer().setKeyFields(singleton("keyField"));
+
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNull(result);
+
+        // matching key field, but non matching regular field
+        filter.addField("keyField", 1);
+
+        result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+    }
+
+    @Test
+    public void testKeyFieldInSubmessage() {
+        // non matching key field
+        IMessage message = createMessage(msg -> {
+            msg.addField("rootField", 1);
+            msg.addField("subMessage", createMessage(subMsg -> {
+                subMsg.addField("keyField", 1);
+                subMsg.addField("nonKeyField1", 2);
+                subMsg.addField("nonKeyField2", 3);
+            }));
+        });
+
+        IMessage filter = createMessage(msg -> {
+            msg.addField("rootField", 1);
+            msg.addField("subMessage", createMessage(subMsg -> {
+                subMsg.addField("keyField", 2);
+                subMsg.addField("nonKeyField1", 2);
+                subMsg.addField("nonKeyField2", 3);
+            }));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+
+        metaContainer.add("subMessage", new MetaContainer().setKeyFields(singleton("keyField")));
+
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNull(result);
+
+        // matching key field, but non matching regular field
+        IMessage subMessage = filter.getField("subMessage");
+        subMessage.addField("keyField", 1);
+        subMessage.addField("nonKeyField1", 1);
+
+        result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+
+        // override key field in submessage by marking submessage field as a key one
+        metaContainer.setKeyFields(singleton("subMessage"));
+
+        result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void testKeyFieldInSubmessageCollection() {
+        // non matching key field
+        IMessage message = createMessage(msg -> {
+            msg.addField("rootField", 1);
+            msg.addField("collection", asList(
+                    createMessage(subMsg -> {
+                        subMsg.addField("keyField", 3);
+                        subMsg.addField("nonKeyField", 4);
+                    }),
+                    createMessage(subMsg -> {
+                        subMsg.addField("keyField", 1);
+                        subMsg.addField("nonKeyField", 2);
+                    })
+            ));
+        });
+
+        IMessage filter = createMessage(msg -> {
+            msg.addField("rootField", 1);
+            msg.addField("collection", asList(
+                    createMessage(subMsg -> {
+                        subMsg.addField("keyField", 1);
+                        subMsg.addField("nonKeyField", 2);
+                    }),
+                    createMessage(subMsg -> {
+                        subMsg.addField("keyField", 2);
+                        subMsg.addField("nonKeyField", 4);
+                    })
+            ));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+
+        metaContainer.add("collection", new MetaContainer());
+        metaContainer.add("collection", new MetaContainer().setKeyFields(singleton("keyField")));
+
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNull(result);
+
+        // matching key field, but non matching regular field
+        IMessage collectionElement = filter.<List<IMessage>>getField("collection").get(1);
+        collectionElement.addField("keyField", 3);
+        collectionElement.addField("nonKeyField", 5);
+
+        result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(4, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+
+        // override key field in collection by marking collection field as a key one
+        metaContainer.setKeyFields(singleton("collection"));
+
+        result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertNull(result);
+    }
+
+    private static IMessage createMessage(Consumer<IMessage> initializer) {
+        IMessage message = new MapMessage("namespace", "name");
+        initializer.accept(message);
+        return message;
     }
 
 	private enum FilterType {

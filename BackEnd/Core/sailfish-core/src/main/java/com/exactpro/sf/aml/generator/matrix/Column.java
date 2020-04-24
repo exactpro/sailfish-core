@@ -15,13 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator.matrix;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.exactpro.sf.common.util.StringUtil;
-import com.google.common.base.Strings;
 
 /**
  * This enumeration represent a matrix columns.
@@ -61,11 +57,12 @@ public enum Column {
     Comment(Constants.SYSTEM_PREFIX + "comment", "If Y then action will be ignored"),
     Tag(Constants.SYSTEM_PREFIX + "tag", "action tag for statistics"),
     Dependencies(Constants.SYSTEM_PREFIX + "dependencies", "list of references on which this action depends"),
-    VerificationsOrder(Constants.SYSTEM_PREFIX + "verifications_order", "Field order for sorting verifications in report");
+    VerificationsOrder(Constants.SYSTEM_PREFIX + "verifications_order", "Field order for sorting verifications in report"),
+    KeyFields(Constants.SYSTEM_PREFIX + "key_fields", "a set of fields which are required to match against a filter for a message to be checked completely");
 
-	public String getHelpString() {
-		return helpString;
-	}
+    public String getHelpString() {
+        return helpString;
+    }
 
     private final String column;
     private final String helpString;
@@ -75,7 +72,7 @@ public enum Column {
         this.helpString = Objects.requireNonNull(StringUtils.stripToNull(helpString), "Help string cannot be null or empty");
     }
 
-	public String getName() {
+    public String getName() {
         return column;
 	}
 

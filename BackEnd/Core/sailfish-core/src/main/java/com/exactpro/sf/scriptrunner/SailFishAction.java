@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.aml.script.MetaContainer;
 
@@ -67,34 +66,35 @@ public class SailFishAction {
     protected static MetaContainer createMetaContainerByPath(MetaContainer parent, String failUnexpected, String... path) {
         Objects.requireNonNull(parent, "parent cannot be null");
 
-        if (StringUtils.isBlank(failUnexpected)) {
-            throw new IllegalArgumentException("failUnexpected cannot be blank");
-        }
-
         if (ArrayUtils.isEmpty(path)) {
             throw new IllegalArgumentException("path cannot be empty");
         }
 
-        MetaContainer current = parent;
-
-        for (int i = 0; i < path.length - 1; i++) {
-            String field = path[i];
-            List<MetaContainer> children = current.get(field);
-
-            if (children == null) {
-                MetaContainer child = new MetaContainer();
-                current.add(field, child);
-                current = child;
-            } else {
-                current = children.get(children.size() - 1);
-            }
+        if (path.length % 2 != 0) {
+            throw new IllegalArgumentException("path must contain even amount of elements");
         }
 
-        MetaContainer last = new MetaContainer();
+        MetaContainer current = parent;
 
-        last.setFailUnexpected(failUnexpected);
-        current.add(path[path.length - 1], last);
+        for (int i = 0; i < path.length; i += 2) {
+            String field = path[i];
+            int index = Integer.parseInt(path[i + 1]);
 
-        return last;
+            List<MetaContainer> children = current.get(field);
+
+            while (children == null || children.size() < index + 1) {
+                MetaContainer child = new MetaContainer();
+                current.add(field, child);
+                children = current.get(field);
+            }
+
+            current = children.get(index);
+        }
+
+        if (failUnexpected != null) {
+            current.setFailUnexpected(failUnexpected);
+        }
+
+        return current;
     }
 }
