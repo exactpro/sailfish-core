@@ -24,7 +24,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +48,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.csvreader.CsvWriter;
 import com.exactpro.sf.center.ISFContext;
@@ -92,6 +93,7 @@ public class StatisticsUtils {
     private static final String FIX_REVISION_COLUMN = "Fix Revision";
     private static final String HASH_COLUMN = "Hash";
     private static final String TAGGED_ACTIONS_COLUMN = "Tagged Actions";
+    private static final String UNKNOWN_TIME = "Unknown";
     public static final String[] AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS = { ID_COLUMN, NAME_COLUMN, DESCRIPTION_COLUMN,
             STATUS_COLUMN, FAILURE_REASON_COLUMN, FAILED_ACTIONS_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
             EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, ENVIRONMENT_COLUMN, SERVICES_USED_COLUMN,
@@ -439,7 +441,7 @@ public class StatisticsUtils {
                               : actionRow ? "" : row.getFinishTime().toString();
                     break;
                 case "Execution Time":
-                    toWrite = actionRow ? "" : DurationFormatUtils.formatDuration(row.getExecutionTime(), "mm:ss");
+                    toWrite = actionRow ? "" : formatExecTimeOrUnknown(row.getExecutionTime());
                     break;
                 case "SF":
                     toWrite = matrixRow ? String.format("%s:%s%s", row.getHost(), row.getPort(), row.getSfName()) : "";
@@ -525,6 +527,11 @@ public class StatisticsUtils {
         writer.writeRecord(headers);
     }
 
+    @NotNull
+    public static String formatExecTimeOrUnknown(@Nullable Long executionTime) {
+        return executionTime == null ? UNKNOWN_TIME : DurationFormatUtils.formatDuration(executionTime, "mm:ss");
+    }
+
     public static String createCategorisedKnownBugsCell(List<KnownBugCategoryRow> categorisedKnownBugs, boolean reproduced) {
         if (categorisedKnownBugs == null) {
             return StringUtils.EMPTY;
@@ -549,7 +556,11 @@ public class StatisticsUtils {
 
         for (AggregatedReportRow row : reportRows) {
             if (row.isMatrixRow()) {
-                spentTime += row.getExecutionTime();
+                Long executionTime = row.getExecutionTime();
+                if (executionTime == null) {
+                    continue;
+                }
+                spentTime += executionTime;
             }
         }
 
@@ -565,7 +576,7 @@ public class StatisticsUtils {
             return StatusType.FAILED.name();
         }
 
-        return row.getConditionallyPassedCount() > 0 ? StatusType.CONDITIONALLY_PASSED.name() : StatusType.PASSED.name();
+        return (row.getConditionallyPassedCount() > 0 ? StatusType.CONDITIONALLY_PASSED : StatusType.PASSED).name();
     }
 
     private static String getActionDescriptionsByTag(List<ActionInfoRow> infoRows, String tag) {

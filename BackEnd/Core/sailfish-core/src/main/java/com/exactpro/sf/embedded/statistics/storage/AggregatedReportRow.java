@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jetbrains.annotations.Nullable;
 
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
@@ -184,18 +185,31 @@ public class AggregatedReportRow extends CommonReportRow {
         fields.put("Finish Time", finishTime);
 	}
 
+    @Nullable
     public Long getExecutionTime() {
         return isMatrixRow()
                 ? getExecutionMatrixTime()
                 : getExecutionCaseTime();
     }
 
+    @Nullable
     public Long getExecutionMatrixTime() {
-        return DateTimeUtility.getMillisecond(getMatrixFinishTime()) - DateTimeUtility.getMillisecond(getMatrixStartTime());
+        LocalDateTime matrixFinishTime = getMatrixFinishTime();
+        LocalDateTime matrixStartTime = getMatrixStartTime();
+        if (matrixFinishTime == null || matrixStartTime == null) {
+            return null;
+        }
+        return DateTimeUtility.getMillisecond(matrixFinishTime) - DateTimeUtility.getMillisecond(matrixStartTime);
     }
 
+    @Nullable
     public Long getExecutionCaseTime() {
-        return DateTimeUtility.getMillisecond(getFinishTime())  - DateTimeUtility.getMillisecond(getStartTime());
+        LocalDateTime finishTime = getFinishTime();
+        LocalDateTime startTime = getStartTime();
+        if (finishTime == null || startTime == null) {
+            return null;
+        }
+        return DateTimeUtility.getMillisecond(finishTime)  - DateTimeUtility.getMillisecond(startTime);
     }
 
 	public String getUserName() {

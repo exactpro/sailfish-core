@@ -38,7 +38,6 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.slf4j.Logger;
@@ -742,8 +741,8 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
         return StatisticsUtils.getLastResultExecutionTime(lastResult);
     }
 
-    public String msToMinutesSeconds(long duration) {
-        return DurationFormatUtils.formatDuration(duration, "mm:ss");
+    public String msToMinutesSeconds(Long duration) {
+        return StatisticsUtils.formatExecTimeOrUnknown(duration);
     }
 
     public boolean isExportWithTCs() {

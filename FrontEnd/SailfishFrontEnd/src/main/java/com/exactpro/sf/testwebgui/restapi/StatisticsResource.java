@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
@@ -386,7 +387,8 @@ public class StatisticsResource {
                                 writer.writeAttribute("name", matrixName);
                                 writer.writeAttribute("skipped", "0");
                                 writer.writeAttribute("tests", row.getPassedCount() + row.getConditionallyPassedCount() + row.getFailedCount() + "");
-                                writer.writeAttribute("time", "" + row.getExecutionTime() / 1000.d);
+                                Long executionTime = row.getExecutionTime();
+                                writer.writeAttribute("time", executionTime == null ? "-1" : String.valueOf(TimeUnit.MILLISECONDS.toSeconds(executionTime)));
                                 writer.writeAttribute("timestamp", xmlFormat.get().format(row.getMatrixStartTime()));
 
                             } else {
