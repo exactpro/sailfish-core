@@ -798,7 +798,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 				Set<Integer> requiredFields, IFieldStructure msgStruct) {
             for(IFieldStructure fldstrct : msgStruct.getFields().values()) {
 				Integer tag = getFieldTag(fldstrct);
-				if (fldstrct.isRequired()) {
+				if (tag != null && fldstrct.isRequired()) {
 					requiredFields.add(tag);
 				}
 				if (tag == null) {

@@ -139,6 +139,7 @@
 			<value name="MASS_QUOTE_ACKNOWLEDGEMENT">b</value>
 			<value name="ORDER_MASS_CANCEL_REQUEST">q</value>
 			<value name="PARTY_RISK_LIMITS_REPORT">CM</value>
+			<value name="TEST_REQUIRED_TAGS_IN_GROUP_MESSAGE">RG</value>
 		</field>
 		<field id="field-NewSeqNo" name="NewSeqNo" type="java.lang.Integer">
 			<attribute name="tag" type="java.lang.Integer">36</attribute>
@@ -2642,6 +2643,10 @@
             <attribute name="tag" type="java.lang.Integer">296</attribute>
             <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
         </field>
+        <field id="field-TestGroup" name="TestGroup" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">777</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+        </field>
 	</fields>
 	<messages>
 		<message name="TradingParty_NoPartyIDs" id="group-TradingParty_NoPartyIDs">
@@ -3517,7 +3522,7 @@
 			<attribute type="java.lang.String" name="entity_type">Message</attribute>
 			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
 			<attribute type="java.lang.String" name="MessageType">D</attribute>
-			<field reference="M_header" name="header" required="true"/>
+			<field reference="header" name="header" required="true"/>
 			<field reference="field-ClOrdID" name="ClOrdID" required="true"/>
 			<field reference="component-TradingParty" name="TradingParty" required="true"/>
 			<field reference="field-Account" name="Account"/>
@@ -3591,21 +3596,27 @@
 			<field reference="F_OrderAttributeType" name="OrderAttributeType"/>
 			<field reference="F_OrderAttributeValue" name="OrderAttributeValue"/>
 		</message>
-		<message id="M_header" name="header_tag">
-			<attribute type="java.lang.String" name="entity_type">Header</attribute>
-			<field reference="field-BeginString" name="BeginString" required="true"/>
-			<field reference="field-BodyLength" name="BodyLength" required="true"/>
-			<field reference="field-MsgType" name="MsgType" required="true"/>
-			<field reference="field-MsgSeqNum" name="MsgSeqNum" required="true"/>
-			<field reference="field-SenderCompID" name="SenderCompID" required="true"/>
-			<field reference="field-TargetCompID" name="TargetCompID" required="true"/>
-			<field reference="field-PossDupFlag" name="PossDupFlag"/>
-			<field reference="field-PossResend" name="PossResend"/>
-			<field reference="field-SendingTime" name="SendingTime"/>
-			<field reference="field-OrigSendingTime" name="OrigSendingTime"/>
-			<field reference="field-ApplVerID" name="ApplVerID"/>
-			<field reference="field-OnBehalfOfCompID" name="OnBehalfOfCompID"/>
-			<field reference="field-DeliverToCompID" name="DeliverToCompID"/>
-		</message>
+        <message name="TestRequiredTagsInGroupMessage">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">RG</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="TestGroup" reference="group-TestGroup" isCollection="true" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="TestGroup" id="group-TestGroup">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">777</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <!-- A smal copy of group-Parties_NoPartyIDs with additional required component -->
+            <field name="PartyID" reference="field-PartyID" required="true"/>
+            <field name="PartyIDSource" reference="field-PartyIDSource" required="true"/>
+            <field name="PartyRole" reference="field-PartyRole" required="true"/>
+            <field name="TestComp" reference="component-TestComp" required="true"/>
+        </message>
+        <message id="component-TestComp" name="TestComp">
+            <attribute name="entity_type" type="java.lang.String">Component</attribute>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+        </message>
 	</messages>
 </dictionary>
