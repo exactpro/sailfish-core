@@ -239,19 +239,11 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
         Table table = new Table(offset);
         table.setTitle(result.getName());
 
-        String status = Objects.toString(result.getStatus(), "");
+        String status = Objects.toString(result.getStatus(), Objects.toString(ComparisonUtil.getStatusType(result) + " (AGG)"));
         String expected = Formatter.formatExpected(result);
         String actual = Formatter.formatForHtml(result.getActual(), false);
 
-        if(result.getExpected() != null) {
-            if(result.getDoublePrecision() != null) {
-                expected += " +- " + result.getDoublePrecision();
-            }
-
-            if(result.getSystemPrecision() != null) {
-                expected += " % " + result.getSystemPrecision();
-            }
-        }
+        expected = appendPrecision(result, expected);
 
         table.add(new Row(offset, result.getName(), expected, actual, status));
 
@@ -261,15 +253,7 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
                 expected = Formatter.formatExpected(subResult);
                 actual = Formatter.formatForHtml(subResult.getActual(), false);
 
-                if(subResult.getExpected() != null) {
-                    if(subResult.getDoublePrecision() != null) {
-                        expected += " +- " + subResult.getDoublePrecision();
-                    }
-
-                    if(subResult.getSystemPrecision() != null) {
-                        expected += " % " + subResult.getSystemPrecision();
-                    }
-                }
+                expected = appendPrecision(subResult, expected);
 
                 table.add(new Row(offset, subResult.getName(), expected, actual, status));
             } else {
@@ -280,5 +264,18 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
         }
 
         return table;
+    }
+
+    private String appendPrecision(ComparisonResult subResult, String expected) {
+        if (subResult.getExpected() != null) {
+            if (subResult.getDoublePrecision() != null) {
+                expected += " +- " + subResult.getDoublePrecision();
+            }
+
+            if (subResult.getSystemPrecision() != null) {
+                expected += " % " + subResult.getSystemPrecision();
+            }
+        }
+        return expected;
     }
 }
