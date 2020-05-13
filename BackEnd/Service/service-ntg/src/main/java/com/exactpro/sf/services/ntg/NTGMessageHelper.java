@@ -43,13 +43,14 @@ import com.exactpro.sf.services.ntg.exceptions.UndefinedMessageException;
 public class NTGMessageHelper extends MessageHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(NTGMessageHelper.class);
 
-    public static String MESSAGE_HEADER = "MessageHeader";
+    public static final String MESSAGE_HEADER = "MessageHeader";
     public static String FIELD_DIRTY_MSG_TYPE = "NTGMsgType";
     public static String FIELD_DIRTY_START = "DirtyStart";
     public static String FIELD_DIRTY_MSG_LEN = "DirtyMsgLen";
 
 	public static final String FIELD_MESSAGE_LENGTH = "MessageLength";
 	public static final String FIELD_START_OF_MESSAGE = "StartOfMessage";
+    public static final int VALUE_START_OF_MESSAGE = 2;
     public static final String FIELD_TRANSACT_TIME = "TransactTime";
 	public static final String MESSAGE_TYPE = "MessageType";
 
@@ -160,45 +161,44 @@ public class NTGMessageHelper extends MessageHelper {
 	@Override
 	public IMessage prepareMessageToEncode(IMessage message, Map<String, String> params) {
 		// AML3 - header can be filled like repeating group.
-		IMessage header = (IMessage) message.getField("MessageHeader");
+		IMessage header = (IMessage) message.getField(MESSAGE_HEADER);
         NTGMessageMetadata m = getMetadata(message.getName());
+        if(header == null) {
+            header = getMessageFactory().createMessage(MESSAGE_HEADER, getNamespace());
+            // add header to message
+            message.addField(MESSAGE_HEADER, header);
+        }
 
-		if (header != null) {
-			if (!header.isFieldSet("MessageLength")) {
-				// special case: handle AML2 actions that doesn't sets
-				// MessageLength field
-				header.addField("MessageLength", m.messageSize);
-			}
-			return message;
-		}
+        if (!header.isFieldSet(FIELD_MESSAGE_LENGTH)) {
+            // special case: handle AML2 actions that doesn't sets
+            // MessageLength field
+            header.addField(FIELD_MESSAGE_LENGTH, m.messageSize);
+        }
+        if (!header.isFieldSet(FIELD_START_OF_MESSAGE)) {
+            header.addField(FIELD_START_OF_MESSAGE, VALUE_START_OF_MESSAGE);
+        }
+        if (!header.isFieldSet(MESSAGE_TYPE)) {
+            header.addField(MESSAGE_TYPE, m.messageType);
+        }
 
-		// fill header
-		header = getMessageFactory().createMessage("MessageHeader", getNamespace());
-		header.addField("StartOfMessage", 2); // FIXME: better ?? default value?
-		header.addField("MessageLength", m.messageSize);
-		header.addField("MessageType", m.messageType);
 
 		if (params != null) {
             // AML2 - header filled by actions. Dirty AML2 uses "#nativemsgtype", "#dirtystart", "#dirtymsglen" to override header's fields
 		    String value = params.get(FIELD_DIRTY_MSG_LEN);
 		    if (value != null) {
-                header.addField("MessageLength", Integer.valueOf(value));
+                header.addField(FIELD_MESSAGE_LENGTH, Integer.valueOf(value));
 		    }
 		    
 		    value = params.get(FIELD_DIRTY_MSG_TYPE);
             if (value != null) {
-                header.addField("MessageType", value);
+                header.addField(MESSAGE_TYPE, value);
             }
             
             value = params.get(FIELD_DIRTY_START);
             if (value != null) {
-                header.addField("StartOfMessage", Integer.valueOf(value));
+                header.addField(FIELD_START_OF_MESSAGE, Integer.valueOf(value));
             }
 		}
-		
-		// add header to message
-		message.addField("MessageHeader", header);
-
 		return message;
 	}
 
