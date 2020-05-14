@@ -390,6 +390,10 @@ checkCompatibility {
 	versionFile = File.createTempFile("${getTemporaryDir()}",'VERSION')
 }
 
+serviceLoader {
+    serviceInterface 'com.exactpro.sf.matrixhandlers.IMatrixProviderFactory'
+}
+
 //Functions TODO: move to parent
 def configureGenerateSailfishMessage(files, inputs, outputs) {
 	files.each { dict ->

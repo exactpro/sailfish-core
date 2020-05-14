@@ -20,6 +20,10 @@ subprojects {
     collectDependencies {
         publishResource = ''
     }
+
+    serviceLoader {
+        serviceInterface 'com.exactpro.sf.externalapi.codec.IExternalCodecFactory'
+    }
 }
 
 // Setting this property to true will make the artifactoryPublish task
