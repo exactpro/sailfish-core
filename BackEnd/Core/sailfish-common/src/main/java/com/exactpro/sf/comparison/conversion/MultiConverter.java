@@ -81,14 +81,22 @@ public class MultiConverter {
         
         Map<Class<?>, IConverter<?>> target = new HashMap<>();
         
+        target.put(boolean.class, new BooleanConverter());
         target.put(Boolean.class, new BooleanConverter());
+        target.put(byte.class, new ByteConverter());
         target.put(Byte.class, new ByteConverter());
+        target.put(short.class, new ShortConverter());
         target.put(Short.class, new ShortConverter());
+        target.put(int.class, new IntegerConverter());
         target.put(Integer.class, new IntegerConverter());
+        target.put(long.class, new LongConverter());
         target.put(Long.class, new LongConverter());
+        target.put(float.class, new FloatConverter());
         target.put(Float.class, new FloatConverter());
+        target.put(double.class, new DoubleConverter());
         target.put(Double.class, new DoubleConverter());
         target.put(BigDecimal.class, new BigDecimalConverter());
+        target.put(char.class, new CharacterConverter());
         target.put(Character.class, new CharacterConverter());
         target.put(String.class, new StringConverter());
         target.put(LocalDate.class, new LocalDateConverter());
