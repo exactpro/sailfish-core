@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary;
 
+import com.exactpro.sf.configuration.dictionary.impl.BaseFIXDictionaryValidator;
 import com.exactpro.sf.configuration.dictionary.impl.DefaultDictionaryValidator;
-import com.exactpro.sf.configuration.dictionary.impl.FIXDictionaryValidator;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidatorFactory;
 
-public class FIXDictionaryValidatorFactory implements IDictionaryValidatorFactory {
+public class BaseFIXDictionaryValidatorFactory implements IDictionaryValidatorFactory {
 
     public IDictionaryValidator createDictionaryValidator() {
-        return new FIXDictionaryValidator(new DefaultDictionaryValidator());
+        return new BaseFIXDictionaryValidator(new DefaultDictionaryValidator());
     }
 }

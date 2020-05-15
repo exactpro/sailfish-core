@@ -65,7 +65,7 @@ public class SfDictionaryConverterTest extends AbstractTest {
         ClassLoader classLoader = SfDictionaryConverterTest.class.getClassLoader();
         try (InputStream in = classLoader.getResourceAsStream("fix/qfj2dict.xsl");
                 InputStream inTypes = classLoader.getResourceAsStream("fix/types.xml")) {
-            dictionaryValidator = new FIXDictionaryValidatorFactory().createDictionaryValidator();
+            dictionaryValidator = new FullFIXDictionaryValidatorFactory().createDictionaryValidator();
             converter = new SailfishDictionaryToQuckfixjConverter();
             File xsl = new File(outputFolder, "qfj2dict.xsl");
             File types = new File("types.xml");

@@ -29,7 +29,7 @@ import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.util.AbstractTest;
 
 public class TestFIXDictionaryValidator extends AbstractTest {
-    private final IDictionaryValidator dictionaryValidator = new FIXDictionaryValidatorFactory().createDictionaryValidator();
+    private final IDictionaryValidator dictionaryValidator = new FullFIXDictionaryValidatorFactory().createDictionaryValidator();
 
     @Test
     public void testFIXDictionaryValidatorPositive() throws IOException {

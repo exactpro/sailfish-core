@@ -74,10 +74,10 @@ import com.google.common.collect.SetMultimap;
 
 import quickfix.FieldType;
 
-public class FIXDictionaryValidator extends AbstractDictionaryValidator {
+public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     private static final long serialVersionUID = 1839126797364844485L;
 
-    private final Map<String, EntityValidator> entityNamesToEntityValidators;
+    protected final Map<String, EntityValidator> entityNamesToEntityValidators;
 
     private final SetMultimap<Class<?>, String> javaTypeToFixTypes = HashMultimap.create();
 
@@ -87,11 +87,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
 
     {
         entityNamesToEntityValidators = new HashMap<>();
-        entityNamesToEntityValidators.put(MESSAGE_ENTITY, new MessageEntityValidator());
-        entityNamesToEntityValidators.put(COMPONENT_ENTITY, new ComponentEntityValidator());
-        entityNamesToEntityValidators.put(GROUP_ENTITY, new GroupEntityValidator());
-        entityNamesToEntityValidators.put(HEADER_ENTITY, new HeaderEntityValidator());
-        entityNamesToEntityValidators.put(TRAILER_ENTITY, new TrailerEntityValidator());
+        configureEntityValidators(entityNamesToEntityValidators);
 
         javaTypeToFixTypes.put(Double.class, FieldType.Price.getName());
         javaTypeToFixTypes.put(Double.class, FieldType.Amt.getName());
@@ -147,10 +143,40 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
         javaTypeToFixTypes.put(Character.class, FieldType.Char.getName());
     }
 
-    public FIXDictionaryValidator() {
+    private void configureEntityValidators(Map<String, EntityValidator> entityNamesToEntityValidators) {
+        entityNamesToEntityValidators.put(TRAILER_ENTITY, createTrailerEntityValidator());
+        entityNamesToEntityValidators.put(HEADER_ENTITY, createHeaderEntityValidator());
+        entityNamesToEntityValidators.put(GROUP_ENTITY, createGroupEntityValidator());
+        entityNamesToEntityValidators.put(COMPONENT_ENTITY, createComponentEntityValidator());
+        entityNamesToEntityValidators.put(MESSAGE_ENTITY, createMessageEntityValidator());
     }
 
-    public FIXDictionaryValidator(IDictionaryValidator parentValidator) {
+
+
+    protected EntityValidator createTrailerEntityValidator() {
+        return new TrailerEntityValidator();
+    }
+
+    protected EntityValidator createHeaderEntityValidator() {
+        return new HeaderEntityValidator();
+    }
+
+    protected EntityValidator createGroupEntityValidator() {
+        return new GroupEntityValidator();
+    }
+
+    protected EntityValidator createComponentEntityValidator() {
+        return new ComponentEntityValidator();
+    }
+
+    protected EntityValidator createMessageEntityValidator() {
+        return new BaseMessageEntityValidator();
+    }
+
+    public BaseFIXDictionaryValidator() {
+    }
+
+    public BaseFIXDictionaryValidator(IDictionaryValidator parentValidator) {
         super(parentValidator);
     }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,41 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.exactpro.sf.configuration.dictionary.impl;
 
-import java.util.Iterator;
-import java.util.List;
-
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
 import com.exactpro.sf.configuration.dictionary.ValidationHelper;
-import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-public class MessageEntityValidator extends EntityValidator {
+import java.util.Iterator;
+import java.util.List;
+
+public class FullMessageEntityValidator extends BaseMessageEntityValidator {
+
     @Override
     public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
-        checkAttributes(errors, message);
+        super.validateEntity(errors, message);
         checkUniqueness(errors, message);
-
-        ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.HEADER);
-        ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.TRAILER);
-    }
-
-    private void checkAttributes(List<DictionaryValidationError> errors, IMessageStructure message) {
-
-        ValidationHelper.checkMessageAttributeType(errors, message,
-                FixMessageHelper.MESSAGE_TYPE_ATTR_NAME, JavaType.JAVA_LANG_STRING, null);
-
-        ValidationHelper.checkMessageAttributeType(errors, message, MessageHelper.ATTRIBUTE_IS_ADMIN, JavaType.JAVA_LANG_BOOLEAN,
-                new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString()});
-
     }
 
     private void checkUniqueness(List<DictionaryValidationError> errors, IMessageStructure message) {
@@ -86,7 +73,7 @@ public class MessageEntityValidator extends EntityValidator {
     }
 
     private void checkFieldRepeating(IFieldStructure message, IFieldStructure field,
-            SetMultimap<String, String> duplicates) {
+                                     SetMultimap<String, String> duplicates) {
         for(IFieldStructure messageField : message.getFields().values()) {
             if (messageField.isComplex()) {
                 checkFieldRepeating(messageField, field, duplicates);
@@ -99,5 +86,4 @@ public class MessageEntityValidator extends EntityValidator {
             }
         }
     }
-
 }

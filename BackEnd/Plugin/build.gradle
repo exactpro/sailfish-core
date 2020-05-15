@@ -14,7 +14,8 @@ subprojects {
         DEFAULT_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.DefaultDictionaryValidatorFactory'
         ITCH_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.ITCHDictionaryValidatorFactory'
         NTG_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.NTGDictionaryValidatorFactory'
-        FIX_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory'
+        FULL_FIX_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.FullFIXDictionaryValidatorFactory'
+		BASE_FIX_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.BaseFIXDictionaryValidatorFactory'
 	}
 
     dependencies {
@@ -67,7 +68,7 @@ subprojects {
 
         validate(ITCH_VALIDATOR, 'itch.*.xml')
         validate(NTG_VALIDATOR, 'ntg.*.xml')
-        validate(FIX_VALIDATOR, 'FIX.*.xml')   	
+        validate(FULL_FIX_VALIDATOR, 'FIX.*.xml')
     }
 	
     collectDependencies {
