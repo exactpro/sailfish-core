@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.aml;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 
 import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
@@ -33,6 +34,8 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.AutoLanguageFactory;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 
 public class AMLBlockUtility {
     public static List<AMLElement> flatten(Iterable<AMLElement> elements) throws AMLException {
@@ -89,7 +92,7 @@ public class AMLBlockUtility {
         }
     }
 
-    public static Map<String, String> resolveDefinedServiceNames(List<AMLBlock> blocks, String environmentName, IConnectionManager serviceManager) throws AMLException {
+    public static Map<String, SortedMap<Long, String>> resolveDefinedServiceNames(List<AMLBlock> blocks, String environmentName, IConnectionManager serviceManager) throws AMLException {
         AMLDefineServiceNameResolvingVisitor visitor = new AMLDefineServiceNameResolvingVisitor(environmentName, serviceManager.getServiceNames());
 
         for (AMLBlock block : blocks) {
@@ -102,7 +105,10 @@ public class AMLBlockUtility {
             throw new AMLException("Failed to resolve defined service names", alertCollector);
         }
 
-        return Collections.unmodifiableMap(visitor.getDefinedServiceNames());
+        return visitor.getDefinedServiceNames()
+                .entrySet()
+                .stream()
+                .collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ImmutableSortedMap.copyOf(entry.getValue())));
     }
 
     public static int hash(AMLBlock block, AMLMatrixWrapper wrapper, Map<String, String> staticVariables, Map<AMLBlock, Integer> cache, Set<String> references) throws AMLException {

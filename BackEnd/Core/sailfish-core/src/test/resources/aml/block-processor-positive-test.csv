@@ -56,3 +56,17 @@ n,,,,,,,,send,,,SimpleMessage,TestAML,3
 ,,,,,,,,after test case block start,,,,,
 ,,,,,,,1000,Sleep,,,,,
 ,,,,,,,,after test case block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,b3,,block start,,,,,
+,,,,%{dsn},,ref5,,send,,,SimpleMessage,TestAML,5
+,,,,,,,,block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,b4,,block start,,,,,
+,,,,%{dsn},,ref6,,send,,,SimpleMessage,TestAML,6
+,,,,,,,,block end,,,,,
+,,test substitution of defined service name in included blocks,,,,,,,,,,,
+,,,,,,tc6,,test case start,,,,,
+,,service name in block included before definition shouldn't be substituted,,,b3,,,include block,,,,,
+,,,,fake,,%{dsn},,DefineServiceName,,,,,
+,,service name in block included after definition should be substituted,,,b4,,,include block,,,,,
+,,,,,,,,test case end,,,,,

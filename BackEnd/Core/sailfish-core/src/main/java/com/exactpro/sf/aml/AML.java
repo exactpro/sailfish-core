@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -149,7 +150,7 @@ public class AML {
     {
         this.matrix = matrix;
 
-        Map<String, String> definedServiceNames = AMLBlockUtility.resolveDefinedServiceNames(matrix.getBlocks(), scriptContext.getEnvironmentName(), environmentManager.getConnectionManager());
+        Map<String, SortedMap<Long, String>> definedServiceNames = AMLBlockUtility.resolveDefinedServiceNames(matrix.getBlocks(), scriptContext.getEnvironmentName(), environmentManager.getConnectionManager());
         AMLBlockUtility.resolveActionURIs(matrix.getBlocks(), actionManager, environmentManager.getConnectionManager(), scriptContext.getEnvironmentName());
 
         SailfishURI languageURI = AMLBlockUtility.detectLanguage(matrix.getBlocks(), languageManager.getLanguageURIs(), amlSettings.getLanguageURI(), actionManager);
@@ -163,7 +164,7 @@ public class AML {
             throw new AMLException("Failed to convert blocks", alertCollector);
         }
 
-        blocks = AMLBlockProcessor.process(blocks, amlSettings, actionManager);
+        blocks = AMLBlockProcessor.process(blocks, amlSettings, actionManager, definedServiceNames);
         this.testCases = blocks.get(AMLBlockType.TestCase);
 
         onProgressChanged(30);

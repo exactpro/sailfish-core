@@ -620,7 +620,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 			that.serviceFields.put(entry.getKey(), entry.getValue().clone());
 		}
 
-        that.serviceName = serviceName;
+        that.serviceName = serviceName == null ? null : serviceName.clone();
 
         for(Pair<String, String> entry : setters) {
 			that.setters.add(new Pair<>(entry.getFirst(), entry.getSecond()));

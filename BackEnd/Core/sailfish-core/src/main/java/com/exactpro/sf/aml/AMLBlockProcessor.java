@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.Stack;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -32,13 +33,15 @@ import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.JavaStatement;
+import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 public class AMLBlockProcessor {
-    public static ListMultimap<AMLBlockType, AMLTestCase> process(ListMultimap<AMLBlockType, AMLTestCase> allBlocks, AMLSettings settings, IActionManager actionManager) throws AMLException {
+    public static ListMultimap<AMLBlockType, AMLTestCase> process(ListMultimap<AMLBlockType, AMLTestCase> allBlocks, AMLSettings settings, IActionManager actionManager, Map<String, SortedMap<Long, String>> definedServiceNames)
+            throws AMLException {
         AlertCollector alertCollector = new AlertCollector();
 
         List<AMLTestCase> testCases = allBlocks.get(AMLBlockType.TestCase);
@@ -65,9 +68,9 @@ public class AMLBlockProcessor {
 
         Set<String> invalidBlockReferences = getRecursiveBlockReferences(blocks, alertCollector);
 
-        insertIncludeBlocks(testCases, blocks, invalidBlockReferences, alertCollector, actionManager);
-        insertIncludeBlocks(beforeTCBlocks, blocks, invalidBlockReferences, alertCollector, actionManager);
-        insertIncludeBlocks(afterTCBlocks, blocks, invalidBlockReferences, alertCollector, actionManager);
+        insertIncludeBlocks(testCases, blocks, invalidBlockReferences, alertCollector, actionManager, definedServiceNames);
+        insertIncludeBlocks(beforeTCBlocks, blocks, invalidBlockReferences, alertCollector, actionManager, definedServiceNames);
+        insertIncludeBlocks(afterTCBlocks, blocks, invalidBlockReferences, alertCollector, actionManager, definedServiceNames);
 
         copyStaticActions(testCases, AMLLangConst.AML2.matches(settings.getLanguageURI()), alertCollector);
         setLastOutcomes(testCases);
@@ -193,13 +196,15 @@ public class AMLBlockProcessor {
         }
     }
 
-    private static void insertIncludeBlocks(List<AMLTestCase> blocks, List<AMLTestCase> includeBlocks, Set<String> invalidBlockReferences, AlertCollector alertCollector, IActionManager actionManager) {
+    private static void insertIncludeBlocks(List<AMLTestCase> blocks, List<AMLTestCase> includeBlocks, Set<String> invalidBlockReferences, AlertCollector alertCollector, IActionManager actionManager,
+            Map<String, SortedMap<Long, String>> definedServiceNames) {
         for(AMLTestCase block : blocks) {
-            insertIncludeBlocks(block, includeBlocks, invalidBlockReferences, alertCollector, actionManager);
+            insertIncludeBlocks(block, includeBlocks, invalidBlockReferences, alertCollector, actionManager, definedServiceNames);
         }
     }
 
-    private static void insertIncludeBlocks(AMLTestCase block, List<AMLTestCase> blocks, Set<String> invalidBlockReferences, AlertCollector alertCollector, IActionManager actionManager) {
+    private static void insertIncludeBlocks(AMLTestCase block, List<AMLTestCase> blocks, Set<String> invalidBlockReferences, AlertCollector alertCollector, IActionManager actionManager,
+            Map<String, SortedMap<Long, String>> definedServiceNames) {
         List<AMLAction> actions = block.getActions();
         int actionsSize = actions.size();
 
@@ -238,6 +243,21 @@ public class AMLBlockProcessor {
 
                     if(!block.isAddToReport()) {
                         blockAction.setAddToReport(false);
+                    }
+
+                    if (blockAction.hasServiceName()) {
+                        Value serviceName = blockAction.getServiceName();
+                        SortedMap<Long, String> availableServiceNames = definedServiceNames.get(serviceName.getValue());
+
+                        if (availableServiceNames != null) {
+                            availableServiceNames = availableServiceNames.headMap(action.getLine());
+
+                            if (!availableServiceNames.isEmpty()) {
+                                String name = availableServiceNames.get(availableServiceNames.lastKey());
+                                serviceName.setValue(name);
+                                serviceName.setReference(AMLLangUtil.isExpression(name));
+                            }
+                        }
                     }
                 }
 

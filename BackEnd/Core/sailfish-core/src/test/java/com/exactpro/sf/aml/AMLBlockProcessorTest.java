@@ -17,6 +17,7 @@ package com.exactpro.sf.aml;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -35,6 +36,8 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionRequirements;
 import com.exactpro.sf.util.AbstractTest;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ListMultimap;
 
 public class AMLBlockProcessorTest extends AbstractTest {
@@ -60,7 +63,7 @@ public class AMLBlockProcessorTest extends AbstractTest {
         try(AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(matrixFile)) {
             AMLMatrix matrix = AMLReader.read(matrixReader);
             ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager, new AlertCollector());
-            blocks = AMLBlockProcessor.process(blocks, settings, actionManager);
+            blocks = AMLBlockProcessor.process(blocks, settings, actionManager, ImmutableMap.of("%{dsn}", ImmutableSortedMap.of(70L, "fake")));
 
             Assert.assertTrue(blocks.get(AMLBlockType.GlobalBlock).isEmpty());
             Assert.assertTrue(blocks.get(AMLBlockType.Block).isEmpty());
@@ -81,7 +84,7 @@ public class AMLBlockProcessorTest extends AbstractTest {
 
             testCases = blocks.get(AMLBlockType.TestCase);
 
-            Assert.assertEquals(5, testCases.size());
+            Assert.assertEquals(6, testCases.size());
 
             AMLTestCase testCase = testCases.get(0);
 
@@ -135,6 +138,20 @@ public class AMLBlockProcessorTest extends AbstractTest {
 
             testCase = testCases.get(4);
 
+            Assert.assertEquals(AMLBlockType.TestCase, testCase.getBlockType());
+
+            AMLAction ref5 = testCase.findActionByRef("ref5");
+            AMLAction ref6 = testCase.findActionByRef("ref6");
+
+            Assert.assertNotNull(ref5);
+            Assert.assertTrue(ref5.hasServiceName());
+            Assert.assertEquals("%{dsn}", ref5.getServiceName().getValue());
+            Assert.assertNotNull(ref6);
+            Assert.assertTrue(ref6.hasServiceName());
+            Assert.assertEquals("fake", ref6.getServiceName().getValue());
+
+            testCase = testCases.get(5);
+
             Assert.assertEquals(AMLBlockType.LastBlock, testCase.getBlockType());
             Assert.assertEquals(3, testCase.getActions().size());
             Assert.assertNull(testCase.findActionByRef("afc"));
@@ -153,7 +170,7 @@ public class AMLBlockProcessorTest extends AbstractTest {
             AMLMatrix matrix = AMLReader.read(matrixReader);
             ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager, new AlertCollector());
 
-            AMLBlockProcessor.process(blocks, settings, actionManager);
+            AMLBlockProcessor.process(blocks, settings, actionManager, Collections.emptyMap());
             Assert.fail("No errors were detected");
         } catch(AMLException e) {
             Collection<Alert> errors = e.getAlertCollector().getAlerts();

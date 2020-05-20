@@ -31,6 +31,8 @@ import com.exactpro.sf.aml.generator.matrix.JavaStatement
 import com.exactpro.sf.aml.generator.matrix.JavaStatement.DEFINE_SERVICE_NAME
 import com.exactpro.sf.aml.reader.struct.AMLBlock
 import com.exactpro.sf.aml.reader.struct.AMLElement
+import java.util.SortedMap
+import java.util.TreeMap
 import com.exactpro.sf.common.services.ServiceName as ServiceNameBean
 
 /**
@@ -41,7 +43,7 @@ class AMLDefineServiceNameResolvingVisitor(
     private val environmentName: String,
     private val serviceNames: Array<ServiceNameBean>
 ) : IAMLElementVisitor {
-    val definedServiceNames: MutableMap<String, String> = hashMapOf()
+    val definedServiceNames: MutableMap<String, SortedMap<Long, String>> = hashMapOf()
     val alertCollector: AlertCollector = AlertCollector()
 
     override fun visit(element: AMLElement) {
@@ -56,9 +58,9 @@ class AMLDefineServiceNameResolvingVisitor(
         }
 
         val serviceName = element.getValue(ServiceName)
+        val line = element.line.toLong()
 
         if (JavaStatement.value(actionUri) == DEFINE_SERVICE_NAME) {
-            val line = element.line.toLong()
             val uid = element.uid
             val reference = element.getValue(Reference)
             val referenceColumn = Reference.getName()
@@ -81,10 +83,14 @@ class AMLDefineServiceNameResolvingVisitor(
             }
 
             if (errors == alertCollector.count) {
-                definedServiceNames[reference] = serviceName
+                definedServiceNames.computeIfAbsent(reference) { TreeMap() }[line] = serviceName
             }
         } else if (definedServiceNames.containsKey(serviceName)) {
-            element.setValue(ServiceName, definedServiceNames[serviceName])
+            val availableDefinitions = definedServiceNames[serviceName]!!.headMap(line)
+
+            if (availableDefinitions.isNotEmpty()) {
+                element.setValue(ServiceName, availableDefinitions[availableDefinitions.lastKey()])
+            }
         }
     }
 

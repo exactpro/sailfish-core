@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -168,7 +169,7 @@ public class CodeGenerator_new implements ICodeGenerator {
     private IUtilityManager utilityManager;
 
     private String compilerClassPath;
-    private Map<String, String> definedServiceNames;
+    private Map<String, SortedMap<Long, String>> definedServiceNames;
 
 	public CodeGenerator_new() {
 		this.alertCollector = new AlertCollector();
@@ -187,7 +188,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	                 AMLSettings amlSettings,
 	                 List<IProgressListener> progressListeners,
             String compilerClassPath,
-            Map<String, String> definedServiceNames) throws AMLException {
+            Map<String, SortedMap<Long, String>> definedServiceNames) throws AMLException {
 	    this.workspaceDispatcher = workspaceDispatcher;
 	    this.adapterManager = adapterManager;
 	    this.environmentManager = environmentManager;
@@ -1146,7 +1147,13 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
 
         if(!Column.ServiceName.getName().equals(column)) {
-            name = definedServiceNames.getOrDefault(name, name);
+            if (definedServiceNames.containsKey(name)) {
+                SortedMap<Long, String> availableServiceNames = definedServiceNames.get(name).headMap(line);
+
+                if (!availableServiceNames.isEmpty()) {
+                    name = availableServiceNames.get(availableServiceNames.lastKey());
+                }
+            }
 
             if (AMLLangUtil.isExpression(name)) {
                 alertCollector.add(new Alert(line, uid, null, column, "References instead of service names are only supported for " + Column.ServiceName.name() + " column"));
@@ -1155,8 +1162,8 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
 
         if (AMLLangUtil.isExpression(name)) {
-                return null;
-            }
+            return null;
+        }
 
         return getService(name, line, uid, column);
     }

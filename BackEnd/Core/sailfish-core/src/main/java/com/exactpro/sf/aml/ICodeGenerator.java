@@ -18,6 +18,7 @@ package com.exactpro.sf.aml;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.GeneratedScript;
@@ -46,7 +47,8 @@ public interface ICodeGenerator {
 	void cleanup();
 
     void init(IWorkspaceDispatcher workspaceDispatcher, IAdapterManager adapterManager, IEnvironmentManager environment, IDictionaryManager dictionaryManager, IStaticServiceManager staticServiceManager, IActionManager actionManager,
-            IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath, Map<String, String> definedServiceNames) throws AMLException;
+            IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath, Map<String, SortedMap<Long, String>> definedServiceNames)
+            throws AMLException;
 
     ScriptContext getScriptContext();
 }
