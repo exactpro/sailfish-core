@@ -97,7 +97,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         const { submittedData, report } = this.props;
 
         let uniqueActionId = new Set(submittedData.map(m => m.actionId)).size,
-            failedActions = report.metadata.map(m => m.failedActionCount).reduce((a,b) => a + b);
+            failedActions = report.metadata.map(m => m.failedActionCount).reduce((a,b) => a + b, 0);
 
         return uniqueActionId / failedActions
     }
