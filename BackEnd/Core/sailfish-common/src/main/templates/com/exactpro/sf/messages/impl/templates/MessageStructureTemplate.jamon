@@ -202,6 +202,20 @@ public class <% typeName %> extends BaseMessage
                     return new ArrayList<>(value);
                 }
                 </%if>
+
+                public List<?> getUntyped<% field.getName() %>()
+                {
+                    List<?> values = this.msg.getField("<% field.getName() %>");
+
+                    if(values == null)
+                    {
+                        throw new FieldNotFoundException(" <% field.getName() %> ");
+                    }
+
+                    List<Object> result = new ArrayList<>(values.size());
+                    result.addAll(values);
+                    return result;
+                }
 	
 			<%else>
 				public <% typeName %> set<% field.getName() %>(<% fieldTypeName %> value)
@@ -275,7 +289,12 @@ public class <% typeName %> extends BaseMessage
 					</%java>
 	
 					return <% methodCall %>;
-				}	
+				}
+
+                public Object getUntyped<% field.getName() %>()
+                {
+                    return this.msg.getField("<% field.getName() %>");
+                }
 			</%if>
 			
             public IFilter get<% field.getName() %>Filter()
