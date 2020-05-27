@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.dictionaries;
 
 import static org.apache.commons.lang3.StringUtils.compareIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -699,7 +700,7 @@ public class DictionaryEditorModel {
     private void populateDictionaryFields(TreeModel<FieldEditorModel> model) {
 
         if (model.getData() != null) {
-            if (StringUtils.isEmpty(model.getData().getField().getName()) && !StringUtils.isEmpty(model.getData().getField().getId())) {
+            if (isEmpty(model.getData().getField().getName()) && !isEmpty(model.getData().getField().getId())) {
                 model.getData().getField().setName(model.getData().getField().getId());
             }
 
@@ -710,7 +711,7 @@ public class DictionaryEditorModel {
 
             model.getData().getField().setId(prefix + model.getIndex());
 
-            if (StringUtils.isEmpty(model.getData().getField().getName())) {
+            if (isEmpty(model.getData().getField().getName())) {
                 model.getData().getField().setName(model.getData().getField().getId());
             }
         }
@@ -722,7 +723,7 @@ public class DictionaryEditorModel {
 
     private void populateFields(List<ModifiableFieldStructure> list) {
         for (ModifiableFieldStructure field : list) {
-            if (StringUtils.isEmpty(field.getName()) && !StringUtils.isEmpty(field.getId())) {
+            if (isEmpty(field.getName()) && !isEmpty(field.getId())) {
                 field.setName(field.getId());
             }
         }
@@ -731,13 +732,13 @@ public class DictionaryEditorModel {
     private void populateDictFieldModels(List<FieldEditorModel> dictFieldModels) {
         for (FieldEditorModel model : dictFieldModels) {
 
-            if (StringUtils.isEmpty(model.getField().getName()) && !StringUtils.isEmpty(model.getField().getId())) {
+            if (isEmpty(model.getField().getName()) && !isEmpty(model.getField().getId())) {
                 model.getField().setName(model.getField().getId());
             }
 
             model.getField().setId(model.getIndex());
 
-            if (StringUtils.isEmpty(model.getField().getName())) {
+            if (isEmpty(model.getField().getName())) {
                 model.getField().setName(model.getField().getId());
             }
         }
@@ -1075,7 +1076,7 @@ public class DictionaryEditorModel {
             return;
         }
 
-        if(StringUtils.isEmpty(newField.getName())) {
+        if(isEmpty(newField.getName())) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", "Message name is required");
             return;
         }
@@ -1141,7 +1142,7 @@ public class DictionaryEditorModel {
             return;
         }
 
-        if(StringUtils.isEmpty(newField.getName())) {
+        if(isEmpty(newField.getName())) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", "Field name is required");
             return;
         }
@@ -1157,16 +1158,21 @@ public class DictionaryEditorModel {
         }
 
         if(newField.getReference() instanceof String) {
-            if(StringUtils.isEmpty((String)newField.getReference())) {
+            if(isEmpty((String)newField.getReference())) {
 
                 newField.setReference(null);
 
             } else {
                 newField.setReference(getFieldById((String)newField.getReference()));
-                if(StringUtils.isEmpty(newField.getImplDefaultValue())) {
+                if(isEmpty(newField.getImplDefaultValue())) {
                     newField.setDefaultValue(newField.getImplReference().getImplDefaultValue());
                 }
             }
+        }
+        // FIXME: should be removed during field editing.
+        // We should get the defaultValue == null if user have not specify it explicitly
+        if (isEmpty(newField.getImplDefaultValue())) {
+            newField.setDefaultValue(null);
         }
 
         ModifiableFieldStructure field = cloneField(newField);
@@ -1622,7 +1628,7 @@ public class DictionaryEditorModel {
             return null;
         }
 
-        if(StringUtils.isEmpty(newField.getName())) {
+        if(isEmpty(newField.getName())) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", "Field name is required");
             return null;
         }
@@ -1653,14 +1659,14 @@ public class DictionaryEditorModel {
         boolean newMessageAdded = false;
 
         if(newField.getReference() instanceof String) {
-            if(StringUtils.isEmpty((String)newField.getReference())) {
+            if(isEmpty((String)newField.getReference())) {
 
                 newField.setReference(null);
 
             } else if(!"Message".equals(newType)) {
 
                 newField.setReference(getFieldById((String)newField.getReference()));
-                if(StringUtils.isEmpty(newField.getImplDefaultValue())) {
+                if(isEmpty(newField.getImplDefaultValue())) {
                     newField.setDefaultValue(newField.getImplReference().getImplDefaultValue());
                 }
 
@@ -2223,7 +2229,7 @@ public class DictionaryEditorModel {
             return;
         }
 
-        if(StringUtils.isEmpty(saveAsContainer.getNamespace())) {
+        if(isEmpty(saveAsContainer.getNamespace())) {
             BeanUtil.addErrorMessage("Namespace is required", "");
             return;
         }
@@ -2485,7 +2491,7 @@ public class DictionaryEditorModel {
 
             model.applyChanges();
 
-            if (StringUtils.isEmpty(setDescription)) {
+            if (isEmpty(setDescription)) {
                 setDescription = null;
             }
 
@@ -3349,7 +3355,7 @@ public class DictionaryEditorModel {
 
         this.newType = newType;
 
-        if (StringUtils.isEmpty(newType)) {
+        if (isEmpty(newType)) {
 
             newField.setJavaType(null);
 
