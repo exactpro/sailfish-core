@@ -203,6 +203,7 @@ public class <% typeName %> extends BaseMessage
                 }
                 </%if>
 
+                <%if (!field.isComplex()) %>
                 public List<?> getUntyped<% field.getName() %>()
                 {
                     List<?> values = this.msg.getField("<% field.getName() %>");
@@ -216,6 +217,7 @@ public class <% typeName %> extends BaseMessage
                     result.addAll(values);
                     return result;
                 }
+                </%if>
 	
 			<%else>
 				public <% typeName %> set<% field.getName() %>(<% fieldTypeName %> value)
@@ -291,10 +293,12 @@ public class <% typeName %> extends BaseMessage
 					return <% methodCall %>;
 				}
 
+                <%if (!field.isComplex()) %>
                 public Object getUntyped<% field.getName() %>()
                 {
                     return this.msg.getField("<% field.getName() %>");
                 }
+                </%if>
 			</%if>
 			
             public IFilter get<% field.getName() %>Filter()
