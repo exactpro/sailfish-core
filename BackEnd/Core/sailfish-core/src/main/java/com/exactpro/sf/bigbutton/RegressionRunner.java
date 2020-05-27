@@ -143,6 +143,7 @@ public class RegressionRunner implements AutoCloseable {
 
 	// clear run results
 	public void reset() {
+        logger.info("BigButton reset has been called");
 
 		if(lock.tryAcquire()) {
 
@@ -170,6 +171,7 @@ public class RegressionRunner implements AutoCloseable {
 
 	// Set library
     public void prepare(LibraryImportResult importResult) {
+        logger.info("BigButton prepare has been called");
 
 		if (lock.tryAcquire()) {
 
@@ -226,6 +228,7 @@ public class RegressionRunner implements AutoCloseable {
 	
 	// Start library execution
 	public void run() {
+        logger.info("BigButton run has been called");
 		
 		if (lock.tryAcquire()) {
 			
@@ -263,6 +266,7 @@ public class RegressionRunner implements AutoCloseable {
 
     public void interrupt(String message) {
         monitor.interrupt(message);
+        logger.info("BigButton execution has been interrupted with message: '{}'", message);
     }
 
 	public boolean isFree() {
@@ -276,11 +280,13 @@ public class RegressionRunner implements AutoCloseable {
     public void pause(){
         pause = true;
         monitor.runPaused();
+        logger.info("BigButton execution has been paused");
     }
 
     public void resume(){
         pause = false;
         monitor.resumeRun();
+        logger.info("BigButton execution has been resumed");
     }
 
     public IWorkspaceDispatcher getWorkspaceDispatcher() {
