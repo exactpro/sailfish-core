@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -26,21 +27,19 @@ import org.mockito.Mockito;
 
 import com.exactpro.sf.common.impl.messages.IBaseEnumField;
 
-import junit.framework.Assert;
-
 /**
  * @author nikita.smirnov
  *
  */
 public class TestConvertUtil {
 
+    ConvertUtil convertUtil = new ConvertUtil();
+
     @Rule
     public ExpectedException thrown= ExpectedException.none();
 
     @Test
     public void testToChar() {
-        ConvertUtil convertUtil = new ConvertUtil();
-
         Assert.assertEquals(Character.valueOf('A'), convertUtil.toChar('A'));
         Assert.assertEquals(Character.valueOf('B'), convertUtil.toChar("B"));
         Assert.assertEquals(Character.valueOf('`'), convertUtil.toChar("0", true));
@@ -93,6 +92,18 @@ public class TestConvertUtil {
                 }
             }
         }
+    }
+
+    @Test
+    public void testHexToDec() {
+        Assert.assertEquals("6204c80100000b99", convertUtil.decToHex(7062990022244305817L));
+        Assert.assertEquals(null, convertUtil.decToHex(null));
+    }
+
+    @Test
+    public void testDecToHex() {
+        Assert.assertEquals(7062990022244305817L, (long) convertUtil.hexToDec("6204C80100000B99"));
+        Assert.assertEquals(null, convertUtil.hexToDec(null));
     }
 }
 

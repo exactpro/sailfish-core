@@ -413,4 +413,22 @@ public class ConvertUtil extends AbstractCaller {
         String stringValue = toString(value);
         return stringValue == null ? null : Pattern.quote(stringValue);
     }
+
+    @UtilityMethod
+    @Description("Converts a String HEX value to Long DEC.<br/>"
+            + "<b>value</b> - a value for converting.<br/>"
+            + "Example:<br/>"
+            + "#{hexToDec(\"6204C80100000B99\")} returns 7062990022244305817")
+    public Long hexToDec(String value) {
+        return  value == null ? null : Long.parseLong(value, 16);
+    }
+
+    @UtilityMethod
+    @Description("Converts a Long DEC value to String HEX.<br/>"
+            + "<b>value</b> - a value for converting.<br/>"
+            + "Example:<br/>"
+            + "#{decToHex(\"7062990022244305817L\")} returns 6204C80100000B99")
+    public String decToHex(Number value) {
+        return value == null ? null : Long.toString(value.longValue(), 16);
+    }
 }
