@@ -19,6 +19,9 @@ import Log from '../../models/Log';
 import { createStyleSelector } from '../../helpers/styleCreators';
 import SearchableContent from "../search/SearchableContent";
 import { keyForLog } from "../../helpers/keys";
+import { RecoverableExpandablePanel } from '../ExpandablePanel';
+import { RecoverableExceptionChain } from '../ExceptionChain';
+import { stopPropagationHandler } from '../../helpers/react';
 
 interface LogCardProps {
 	log: Log;
@@ -63,13 +66,34 @@ export default function LogCard({ log , index }: LogCardProps){
 							<div className="log-card__exception">Exception</div>
 							<div className="log-card__exception-val">{exception.class}</div>
 						</>
+						
 				}
+				
 			</div>
 			<div className="log-card__delimiter" />
 			<div className="log-card__content">
 				<SearchableContent
 					contentKey={keyForLog(index, 'message')}
 					content={message} />
+				{
+					exception && 
+					<div className="lc-body__exception-chain-header">
+						<RecoverableExpandablePanel
+							stateKey={keyForLog(index, 'exception')}>
+							{
+								toggleExpand => (
+									<div className="lc-body__item-title"
+											onClick={stopPropagationHandler(toggleExpand)}>
+										Cause
+									</div>
+								)
+							}
+							<RecoverableExceptionChain
+								exception={exception}
+								stateKey={`${keyForLog(index, 'exception')}-chain`}/>
+						</RecoverableExpandablePanel>
+					</div>
+				}
 			</div>
 		</div>
 	)

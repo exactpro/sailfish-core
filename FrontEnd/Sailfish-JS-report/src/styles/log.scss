@@ -127,6 +127,26 @@
 	}
 }
 
+.lc-body {
+    display: block;
+    box-sizing: border-box;
+    word-break: break-all;
+
+    &__item-title {
+        font-weight: bold;
+        font-size: 18px;
+
+        &:hover {
+            @include unselectable;
+            cursor: pointer;
+        }
+    }
+
+    &__exception-chain-header {
+        margin-top: 10px;
+    }
+}
+
 .lc-skeleton {
     @include skeleton-pulse;
     box-sizing: border-box;

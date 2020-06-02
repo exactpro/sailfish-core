@@ -24,6 +24,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import SkeletonedLogsListItem from './SkeletonedLogsListItem';
 import '../../styles/log.scss';
+import StateSaverProvider from '../util/StateSaverProvider';
 
 interface StateProps {
     logsCount: number;
@@ -83,14 +84,16 @@ const LogsListBase = React.forwardRef<LogListActions, Props>(({
     return (
         <div className="logs">
             <div className="logs__list">
-                <Virtuoso
-                    ref={virtuosoRef}
-                    totalCount={logsCount}
-                    item={renderLog}
-                    overscan={3}
-                    style={{height: '100%'}}
-                    className="logs__scroll-container"
-                />
+                <StateSaverProvider>
+                    <Virtuoso
+                        ref={virtuosoRef}
+                        totalCount={logsCount}
+                        item={renderLog}
+                        overscan={3}
+                        style={{height: '100%'}}
+                        className="logs__scroll-container"
+                    />
+                </StateSaverProvider>
             </div>
         </div>
     )
