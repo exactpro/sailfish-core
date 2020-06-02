@@ -96,7 +96,7 @@ public class TestConvertUtil {
 
     @Test
     public void testHexToDec() {
-        Assert.assertEquals("6204c80100000b99", convertUtil.decToHex(7062990022244305817L));
+        Assert.assertEquals("6204C80100000B99", convertUtil.decToHex(7062990022244305817L));
         Assert.assertEquals(null, convertUtil.decToHex(null));
     }
 
