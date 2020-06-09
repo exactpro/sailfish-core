@@ -1,3 +1,18 @@
+<!--/******************************************************************************-->
+<!--        * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)-->
+<!--        *-->
+<!--        * Licensed under the Apache License, Version 2.0 (the "License");-->
+<!--        * you may not use this file except in compliance with the License.-->
+<!--        * You may obtain a copy of the License at-->
+<!--        *-->
+<!--        *     http://www.apache.org/licenses/LICENSE-2.0-->
+<!--        *-->
+<!--        * Unless required by applicable law or agreed to in writing, software-->
+<!--        * distributed under the License is distributed on an "AS IS" BASIS,-->
+<!--        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.-->
+<!--        * See the License for the specific language governing permissions and-->
+<!--        * limitations under the License.-->
+<!--        ******************************************************************************/-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
         "http://www.w3.org/TR/html4/strict.dtd">
 
@@ -6,9 +21,9 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:c="http://java.sun.com/jstl/core">
+>
 <h:head>
-    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Download :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
 
@@ -32,7 +47,8 @@
 		console.error = console.error || function(){};
 		console.info = console.info || function(){};
 
-  	</script>
+
+    </script>
 
 </h:head>
 <h:body styleClass="eps-application">
@@ -43,15 +59,15 @@
 
 
     <f:metadata>
-        <f:event type="preRenderView" listener="#{DownloadBean.preRenderView}" />
+        <f:event type="preRenderView" listener="#{DownloadBean.preRenderView}"/>
     </f:metadata>
 
     <div class="eps-container">
 
         <h:form id="form" prependId="false" styleClass="eps-download-form">
-            <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true" />
+            <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true"/>
             <p:remoteCommand name="postDownload" action="#{DownloadBean.postDownload}"/>
-            <p:defaultCommand target="goButton" />
+            <p:defaultCommand target="goButton"/>
 
             <p:outputPanel id="download-header" styleClass="eps-download-header">
                 <div class="eps-path-wrapper">
@@ -60,7 +76,7 @@
 
                     <p:menubar styleClass="eps-go-button">
                         <p:menuitem id="goButton" icon="eps-custom-icon eps-custom-icon-goto" update="mainMenuBar curDirP folderContent"
-                                    actionListener="#{DownloadBean.toTextFolder}" oncomplete="onSortComplete()" />
+                                    actionListener="#{DownloadBean.toTextFolder}" oncomplete="onSortComplete()"/>
                     </p:menubar>
                 </div>
 
@@ -71,9 +87,9 @@
 
                     <p:menuitem id="getSizeButton" icon="eps-custom-icon eps-custom-icon-calc" actionListener="#{DownloadBean.getFolderSize}" update="folderContent" disabled="#{DownloadBean.sizeBtnNotAvailable}"/>
                     <p:menuitem id="upButton" icon="eps-custom-icon eps-custom-icon-back" disabled="#{DownloadBean.upNotAvailable}" actionListener="#{DownloadBean.toParentFolder}"
-                                update="mainMenuBar curDirP folderContent download-header" oncomplete="onSortComplete()" />
+                                update="mainMenuBar curDirP folderContent download-header" oncomplete="onSortComplete()"/>
                     <p:menuitem icon="eps-custom-icon eps-custom-icon-folder" id="inButton" actionListener="#{DownloadBean.toSelected}" update="mainMenuBar curDirP folderContent"
-                                disabled="#{DownloadBean.openFolderNotAvailable}" oncomplete="onSortComplete()" />
+                                disabled="#{DownloadBean.openFolderNotAvailable}" oncomplete="onSortComplete()"/>
                     <p:menuitem id="downloadButton" icon="eps-custom-icon eps-custom-icon-download" ajax="false" disabled="#{DownloadBean.downloadNotAvailable}">
                         <p:fileDownload value="#{DownloadBean.strContent}"/>
                     </p:menuitem>
@@ -81,6 +97,7 @@
                         <p:fileDownload value="#{DownloadBean.zipContent}"/>
                     </p:menuitem>
                     <p:menuitem id="showTextButton" icon="eps-custom-icon eps-custom-icon-view" ajax="false" disabled="#{DownloadBean.showTextNotAvailable}" actionListener="#{DownloadBean.showTextContentModal}"/>
+                    <p:menuitem id="deleteButton" icon="eps-custom-icon eps-custom-icon-delete" ajax="false" disabled="#{DownloadBean.deleteFilesNotAvailable}" onclick="PF('confirmation').show(); return false;"/>
 
                 </p:menubar>
 
@@ -90,6 +107,7 @@
                 <p:tooltip value="Download selected folders and files" for="downloadButton"/>
                 <p:tooltip value="Download selected as ZIP" for="downloadZipButton"/>
                 <p:tooltip value="Show file content" for="showTextButton"/>
+                <p:tooltip value="Delete file(s)" for="deleteButton"/>
 
             </p:outputPanel>
 
@@ -99,26 +117,26 @@
                          rowKey="#{file.name}" scrollable="true" scrollHeight="100%" resizableColumns="true"
                          rowStyleClass="eps-download-row #{file.directory ? 'directory-row' : 'file-row'}" styleClass="eps-main-table eps-download-table">
 
-                <p:ajax event="rowSelect"	update=":form:download-header" />
-                <p:ajax event="rowUnselect" update=":form:download-header" />
-                <p:ajax event="rowSelectCheckbox" update=":form:download-header" />
-                <p:ajax event="rowUnselectCheckbox" update=":form:download-header" />
-                <p:ajax event="toggleSelect" update=":form:download-header" />
-                <p:ajax event="rowDblselect" listener="#{DownloadBean.toSelected}" update=":form:mainMenuBar :form:curDirP folderContent :form:download-header"
+                <p:ajax event="rowSelect" update=":form:download-header :confirmationForm:deleteFilesList"/>
+                <p:ajax event="rowUnselect" update=":form:download-header :confirmationForm:deleteFilesList"/>
+                <p:ajax event="rowSelectCheckbox" update=":form:download-header :confirmationForm:deleteFilesList"/>
+                <p:ajax event="rowUnselectCheckbox" update=":form:download-header :confirmationForm:deleteFilesList"/>
+                <p:ajax event="toggleSelect" update=":form:download-header :confirmationForm:deleteFilesList"/>
+                <p:ajax event="rowDblselect" listener="#{DownloadBean.toSelected}" update=":form:mainMenuBar :form:curDirP folderContent :form:download-header :confirmationForm:deleteFilesList"
                         oncomplete="onSortComplete()"/>
-                <p:ajax event="sort" oncomplete="onSortComplete()" />
+                <p:ajax event="sort" oncomplete="onSortComplete()"/>
 
                 <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
                 <p:column headerText="" sortBy="#{file.directory}" style="width: 10px">
-                    <h:graphicImage library="sf" name="images/download/isDir/#{file.directory}.png" />
+                    <h:graphicImage library="sf" name="images/download/isDir/#{file.directory}.png"/>
                 </p:column>
 
-                <p:column headerText="Name" sortBy="#{file.name}" style="width: 550px">
+                <p:column headerText="Name" sortBy="#{file.name}" style="width: 540px">
                     <h:outputText value="#{file.name}"/>
                 </p:column>
 
-                <p:column headerText="Last Modification"  sortBy="#{file.rawLastModification}" style="width: 130px" >
+                <p:column headerText="Last Modification" sortBy="#{file.rawLastModification}" style="width: 130px">
                     <h:outputText value="#{file.lastModification}"/>
                 </p:column>
 
@@ -126,9 +144,14 @@
                     <h:outputText value="#{file.size}"/>
                 </p:column>
 
+                <p:column style="width: 10px">
+                    <h:outputText value="#{DownloadBean.isDeleteFileAvailable(file) ? '+' : '' }"/>
+                </p:column>
+
             </p:dataTable>
 
             <br/>
+
         </h:form>
     </div>
 
@@ -140,55 +163,55 @@
     <h:outputScript library="sf" name="js/menu.js"/>
 
     <h:form id="showTextForm" prependId="false">
-        <p:dialog id="showTextDialog" header="#{DownloadBean.viewedFileName}" widgetVar="showTxtDlg" 
-        			modal="true" width="70%" closeOnEscape="true" position="center" draggable="true">
+        <p:dialog id="showTextDialog" header="#{DownloadBean.viewedFileName}" widgetVar="showTxtDlg"
+                  modal="true" width="70%" closeOnEscape="true" position="center" draggable="true">
             <p:ajax event="close" listener="#{DownloadBean.contentDialogClose}"/>
-            
+
             <div>
-            <h:panelGrid columns="2">
-            <p:inputText id="searchField" value="#{DownloadBean.searchPhrase}" styleClass="eps-input eps-path-input"/>
-            <p:menubar>
-                <p:menuitem id="findBack" icon="eps-custom-icon eps-custom-icon-prev"
-                            actionListener="#{DownloadBean.find(true)}"
-                            update="afterLoad" oncomplete="afterLoad()"
-                            disabled="#{DownloadBean.prevPageNotAvailable}"/>
-                <p:menuitem id="find" icon="eps-custom-icon eps-custom-icon-search"/>
-                <p:menuitem id="findNext" icon="eps-custom-icon eps-custom-icon-next"
-                            actionListener="#{DownloadBean.find(false)}"
-                            update="afterLoad" oncomplete="afterLoad()"
-                            disabled="#{DownloadBean.nextPageNotAvailable}"/>
-            </p:menubar>
-            <h:panelGroup id="afterLoad">
-    			<h:outputScript>
-        			function afterLoad() {    
-            			if (#{DownloadBean.notFound}) {
-            				$("input[name='searchField']").css("color","red");
-            			}
-            		}
-   				 </h:outputScript>
-			</h:panelGroup>
-			</h:panelGrid>
-			</div>
-			
-			<p:outputLabel id="textOfPage" style="white-space: pre-wrap; font-size: 10px" value="#{DownloadBean.loadedPageOfFile}" escape="false"/>
-            		
+                <h:panelGrid columns="2">
+                    <p:inputText id="searchField" value="#{DownloadBean.searchPhrase}" styleClass="eps-input eps-path-input"/>
+                    <p:menubar>
+                        <p:menuitem id="findBack" icon="eps-custom-icon eps-custom-icon-prev"
+                                    actionListener="#{DownloadBean.find(true)}"
+                                    update="afterLoad" oncomplete="afterLoad()"
+                                    disabled="#{DownloadBean.prevPageNotAvailable}"/>
+                        <p:menuitem id="find" icon="eps-custom-icon eps-custom-icon-search"/>
+                        <p:menuitem id="findNext" icon="eps-custom-icon eps-custom-icon-next"
+                                    actionListener="#{DownloadBean.find(false)}"
+                                    update="afterLoad" oncomplete="afterLoad()"
+                                    disabled="#{DownloadBean.nextPageNotAvailable}"/>
+                    </p:menubar>
+                    <h:panelGroup id="afterLoad">
+                        <h:outputScript>
+                            function afterLoad() {
+                            if (#{DownloadBean.notFound}) {
+                            $("input[name='searchField']").css("color","red");
+                            }
+                            }
+                        </h:outputScript>
+                    </h:panelGroup>
+                </h:panelGrid>
+            </div>
+
+            <p:outputLabel id="textOfPage" style="white-space: pre-wrap; font-size: 10px" value="#{DownloadBean.loadedPageOfFile}" escape="false"/>
+
             <div align="center">
-            <h:panelGrid columns="1">
-            <p:menubar id="viewerMenuBar" styleClass="eps-download-toolbar">
-            	<p:menuitem id="firstPage" icon="eps-custom-icon eps-custom-icon-first"
-            				disabled="#{DownloadBean.prevPageNotAvailable}"
-                            actionListener="#{DownloadBean.firstPage}"/>
-                <p:menuitem id="previousPage" icon="eps-custom-icon eps-custom-icon-prev"
-                            disabled="#{DownloadBean.prevPageNotAvailable}"
-                            actionListener="#{DownloadBean.previousPage}"/>
-                <p:menuitem id="nextPage" icon="eps-custom-icon eps-custom-icon-next"
-                            disabled="#{DownloadBean.nextPageNotAvailable}"
-                            actionListener="#{DownloadBean.nextPage}"/>
-                <p:menuitem id="lastPage" icon="eps-custom-icon eps-custom-icon-last"
-                			disabled="#{DownloadBean.nextPageNotAvailable}"
-                            actionListener="#{DownloadBean.lastPage}"/>
-            </p:menubar>
-            </h:panelGrid>
+                <h:panelGrid columns="1">
+                    <p:menubar id="viewerMenuBar" styleClass="eps-download-toolbar">
+                        <p:menuitem id="firstPage" icon="eps-custom-icon eps-custom-icon-first"
+                                    disabled="#{DownloadBean.prevPageNotAvailable}"
+                                    actionListener="#{DownloadBean.firstPage}"/>
+                        <p:menuitem id="previousPage" icon="eps-custom-icon eps-custom-icon-prev"
+                                    disabled="#{DownloadBean.prevPageNotAvailable}"
+                                    actionListener="#{DownloadBean.previousPage}"/>
+                        <p:menuitem id="nextPage" icon="eps-custom-icon eps-custom-icon-next"
+                                    disabled="#{DownloadBean.nextPageNotAvailable}"
+                                    actionListener="#{DownloadBean.nextPage}"/>
+                        <p:menuitem id="lastPage" icon="eps-custom-icon eps-custom-icon-last"
+                                    disabled="#{DownloadBean.nextPageNotAvailable}"
+                                    actionListener="#{DownloadBean.lastPage}"/>
+                    </p:menubar>
+                </h:panelGrid>
             </div>
 
             <p:tooltip value="Next page" for="nextPage"/>
@@ -197,6 +220,34 @@
             <p:tooltip value="Find next" for="findNext"/>
             <p:tooltip value="Find previous" for="findBack"/>
 
+        </p:dialog>
+    </h:form>
+
+    <h:form enctype="multipart/form-data" id="confirmationForm">
+        <p:dialog header="Delete file(s)" widgetVar="confirmation" modal="true" resizable="false">
+            <div style="text-align: center; margin: 10px auto;">
+                <h:outputText value="Are you sure about deleting selected files?"/>
+            </div>
+            <h:panelGroup id="deleteFilesList" styleClass="eps-delete-files-list-wrap">
+                <ul class="eps-delete-files-list">
+                    <ui:repeat value="#{DownloadBean.getTopSelectedFiles(10)}" var="file">
+                        <li>
+                            <h:outputText value="#{file.name}"/>
+                        </li>
+                    </ui:repeat>
+                </ul>
+                <h:outputText value="... and #{DownloadBean.getNumberOfSelectedFiles() - 10} more files." rendered="#{DownloadBean.getNumberOfSelectedFiles() > 10}"/>
+            </h:panelGroup>
+
+
+            <div style="text-align: left; margin: 5px auto;">
+                <h:outputText value="*Attention! Files can be deleted only from the last layer."/>
+            </div>
+
+            <div style="text-align: center;">
+                <p:commandButton id="deleteSubmit" value="Yes" action="#{DownloadBean.deleteFiles}" oncomplete="PF('confirmation').hide()" update=":form"/>
+                <p:commandButton id="deleteCancel" value="No" oncomplete="PF('confirmation').hide()"/>
+            </div>
         </p:dialog>
     </h:form>
 

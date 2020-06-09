@@ -167,4 +167,12 @@ public interface IWorkspaceDispatcher {
      * @return writeable file from last layer
      */
     File getWritableFile(FolderType folderType, String... fileName) throws WorkspaceSecurityException, IOException;
+
+    /**
+     * Checks whether the file is on the last layer. If the last layer is the only one, returns false.
+     * @return
+     */
+    default boolean isLastLayerFile(FolderType folderType, String... fileName) throws IOException {
+        throw new UnsupportedOperationException("Method 'isLastLayerFile' isn't implement.");
+    }
 }

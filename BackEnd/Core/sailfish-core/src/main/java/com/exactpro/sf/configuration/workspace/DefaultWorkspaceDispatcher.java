@@ -23,7 +23,6 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -44,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.Pair;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
@@ -214,6 +212,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
     /**
      * Create file in the last workspace
+     *
      * @throws WorkspaceStructureException
      */
     @Override
@@ -355,7 +354,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 	        	if (!folderInWorkspace.exists()) {
 	        	    continue;
 	        	}
-	        	
+
 	        	Path pathInWorkspace = folderInWorkspace.toPath();
                 try {
                     Files.walk(pathInWorkspace, recursive ? Integer.MAX_VALUE : 1, FileVisitOption.FOLLOW_LINKS)
@@ -394,6 +393,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
     /**
      * Find file in workspaces (search order: form last workspace to deploy folder)
+     *
      * @param folderType
      * @param fileName
      * @return
@@ -403,21 +403,13 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         File targetFile = null;
         try {
             workspacesLock.readLock().lock();
-            for(int i = workspaces.size() - 1; i >= 0; i--) {
+            for (int i = workspaces.size() - 1; i >= 0; i--) {
                 WorkspaceLayer layer = workspaces.get(i);
-	        	targetFile = new File(layer.get(folderType), toPathString(fileName));
-
-	        	Path targetPath = targetFile.toPath().normalize();
-                Path rootPath = workspaces.get(i).get(folderType).toPath().normalize();
-	        	if (! targetPath.startsWith(rootPath)) {
-	        		throw new WorkspaceSecurityException("Access outside workspace is denied. Access file: {" + folderType + "}/" + toPathString(fileName));
-	        	}
-
-
-	            if (targetFile.exists()) {
-	                return Maps.immutableEntry(layer, targetFile);
-	            }
-	        }
+                targetFile = new File(layer.get(folderType), toPathString(fileName));
+                if (existsOnLayer(folderType, layer, fileName)) {
+                    return Maps.immutableEntry(layer, targetFile);
+                }
+            }
         } finally {
             workspacesLock.readLock().unlock();
         }
@@ -534,6 +526,34 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
 
         return targetFile;
+    }
+
+    @Override
+    public boolean isLastLayerFile(FolderType folderType, String... fileName) throws IOException {
+        checkFolderTypeAndFileName(folderType, fileName);
+
+        if (workspaces.size() <= 1) {
+            return false;
+        }
+
+        try {
+            workspacesLock.readLock().lock();
+            return existsOnLayer(folderType, workspaces.get(workspaces.size() - 1), fileName);
+        } finally {
+            workspacesLock.readLock().unlock();
+        }
+    }
+
+    private boolean existsOnLayer(FolderType folderType, WorkspaceLayer layer, String... fileName) {
+        File targetFile = new File(layer.get(folderType), toPathString(fileName));
+
+        Path targetPath = targetFile.toPath().normalize();
+        Path rootPath = layer.get(folderType).toPath().normalize();
+        if (!targetPath.startsWith(rootPath)) {
+            throw new WorkspaceSecurityException("Access outside workspace is denied. Access file: {" + folderType + "}/" + toPathString(fileName));
+        }
+
+        return targetFile.exists();
     }
 
     private void checkFolderTypeAndFileName(FolderType folderType, String... fileName) {

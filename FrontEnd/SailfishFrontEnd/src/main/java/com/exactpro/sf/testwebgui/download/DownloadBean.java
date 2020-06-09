@@ -21,8 +21,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -47,9 +51,9 @@ import com.exactpro.sf.testwebgui.BeanUtil;
 public class DownloadBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DownloadBean.class);
-	
+
 	private static final String ZIP_NAME = "files.zip";
-	
+
 	private List<FileAdapter> files;
 
 	private String curDirPath;
@@ -59,7 +63,7 @@ public class DownloadBean implements Serializable {
 	private boolean upNotAvailable;
 
     private boolean showHiddenFiles;
-	
+
     private String loadedPageOfFile;
 
     private transient PagedFileViewer pagedFileViewer;
@@ -71,7 +75,7 @@ public class DownloadBean implements Serializable {
         init();
         return this;
     }
-    
+
 	@PostConstruct
 	public void init() {
 		changeDirectory(".");
@@ -84,9 +88,9 @@ public class DownloadBean implements Serializable {
 	}
 
 	private void fillFiles() throws FileNotFoundException, WorkspaceSecurityException {
-		
+
 		IWorkspaceDispatcher workspaceDispatcher = BeanUtil.findBean(BeanUtil.WORKSPACE_DISPATCHER, IWorkspaceDispatcher.class);
-		
+
 		ArrayList<String> children = new ArrayList<String>(workspaceDispatcher.listFiles(null, FolderType.ROOT, curDirPath));
 		this.files = new ArrayList<FileAdapter>();
 
@@ -130,42 +134,42 @@ public class DownloadBean implements Serializable {
 		logger.info("getZipContent invoked {}", getUser());
 
         try {
-			
+
 			String absoluteWebPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
 			File zipFile = new File(absoluteWebPath, ZIP_NAME);
-			
+
 			if (zipFile.exists()) {
 				zipFile.delete();
 			}
-		
+
 			AppZip appZip = new AppZip();
 
             for(FileAdapter fa : selectedFiles) {
 				appZip.generateFileList(fa.getFile());
 			}
-			
+
 			appZip.zipIt(zipFile.getAbsoluteFile().toString());
-			
+
 			FileInputStream in = new FileInputStream(zipFile);
 
             return new DefaultStreamedContent(in, "application/zip", ZIP_NAME);
-			
+
 		} catch (IOException e) {
 			logger.error("Zip Downloading Error", e.getMessage(), e);
 		}
 
         return null;
 	}
-	
+
 	public void postDownload() {
 		logger.info("postDownload invoked {}", getUser());
 		String absoluteWebPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
 		File zipFile = new File(absoluteWebPath, ZIP_NAME);
-		
+
 		if (zipFile.exists()) {
 			zipFile.delete();
 		}
-		
+
 	}
 
 	public String getCurrentDir() {
@@ -272,9 +276,9 @@ public class DownloadBean implements Serializable {
 			return false;
 		}
 		try {
-			
+
 			IWorkspaceDispatcher workspaceDispatcher = BeanUtil.findBean(BeanUtil.WORKSPACE_DISPATCHER, IWorkspaceDispatcher.class);
-			
+
 			File newFile = workspaceDispatcher.getFile(FolderType.ROOT, newPath);
 			if (!newFile.isDirectory()) {
 				return false;
@@ -287,8 +291,8 @@ public class DownloadBean implements Serializable {
 			return false;
 		}
 	}
-	
-	
+
+
 	private void changeDirectory(String newDirectoryPath) {
 	    updateCurrentPath(newDirectoryPath);
         try {
@@ -301,6 +305,66 @@ public class DownloadBean implements Serializable {
 
     public boolean isShowTextNotAvailable() {
         return selectedFiles.length != 1 || selectedFiles[0].isDirectory();
+    }
+
+    public boolean isDeleteFileAvailable(FileAdapter fileAdapter) {
+        if (fileAdapter.isDirectory()) {
+            return false;
+        }
+
+        IWorkspaceDispatcher workspaceDispatcher = BeanUtil.findBean(BeanUtil.WORKSPACE_DISPATCHER, IWorkspaceDispatcher.class);
+
+        try {
+            return workspaceDispatcher.isLastLayerFile(FolderType.ROOT, curDirPath, fileAdapter.getFile().getName());
+        } catch (Exception e) {
+            logger.warn("Unable to get information about file {}", fileAdapter.getFile().getName(), e);
+        }
+        return false;
+    }
+
+    public boolean isDeleteFilesNotAvailable() {
+        if (Stream.of(selectedFiles).anyMatch(FileAdapter::isDirectory)) {
+            return true;
+        }
+
+        IWorkspaceDispatcher workspaceDispatcher = BeanUtil.findBean(BeanUtil.WORKSPACE_DISPATCHER, IWorkspaceDispatcher.class);
+
+        return selectedFiles.length == 0 || Stream.of(selectedFiles)
+                .map(FileAdapter::getFile).anyMatch(file ->
+                {
+                    try {
+                        return !workspaceDispatcher.isLastLayerFile(FolderType.ROOT, curDirPath, file.getName());
+                    } catch (Exception e) {
+                        logger.warn("Unable to get information about file {}", file.getName(), e);
+                        return true;
+                    }
+                });
+    }
+
+    public void deleteFiles() throws FileNotFoundException {
+        if (selectedFiles.length > 0) {
+            IWorkspaceDispatcher workspaceDispatcher = BeanUtil.findBean(BeanUtil.WORKSPACE_DISPATCHER, IWorkspaceDispatcher.class);
+
+            for (FileAdapter fa : selectedFiles) {
+                try {
+                    workspaceDispatcher.removeFile(FolderType.ROOT, curDirPath, fa.getName());
+                } catch (Exception e) {
+                    logger.warn("Unable to remove file {}", fa.getName(), e);
+                }
+            }
+            fillFiles();
+        }
+    }
+
+    public List<FileAdapter> getTopSelectedFiles(int number) {
+        return Arrays.stream(selectedFiles)
+                .limit(number)
+                .sorted(Comparator.comparing(FileAdapter::getName, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+
+    public int getNumberOfSelectedFiles() {
+        return selectedFiles.length;
     }
 
     public void showTextContentModal() {
