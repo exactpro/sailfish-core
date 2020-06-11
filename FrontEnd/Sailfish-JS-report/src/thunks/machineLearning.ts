@@ -95,10 +95,9 @@ export function mlDeleteEntry(dataToDelete: SubmittedData): ThunkAction<void, ne
 
 export function fetchToken(): ThunkAction<void, never, never, AnyAction> {
     return (dispatch: ThunkDispatch<never, never, StateAction>, getState: () => AppState) => {
-        const { workFolder } = getState().report.reportProperties;
 
         const currentUrl = new URL(window.location.href);
-        const reportZipUrl = currentUrl.href.replace(/index\.html[^/]*$/g, currentUrl.pathname.endsWith(".zip/index.html") ?  "" :  (workFolder + ".zip"));
+        const reportZipUrl = currentUrl.href.replace(/\/index\.html[^/]*$/g, currentUrl.pathname.endsWith(".zip/index.html") ? "" : ".zip");
         const apiPath = getApiPath();
 
         if (!apiPath) {
