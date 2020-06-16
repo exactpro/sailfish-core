@@ -34,8 +34,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSize=512m" #Size of the Permanen
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+HeapDumpOnOutOfMemoryError" #Option tells the HotSpot VM to generate a heap dump when an allocation from the Java heap or the permanent generation cannot be satisfied.
 #export CATALINA_OPTS="$CATALINA_OPTS -XX:HeapDumpPath=" #For example -XX:HeapDumpPath=/disk2/dumps will cause the heap dump to be generated in the /disk2/dumps directory.
 #export CATALINA_OPTS="$CATALINA_OPTS -Duser.timezone=UTC" #Use the user.timezone property value as the default time zone ID if it's available.
-#export CATALINA_OPTS="$CATALINA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
 #export CATALINA_OPTS="$CATALINA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" #Use for configure jvm FlightRecorder
+export CATALINA_OPTS="$CATALINA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells that JVM should terminate process if OutOfMemoryError had been thrown
 export CATALINA_OPTS="$CATALINA_OPTS -Duser.dir=$CATALINA_BASE/temp" # Uses to specify directory for relative paths
 

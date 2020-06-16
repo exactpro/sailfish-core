@@ -35,8 +35,8 @@ set "CATALINA_OPTS=%CATALINA_OPTS% -XX:MaxPermSize=512m" rem Size of the Permane
 set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+HeapDumpOnOutOfMemoryError" rem Option tells the HotSpot VM to generate a heap dump when an allocation from the Java heap or the permanent generation cannot be satisfied.
 rem set "CATALINA_OPTS=%CATALINA_OPTS% -XX:HeapDumpPath=" rem For example -XX:HeapDumpPath=/disk2/dumps will cause the heap dump to be generated in the /disk2/dumps directory.
 rem set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.timezone=UTC" rem Use the user.timezone property value as the default time zone ID if it's available.
-rem set "CATALINA_OPTS=%CATALINA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
 rem set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" rem Use for configure jvm FlightRecorder
+set "CATALINA_OPTS=%CATALINA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
 set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
 set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
 
