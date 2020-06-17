@@ -26,9 +26,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.util.DateTimeUtility;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -48,21 +51,12 @@ public class FileSessionStorage {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private static final String STORAGE = "session_manager_storage.json";
-    private static final ObjectReader jsonReader = new ObjectMapper().reader(new MapTypeReference());
+    private static final ObjectReader jsonReader = new ObjectMapper().readerFor(new MapTypeReference());
     private static final ObjectWriter jsonWriter = new ObjectMapper().writer();
 
     private final File targetStorage;
     private final Map<String, TimestampedValue<?>> metadataMap;
-    private final Predicate<Long> lifetimePredicate = new Predicate<Long>() {
-
-        private final long leftBarrier = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli();
-        private final long rightBarrier = leftBarrier + (1000L * 60L * 60L * 24L);
-
-        @Override
-        public boolean test(Long unixTime) {
-            return leftBarrier < unixTime && rightBarrier > unixTime;
-        }
-    };
+    private final Predicate<Long> lifetimePredicate = new DailyLifetimeInvalidator();
 
 
     public FileSessionStorage(IWorkspaceDispatcher workspaceDispatcher, String protocol, String sessionId) throws IOException {
@@ -110,7 +104,7 @@ public class FileSessionStorage {
             throw new UnsupportedOperationException(value.getClass().getCanonicalName() + " is not supported to store");
         }
 
-        metadataMap.put(key, new TimestampedValue(value));
+        metadataMap.put(key, new TimestampedValue<>(value));
     }
 
     private boolean checkType(Class<?> clazz) {
@@ -147,6 +141,18 @@ public class FileSessionStorage {
         @Override
         public String toString() {
             return value.toString();
+        }
+    }
+
+    private static class DailyLifetimeInvalidator implements Predicate<Long> {
+
+        // start of the current day in epoch millis
+        private final long leftBarrier = DateTimeUtility.getMillisecond(DateTimeUtility.nowLocalDate());
+        private final long rightBarrier = leftBarrier + TimeUnit.DAYS.toMillis(1);
+
+        @Override
+        public boolean test(Long unixTime) {
+            return leftBarrier < unixTime && rightBarrier > unixTime;
         }
     }
 }
