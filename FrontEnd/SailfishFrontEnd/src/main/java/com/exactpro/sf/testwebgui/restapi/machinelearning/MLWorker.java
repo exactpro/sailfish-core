@@ -229,7 +229,7 @@ public class MLWorker {
             com.exactpro.sf.embedded.machinelearning.entities.Message parseMessage = JsonEntityParser.parseMessage(SFLocalContext.getDefault().getDictionaryManager(), parser, sfMessage.entrySet()
                     .stream()
                     .filter(o -> !(o instanceof Map))
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue()))), true);
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue()))), true, true);
 
             parseMessage.setId(message.getId());
 

@@ -18,6 +18,7 @@ package com.exactpro.sf.embedded.machinelearning;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDictionaryManager;
+import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.embedded.machinelearning.entities.EntryType;
 import com.exactpro.sf.embedded.machinelearning.entities.FailedAction;
@@ -70,7 +71,7 @@ public class JsonEntityParser {
                 Message message = null;
                 while (p.nextToken() != JsonToken.END_OBJECT) {
                     if (!collectField(p, messageFields, JsonMessageConverter.JSON_MESSAGE)) {
-                        message = parseMessage(dictionaryManager, p, messageFields, true);
+                        message = parseMessage(dictionaryManager, p, messageFields, true, storeId);
                     }
                 }
                 boolean explanation = BooleanUtils.toBoolean(messageFields.get("problemExplanation"));
@@ -102,7 +103,7 @@ public class JsonEntityParser {
                 String currentName = parser.getCurrentName();
                 if ("expected".equals(currentName)) {
                     //Special logic for handle properties before expected complex node
-                    failedAction.setExpectedMessage(parseMessage(dictionaryManager, parser, rootFields, false));
+                    failedAction.setExpectedMessage(parseMessage(dictionaryManager, parser, rootFields, false, storeId));
                     rootFields.forEach((k, v) -> {
                         try {
                             BeanUtils.setProperty(failedAction, k, v);
@@ -136,7 +137,7 @@ public class JsonEntityParser {
         return false;
     }
 
-    public static Message parseMessage(IDictionaryManager dictionaryManager, JsonParser parser, Map<String, String> rootFields, boolean compact) throws JsonParseException, IOException {
+    public static Message parseMessage(IDictionaryManager dictionaryManager, JsonParser parser, Map<String, String> rootFields, boolean compact, boolean storeId) throws JsonParseException, IOException {
         try {
             parser.nextToken();
 
@@ -147,7 +148,17 @@ public class JsonEntityParser {
             JsonMLMessageDecoder decoder = new JsonMLMessageDecoder(dictionaryManager, dictionaryURI, protocol);
             boolean isDirty = !dirty.isEmpty() && Boolean.parseBoolean(dirty);
 
-            Message message = decoder.parse(parser, compact);
+            Message message;
+            if (storeId) {
+                message = decoder.parse(parser, compact);
+            } else {
+                message = decoder.parse(parser,
+                        protocol,
+                        SailfishURI.parse(dictionaryURI),
+                        rootFields.get(JsonMessageConverter.JSON_MESSAGE_NAMESPACE),
+                        rootFields.get(JsonMessageConverter.JSON_MESSAGE_NAME),
+                        compact, isDirty);
+            }
 
             message.setDirty(isDirty);
 
