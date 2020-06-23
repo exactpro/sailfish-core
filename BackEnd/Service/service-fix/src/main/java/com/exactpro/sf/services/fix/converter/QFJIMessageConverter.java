@@ -175,7 +175,7 @@ public class QFJIMessageConverter
         }
 
         IMessage resultMessage = message instanceof SailfishQuickfixMessage
-                ? factory.createMessage(((SailfishQuickfixMessage)message).id, messageStructure.getName(), messageStructure.getNamespace())
+                ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
                 : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
 
         IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
@@ -376,7 +376,7 @@ public class QFJIMessageConverter
                 : null;
 
         return (messageClass == Message.class)
-                ? new SailfishQuickfixMessage(fieldOrder, fieldOrderHeader, fieldOrderTrailer, metadata.getId())
+                ? new SailfishQuickfixMessage(fieldOrder, fieldOrderHeader, fieldOrderTrailer, metadata)
                 : messageClass.newInstance();
     }
 

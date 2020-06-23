@@ -37,6 +37,9 @@ import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+/**
+ * To be removed in the next release. Please use {@link IMetadata} instead
+ */
 @Deprecated
 @JsonDeserialize(using = MsgMetaDataDeserializer.class)
 public class MsgMetaData extends Metadata {

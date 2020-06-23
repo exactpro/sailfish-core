@@ -101,11 +101,12 @@ public abstract class AbstractMessageFactory implements IMessageFactory {
         return dictionaryURI;
     }
 
-    private IMessage createMessage(MsgMetaData metaData) {
+    @Override
+    public IMessage createMessage(MsgMetaData metaData) {
         if (metaData.getMsgNamespace().equals(namespace)) {
             metaData.setDictionaryURI(dictionaryURI);
             metaData.setProtocol(getProtocol());
-    
+
             if (dictionary != null) { //FIXME: Remove this check after removing init(String namespace, SailfishURI dictionaryURI) method
                 IMessageStructure messageStructure = dictionary.getMessages().get(metaData.getMsgName());
                 if (messageStructure != null) {

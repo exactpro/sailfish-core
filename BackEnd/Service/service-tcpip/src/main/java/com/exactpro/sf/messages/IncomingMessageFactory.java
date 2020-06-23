@@ -21,6 +21,7 @@ import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
@@ -45,6 +46,11 @@ public class IncomingMessageFactory implements IMessageFactory {
     @Override
     public void init(String namespace, SailfishURI dictionaryURI) {
         delegateFactory.init(namespace, dictionaryURI);
+    }
+
+    @Override
+    public IMessage createMessage(MsgMetaData metadata) {
+        return delegateFactory.createMessage(metadata); // override name and namespace in metadata?
     }
 
     @Override
