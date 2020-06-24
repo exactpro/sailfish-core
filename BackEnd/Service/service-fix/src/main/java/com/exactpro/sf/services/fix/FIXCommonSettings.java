@@ -52,13 +52,19 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     @RequiredParam
     @Description("Time of day that this FIX session becomes activated.<br>"
-            + "time in the format of HH:MM:SS, time is represented in UTC.")
+            + "time in the format of HH:MM:SS, time is represented in UTC.<br>"
+            + "If the session creation time is not between StartTime and EndTime the session state will be reset "
+            + "(incoming / outgoing sequences and message cache will be drop).<br>"
+            + "The bounds move daily. That means next day after the start at 'EndTime' the bounds will be moved")
     @InputMask("99:99:99")
     protected String StartTime = "00:00:00";
 
     @RequiredParam
     @Description("Time of day that this FIX session becomes deactivated.<br>"
-            + "time in the format of HH:MM:SS, time is represented in UTC  ")
+            + "time in the format of HH:MM:SS, time is represented in UTC.<br>"
+            + "If the session creation time is not between StartTime and EndTime the session state will be reset "
+            + "(incoming / outgoing sequences and message cache will be drop).<br>"
+            + "The bounds move daily. That means next day after the start at 'EndTime' the bounds will be moved")
     @InputMask("99:99:99")
     protected String EndTime = "00:00:00";
 
