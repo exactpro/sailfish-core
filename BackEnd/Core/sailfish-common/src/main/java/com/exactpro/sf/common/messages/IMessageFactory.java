@@ -18,6 +18,7 @@ package com.exactpro.sf.common.messages;
 import java.util.Collections;
 import java.util.Set;
 
+import com.exactpro.sf.common.messages.structures.DictionaryConstants;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
@@ -43,9 +44,19 @@ public interface IMessageFactory
     void init(String namespace, SailfishURI dictionaryURI);
 
     /**
+     * Creates a new message with the provided metadata.
+     * If factory instance has dictionary URI specified and created message has submessage
+     * fields with {@link DictionaryConstants#ATTRIBUTE_CREATE_DEFAULT_STRUCTURE} attribute set
+     * to {@code true} in the dictionary - such fields will be created automatically
+     * @param metadata message metadata
+     * @return message with provided metadata
+     */
+    IMessage createMessage(MsgMetaData metadata);
+
+    /**
      * Creates new message with the id parameter passed to its metadata
      * If dictionary is not null and field has
-     * {@value com.exactpro.sf.common.messages.structures.DictionaryConstants#ATTRIBUTE_CREATE_DEFAULT_STRUCTURE}
+     * {@value DictionaryConstants#ATTRIBUTE_CREATE_DEFAULT_STRUCTURE}
      * attribute = 'true' then complex non-collection fields will be created
      * @return a message with specified metadata id
      */

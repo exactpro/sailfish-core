@@ -15,11 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.MsgMetaData;
-import com.exactpro.sf.services.fix.FixUtil;
 
 import quickfix.FieldMap;
 import quickfix.Message;
@@ -31,34 +28,36 @@ public final class SailfishQuickfixMessage extends Message {
     protected final SailfishQuickfixHeader header;
     protected final SailfishQuickfixTrailer trailer;
 
-    protected final long id;
-    
-    public SailfishQuickfixMessage(int[] fieldOrderBody, int[] fieldOrderHeader, int[] fieldOrderTrailer, long id) {
+    protected final MsgMetaData metadata;
+
+    public SailfishQuickfixMessage(int[] fieldOrderBody, int[] fieldOrderHeader, int[] fieldOrderTrailer, MsgMetaData metadata) {
         super(fieldOrderBody);
         super.header = this.header = new SailfishQuickfixHeader(fieldOrderHeader);
         super.trailer = this.trailer = new SailfishQuickfixTrailer(fieldOrderTrailer);
-        this.id = id;
+        this.metadata = metadata;
     }
-    
+
     @Override
     public Object clone() {
-        SailfishQuickfixMessage message = new SailfishQuickfixMessage(getFieldOrder(), getHeader().getFieldOrder(), getTrailer().getFieldOrder(), id);
+        MsgMetaData clonedMetadata = metadata.clone();
+        clonedMetadata.set(MetadataProperty.ID.getPropertyName(), metadata.getId());
+        SailfishQuickfixMessage message = new SailfishQuickfixMessage(getFieldOrder(), getHeader().getFieldOrder(), getTrailer().getFieldOrder(), clonedMetadata);
         message.initializeFrom(this);
         message.getSailfishHeader().initializeFrom(getHeader());
         message.getSailfishTrailer().initializeFrom(getTrailer());
         return message;
     }
-    
+
     public SailfishQuickfixHeader getSailfishHeader() {
         return header;
     }
-    
+
     public SailfishQuickfixTrailer getSailfishTrailer() {
         return trailer;
     }
 
-    public long getId() {
-        return id;
+    public MsgMetaData getMetadata() {
+        return metadata;
     }
 
     private final class SailfishQuickfixHeader extends Header {
@@ -67,7 +66,7 @@ public final class SailfishQuickfixMessage extends Message {
         public SailfishQuickfixHeader(int[] fieldOrder) {
             super(fieldOrder);
         }
-        
+
         @Override
         public void initializeFrom(FieldMap source) {
             super.initializeFrom(source);
