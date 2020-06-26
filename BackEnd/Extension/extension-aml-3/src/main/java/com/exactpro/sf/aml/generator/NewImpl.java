@@ -335,7 +335,7 @@ public class NewImpl {
 
 		if (action.hasTemplate()) {
 			String template = action.getTemplate();
-            AMLAction templateAction = tc.findActionByRef(template);
+            AMLAction templateAction = tc.findClosestAction(action, template);
 
             if(templateAction == null) {
                 alertCollector.add(new Alert(action.getLine(), action.getReference(), Column.Template.getName(), "Cannot find template action with reference: " + template));
@@ -1378,7 +1378,7 @@ public class NewImpl {
 	    String refName = refSplit[0];
 		int lineNumber = action.get(fieldName).getLineNumber();
 
-	    AMLAction subAction = tc.findActionByRef(refName);
+        AMLAction subAction = tc.findClosestAction(action, refName);
 
         if(subAction == null || action.equals(subAction)) {
             alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(

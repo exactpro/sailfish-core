@@ -32,7 +32,7 @@ import com.exactpro.sf.embedded.statistics.StatisticsService;
  *
  */
 @SuppressWarnings("serial")
-public class AMLTestCase implements ITestCase, Cloneable, Serializable {
+public class AMLTestCase implements Cloneable, Serializable {
 
     private final List<AMLAction> actions = new ArrayList<>();
     private String reference;
@@ -82,27 +82,22 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         addAction(actions.size(), action);
 	}
 
-	@Override
     public List<AMLAction> getActions() {
         return actions;
 	}
 
-    @Override
     public String getReference() {
         return reference;
     }
 
-    @Override
     public void setReference(String reference) {
         this.reference = reference;
     }
 
-    @Override
     public boolean hasReference() {
         return StringUtils.isNotEmpty(reference);
 	}
 
-	@Override
     public AMLAction getAction(int i) {
         return actions.get(i);
 	}
@@ -123,28 +118,29 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 		this.line = line;
 	}
 
-	@Override
     public String getDescription() {
         return description;
 	}
 
-	@Override
     public void setDescription(String description) {
 		this.description = description;
 	}
 
+    private static boolean checkActionReference(AMLAction action, String reference) {
+        ExecutionMode executionMode = action.getExecutionMode();
+        return (executionMode == ExecutionMode.EXECUTABLE || executionMode == ExecutionMode.OPTIONAL) &&
+                (reference.equals(action.getReference()) || reference.equals(action.getReferenceToFilter()));
+    }
+
 	/**
-	 * Return action with specified reference.
+     * Returns the first found action with specified reference.
 	 * @param lineRef reference
 	 * @return action in test case or null if no reference found
 	 */
-	@Override
     public AMLAction findActionByRef(String lineRef)
 	{
         for(AMLAction action : actions) {
-            if((action.getExecutionMode() == ExecutionMode.EXECUTABLE || action.getExecutionMode() == ExecutionMode.OPTIONAL)
-                    && (lineRef.equals(action.getReference())
-                    || lineRef.equals(action.getReferenceToFilter()))) {
+            if (checkActionReference(action, lineRef)) {
                 return action;
             }
         }
@@ -152,22 +148,49 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         return null;
 	}
 
-	@Override
+    /**
+     * Searches for an action closest to the specified one by reference.
+     * Actions before the specified action have a higher priority than actions after it
+     * @param dependant depending action
+     * @param dependencyReference target action reference
+     * @return closest action with the specified reference or {@code null} if there is no such action
+     */
+    public AMLAction findClosestAction(AMLAction dependant, String dependencyReference) {
+        int dependantIndex = actions.indexOf(dependant);
+
+        if (dependantIndex >= 0) {
+            for (int i = dependantIndex - 1; i >= 0; i--) {
+                AMLAction action = actions.get(i);
+
+                if (checkActionReference(action, dependencyReference)) {
+                    return action;
+                }
+            }
+
+            for (int i = dependantIndex; i < actions.size(); i++) {
+                AMLAction action = actions.get(i);
+
+                if (checkActionReference(action, dependencyReference)) {
+                    return action;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public void setId(String id) {
 		this.id = id;
 	}
 
-	@Override
     public String getId() {
 		return id;
 	}
 
-	@Override
     public void setExecutionMode(ExecutionMode executionMode) {
 		this.executionMode = executionMode;
 	}
 
-	@Override
     public ExecutionMode getExecutionMode() {
         return executionMode;
 	}
@@ -214,22 +237,18 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         this.addToReport = addToReport;
     }
 
-    @Override
     public AMLBlockType getBlockType() {
         return blockType;
     }
 
-    @Override
     public void setBlockType(AMLBlockType blockType) {
         this.blockType = blockType;
     }
 
-    @Override
     public long getUID() {
         return uid;
     }
 
-    @Override
     public int getHash() {
         return hash;
     }
@@ -250,7 +269,6 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         return isOptional() ? "{\"" + StatisticsService.OPTIONAL_TAG_NAME + "\"}" : "{}";
     }
 
-    @Override
 	public AMLTestCase clone() {
 
         AMLTestCase that = new AMLTestCase(id, uid, hash);

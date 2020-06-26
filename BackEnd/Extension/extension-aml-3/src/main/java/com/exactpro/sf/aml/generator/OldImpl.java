@@ -351,7 +351,7 @@ public class OldImpl {
 		        ref = StringUtils.substringBetween(ref, AMLLangConst.BEGIN_STATIC, AMLLangConst.END_STATIC);
 		        String[] refSplit = ref.split("[:.]");
 	            String reference = refSplit[0];
-	            AMLAction subAction = tc.findActionByRef(reference);
+                AMLAction subAction = tc.findClosestAction(action, reference);
 
 	            if (subAction == null)
 	            {
@@ -408,7 +408,7 @@ public class OldImpl {
 
 		    String[] refSplit = ref.split("[:.]");
             String reference = refSplit[0];
-			AMLAction subAction = tc.findActionByRef(reference);
+            AMLAction subAction = tc.findClosestAction(action, reference);
 
 			if (subAction == null)
 			{

@@ -44,7 +44,7 @@ import com.google.common.collect.ImmutableSet;
  * @author dmitry.guriev
  *
  */
-public class AMLAction implements IAction, Cloneable, Serializable {
+public class AMLAction implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 5614362887064463267L;
 
@@ -107,56 +107,46 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.hash = hash;
 	}
 
-	@Override
 	public void setReference(String ref)
 	{
         this.reference = StringUtils.defaultString(ref);
 	}
 
-	@Override
 	public String getReference()
 	{
         return reference;
 	}
 
-	@Override
     public boolean hasReference() {
         return StringUtils.isNotEmpty(reference);
 	}
 
-	@Override
 	public void setReferenceToFilter(String ref)
 	{
         this.referenceToFilter = StringUtils.defaultString(ref);
 	}
 
-	@Override
     public boolean hasReferenceToFilter() {
         return StringUtils.isNotEmpty(referenceToFilter);
     }
 
-	@Override
 	public String getReferenceToFilter()
 	{
         return referenceToFilter;
 	}
 
-	@Override
 	public String getTemplate() {
 		return template;
 	}
 
-	@Override
 	public void setTemplate(String template) {
         this.template = StringUtils.defaultString(template);
 	}
 
-	@Override
 	public boolean hasTemplate() {
         return StringUtils.isNotEmpty(template);
     }
 
-	@Override
 	public void put(String key, Value value)
 	{
         parameters.put(key, value);
@@ -166,96 +156,79 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         parameters.remove(key);
 	}
 
-	@Override
 	public Value get(String key)
 	{
         return parameters.get(key);
 	}
 
-	@Override
 	public void setId(String id)
 	{
         this.id = StringUtils.defaultString(id);
 	}
 
-	@Override
 	public String getId()
 	{
         return id;
 	}
 
-	@Override
     public boolean hasId() {
         return StringUtils.isNotEmpty(id);
     }
 
-    @Override
     public void setServiceName(Value serviceName) {
         this.serviceName = serviceName;
     }
 
-    @Override
     public Value getServiceName() {
         return serviceName;
     }
 
-	@Override
 	public boolean hasServiceName() {
         return serviceName != null;
     }
 
-	@Override
 	public void setExecutionMode(ExecutionMode executionMode)
 	{
 		this.executionMode = executionMode;
 	}
 
-	@Override
 	public ExecutionMode getExecutionMode()
 	{
         return executionMode;
 	}
 
-	@Override
 	public SailfishURI getActionURI()
 	{
         return actionURI;
 	}
 
-	@Override
 	public void setActionURI(SailfishURI actionURI)
 	{
 		this.actionURI = actionURI;
 	}
 
-	@Override
     public boolean hasActionURI() {
 	    return actionURI != null;
 	}
 
-	@Override
 	public SailfishURI getDictionaryURI()
 	{
         return dictionaryURI;
 	}
 
-	@Override
 	public void setDictionaryURI(SailfishURI dictionaryURI)
 	{
 		this.dictionaryURI = dictionaryURI;
 	}
 
-	@Override
     public boolean hasDictionaryURI() {
 	    return dictionaryURI != null;
 	}
 
-	@Override
 	public void setTimeout(Value s) {
 		this.timeout = s;
 	}
 
-	@Override
 	public Value getTimeout() {
         return timeout;
 	}
@@ -268,7 +241,6 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         return line;
 	}
 
-	@Override
 	public Map<String, Value> getParameters() {
         return parameters;
 	}
@@ -283,22 +255,18 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         return actionParameterType;
 	}
 
-	@Override
 	public void setCheckPoint(String checkPoint) {
 		this.checkPoint = checkPoint;
 	}
 
-	@Override
 	public String getCheckPoint() {
         return checkPoint;
 	}
 
-	@Override
 	public String getMessageTypeColumn() {
         return messageTypeColumn;
 	}
 
-	@Override
 	public void setMessageTypeColumn(String mesageTypeColumn) {
 		this.messageTypeColumn = mesageTypeColumn;
 	}
@@ -319,22 +287,18 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         serviceFields.put(key, value);
 	}
 
-	@Override
 	public void addDefinedColumn(String columnName) {
         definedColumns.add(columnName);
 	}
 
-	@Override
 	public Set<String> getDefinedColumns() {
         return definedColumns;
 	}
 
-	@Override
 	public String getDescrption() {
         return description;
 	}
 
-	@Override
 	public void setDescrption(String description) {
 		this.description = description;
 	}
@@ -372,12 +336,10 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	    return "";
     }
 
-	@Override
 	public void setMessageCount(String messageCount) {
 		this.messageCount = messageCount;
 	}
 
-	@Override
 	public String getMessageCount() {
         return messageCount;
 	}
@@ -386,22 +348,18 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         return setters;
 	}
 
-	@Override
 	public String getDoublePrecision() {
         return doublePrecision;
 	}
 
-	@Override
 	public void setDoublePrecision(String precision) {
 		this.doublePrecision = precision;
 	}
 
-	@Override
 	public String getSystemPrecision() {
         return systemPrecision;
 	}
 
-	@Override
 	public void setSystemPrecision(String precision) {
 		this.systemPrecision = precision;
 	}
@@ -415,32 +373,26 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.failUnexpected = value;
 	}
 
-	@Override
 	public String getStaticType() {
         return staticType;
 	}
 
-	@Override
 	public void setStaticType(String type) {
 		this.staticType = type;
 	}
 
-	@Override
 	public Value getStaticValue() {
         return staticValue;
 	}
 
-	@Override
 	public void setStaticValue(Value value) {
 		this.staticValue = value;
 	}
 
-	@Override
 	public boolean getContinueOnFailed() {
         return continueOnFailed;
 	}
 
-	@Override
 	public void setContinueOnFailed(boolean b) {
 		this.continueOnFailed = b;
 	}
@@ -453,47 +405,38 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.breakPoint = b;
 	}
 
-	@Override
 	public boolean getAutoStart() {
         return autoStart;
 	}
 
-	@Override
 	public void setAutoStart(boolean b) {
 		this.autoStart = b;
 	}
 
-	@Override
 	public boolean getReorderGroups() {
         return reorderGroups;
 	}
 
-	@Override
 	public void setReorderGroups(boolean b) {
 	    this.reorderGroups = b;
 	}
 
-	@Override
 	public List<String> getHeaders() {
         return headers;
 	}
 
-	@Override
 	public void setHeaders(List<String> headers) {
 		this.headers = headers;
 	}
 
-	@Override
 	public String getOutcome() {
         return outcome;
 	}
 
-	@Override
 	public void setOutcome(String cell) {
 		this.outcome = cell;
 	}
 
-    @Override
     public boolean hasOutcome() {
         return StringUtils.isNotEmpty(outcome);
     }
@@ -533,17 +476,15 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     public boolean isOptional() {
         return executionMode == ExecutionMode.OPTIONAL;
     }
-    @Override
+
 	public void addMessageReference(String lineRef, MessageReference ref) {
         messageReferences.put(lineRef, ref);
 	}
 
-	@Override
 	public Map<String, MessageReference> getMessageReferences() {
         return messageReferences;
 	}
 
-	@Override
 	public void setMessageReferences(Map<String, MessageReference> messageReferences) {
 		this.messageReferences = messageReferences;
 	}
@@ -684,27 +625,22 @@ public class AMLAction implements IAction, Cloneable, Serializable {
         this.checkGroupsOrder = checkGroupsOrder;
     }
 
-    @Override
 	public Map<Column, IField> getDefinedServiceFields() {
 		return definedServiceFields;
 	}
 
-	@Override
 	public void addDefinedServiceField(Column key, IField value) {
 		definedServiceFields.put(key, value);
 	}
 
-	@Override
 	public IField getDefinedServiceField(Column key) {
 		return definedServiceFields.get(key);
 	}
 
-    @Override
     public ActionInfo getActionInfo() {
         return actionInfo;
     }
 
-    @Override
     public void setActionInfo(ActionInfo actionInfo) {
         this.actionInfo = actionInfo;
     }

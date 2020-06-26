@@ -158,7 +158,7 @@ public class TestAML3_0 extends TestAML3Base {
         AML aml = executeTest(VALID_TEST_PATH + "IncludeBlock.csv");
         Collection<Alert> source = aml.getAlertCollector().getAlerts();
 
-        Assert.assertEquals("List errors size", 7, source.size());
+        Assert.assertEquals("List errors size", 9, source.size());
         Assert.assertEquals("Critical errors size", 0, aml.getAlertCollector().getCount(AlertType.ERROR));
 
         List<AMLTestCase> testCases = aml.getTestCases();
@@ -172,7 +172,11 @@ public class TestAML3_0 extends TestAML3Base {
         Assert.assertEquals(AMLLangConst.INIT_BLOCK_RESULTS_MAP_URI, secondTestCaseActions.get(0).getActionURI());
         Assert.assertEquals(AMLLangConst.INIT_BLOCK_PARAMETERS_MAP_URI, secondTestCaseActions.get(1).getActionURI());
 
-        Alert alert = new Alert(24, "m3", "MarketDepthLevel_2_4", "Reference to unknown column 'm2' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
+        Alert alert = new Alert(4, "m1", "Instrument", "Reference to unknown column 'Instrument' is found in column 'Instrument': '${block1.Instrument}'.", AlertType.WARNING);
+        Assert.assertTrue(alert.toString(), source.remove(alert));
+        alert = new Alert(8, "m2", "Instrument", "Reference to unknown column 'Instrument' is found in column 'Instrument': '${block1.Instrument}'.", AlertType.WARNING);
+        Assert.assertTrue(alert.toString(), source.remove(alert));
+        alert = new Alert(24, "m3", "MarketDepthLevel_2_4", "Reference to unknown column 'm2' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
         alert = new Alert(24, "m3", "MarketDepthLevel_2_4" ,"Reference to unknown column 'MarketDepthLevel_2_4' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));

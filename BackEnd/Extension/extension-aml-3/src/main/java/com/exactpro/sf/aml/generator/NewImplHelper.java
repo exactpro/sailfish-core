@@ -167,7 +167,7 @@ public class NewImplHelper {
 		}
 
 		// find action by reference
-		AMLAction refAction = tc.findActionByRef(lineRef);
+        AMLAction refAction = tc.findClosestAction(action, lineRef);
 		if (refAction == null)
 		{
 			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to unknown action '"+lineRef
@@ -391,7 +391,7 @@ public class NewImplHelper {
 
 		// find action by reference
 
-        AMLAction refAction = tc.findActionByRef(lineRef);
+        AMLAction refAction = tc.findClosestAction(action, lineRef);
 
 		if (refAction == null)
 		{
