@@ -1,0 +1,11 @@
+#template,#reference,#dictionary,#action,#message_type,FInteger,MessageArray,firstArg,secondArg
+,blk,,block start,,,,,
+,msg,,,SimpleMessage,${blk.FInteger},,,
+,sent,TestAML,initSendMessage,ArrayMessage,,[msg],,
+,,,block end,,,,,
+,,,test case start,,,,,
+blk,b1,,include block,,1,,,
+blk,b2,,include block,,2,,,
+,,,Compare,,,,${b1.sent.MessageArray[0].FInteger},1
+,,,Compare,,,,${b2.sent.MessageArray[0].FInteger},2
+,,,test case end,,,,,
