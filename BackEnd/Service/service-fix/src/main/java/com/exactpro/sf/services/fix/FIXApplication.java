@@ -204,9 +204,10 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				String text = message.getString(Text.FIELD);
                 textMessage = "Received Logout has text (58) tag: " + text;
 
-				if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
-				        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
-                        || StringUtil.containsAll(text, "Sequence Number", "<", "expected"))
+                if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
+                        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
+                        || StringUtil.containsAll(text, "Sequence Number", "<", "expected")
+                        || StringUtil.containsAll(text, "MsgSeqNum", "less than expected"))
 				{
 					incorrectSenderMsgSeqNum = true;
 					// extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
@@ -239,11 +240,11 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				}
 
                 if(seqNum != -1) {
-                    this.seqNumSender = new Integer(seqNum);
+                    this.seqNumSender = seqNum;
                 }
 
                 if(targSeq != -1) {
-                    this.seqNumTarget = new Integer(targSeq);
+                    this.seqNumTarget = targSeq;
                 }
 			}
             if (serviceMonitor != null) {

@@ -358,6 +358,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         String value = StringUtils.substringBetween(text, "expecting ", " but received");
         value = value == null ? StringUtils.substringBetween(text, "Expected: ", ">") : value;
         value = value == null ? StringUtils.substringBetween(text, "expected (", ")") : value;
+        value = value == null ? StringUtils.substringAfterLast(text, "less than expected").trim() : value;
         return Integer.parseInt(value);
     }
 
