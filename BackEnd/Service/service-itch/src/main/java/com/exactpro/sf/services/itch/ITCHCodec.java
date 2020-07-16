@@ -88,9 +88,9 @@ public class ITCHCodec extends AbstractCodec {
             ITCHCodecSettings msettings = (ITCHCodecSettings) settings;
 			this.msgLengthFieldSize = msettings.getMsgLength();
 			this.codecMessageFilter = new CodecMessageFilter(msettings.getFilterValues());
-            this.preprocessor = DefaultPreprocessor.loadPreprocessor(serviceContext,
+            this.preprocessor = msettings.isPreprocessingEnabled() ? DefaultPreprocessor.loadPreprocessor(serviceContext,
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
-                    getClass().getClassLoader());
+                    getClass().getClassLoader()) : null;
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
