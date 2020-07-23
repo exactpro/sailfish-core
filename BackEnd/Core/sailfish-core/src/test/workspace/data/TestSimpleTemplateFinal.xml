@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTf-8" standalone="yes"?>
 <!--
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,14 +16,23 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
-<dataListing>
-	<data title="TestSimpleRules">
-		<resource>TestSimpleRules.xml</resource>
-	</data>
-	<data title="TestSimpleTemplate">
-		<resource>TestSimpleTemplate.xml</resource>
-	</data>
-	<data title="TestSimpleTemplateFinal">
-		<resource>TestSimpleTemplateFinal.xml</resource>
-	</data>
-</dataListing>
+<rules>
+    <ruleDescription msgType="AddOrder">
+        <when>
+            <field name="When" value="OK" />
+        </when>
+        <change>
+            <field name="Change" value="NEW VALUE" />
+        </change>
+        <remove>
+            <field name="ToRemove"/>
+        </remove>
+        <save>
+            <field name="Save" value="ref1" />
+        </save>
+        <saveMapping>
+            <field keyField="FromMapping" valueField="ToMapping" />
+        </saveMapping>
+    </ruleDescription>
+
+</rules>
