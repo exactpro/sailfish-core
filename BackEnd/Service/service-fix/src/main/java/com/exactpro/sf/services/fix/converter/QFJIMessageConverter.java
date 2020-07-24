@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fix.converter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.fix.QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -28,9 +29,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -382,6 +386,7 @@ public class QFJIMessageConverter
 
     protected void traverseIMessage(FieldMap resultMessage, IMessage message) throws MessageConvertException {
         IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
+        Set<Integer> definedTags = getDefinedTags(message, messageStructure);
 
         for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
 			String fieldName = fieldStructure.getName();
@@ -463,7 +468,15 @@ public class QFJIMessageConverter
                     } else {
                         resultMessage.setString(fieldTag, (String)fieldValue);
                     }
-
+                    //In FIX if a field has type DATA it also has a paired field that has a tag value equals `dataTag - 1`.
+                    // The value for that field should be set to the content length in the data field
+                    String fixtype = getAttributeValue(fieldStructure, ATTRIBUTE_FIX_TYPE);
+                    if (FieldType.Data.getName().equals(fixtype)) {
+                        int lengthTag = fieldTag - 1;
+                        if (!definedTags.contains(lengthTag)) {
+                            resultMessage.setInt(lengthTag, ((String)fieldValue).length());
+                        }
+                    }
                     continue;
                 case JAVA_MATH_BIG_DECIMAL:
                     if(fieldValue instanceof BigDecimal) {
@@ -477,7 +490,7 @@ public class QFJIMessageConverter
                     boolean includeMillis = includeMilliseconds;
                     boolean includeMicros = includeMicroseconds;
 
-                    Object fixType = getAttributeValue(fieldStructure, QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
+                    Object fixType = getAttributeValue(fieldStructure, ATTRIBUTE_FIX_TYPE);
                     if (FieldType.UtcTimeStampSecondPresicion.getName().equals(fixType)) {
                         includeMillis = includeMicros = false;
                     }
@@ -501,6 +514,24 @@ public class QFJIMessageConverter
             }
 		}
 	}
+
+    @NotNull
+    private Set<Integer> getDefinedTags(IMessage message, IMessageStructure messageStructure) {
+        Set<Integer> tagsSet = new TreeSet<>();
+        for (IFieldStructure fieldStructure : messageStructure.getFields().values()) {
+            String fieldName = fieldStructure.getName();
+            Object fieldValue = message.getField(fieldName);
+
+            if (fieldValue == null) {
+                continue;
+            }
+            Integer tag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
+            if(tag != null) {
+                tagsSet.add(tag);
+            }
+        }
+        return tagsSet;
+    }
 
     private void traverseGroups(FieldMap resultMessage, List<?> groups, IFieldStructure fieldStructure, Integer groupTag) throws MessageConvertException {
         if(groupTag == null) {
