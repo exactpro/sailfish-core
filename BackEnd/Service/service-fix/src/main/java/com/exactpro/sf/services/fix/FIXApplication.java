@@ -48,7 +48,9 @@ import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.storage.IMessageStorage;
 
+import quickfix.ConfigError;
 import quickfix.DoNotSend;
+import quickfix.FieldConvertError;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
@@ -130,20 +132,9 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         this.messageHelper = this.applicationContext.getMessageHelper();
         this.storage = serviceContext.getMessageStorage();
         this.settings = this.applicationContext.getSessionSettings();
-        if(settings.isSetting(SEND_APP_REJECT)) {
-            try {
-                this.sendAppReject = settings.getBool(SEND_APP_REJECT);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        if(settings.isSetting(SEND_ADMIN_REJECT)) {
-            try {
-                this.sendAdminReject = settings.getBool(SEND_ADMIN_REJECT);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
+
+        this.sendAppReject = getBoolean(settings, SEND_APP_REJECT, true);
+        this.sendAdminReject = getBoolean(settings, SEND_ADMIN_REJECT, true);
 
         this.autorelogin = fixSettings.isAutorelogin();
 
@@ -168,6 +159,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         processMessage(sessionID, message, ServiceHandlerRoute.FROM_ADMIN, sessionID.getTargetCompID(), serviceStringName, true);
 
 		Session session = Session.lookupSession(sessionID);
+		ISession iSession = sessionMap.get(sessionID);
 
 		String msgType = getMessageType(message);
 		MsgSeqNum msgSeqNum = new MsgSeqNum();
@@ -188,12 +180,11 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                         session.setNextSenderMsgSeqNum(seqNumSender);
                         logger.info("Set session.setNextSenderMsgSeqNum = {}", seqNumSender);
                     } catch (NumberFormatException | IOException e) {
-                        logger.error(e.getMessage(), e);
+                        exceptionCaught(iSession, "Update sender sequence number via text '" + rejectText + "' from reject message failure", e);
                     }
                 }
             }
-        } else if (MsgType.LOGOUT.equals(msgType))
-		{
+        } else if (MsgType.LOGOUT.equals(msgType)) {
             String textMessage = "Received Logout doesn't have text (58 tag)";
 			if (message.isSetField(Text.FIELD))
 			{
@@ -204,47 +195,44 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				String text = message.getString(Text.FIELD);
                 textMessage = "Received Logout has text (58) tag: " + text;
 
-                if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
-                        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
-                        || StringUtil.containsAll(text, "Sequence Number", "<", "expected")
-                        || StringUtil.containsAll(text, "MsgSeqNum", "less than expected"))
-				{
-					incorrectSenderMsgSeqNum = true;
-					// extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
-                    try {
+                try {
+                    if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
+                            || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
+                            || StringUtil.containsAll(text, "Sequence Number", "<", "expected")
+                            || StringUtil.containsAll(text, "MsgSeqNum", "less than expected")) {
+                        incorrectSenderMsgSeqNum = true;
+                        // extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
                         seqNum = FIXMatrixUtil.extractSeqNum(text);
-                    } catch (NumberFormatException e) {
-                        logger.error(e.getMessage(), e);
+
+                        // DG: experimentally checked
+                        // only here set next seq num as seqMum-1.
+                        //seqNum = seqNum-1; // nikolay.antonov : It is seems doesn't works.
+                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
+                    } else if (text.startsWith("Error ! Expecting : ")) {
+                        incorrectTargetMsgSeqNum = true;
+                        // extract 1282 from the text: Error ! Expecting : 1282 but received : 1281
+                        seqNum = Integer.parseInt(text.split(" ")[4]);
+                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
+                    } else if (text.startsWith("Negative gap for the user")) {
+                        incorrectSenderMsgSeqNum = true;
+                        String num = text.substring(
+                                text.lastIndexOf('[') + 1,
+                                text.lastIndexOf(']'));
+                        seqNum = Integer.parseInt(num);
+
+                        //incorrectTargetMsgSeqNum = true; // TODO
+                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD); // TODO: +1 ?
                     }
-					// DG: experimentally checked
-					// only here set next seq num as seqMum-1.
-					//seqNum = seqNum-1; // nikolay.antonov : It is seems doesn't works.
-					targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
-				}
-				else if (text.startsWith("Error ! Expecting : "))
-				{
-					incorrectTargetMsgSeqNum = true;
-					// extract 1282 from the text: Error ! Expecting : 1282 but received : 1281
-					seqNum = Integer.parseInt(text.split(" ")[4]);
-					targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
-				}else if (text.startsWith("Negative gap for the user"))
-				{
-					incorrectSenderMsgSeqNum = true;
-					String num = text.substring(
-							text.lastIndexOf('[') + 1,
-							text.lastIndexOf(']') );
-					seqNum = Integer.parseInt(num);
 
-					//incorrectTargetMsgSeqNum = true; // TODO
-					targSeq = message.getHeader().getInt(MsgSeqNum.FIELD); // TODO: +1 ?
-				}
+                    if (seqNum != -1) {
+                        this.seqNumSender = seqNum;
+                    }
 
-                if(seqNum != -1) {
-                    this.seqNumSender = seqNum;
-                }
-
-                if(targSeq != -1) {
-                    this.seqNumTarget = targSeq;
+                    if (targSeq != -1) {
+                        this.seqNumTarget = targSeq;
+                    }
+                } catch (NumberFormatException e) {
+                    exceptionCaught(iSession, "Update sender / target sequence numbers via text '" + text + "' from logout message failure", e);
                 }
 			}
             if (serviceMonitor != null) {
@@ -274,7 +262,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 					session.send(heartbeat);
 				}
 			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
+			    exceptionCaught(iSession, "Filling gap from " +beginString+ " to " + endSeqNo + " message sequences using fake heartbeats failure", e);
 			}
 //		} else if (MsgType.TEST_REQUEST.equals(msgType)) {
 //			MessageFactory messageFactory = session.getMessageFactory();
@@ -298,18 +286,20 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 	@Override
 	public void onMessageRejected(Message message, SessionID sessionID, String reason) {
 		logger.debug("onMessageRejected: {}", message);
-		try {
-            IMessage iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
-            iMsg.getMetaData().setRejectReason(reason);
+        if (!isPerformance) {
+            ISession iSession = sessionMap.get(sessionID);
+            try {
+                IMessage iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
+                iMsg.getMetaData().setRejectReason(reason);
 
-            if (!isPerformance) {
-                storeMessage(sessionID, iMsg);
+                storeMessage(iSession, iMsg);
+
+                // We don't call IServiceHandler here because this message is invalid. They shouldn't reach comparator
+            } catch (MessageConvertException | RuntimeException e) {
+                // don't throw it to QFJ
+                exceptionCaught(iSession, "Process reject of message " + message + " failure", e);
             }
-		    // We don't call IServiceHandler here because this message is invalid. They shouldn't reach comparator
-        } catch(MessageConvertException | RuntimeException e) {
-			// don't throw it to QFJ
-			logger.error(e.getMessage(), e);
-		}
+        }
 	}
 
 	@Override
@@ -325,8 +315,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				logger.info("Set session.setNextSenderMsgSeqNum = {}", seqNumSender);
 			}
 		} catch (IOException e) {
-			logger.error("Could not set specified both seqNumSender={} for the session {}.",
-                    seqNumSender, iSession.getName(), e);
+            exceptionCaught(iSession, "Could not set specified both seqNumSender " + seqNumSender + " for the session " + iSession.getName(), e);
 		}
 
 		try {
@@ -335,20 +324,14 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                 logger.info("Set session.setNextTargetMsgSeqNum = {}", seqNumTarget);
             }
         } catch (IOException e) {
-            logger.error("Could not set specified both seqNumTarget={} for the session {}.",
-                    seqNumTarget, iSession.getName(), e);
+            exceptionCaught(iSession, "Could not set specified both seqNumTarget " + seqNumTarget + " for the session " + iSession.getName(), e);
         }
 
-		if (handler == null) {
-			logger.error("Service initialization did not complete.");
-		} else {
-    		try {
-    			handler.sessionOpened(iSession);
-    		} catch (Exception e) {
-    			handler.exceptionCaught(iSession, e);
-                logger.error("onCreate: can not do handler.sessionOpened({}) ", iSession, e);
-    		}
-		}
+        try {
+            handler.sessionOpened(iSession);
+        } catch (ServiceHandlerException e) {
+            exceptionCaught(iSession, "onCreate: handler.sessionOpened(" + iSession + ") failure", e);
+        }
 	}
 
 	@Override
@@ -365,8 +348,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 		try {
 			handler.sessionClosed(iSession);
 		} catch (Exception e) {
-			handler.exceptionCaught(iSession, e);
-            logger.error("onLogout: can not do handler.sessionClosed({}) ", iSession, e);
+			exceptionCaught(iSession, "onLogout: handler.sessionClosed(" + iSession + ')', e);
 		}
         if(!autorelogin)
 		{
@@ -382,6 +364,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 	    logger.debug("toAdmin: {}", message);
 
 		String msgType = getMessageType(message);
+		ISession iSession = sessionMap.get(sessionID);
 
 		try {
 			if (MsgType.LOGON.equals(msgType))
@@ -474,7 +457,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 						session.getSessionState().getMessageStore().refresh(); // reopen files // possible race condition ?
 						session.setNextSenderMsgSeqNum(seqNumSender);
 					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
+                        exceptionCaught(iSession, "Set next sender sequence number to " + seqNumSender + " failure", e);
 					}
 					this.incorrectSenderMsgSeqNum = false;
 				}
@@ -486,7 +469,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 						session.getSessionState().getMessageStore().refresh(); // reopen files // possible race condition ?
 						session.setNextTargetMsgSeqNum(seqNumTarget);
 					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
+                        exceptionCaught(iSession, "Set next target sequence number to " + seqNumTarget + " failure", e);
 					}
 					this.incorrectTargetMsgSeqNum = false;
 				}
@@ -529,7 +512,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				}
 			}
 		} catch (Exception e) {
-			logger.error("toAdmin: Can not process the message {}", message, e);
+            exceptionCaught(iSession, "toAdmin: process the message " + message + " failure", e);
 		}
 	}
 
@@ -607,15 +590,13 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
     }
 
     /**
-     * @param sessionID
-     * @param message
      * @throws FieldNotFound
      */
-    private void storeMessage(SessionID sessionID, IMessage message) {
+    private void storeMessage(ISession iSession, IMessage message) {
         try {
             storage.storeMessage(message);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            exceptionCaught(iSession, "Sore message " + message + " failure", e);
         }
     }
 
@@ -623,22 +604,16 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                                 String from, String to, boolean isAdmin) {
         if (!isPerformance) {
             ISession iSession = sessionMap.get(sessionID);
-            IMessage iMsg = null;
             try {
-                iMsg = convert(message, from, to, isAdmin);
-                storeMessage(sessionID, iMsg);
+                IMessage iMsg = convert(message, from, to, isAdmin);
+                storeMessage(iSession, iMsg);
                 handler.putMessage(iSession, route, iMsg);
 
                 if(route == ServiceHandlerRoute.FROM_ADMIN || route == ServiceHandlerRoute.FROM_APP) {
                     latencyCalculator.updateLatency(sessionID, iMsg);
                 }
-            } catch (ServiceHandlerException e) {
-                handler.exceptionCaught(iSession, e);
-                logger.error("{}: Can not put the message {} to handler", route.getAlias(), iMsg, e);
-            } catch (MessageConvertException e) {
-                logger.error("{}: Can not convert the message {}", route.getAlias(), message, e);
-            } catch (Exception e) {
-                logger.error("{}: Can not process the message {}", route.getAlias(), message, e);
+            } catch (ServiceHandlerException | MessageConvertException | RuntimeException e) {
+                exceptionCaught(iSession, route.getAlias() + ": process message " + message + " failure", e);
             }
         }
     }
@@ -663,5 +638,22 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
     @Override
     public long getLatency(SessionID sessionID) {
         return latencyCalculator.getLatency(sessionID);
+    }
+
+    private boolean getBoolean(SessionSettings settings, String key, boolean defaultValue) {
+        if(settings.isSetting(key)) {
+            try {
+                return settings.getBool(key);
+            } catch (ConfigError | FieldConvertError e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return defaultValue;
+    }
+
+    private void exceptionCaught(ISession iSession, String message, Throwable e) {
+        RuntimeException cause = new RuntimeException(message, e);
+        handler.exceptionCaught(iSession, cause);
+        logger.error(cause.getMessage(), cause);
     }
 }
