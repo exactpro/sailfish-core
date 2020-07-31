@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fix.converter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.fix.FixMessageHelper.EXCEPTIONAL_DATA_LENGTH_TAGS;
 import static com.exactpro.sf.services.fix.QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE;
 
 import java.math.BigDecimal;
@@ -472,7 +473,10 @@ public class QFJIMessageConverter
                     // The value for that field should be set to the content length in the data field
                     String fixtype = getAttributeValue(fieldStructure, ATTRIBUTE_FIX_TYPE);
                     if (FieldType.Data.getName().equals(fixtype)) {
-                        int lengthTag = fieldTag - 1;
+                        Integer lengthTag = EXCEPTIONAL_DATA_LENGTH_TAGS.get(fieldTag);
+                        if (lengthTag == null) {
+                            lengthTag = fieldTag - 1;
+                        }
                         if (!definedTags.contains(lengthTag)) {
                             resultMessage.setInt(lengthTag, ((String)fieldValue).length());
                         }

@@ -31,6 +31,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author nikita.smirnov
@@ -92,6 +93,11 @@ public class FixMessageHelper extends MessageHelper {
     public static final String PROTOCOL = "FIX";
     public static final String LANGUAGE = "LANGUAGE";
     public static final String XMLDATA = "XMLDATA";
+
+    //    A field with tagNumber and type DATA must have a paired field with tagNumber-1 and type LENGTH.
+    //    But there are exceptions, for example field Signature with tag 89 and type DATA has a paired field with tag 93 and type LENGTH.
+    //    Fields with such tags should be excluded from validation.
+    public static final Map<Integer, Integer> EXCEPTIONAL_DATA_LENGTH_TAGS = ImmutableMap.of(89, 93);
 
     @Override
     public AbstractCodec getCodec(IServiceContext serviceContext) {

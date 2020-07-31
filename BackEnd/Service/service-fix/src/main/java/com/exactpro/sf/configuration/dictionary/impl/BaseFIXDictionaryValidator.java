@@ -14,11 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
-
+import static com.exactpro.sf.common.impl.messages.xml.configuration.JavaType.JAVA_LANG_INTEGER;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.fix.FixMessageHelper.ATTRIBUTE_ENTITY_TYPE;
+import static com.exactpro.sf.services.fix.FixMessageHelper.ATTRIBUTE_TAG;
 import static com.exactpro.sf.services.fix.FixMessageHelper.COMPONENT_ENTITY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.DAY_OF_MONTH;
+import static com.exactpro.sf.services.fix.FixMessageHelper.EXCEPTIONAL_DATA_LENGTH_TAGS;
 import static com.exactpro.sf.services.fix.FixMessageHelper.GROUP_ENTITY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.HEADER;
 import static com.exactpro.sf.services.fix.FixMessageHelper.HEADER_ENTITY;
@@ -41,6 +43,7 @@ import static com.exactpro.sf.services.fix.FixMessageHelper.TRAILER_ENTITY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.TZTIMEONLY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.TZTIMESTAMP;
 import static com.exactpro.sf.services.fix.FixMessageHelper.XMLDATA;
+import static com.exactpro.sf.services.fix.QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -55,7 +58,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -65,7 +67,6 @@ import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
 import com.exactpro.sf.configuration.dictionary.ValidationHelper;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
-import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
@@ -81,6 +82,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
 
     private final SetMultimap<Class<?>, String> javaTypeToFixTypes = HashMultimap.create();
 
+
     private static final String DATE = "DATE";
     private static final String LONG = "LONG";
 
@@ -88,6 +90,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     {
         entityNamesToEntityValidators = new HashMap<>();
         configureEntityValidators(entityNamesToEntityValidators);
+
 
         javaTypeToFixTypes.put(Double.class, FieldType.Price.getName());
         javaTypeToFixTypes.put(Double.class, FieldType.Amt.getName());
@@ -188,7 +191,6 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
         checkMessageTypes(errors, dictionary);
         checkRequiredMessages(errors, dictionary);
         checkTagDuplicates(errors, dictionary);
-
         entityNamesToEntityValidators.get(GROUP_ENTITY).setDictionary(null);
         return errors;
     }
@@ -206,19 +208,57 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IMessageStructure message, IFieldStructure field) {
         List<DictionaryValidationError> errors = super.validate(message, field);
 
-        if(message == null && !field.isComplex()) {
-
-            if(field.getAttributes().isEmpty()) {
-                errors.add(new DictionaryValidationError(null, field.getName(),
-                        "Field  <strong>\"" + field.getName() + "\"</strong> doesn't contain attributes",
-                        DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+        if (!field.isComplex()) {
+            if (message == null) {
+                if (field.getAttributes().isEmpty()) {
+                    errors.add(new DictionaryValidationError(null, field.getName(),
+                            "Field  <strong>\"" + field.getName() + "\"</strong> doesn't contain attributes",
+                            DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+                } else {
+                    checkTag(errors, null, field);
+                    checkFixType(errors, null, field);
+                }
             } else {
-                checkTag(errors, null, field);
-                checkFixType(errors, null, field);
+                validatePairTagsLengthData(errors, message, field);
             }
         }
 
         return errors;
+    }
+
+    private void validatePairTagsLengthData(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field) {
+        String fixType = getAttributeValue(field, ATTRIBUTE_FIX_TYPE);
+        if (FieldType.Data.getName().equals(fixType)) {
+            Integer fieldTag = getAttributeValue(field, ATTRIBUTE_TAG);
+            if (fieldTag == null) {
+                return;
+            }
+            Integer lengthTag = EXCEPTIONAL_DATA_LENGTH_TAGS.get(fieldTag);
+            if (lengthTag == null) {
+                lengthTag = fieldTag - 1;
+            }
+            Map<Integer, String> definedTags = getDefinedTags(message);
+            String fieldLengthName = definedTags.get(lengthTag);
+            if (fieldLengthName == null) {
+                errors.add(new DictionaryValidationError(message.getName(), field.getName(),
+                        "Message <strong>\"" + message.getName() + "\"</strong> doesn't contain field with tag <strong>\""
+                                + lengthTag + "\"</strong> and type <strong>\"" + FieldType.Length.getName() + "\"</strong>",
+                        DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
+            } else {
+                IFieldStructure fieldLength = message.getFields().get(fieldLengthName);
+                fixType = getAttributeValue(fieldLength, ATTRIBUTE_FIX_TYPE);
+                //the field containing the length for the field with the DATA type must be of the LENGTH type for FIX version> 4.2
+                // and INT for the version <= 4.2
+                if (!FieldType.Length.getName().equals(fixType) && !FieldType.Int.getName().equals(fixType) ) {
+                    errors.add(new DictionaryValidationError(message.getName(), fieldLength.getName(),
+                            "Field <strong>\"" + fieldLength.getName() + "\"</strong> must be of type <strong>\""
+                                    + FieldType.Length.getName() + "\"</strong> for FIX version > 4.2 or <strong>\"" + FieldType.Int.getName() + "\"</strong> for FIX version <= 4.2 instead of <strong>\"" + fixType + "\"</strong>",
+                            DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+                }
+            }
+
+        }
+
     }
 
     private void checkTagDuplicates(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
@@ -264,7 +304,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private void addTagToMap(Multimap<Integer, FieldHolder> tags, IMessageStructure message, IFieldStructure field) {
-        Integer tag = getAttributeValue(field, FixMessageHelper.ATTRIBUTE_TAG);
+        Integer tag = getAttributeValue(field, ATTRIBUTE_TAG);
         if (tag != null) {
             tags.put(tag, new FieldHolder(message == null ? null : message.getName(), field.getName()));
         }
@@ -370,18 +410,29 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     private void checkTag(List<DictionaryValidationError> errors, IMessageStructure message,
                           IFieldStructure field) {
 
-        if(ValidationHelper.checkFieldAttributeType(errors, field, FixMessageHelper.ATTRIBUTE_TAG,
-                JavaType.JAVA_LANG_INTEGER, null)) {
+        if(ValidationHelper.checkFieldAttributeType(errors, field, ATTRIBUTE_TAG,
+                JAVA_LANG_INTEGER, null)) {
 
-            Integer tag = getAttributeValue(field, FixMessageHelper.ATTRIBUTE_TAG);
+            Integer tag = getAttributeValue(field, ATTRIBUTE_TAG);
 
             if (tag == null) {
                 errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                         "Field  <strong>\"" + field.getName() + "\"</strong> doesn't contain <strong>\""
-                                + FixMessageHelper.ATTRIBUTE_TAG + "\"</strong> attribute",
+                                + ATTRIBUTE_TAG + "\"</strong> attribute",
                         DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
             }
         }
+    }
+
+    private Map<Integer, String> getDefinedTags(IMessageStructure messageStructure) {
+        Map<Integer, String> tagsMap = new HashMap<>();
+        for (IFieldStructure fieldStructure : messageStructure.getFields().values()) {
+            Integer tag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
+            if (tag != null) {
+                tagsMap.put(tag, fieldStructure.getName());
+            }
+        }
+        return tagsMap;
     }
 
     private void checkFixType(List<DictionaryValidationError> errors, IMessageStructure message,

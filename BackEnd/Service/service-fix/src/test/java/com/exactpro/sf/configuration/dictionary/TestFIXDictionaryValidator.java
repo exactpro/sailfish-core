@@ -104,7 +104,12 @@ public class TestFIXDictionaryValidator extends AbstractTest {
                 "Duplicated tag 386 in filed NoTradingSessionsDup in message TrdgSesGrp_Dup",
                 "Duplicated tag 386 in filed NoTradingSessions in message TrdgSesGrp",
                 "Duplicated tag 386 in filed NoTradingSessions",
-                "Message for value [2] name [TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE] in MsgType is  missing in dictonary"
+                "Message for value [2] name [TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE] in MsgType is  missing in dictonary",
+                "Field <strong>\"EncodedListExecInstLen\"</strong> must be of type <strong>\"LENGTH\"</strong> for FIX version > 4.2 or <strong>\"INT\"</strong> for FIX version <= 4.2 instead of <strong>\"STRING\"</strong>",
+                "Message <strong>\"UnderlyingInstrument\"</strong> doesn't contain field with tag <strong>\"362\"</strong> and type <strong>\"LENGTH\"</strong>",
+                //Special case for Signature which violates above assumption.
+                //Field Signature with tag 89 and type DATA has a paired field with tag 93 and type LENGTH.
+                "Message <strong>\"trailerInvalidName\"</strong> doesn't contain field with tag <strong>\"93\"</strong> and type <strong>\"LENGTH\"</strong>"
         };
 
         Assert.assertEquals(errorMessages.length, errors.size());

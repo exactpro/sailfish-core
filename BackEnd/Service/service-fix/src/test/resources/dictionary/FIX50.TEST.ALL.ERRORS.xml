@@ -1246,9 +1246,9 @@
 			<attribute name="tag" type="java.lang.Integer">346</attribute>
 			<attribute name="fixtype" type="java.lang.String">INT</attribute>
 		</field>
-		<field id="field-EncodedListExecInstLen" name="EncodedListExecInstLen" type="java.lang.Integer">
+		<field id="field-EncodedListExecInstLen" name="EncodedListExecInstLen" type="java.lang.String">
 			<attribute name="tag" type="java.lang.Integer">352</attribute>
-			<attribute name="fixtype" type="java.lang.String">LENGTH</attribute>
+			<attribute name="fixtype" type="java.lang.String">STRING</attribute>
 		</field>
 		<field id="field-EncodedListExecInst" name="EncodedListExecInst" type="java.lang.String">
 			<attribute name="tag" type="java.lang.Integer">353</attribute>
@@ -3037,7 +3037,6 @@
 			<field name="UnderlyingCouponRate" reference="field-UnderlyingCouponRate" required="false"/>
 			<field name="UnderlyingSecurityExchange" reference="field-UnderlyingSecurityExchange" required="false"/>
 			<field name="UnderlyingIssuer" reference="field-UnderlyingIssuer" required="false"/>
-			<field name="EncodedUnderlyingIssuerLen" reference="field-EncodedUnderlyingIssuerLen" required="false"/>
 			<field name="EncodedUnderlyingIssuer" reference="field-EncodedUnderlyingIssuer" required="false"/>
 			<field name="UnderlyingSecurityDesc" reference="field-UnderlyingSecurityDesc" required="false"/>
 			<field name="EncodedUnderlyingSecurityDescLen" reference="field-EncodedUnderlyingSecurityDescLen" required="false"/>
@@ -3274,7 +3273,7 @@
 		</message>
 		<message id="trailerInvalidName" name="trailerInvalidName">
 			<attribute name="entity_type" type="java.lang.String">Trailer</attribute>
-			<field name="SignatureLength" reference="field-SignatureLength" required="false"/>
+<!--			<field name="SignatureLength" reference="field-SignatureLength" required="false"/>-->
 			<field name="Signature" reference="field-Signature" required="false"/>
 
 			<!-- no checksum test -->

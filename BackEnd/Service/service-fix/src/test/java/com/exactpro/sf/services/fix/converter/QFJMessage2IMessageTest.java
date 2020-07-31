@@ -470,6 +470,47 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
     }
 
+    //Special case for Signature which violates above assumption.
+    //Field Signature with tag 89 and type DATA has a paired field with tag 93 and type LENGTH.
+    @Test
+    public void testMessageWithDataNotLengthTypesForSignature() throws Exception {
+        IMessage message = messageFactory.createMessage("MarketDataIncrementalRefresh", "FIX_5_0");
+        IMessage header = messageFactory.createMessage("header", "FIX_5_0");
+        header.addField("BeginString", "FIXT.1.1");
+        header.addField("SendingTime", DateTimeUtility.toLocalDateTime(1467283041001L));
+        header.addField("TargetCompID", "Target");
+        header.addField("SenderCompID", "Sender");
+        header.addField("MsgType", "X");
+        header.addField("BodyLength", 170);
+        header.addField("PossDupFlag", true);
+        header.addField("MsgSeqNum", 789);
+        header.addField("XmlData", "TestText");
+        header.addField("XmlDataLen", 8);
+
+        message.addField("header", header);
+        message.addField("RefSeqNum", 2);
+        IMessage trailer = messageFactory.createMessage("trailer", "FIX_5_0");
+        trailer.addField("CheckSum", "090");
+        trailer.addField("Signature", "signature");
+        message.addField("trailer", trailer);
+
+        System.out.println(message);
+
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
+
+        Message fixMessage = converter.convert(message, true);
+
+        trailer.addField("SignatureLength", 9);
+
+        IMessage newMessage = converter.convert(fixMessage);
+
+        System.out.println(fixMessage);
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, newMessage, new ComparatorSettings());
+
+        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+    }
+
     private QFJIMessageConverterSettings getSettings(String sfDictionary) throws IOException {
         IDictionaryStructure dictionary = getSfDictionary(sfDictionary);
         return new QFJIMessageConverterSettings( dictionary, messageFactory).setIncludeMilliseconds(true);
