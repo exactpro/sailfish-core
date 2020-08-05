@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
-import com.exactpro.sf.common.messages.FieldNotFoundException;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
@@ -643,7 +642,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		String bs = getBeginString();
 		IFieldStructure fldType = fields.get(tag);
 		if (fldType == null) {
-			throw new FieldNotFoundException("tag:" + tag);
+			throw new FieldException(SessionRejectReason.TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE, tag);
 		}
         String fixType = getAttributeValue(fldType, ATTRIBUTE_FIX_TYPE);
 		if (bs == null || fixType == null)	{

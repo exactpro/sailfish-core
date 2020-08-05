@@ -62,6 +62,19 @@ public class QFJDictionaryAdapterTest {
         when(provider.getApplicationDataDictionary(new ApplVerID(ApplVerID.FIX50SP2))).thenReturn(qfjDictionaryAdapter);
     }
 
+    @Test
+    public void testValidationThrowsCorrectExceptionIfTagNotDefinedInDictionary() throws Exception {
+        try {
+            String messageString = "8=FIXT.1.19=9435=RG34=321749=TEST_152=20200428-16:47:06.204"
+                    + "56=FMSSTEST1777=1448=mb447=D452=311=12322222=12310=152";
+            Message message = MessageUtils.parse(session, messageString);
+            qfjDictionaryAdapter.validate(message, false);
+            Assert.fail("Failed negative test to validate required tags, no expected error");
+        } catch (FieldException e){
+            Assert.assertEquals(22222, e.getField());
+            Assert.assertEquals(SessionRejectReason.TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE, e.getSessionRejectReason());
+        }
+    }
 
     @Test
     public void testValidateRequiredTags() throws Exception {
