@@ -221,13 +221,22 @@ public class ServiceActions extends AbstractCaller {
         return result;
     }
 
+    /**
+     * Converts property name to be used in the {@link BeanMap}.<br/>
+     * Note: if the value is fully in upper case (like, URL) it will be returned unmodified.
+     * @param value property name to convert
+     * @return property name with removed whitespaces and uncapitalized the first character (e.g. Foo -> foo, FooBar -> fooBar, Foo Bar -> fooBar).
+     * In case the value contains only capitalized characters it will be returned unmodified (e.g. URL -> URL).
+     */
     public static String convertProperty(String value) {
 		if (value.contains(" ")) {
 			return WordUtils.uncapitalize(WordUtils.capitalizeFully(value).replaceAll(" ", ""));
-		} else {
-			return WordUtils.uncapitalize(value);
 		}
-	}
+        if (value.length() > 1 && StringUtils.isAllUpperCase(value)) {
+            return value;
+        }
+        return WordUtils.uncapitalize(value);
+    }
 
     protected static boolean checkServiceDuplicates(IActionContext actionContext, ServiceName serviceName) {
         ServiceName[] serviceNames = actionContext.getServiceManager().getServiceNames();

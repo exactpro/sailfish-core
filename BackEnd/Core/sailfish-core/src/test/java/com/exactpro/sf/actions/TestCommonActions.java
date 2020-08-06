@@ -111,4 +111,14 @@ public class TestCommonActions extends AbstractTest {
 		Assert.assertEquals(expected, ServiceActions.convertProperty("waiting time before starting"));
 		Assert.assertEquals(expected, ServiceActions.convertProperty("WAITING time BEFORE starting"));
 	}
+
+    @Test
+    public void testConvertPropertyWithAllCapitalizedCharacters() {
+        Assert.assertEquals("URL", ServiceActions.convertProperty("URL"));
+    }
+
+    @Test
+    public void testConvertPropertyWithFirstCapitalizedCharacter() {
+        Assert.assertEquals("url", ServiceActions.convertProperty("Url"));
+    }
 }
