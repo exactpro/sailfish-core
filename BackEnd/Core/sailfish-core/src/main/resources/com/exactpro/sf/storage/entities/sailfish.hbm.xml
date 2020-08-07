@@ -93,7 +93,11 @@
                   type="com.exactpro.sf.storage.TimestampToString"/>
 		<property name="admin" column="IS_ADMIN" type="boolean" index="IDX_ADMIN" />
 		<property name="humanMessage" column="HUMAN_MSG" type="text"/>
-        <property name="rejectReason" column="REJECT_REASON" length="512"/>
+        <property name="rejectReason" column="REJECT_REASON" length="512">
+            <type name="com.exactpro.sf.storage.TruncatedString">
+                <param name="length">512</param>
+            </type>
+        </property>
 		<property name="jsonMessage" column="JSON_MSG" type="text"/>
 		<!--
 			About rawMessage: Hibernate type 'image' matches to jdbc 'LONGVARBINARY' type
