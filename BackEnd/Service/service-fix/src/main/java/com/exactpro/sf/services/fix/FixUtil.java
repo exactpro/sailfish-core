@@ -386,8 +386,7 @@ public class FixUtil {
                                         break;
                                 }
                             } catch (FieldException | FieldConvertError e) {
-                                throw new MessageConvertException(
-                                        String.format("Can not parse [%s] value for [%s] field", fieldName, fieldValue), "", e);
+                                throw new MessageConvertException("Can't parse [" + fieldName + "] value for [" + fieldValue + "] field", e);
                             }
                         }
                     } else {

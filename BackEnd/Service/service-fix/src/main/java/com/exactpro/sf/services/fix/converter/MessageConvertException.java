@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,54 +12,62 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.fix.converter;
 
-/**
- * @author nikita.smirnov
- *
- */
+import org.jetbrains.annotations.Nullable;
+
 public class MessageConvertException extends Exception {
 
     private static final long serialVersionUID = 8091325017955678801L;
-    
+
+    @Deprecated
     private final Object sfMessage;
-    
-    public MessageConvertException(Object sfMessage) {
+
+    public MessageConvertException(String message, Throwable cause) {
+        super(message, cause);
+        this.sfMessage = null;
+    }
+
+    public MessageConvertException(String message) {
+        super(message);
+        this.sfMessage = null;
+    }
+
+    @Deprecated
+    public MessageConvertException(@Nullable Object sfMessage) {
         this.sfMessage = sfMessage;
     }
-    
+
+    @Deprecated
     public MessageConvertException(Object sfMessage, String message) {
         super(message);
         this.sfMessage = sfMessage;
     }
 
-    public MessageConvertException(Object sfMessage, Throwable cause) {
+    @Deprecated
+    public MessageConvertException(@Nullable Object sfMessage, Throwable cause) {
         super(cause);
         this.sfMessage = sfMessage;
     }
 
+    @Deprecated
     public MessageConvertException(Object sfMessage, String message, Throwable cause) {
         super(message, cause);
         this.sfMessage = sfMessage;
     }
-    
+
+    @Deprecated
     public MessageConvertException() {
         this((Object)null);
     }
-    
-    public MessageConvertException(String message) {
-        this(null, message);
-    }
 
+    @Deprecated
     public MessageConvertException(Throwable cause) {
-        this(null, cause);
+        this((Object)null, cause);
     }
 
-    public MessageConvertException(String message, Throwable cause) {
-        this(null, message, cause);
-    }
-
+    @Deprecated
     public Object getSfMessage() {
         return sfMessage;
     }

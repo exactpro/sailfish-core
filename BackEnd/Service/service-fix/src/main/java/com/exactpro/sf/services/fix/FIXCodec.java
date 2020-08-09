@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -427,7 +428,7 @@ public class FIXCodec extends AbstractCodec {
             if (fieldStructure.isComplex()) {
                 String entType = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);
 
-                if (entType.equals(FixMessageHelper.GROUP_ENTITY)) {
+                if (FixMessageHelper.GROUP_ENTITY.equals(entType)) {
 
                     Integer groupTag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
                     List<Group> groups = message.getGroups(groupTag);
@@ -439,7 +440,7 @@ public class FIXCodec extends AbstractCodec {
                             iMessageTo.addField(fieldStructure.getName(), groupList);
                         }
                     }
-                } else if(entType.equals(FixMessageHelper.COMPONENT_ENTITY)) {
+                } else if(FixMessageHelper.COMPONENT_ENTITY.equals(entType)) {
                     IMessage iMessageComponent =
                             msgFactory.createMessage(fieldStructure.getName(), messageStructure.getNamespace());
 
@@ -447,7 +448,7 @@ public class FIXCodec extends AbstractCodec {
 
                     copyFields(message, iMessageComponent, componentStructure);
                     if(!iMessageComponent.getFieldNames().isEmpty()) {
-                        iMessageTo.addField(fieldStructure.getName(), Arrays.asList(iMessageComponent));
+                        iMessageTo.addField(fieldStructure.getName(), Collections.singletonList(iMessageComponent));
                     }
 
                 }
@@ -466,7 +467,7 @@ public class FIXCodec extends AbstractCodec {
                                 iMessageTo.addField(fieldStructure.getName(), message.getString(tag));
                             }
                         } catch (FieldNotFound e) {
-                            throw new MessageConvertException(message, "", e);
+                            throw new MessageConvertException("Field " + tag + " isn't found for copying to message " + iMessageTo.getName(), e);
                         }
                     } else {
                         iMessageTo.addField(fieldStructure.getName(), message.getString(tag));

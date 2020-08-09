@@ -28,8 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
+
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,10 +191,12 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                 if(ensureListType((List<?>)fieldValue, String.class)) {
                     resultMessage.setOrder(parseFieldOrder((List<String>)fieldValue));
                 } else {
-                    throw new MessageConvertException(message, FieldConst.FIELD_ORDER + " field is not a list of strings");
+                    throw new MessageConvertException("Value of " + FieldConst.FIELD_ORDER + " field in message " + message.getName() + " is not a list of strings, value '"
+                            + fieldValue + "' class '" + ClassUtils.getName(fieldValue) + '\'');
                 }
             } else {
-                throw new MessageConvertException(message, FieldConst.FIELD_ORDER + " field is not a list");
+                throw new MessageConvertException("Value of " + FieldConst.FIELD_ORDER + " field in message " + message.getName() + " is not a list, value '"
+                        + fieldValue + "' class '" + ClassUtils.getName(fieldValue) + '\'');
             }
         } else if (message.isFieldSet(FieldConst.FIELD_GROUP_DELIMITER)) {
             Object fieldValue = message.getField(FieldConst.FIELD_GROUP_DELIMITER);
@@ -204,7 +209,8 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                 firstElement.addAll(originOrder);
                 resultMessage.setOrder(firstElement);
             } else {
-                throw new MessageConvertException(message, FieldConst.FIELD_GROUP_DELIMITER + " field is not a string");
+                throw new MessageConvertException("Value of " + FieldConst.FIELD_GROUP_DELIMITER + " field in message " + message.getName() + " is not a string, value '"
+                        + fieldValue + "' class '" + ClassUtils.getName(fieldValue) + '\'');
             }
         } else {
             resultMessage.setOrder(getFieldOrder(rootStructure));
@@ -226,7 +232,8 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
             } else if(fieldValue instanceof IMessage) {
                 groupCounters = parseGroupCounters(MessageUtil.convertToHashMap((IMessage) fieldValue));
             } else {
-                throw new MessageConvertException(message, "GroupCounters field is neither a Map nor a IMessage");
+                throw new MessageConvertException("Value of " + FieldConst.GROUP_COUNTERS + " field in message " + message.getName() + " is neither a Map nor a IMessage, value '"
+                        + fieldValue + "' class '" + ClassUtils.getName(fieldValue) + '\'');
             }
         }
 
@@ -244,13 +251,13 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                 FieldList component = new FieldList();
                 resultMessage.addField(new Field(fieldName, component));
                 traverseDirtyIMessage((IMessage)fieldValue, component, fieldStructure);
-
                 continue;
             }
 
             if(fieldValue instanceof List<?>) {
                 if(!fieldName.matches("\\d+")) {
-                    throw new MessageConvertException(message, "Unknown field: " + fieldName);
+                    throw new MessageConvertException("Unknown the field: " + fieldName + " in message " + message.getName() + ", value '"
+                            + fieldValue + "' class '" + ClassUtils.getName(fieldValue) + '\'');
                 }
 
                 if(ensureListType((List<?>)fieldValue, String.class)) {
@@ -283,7 +290,9 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
                     resultMessage.addField(new Field(fieldName, groupCounter, groups));
                 } else {
-                    throw new MessageConvertException(message, "Unknown list type in field: " + fieldName);
+                    throw new MessageConvertException("Unknown list type in the field: " + fieldName + " in message " + message.getName() + ", value " + ((List<?>)fieldValue).stream()
+                            .map(ClassUtils::getName)
+                            .collect(Collectors.joining()));
                 }
 
                 continue;
@@ -333,7 +342,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                     resultMessage.addField(new Field(fieldName, fieldValue.toString()));
                 }
             } else {
-                throw new MessageConvertException(message, "Unknown field: " + fieldName);
+                throw new MessageConvertException("Unknown the field: " + fieldName + " in message " + message.getName());
             }
         }
     }
@@ -492,7 +501,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
             if(fieldName.startsWith(DirtyFixUtil.DIRTY)){
                 String tag = fieldConverter.convertToTag(fieldName.substring(DirtyFixUtil.DIRTY.length()));
                 if(tag == null){
-                    throw new MessageConvertException(message, "Unknown field: " + fieldName);
+                    throw new MessageConvertException("Unknown the field: " + fieldName + " in message " + message.getName());
                 }
                 moveIfExist(message, fieldName, header, tag);
             }
@@ -532,7 +541,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                     value.add(keyValue[1]);
                 }
             } else {
-                throw new MessageConvertException(message, field + " field is not a string");
+                throw new MessageConvertException(field + " field is not a string in message " + message.getName() + ", value " + fieldValue + ", type " + ClassUtils.getName(fieldValue));
             }
         }
     }

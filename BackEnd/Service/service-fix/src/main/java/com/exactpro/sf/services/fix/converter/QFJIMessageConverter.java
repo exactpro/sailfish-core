@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.fix.converter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,9 +103,9 @@ public class QFJIMessageConverter
         this.skipTags = settings.isSkipTags();
         this.orderingFields = settings.isOrderingFields();
         
-        if (this.orderingFields) {
-            this.fieldOrderHeader = getFieldOrderPrimitive(this.dictionary.getMessages().get(FixMessageHelper.HEADER));
-            this.fieldOrderTrailer = getFieldOrderPrimitive(this.dictionary.getMessages().get(FixMessageHelper.TRAILER));
+        if (orderingFields) {
+            this.fieldOrderHeader = getFieldOrderPrimitive(dictionary.getMessages().get(FixMessageHelper.HEADER));
+            this.fieldOrderTrailer = getFieldOrderPrimitive(dictionary.getMessages().get(FixMessageHelper.TRAILER));
         } else {
             this.fieldOrderHeader = null;
             this.fieldOrderTrailer = null;
@@ -158,6 +159,7 @@ public class QFJIMessageConverter
         return convert(message, verifyTagsOverride, skipTagsOverride, false);
     }
 
+    @Nullable
     public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
             boolean ignoreFieldType) throws MessageConvertException {
 
@@ -165,47 +167,45 @@ public class QFJIMessageConverter
             return null;
         }
 
-        String messageType = null;
-
         try {
-            messageType = message.getHeader().getString(MsgType.FIELD);
+            String messageType = message.getHeader().getString(MsgType.FIELD);
+
+            IMessageStructure messageStructure = typeToStructure.get(messageType);
+
+            if(messageStructure == null) {
+                throw new MessageConvertException("Unknown message type: " + messageType);
+            }
+
+            IMessage resultMessage = message instanceof SailfishQuickfixMessage
+                    ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
+                    : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
+
+            IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
+            IMessage messageTrailer = factory.createMessage(FixMessageHelper.TRAILER, messageStructure.getNamespace());
+
+            resultMessage.addField(FixMessageHelper.HEADER, messageHeader);
+            resultMessage.addField(FixMessageHelper.TRAILER, messageTrailer);
+
+            boolean verifyTags = ObjectUtils.defaultIfNull(verifyTagsOverride, this.verifyTags);
+            boolean skipTags = ObjectUtils.defaultIfNull(skipTagsOverride, this.skipTags);
+
+            traverseMessage(resultMessage, message, factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+            traverseMessage(resultMessage, message.getHeader(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+            traverseMessage(resultMessage, message.getTrailer(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+
+
+            // dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
+            resultMessage.getMetaData().setAdmin(message.isAdmin());
+            resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
+
+            if (message.getException() != null) {
+                resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
+            }
+
+            return resultMessage;
         } catch (FieldNotFound e) {
-            throw new MessageConvertException(message, "Failed to get message type", e);
+            throw new MessageConvertException("Failed to get message type, raw message: " + message, e);
         }
-
-        IMessageStructure messageStructure = typeToStructure.get(messageType);
-
-        if(messageStructure == null) {
-            throw new MessageConvertException(message, "Unknown message type: " + messageType);
-        }
-
-        IMessage resultMessage = message instanceof SailfishQuickfixMessage
-                ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
-                : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
-
-        IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
-        IMessage messageTrailer = factory.createMessage(FixMessageHelper.TRAILER, messageStructure.getNamespace());
-
-        resultMessage.addField(FixMessageHelper.HEADER, messageHeader);
-        resultMessage.addField(FixMessageHelper.TRAILER, messageTrailer);
-
-        boolean verifyTags = ObjectUtils.defaultIfNull(verifyTagsOverride, this.verifyTags);
-        boolean skipTags = ObjectUtils.defaultIfNull(skipTagsOverride, this.skipTags);
-
-        traverseMessage(resultMessage, message, factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
-        traverseMessage(resultMessage, message.getHeader(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
-        traverseMessage(resultMessage, message.getTrailer(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
-
-
-        // dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
-        resultMessage.getMetaData().setAdmin(message.isAdmin());
-        resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
-
-        if (message.getException() != null) {
-            resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
-        }
-
-        return resultMessage;
     }
 
     protected void traverseMessage(IMessage resultMessage, FieldMap message, IMessageFactory factory,
@@ -224,7 +224,7 @@ public class QFJIMessageConverter
 
             if(!tagToStructure.containsRow(fieldTag)) {
                 if(verifyTags) {
-                    throw new MessageConvertException(message, "Unknown tag: " + fieldTag);
+                    throw new MessageConvertException("Unknown tag: " + fieldTag + ", verify tags enabled");
                 }
 
                 continue;
@@ -234,7 +234,7 @@ public class QFJIMessageConverter
 
             if(fieldStructure == null) {
                 if(verifyTags) {
-                    throw new MessageConvertException(message, String.format("Message '%s' doesn't contain tag: %s", messageName, fieldTag));
+                    throw new MessageConvertException("Message '" + messageName + "' doesn't contain tag: " + fieldTag + ", verify tags enabled");
                 }
 
                 continue;
@@ -244,7 +244,8 @@ public class QFJIMessageConverter
 
 			if(fieldPath == null) {
 			    if(verifyTags) {
-                    throw new MessageConvertException(message, String.format("No field path in message '%s' for tag: %s", messageName, fieldTag));
+			        //TODO Clarefy error description for user
+                    throw new MessageConvertException("No field path in the message '" + messageName + "' for tag: " + fieldTag + ", verify tags enabled");
                 }
 
 			    continue;
@@ -257,9 +258,13 @@ public class QFJIMessageConverter
 				List<IMessage> iGroups = new ArrayList<>();
 
                 for(Group group : message.getGroups(fieldTag)) {
-                    IMessage iGroup = factory.createMessage(fieldStructure.getReferenceName(), fieldStructure.getNamespace());
-                    traverseMessage(iGroup, group, factory, iGroup, verifyTags, skipTags, ignoreFieldType);
-                    iGroups.add(iGroup);
+                    try {
+                        IMessage iGroup = factory.createMessage(fieldStructure.getReferenceName(), fieldStructure.getNamespace());
+                        traverseMessage(iGroup, group, factory, iGroup, verifyTags, skipTags, ignoreFieldType);
+                        iGroups.add(iGroup);
+                    } catch (MessageConvertException e) {
+                        throw new MessageConvertException("Group '" + group.getFieldTag() + "' can't be parsed. " + e.getMessage(), e);
+                    }
                 }
 
                 if (!iGroups.isEmpty()) {
@@ -280,7 +285,7 @@ public class QFJIMessageConverter
 				try {
 					if (message.getString(fieldTag).isEmpty()) {
 						// it from SETTING_VALIDATE_FIELDS_HAVE_VALUES
-						// don't add it. It can break some traverse of this message
+						// don't add it. It can break some traverse of this message.
 					    continue;
 					}
                     if (ignoreFieldType) {
@@ -324,7 +329,7 @@ public class QFJIMessageConverter
 				        continue;
 					}
                 } catch(FieldNotFound | FieldException e) {
-                    throw new MessageConvertException(message, e.getMessage(), e);
+                    throw new MessageConvertException("Getting field " + fieldName + "problem", e);
                 }
 			}
 		}
@@ -422,13 +427,13 @@ public class QFJIMessageConverter
 
 				switch(entityType) {
 				case "Group":
-				    traverseGroups(resultMessage, (List<?>)message.getField(fieldName), fieldStructure, fieldTag);
+				    traverseGroups(resultMessage, message.getField(fieldName), fieldStructure, fieldTag);
                     continue;
 				case "Component":
                     Object messageComponent = message.getField(fieldName);
 
-                    if(messageComponent instanceof List<?>) {
-                        for(Object element : (List<?>)messageComponent) {
+                    if(messageComponent instanceof Iterable<?>) {
+                        for(Object element : (Iterable<?>)messageComponent) {
                             traverseIMessage(resultMessage, (IMessage)element);
                         }
                     } else if(messageComponent instanceof IMessage) {
@@ -437,8 +442,7 @@ public class QFJIMessageConverter
 
                     continue;
 				default:
-				    throw new MessageConvertException(message,
-                            String.format("Field '%s' has unknown entity type: %s", fieldName, entityType));
+                    throw new MessageConvertException("Field '" + fieldName + "' in  message '" + message.getName() + "' has unknown entity type: " + entityType);
 				}
 			}
 
@@ -514,7 +518,7 @@ public class QFJIMessageConverter
                     throw new MessageConvertException("Unknown field type: " + fieldType);
 			    }
             } catch(ClassCastException e) {
-                throw new MessageConvertException(message, String.format("Failed to convert field '%s' in message: %s", fieldName, messageStructure.getName()), e);
+                throw new MessageConvertException("Failed to convert field '" + fieldName + "' in the message: " + messageStructure.getName(), e);
             }
 		}
 	}
@@ -539,13 +543,13 @@ public class QFJIMessageConverter
 
     private void traverseGroups(FieldMap resultMessage, List<?> groups, IFieldStructure fieldStructure, Integer groupTag) throws MessageConvertException {
         if(groupTag == null) {
-            throw new MessageConvertException(groups, "Group tag is missing for field: " + fieldStructure.getName());
+            throw new MessageConvertException("Group tag is missing for the field: " + fieldStructure.getName());
         }
 
         Integer delimiterTag = getGroupDelimiter(fieldStructure);
 
         if(delimiterTag == null) {
-            throw new MessageConvertException(groups, "Group delimiter is missing for field: " + fieldStructure.getName());
+            throw new MessageConvertException("Group delimiter is missing for the field: " + fieldStructure.getName());
         }
 
         int[] fieldOrder = getFieldOrderPrimitive(fieldStructure);

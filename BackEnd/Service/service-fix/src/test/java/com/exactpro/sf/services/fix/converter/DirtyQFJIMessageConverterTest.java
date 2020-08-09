@@ -577,7 +577,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
                 converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152, "FIX_CSV_ds1", "FGW");
                 Assert.fail("There is no exceptions was thrown");
             } catch (MessageConvertException e) {
-                Assert.assertEquals("GroupCounters field is neither a Map nor a IMessage", e.getMessage());
+                Assert.assertEquals("Value of GroupCounters field in message QuoteCancel is neither a Map nor a IMessage, value '1461=3' class 'java.lang.String'", e.getMessage());
             }
 
             iMessage = converter.convertDirty(message, false);
@@ -621,7 +621,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
                 converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152, "FIX_CSV_ds1", "FGW");
                 Assert.fail("There is no exceptions was thrown");
             } catch (MessageConvertException e) {
-                Assert.assertEquals("FieldOrder field is not a list of strings", e.getMessage());
+                Assert.assertEquals("Value of FieldOrder field in message QuoteCancel is not a list of strings, value '[298, 1166]' class 'java.util.ArrayList'", e.getMessage());
             }
             iMessage = converter.convertDirty(message, false);
             try {
@@ -630,7 +630,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
                 converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152, "FIX_CSV_ds1", "FGW");
                 Assert.fail("There is no exceptions was thrown");
             } catch (MessageConvertException e) {
-                Assert.assertEquals("FieldOrder field is not a list", e.getMessage());
+                Assert.assertEquals("Value of FieldOrder field in message QuoteCancel is not a list, value '298' class 'java.lang.Integer'", e.getMessage());
             }
             iMessage = converter.convertDirty(message, false);
             try {

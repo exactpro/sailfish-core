@@ -333,7 +333,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         try {
             converter.convert(new Message());
         } catch (MessageConvertException e) {
-            Assert.assertEquals(e.getMessage(), "Failed to get message type");
+            Assert.assertEquals("Failed to get message type, raw message: 9=0\u000110=167\u0001", e.getMessage());
         }
 
         try {
@@ -343,7 +343,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
                 }
             });
         } catch (MessageConvertException e) {
-            Assert.assertEquals(e.getMessage(), "Unknown message type: UnknownMessage");
+            Assert.assertEquals("Unknown message type: UnknownMessage", e.getMessage());
         }
     }
 
@@ -364,7 +364,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
                 }
             });
         } catch (MessageConvertException e) {
-            Assert.assertEquals(e.getMessage(), "Unknown tag: 876");
+            Assert.assertEquals("Unknown tag: 876, verify tags enabled", e.getMessage());
         }
 
         try {
@@ -375,7 +375,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
                 }
             });
         } catch (MessageConvertException e) {
-            Assert.assertEquals(e.getMessage(), "Message 'MarketDataIncrementalRefresh' doesn't contain tag: 274");
+            Assert.assertEquals( "Message 'MarketDataIncrementalRefresh' doesn't contain tag: 274, verify tags enabled", e.getMessage());
         }
     }
 
