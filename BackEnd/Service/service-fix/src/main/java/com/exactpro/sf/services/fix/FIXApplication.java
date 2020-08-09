@@ -27,14 +27,17 @@ import java.util.Map;
 import javax.crypto.Cipher;
 
 import org.apache.mina.util.Base64;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.actions.FIXMatrixUtil;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceMonitor;
@@ -288,17 +291,20 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 		logger.debug("onMessageRejected: {}", message);
         if (!isPerformance) {
             ISession iSession = sessionMap.get(sessionID);
+            IMessage iMsg = null;
             try {
-                IMessage iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
+                iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
                 iMsg.getMetaData().setRejectReason(reason);
-
-                storeMessage(iSession, iMsg);
-
                 // We don't call IServiceHandler here because this message is invalid. They shouldn't reach comparator
             } catch (MessageConvertException | RuntimeException e) {
                 // don't throw it to QFJ
                 exceptionCaught(iSession, "Process reject of message " + message + " failure", e);
+
+                iMsg = createErrorMessage(message, e.getMessage() + ". Supprecced reject: " + reason);
+            } finally {
+                storeMessage(iSession, iMsg);
             }
+
         }
 	}
 
@@ -614,8 +620,21 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                 }
             } catch (ServiceHandlerException | MessageConvertException | RuntimeException e) {
                 exceptionCaught(iSession, route.getAlias() + ": process message " + message + " failure", e);
+
+                IMessage iMsg = createErrorMessage(message, e.getMessage());
+                storeMessage(iSession, iMsg);
             }
         }
+    }
+
+    private IMessage createErrorMessage(@NotNull Message qfjMessage, String error) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setCause(error);
+
+        MsgMetaData metaData = errorMessage.getMessage().getMetaData();
+        metaData.setRawMessage(qfjMessage.getMessageData().getBytes());
+
+        return errorMessage.getMessage();
     }
 
     @Override
