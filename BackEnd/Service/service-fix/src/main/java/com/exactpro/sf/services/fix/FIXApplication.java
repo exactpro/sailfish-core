@@ -632,7 +632,11 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         errorMessage.setCause(error);
 
         MsgMetaData metaData = errorMessage.getMessage().getMetaData();
-        metaData.setRawMessage(qfjMessage.getMessageData().getBytes());
+
+        // qfjMessage.getMessageData() might be null in case the message was created via code
+        // FIXME: Integrate this hotfix into qfj library
+        byte[] rawMessage = (qfjMessage.getMessageData() == null ? qfjMessage.toString() : qfjMessage.getMessageData()).getBytes();
+        metaData.setRawMessage(rawMessage);
 
         return errorMessage.getMessage();
     }
