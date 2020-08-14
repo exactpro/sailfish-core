@@ -42,6 +42,7 @@ public class AdvancedMatrixReaderTest {
     private final String YAML_MATRIX = "SystemColumns.yaml";
     private final String ERROR_YAML_MATRIX = "ErrorArrayInBlock.yaml";
     private final String JSON_MATRIX = "JSON.json";
+    private final String YAML_MATRIX_WITH_NULLS = "MatrixWithNulls.yaml";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -170,6 +171,23 @@ public class AdvancedMatrixReaderTest {
                                                     el("#template", "block", 45),el("#id", "123", 44)),
                     reader.readCells());
             Assert.assertEquals(asMapWithNumberLine(el("#action", "Test case end", 41)),
+                    reader.readCells());
+        }
+    }
+
+    @Test
+    public void testYamlMatrixWithNulls() throws Exception {
+        try (AdvancedMatrixReader reader = new AdvancedMatrixReader(new File(PATH + YAML_MATRIX_WITH_NULLS))) {
+
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "test case start", 17)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "BL1", 19),
+                    el("#action", "send", 20),
+                    el("Side", "BUY", 21)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "BL2", 22)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "Test case end", 17)),
                     reader.readCells());
         }
     }

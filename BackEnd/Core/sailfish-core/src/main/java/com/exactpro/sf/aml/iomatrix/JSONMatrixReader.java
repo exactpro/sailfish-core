@@ -105,10 +105,13 @@ public class JSONMatrixReader implements IMatrixReader {
                         consumeNode(actionNode, table, target,  actionKey.getLine());
                         //FIXME will add additional empty row at last action
                         tableRowCounter.getAndIncrement();
-                    } else if (!actionNode.isArray()) {
+                    } else if (actionNode.isSimple()) {
                         table.put(localRowCounter, reference,  new SimpleCell(actionNode.getSimpleValue().toString(), actionKey.getLine()));
-                    } else{
+                    } else if (actionNode.isArray()) {
                         throw new IllegalStateException(String.format("Invalid value type array %s found in block %s, number line %s", reference, commonBlockType, actionKey.getLine()));
+                    } else {
+                        logger.debug("{} - actionNode is NullValue. Line - {}, column - {}",
+                                reference, actionNode.getLine(), actionNode.getColumn());
                     }
                 });
 
@@ -192,6 +195,7 @@ public class JSONMatrixReader implements IMatrixReader {
                 actionFieldPut.accept(new SimpleCell("[" + processObj.apply(actionFieldNode) + "]", actionKey.getLine()));
             } else if (actionFieldNode.isArray()) {
                 String ref = wrapIter(actionFieldNode.getArrayValue().iterator())
+                        .filter(elNode -> elNode.isObject() || elNode.isSimple())
                         //FIXME need unwrap ref syntax? or write only ref name in json
                         .map(elNode -> elNode.isObject() ? processObj.apply(elNode) : elNode.getSimpleValue().toString())
                         .collect(Collectors.joining(","));
