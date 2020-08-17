@@ -110,11 +110,14 @@ public class MLWorker {
                 }
             }
 
-            File reportData = Files.walk(tmpDir)
-                    .map(Path::toFile)
-                    .filter(file -> "reportData".equals(file.getName()))
-                    .findFirst()
-                    .orElseThrow(() -> new EPSCommonException("Unsupported report supplied. JSON data  dir not found"));
+            File reportData;
+            try (Stream<Path> walk = Files.walk(tmpDir)) {
+                reportData = walk
+                        .map(Path::toFile)
+                        .filter(file -> "reportData".equals(file.getName()))
+                        .findFirst()
+                        .orElseThrow(() -> new EPSCommonException("Unsupported report supplied. JSON data  dir not found"));
+            }
 
             ReportRoot jsonReport = OBJECT_MAPPER.readValue(new File(reportData, "report.json"), ReportRoot.class);
 
