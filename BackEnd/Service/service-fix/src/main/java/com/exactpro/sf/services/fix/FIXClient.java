@@ -293,7 +293,11 @@ public class FIXClient implements IInitiatorService {
             sessionSettings.setString(sessionID, Session.SETTING_END_DAY, fixSettings.getEndDate());
         }
 
-        sessionSettings.setString(sessionID, ResetSeqNumFlag, fixSettings.getResetSeqNumFlag()); // Determines if sequence numbers should be reset when recieving a logon request. Acceptors only.
+        String resetSeqNumFlag = fixSettings.getResetSeqNumFlag();
+        if (resetSeqNumFlag != null) {
+            // Determines if sequence numbers should be reset when receiving a logon request. Acceptors only.
+            sessionSettings.setString(sessionID, ResetSeqNumFlag, resetSeqNumFlag);
+        }
 
         sessionSettings.setBool(sessionID, Session.IGNORE_ABSENCE_OF_141_TAG, fixSettings.isIgnoreAbsenceOf141tag());
         sessionSettings.setBool(sessionID, Session.SETTING_REQUIRES_ORIG_SENDING_TIME, fixSettings.isRequiresOrigSendingTime());

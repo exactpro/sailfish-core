@@ -74,7 +74,7 @@ public class FIXClientSettings extends FIXCommonSettings {
 
 	private String EncryptionKeyFilePath;
 
-	@Description("Value of ResetSeqNumFlag(141) tag used in Logon(A) message")
+	@Description("Value of ResetSeqNumFlag(141) tag used in Logon(A) message. If the value is not set the tag won't be sent in the Logon")
 	private String ResetSeqNumFlag = "true";
 
     @Description("Number of seconds to wait for a logon response before disconnecting.")
