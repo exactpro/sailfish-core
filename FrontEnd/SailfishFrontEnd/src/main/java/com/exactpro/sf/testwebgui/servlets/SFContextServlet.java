@@ -102,6 +102,8 @@ public class SFContextServlet implements Servlet {
 
 	private static final String CONFIG_FILE_NAME = "sf.cfg.xml";
 
+    private static final long MAX_HOSTNAME_RESOLUTION_TIME_MS = 100;
+
     private volatile SFLocalContext sfLocalContext;
 
 	private ServletConfig config;
@@ -380,12 +382,21 @@ public class SFContextServlet implements Servlet {
 
             try {
                 String hostname;
+                long resolutionStartTime = System.currentTimeMillis();
+
                 try {
                     hostname = InetAddress.getLocalHost().getHostName();
                 } catch (UnknownHostException e) {
                     logger.error(e.getMessage(), e);
                     hostname = SystemUtils.getHostName();
                 }
+
+                long resolutionTime = System.currentTimeMillis() - resolutionStartTime;
+
+                if (resolutionTime > MAX_HOSTNAME_RESOLUTION_TIME_MS) {
+                    logger.warn("Slow hostname resolution: {} ms (expected max: {} ms)", resolutionTime, MAX_HOSTNAME_RESOLUTION_TIME_MS);
+                }
+
                 sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings,
                         new SfInstanceInfo(hostname, determineTomcatHttpPort(config.getServletContext()),
                                 config.getServletContext().getContextPath(), UUID.randomUUID().toString()));
