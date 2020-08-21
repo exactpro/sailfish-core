@@ -32,8 +32,15 @@ interface IExternalCodecFactory {
 
     /**
      * Creates an instance of [IExternalCodecSettings] which can be used to create a codec using [createCodec] method.
-     * @param dictionary dictionary which can be used by a codec
+     * @param dictionary main codec dictionary
      * @return settings instance
      */
+    @Deprecated(message = "Set dictionary on an instance instead", replaceWith = ReplaceWith("createSettings()"))
     fun createSettings(dictionary: IDictionaryStructure): IExternalCodecSettings
+
+    /**
+     * Creates an instance of [IExternalCodecSettings] which can be used to create a codec using [createCodec] method.
+     * @return settings instance
+     */
+    fun createSettings(): IExternalCodecSettings
 }

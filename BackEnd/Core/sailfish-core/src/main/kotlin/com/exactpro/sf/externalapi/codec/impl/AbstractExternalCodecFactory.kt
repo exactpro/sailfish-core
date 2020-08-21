@@ -18,6 +18,7 @@ package com.exactpro.sf.externalapi.codec.impl
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure
 import com.exactpro.sf.common.util.ICommonSettings
+import com.exactpro.sf.externalapi.DictionaryType.MAIN
 import com.exactpro.sf.externalapi.codec.IExternalCodecFactory
 import com.exactpro.sf.externalapi.codec.IExternalCodecSettings
 import org.apache.commons.configuration.HierarchicalConfiguration
@@ -27,8 +28,14 @@ abstract class AbstractExternalCodecFactory : IExternalCodecFactory {
     protected abstract val messageFactoryClass: Class<out IMessageFactory>
     override val protocolName: String by lazy { messageFactoryClass.newInstance().protocol }
 
+    override fun createSettings(): IExternalCodecSettings {
+        return ExternalCodecSettings(settingsClass.newInstance())
+    }
+
     override fun createSettings(dictionary: IDictionaryStructure): IExternalCodecSettings {
-        return ExternalCodecSettings(settingsClass.newInstance(), dictionary)
+        return createSettings().apply {
+            this[MAIN] = dictionary
+        }
     }
 
     protected class DummyCodecSettings : ICommonSettings {

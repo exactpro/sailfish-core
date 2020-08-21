@@ -18,6 +18,8 @@ package com.exactpro.sf.externalapi.codec
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure
 import com.exactpro.sf.configuration.suri.SailfishURI
 import com.exactpro.sf.configuration.workspace.FolderType
+import com.exactpro.sf.externalapi.DictionaryType
+import com.exactpro.sf.externalapi.DictionaryType.MAIN
 import com.google.common.collect.Table
 import java.io.File
 
@@ -38,6 +40,7 @@ interface IExternalCodecSettings {
     /**
      * Dictionary files mapped to their URI
      */
+    @Deprecated(message = "Set dictionaries by type instead")
     val dictionaryFiles: MutableMap<SailfishURI, File>
 
     /**
@@ -46,9 +49,14 @@ interface IExternalCodecSettings {
     val workspaceFolders: MutableMap<FolderType, File>
 
     /**
-     * Dictionary which can be used by a codec
+     * Main codec dictionary
      */
+    @Deprecated(message = "Access main dictionary via indexing operators instead")
     var dictionary: IDictionaryStructure
+        get() = checkNotNull(this[MAIN]) { "Main dictionary is not set" }
+        set(value) {
+            this[MAIN] = value
+        }
 
     /**
      * Map of available codec settings properties types
@@ -56,12 +64,17 @@ interface IExternalCodecSettings {
     val propertyTypes: Map<String, Class<*>>
 
     /**
+     * Set of dictionary types required by codec
+     */
+    val dictionaryTypes: Set<DictionaryType>
+
+    /**
      * Returns an instance of internal codec settings
      */
     fun <T : Any> getSettings(): T
 
     /**
-     * Return a value of a codec settings property
+     * Returns a value of a codec settings property
      * @param propertyName name of a settings property
      * @return value of a settings property
      */
@@ -73,5 +86,19 @@ interface IExternalCodecSettings {
      * @param propertyValue value of a settings property
      */
     operator fun set(propertyName: String, propertyValue: Any?)
+
+    /**
+     * Returns a value of a dictionary property
+     * @param dictionaryType type of a dictionary property
+     * @return value of a dictionary property
+     */
+    operator fun get(dictionaryType: DictionaryType): IDictionaryStructure?
+
+    /**
+     * Sets a value of a dictionary property
+     * @param dictionaryType type of a dictionary property
+     * @param dictionary value of a dictionary property
+     */
+    operator fun set(dictionaryType: DictionaryType, dictionary: IDictionaryStructure)
 }
 

@@ -34,6 +34,7 @@ import com.exactpro.sf.configuration.suri.SailfishURIUtils.getMatchingValue
 import com.exactpro.sf.configuration.workspace.FolderType
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher
 import com.exactpro.sf.configuration.workspace.IWorkspaceLayout
+import com.exactpro.sf.externalapi.DictionaryType.MAIN
 import com.exactpro.sf.externalapi.codec.IExternalCodec
 import com.exactpro.sf.externalapi.codec.IExternalCodecSettings
 import com.exactpro.sf.externalapi.codec.PluginAlias
@@ -59,6 +60,8 @@ abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory()
     protected abstract val codecClass: Class<out AbstractCodec>
 
     override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = settings.run {
+        val dictionary = checkNotNull(this[MAIN]) { "Main dictionary is not set" }
+
         val messageFactory = messageFactoryClass.newInstance().apply {
             init(SailfishURI.parse(dictionary.namespace), dictionary)
         }
@@ -67,7 +70,7 @@ abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory()
             codecClass,
             InternalServiceContext(
                 InternalDataManager(dataFiles, dataResources),
-                InternalDictionaryManager(dictionaryFiles, messageFactory),
+                InternalDictionaryManager(this, messageFactory),
                 InternalWorkspaceDispatcher(workspaceFolders)
             ),
             getSettings(),
@@ -124,18 +127,27 @@ abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory()
         override fun exists(uri: SailfishURI): Boolean = getMatchingValue(uri, dataFiles, REQUIRE_RESOURCE) != null
 
     }
-
     private class InternalDictionaryManager(
-        dictionaryFiles: Map<SailfishURI, File>,
+        settings: IExternalCodecSettings,
         private val messageFactory: IMessageFactory
     ) : IDictionaryManager {
-        private val dictionaryFiles = dictionaryFiles.mapValues { (uri, file) ->
-            require(file.isFile) { "File with URI '$uri' is not a file: ${file.absolutePath}" }
+        private val dictionaryFiles = hashMapOf<SailfishURI, IDictionaryStructure>()
 
-            file.inputStream().runCatching {
-                use(XmlDictionaryStructureLoader()::load)
-            }.getOrElse {
-                throw Exception("Failed to load dictionary from file: ${file.absolutePath}", it)
+        init {
+            settings.dictionaryFiles.mapValuesTo(dictionaryFiles) { (uri, file) ->
+                require(file.isFile) { "File with URI '$uri' is not a file: ${file.absolutePath}" }
+
+                file.inputStream().runCatching {
+                    use(XmlDictionaryStructureLoader()::load)
+                }.getOrElse {
+                    throw Exception("Failed to load dictionary from file: ${file.absolutePath}", it)
+                }
+            }
+
+            settings.dictionaryTypes.forEach { type ->
+                dictionaryFiles[type.toUri()] = checkNotNull(settings[type]) {
+                    "Dictionary type is not set: $type"
+                }
             }
         }
 

@@ -19,6 +19,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
 
@@ -31,7 +33,8 @@ public class FASTCodecSettings extends AbstractServiceSettings {
 	private boolean streamBlockEncoded = true;
 	private boolean resetContextAfterEachUdpPacket = true;
 	@RequiredParam
-	@Description("Dictionary title")
+    @Description("Dictionary title")
+    @DictionaryProperty(type = DictionaryType.MAIN)
 	private SailfishURI dictionaryName;
 
     public boolean isStreamBlockEncoded() {
