@@ -18,6 +18,7 @@ package com.exactpro.sf.externalapi;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,6 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 public class AbstractSettingsProxy implements ISettingsProxy {
     protected final ICommonSettings settings;
     protected final Map<String, PropertyDescriptor> descriptors;
-
 
     public AbstractSettingsProxy(ICommonSettings settings) {
         this.settings = settings;
@@ -87,12 +87,17 @@ public class AbstractSettingsProxy implements ISettingsProxy {
     }
 
     @Override
-    public SailfishURI getDictionary() {
+    public Set<DictionaryType> getDictionaryTypes() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public SailfishURI getDictionary(DictionaryType dictionaryType) {
         throw new UnsupportedOperationException("Settings don't have a dictionary");
     }
 
     @Override
-    public void setDictionary(SailfishURI dictionary) {
+    public void setDictionary(DictionaryType dictionaryType, SailfishURI dictionaryUri) {
         throw new UnsupportedOperationException("Settings don't have a dictionary");
     }
 }

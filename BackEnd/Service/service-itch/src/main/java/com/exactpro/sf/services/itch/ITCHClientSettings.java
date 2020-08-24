@@ -15,14 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.configuration.HierarchicalConfiguration;
+
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.RequiredParam;
 import com.exactpro.sf.services.mina.AbstractMINASettings;
 import com.exactpro.sf.services.util.ServiceUtil;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ITCHClientSettings extends AbstractMINASettings
@@ -56,9 +59,11 @@ public class ITCHClientSettings extends AbstractMINASettings
 
 	@RequiredParam
 	@Description("Dictionary title")
+    @DictionaryProperty(type = DictionaryType.MAIN)
 	private SailfishURI dictionaryName;
+
     @Description("Fields value for which allow receive messages.\n"
-            + "Example: '1, A' or '"+ ServiceUtil.ALIAS_PREFIX + "dataA'")
+            + "Example: '1, A' or '" + ServiceUtil.ALIAS_PREFIX + "dataA'")
 	private String filterValues;
 
 	@Description("ITCH Preprocessor's class name")

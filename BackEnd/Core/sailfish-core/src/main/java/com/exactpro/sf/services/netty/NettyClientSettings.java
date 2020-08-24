@@ -22,6 +22,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.ServiceException;
 
@@ -32,7 +34,8 @@ public abstract class NettyClientSettings extends AbstractServiceSettings {
     @Description("Idle timeout (minutes)")
 	protected int idleTimeout;
 
-	@Description("Dictionary name")
+    @Description("Dictionary name")
+    @DictionaryProperty(type = DictionaryType.MAIN)
 	protected SailfishURI dictionaryName;
 
 	public int getIdleTimeout() {

@@ -22,6 +22,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 
 @XmlRootElement
@@ -36,7 +38,8 @@ public class TCPIPProxySettings extends AbstractServiceSettings
 	private long timeout;
 	private boolean changeTags;
 	private SailfishURI rulesAlias = SailfishURI.unsafeParse("TCPIPProxyRules");
-	private SailfishURI dictionaryName;
+    @DictionaryProperty(type = DictionaryType.MAIN)
+    private SailfishURI dictionaryName;
 
 	public String getCodecClassName() {
 		return codecClassName;

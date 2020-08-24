@@ -15,17 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.services.mina;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
-
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public abstract class AbstractMINASettings extends AbstractServiceSettings {
     private static final long serialVersionUID = -4850020892139075669L;
 
     @RequiredParam
+    @DictionaryProperty(type = DictionaryType.MAIN)
     protected SailfishURI dictionaryName;
 
     @Override

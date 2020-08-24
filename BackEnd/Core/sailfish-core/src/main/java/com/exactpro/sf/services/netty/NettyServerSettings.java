@@ -17,14 +17,17 @@ package com.exactpro.sf.services.netty;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 
 public abstract class NettyServerSettings extends AbstractServiceSettings {
     
     @Description("The server binds to this port")
     private int port;
-    
+
     @Description("Dictionary name")
+    @DictionaryProperty(type = DictionaryType.MAIN)
     protected SailfishURI dictionaryName;
     
     @Override

@@ -45,7 +45,7 @@ public interface ISettingsProxy {
      * @throws EPSCommonException if target type is incorrect
      */
     <T> T getParameterValue(String name);
-    
+
     /**
      * Set value by name.
      * @param name
@@ -54,20 +54,45 @@ public interface ISettingsProxy {
      *                              or settings does not contain passed name
      */
     void setParameterValue(String name, Object value);
-    
-    /**
-     * Current service dictionary
-     * @return
-     * @throws UnsupportedOperationException if settings have not dictionary
-     */
-    SailfishURI getDictionary();
 
     /**
-     * Set current service status.
-     * @param dictionary
-     * @return
-     * @throws UnsupportedOperationException if settings have not dictionary
+     * Set of dictionary types required by service
      */
-    void setDictionary(SailfishURI dictionary);
+    Set<DictionaryType> getDictionaryTypes();
 
+    /**
+     * Main service dictionary
+     * @return dictionary URI
+     * @throws UnsupportedOperationException if settings have not dictionary
+     * @deprecated Use {@link #getDictionary(DictionaryType) getDictionary(DictionaryType.MAIN)} instead
+     */
+    @Deprecated
+    default SailfishURI getDictionary() {
+        return getDictionary(DictionaryType.MAIN);
+    }
+
+    /**
+     * Returns URI of a dictionary with the specified type
+     * @param dictionaryType type of service dictionary
+     * @return dictionary URI
+     */
+    SailfishURI getDictionary(DictionaryType dictionaryType);
+
+    /**
+     * Sets main dictionary
+     * @param dictionary dictionary URI
+     * @throws UnsupportedOperationException if settings have not dictionary
+     * @deprecated Use {@link #setDictionary(DictionaryType, SailfishURI) setDictionary(DictionaryType.MAIN, dictionaryUri)} instead
+     */
+    @Deprecated
+    default void setDictionary(SailfishURI dictionary) {
+        setDictionary(DictionaryType.MAIN, dictionary);
+    }
+
+    /**
+     * Sets dictionary with the specified type
+     * @param dictionaryType dictionary type
+     * @param dictionaryUri dictionary URI
+     */
+    void setDictionary(DictionaryType dictionaryType, SailfishURI dictionaryUri);
 }

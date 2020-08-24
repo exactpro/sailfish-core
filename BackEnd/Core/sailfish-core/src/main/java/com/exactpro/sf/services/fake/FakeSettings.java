@@ -22,12 +22,15 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 
 @XmlRootElement
 public class FakeSettings extends AbstractServiceSettings {
     private static final long serialVersionUID = 1387730429929582093L;
 
+    @DictionaryProperty(type = DictionaryType.MAIN)
     private SailfishURI dictionaryName;
 	private long idleTimeout = 1000;
 

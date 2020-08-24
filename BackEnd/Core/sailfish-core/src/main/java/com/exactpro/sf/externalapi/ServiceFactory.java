@@ -22,6 +22,7 @@ import static com.exactpro.sf.services.ServiceStatus.ERROR;
 import static com.exactpro.sf.services.ServiceStatus.INITIALIZED;
 import static com.exactpro.sf.services.ServiceStatus.STARTED;
 import static com.exactpro.sf.services.ServiceStatus.WARNING;
+import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 
 import java.beans.PropertyDescriptor;
 import java.io.BufferedOutputStream;
@@ -30,13 +31,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -543,10 +548,32 @@ public class ServiceFactory implements IServiceFactory {
     }
 
     private static class ServiceSettingsProxy extends AbstractSettingsProxy{
+        protected final Map<DictionaryType, String> dictionaryProperties = new EnumMap<>(DictionaryType.class);
 
         public ServiceSettingsProxy(IServiceSettings settings) {
             super(settings);
 
+            for (Field field : getFieldsListWithAnnotation(settings.getClass(), DictionaryProperty.class)) {
+                String name = field.getName();
+
+                if (!descriptors.containsKey(name)) {
+                    throw new IllegalStateException("Field is not a property:" + name);
+                }
+
+                if (field.getType() != SailfishURI.class) {
+                    throw new IllegalStateException("Invalid dictionary property type: " + field.getType().getCanonicalName());
+                }
+
+                if (dictionaryProperties.containsValue(name)) {
+                    continue; // ignore superclass annotation values (subclass fields are processed first)
+                }
+
+                DictionaryType type = field.getAnnotation(DictionaryProperty.class).type();
+
+                if (dictionaryProperties.put(type, name) != null) {
+                    throw new IllegalStateException("Duplicate dictionary property type: " + type);
+                }
+            }
         }
 
         public IServiceSettings getSettings() {
@@ -566,14 +593,20 @@ public class ServiceFactory implements IServiceFactory {
         }
 
         @Override
-        public SailfishURI getDictionary() {
-            return ((IServiceSettings)settings).getDictionaryName();
+        public Set<DictionaryType> getDictionaryTypes() {
+            return Collections.unmodifiableSet(dictionaryProperties.keySet());
         }
 
         @Override
-        public void setDictionary(SailfishURI dictionary) {
-            ((IServiceSettings)settings).setDictionaryName(dictionary);
+        public SailfishURI getDictionary(DictionaryType dictionaryType) {
+            String propertyName = Objects.requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
+            return getParameterValue(propertyName);
+        }
+
+        @Override
+        public void setDictionary(DictionaryType dictionaryType, SailfishURI dictionaryUri) {
+            String propertyName = Objects.requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
+            setParameterValue(propertyName, dictionaryUri);
         }
     }
-
 }

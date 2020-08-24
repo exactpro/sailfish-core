@@ -22,6 +22,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 
 @XmlRootElement
@@ -35,7 +37,8 @@ public class ITCHServerSettings extends AbstractServiceSettings
 
 	private int heartBeatTimeout;
 
-	private SailfishURI dictionaryName;
+    @DictionaryProperty(type = DictionaryType.MAIN)
+    private SailfishURI dictionaryName;
 
 	public int getHeartBeatTimeout()
 	{

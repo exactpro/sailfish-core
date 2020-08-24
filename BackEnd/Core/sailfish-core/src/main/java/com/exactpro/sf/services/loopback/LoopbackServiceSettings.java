@@ -17,12 +17,15 @@ package com.exactpro.sf.services.loopback;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 
 public class LoopbackServiceSettings extends AbstractServiceSettings{
     private static final long serialVersionUID = 5233309386346201972L;
 
     @Description("Dictionary title")
+    @DictionaryProperty(type = DictionaryType.MAIN)
     private SailfishURI dictionaryName;
 
     @Override public SailfishURI getDictionaryName() {

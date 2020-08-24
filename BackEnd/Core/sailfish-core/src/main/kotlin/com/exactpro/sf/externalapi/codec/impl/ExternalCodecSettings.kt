@@ -48,9 +48,7 @@ class ExternalCodecSettings(
         val map = hashMapOf<DictionaryType, PropertyDescriptor>()
 
         forEach { field ->
-            val descriptor = properties[field.name]
-
-            checkNotNull(descriptor) { "Field is not a property: ${field.name}" }
+            val descriptor = checkNotNull(properties[field.name]) { "Field is not a property: ${field.name}" }
 
             check(field.type == SailfishURI::class.java || field.type == IDictionaryStructure::class.java) {
                 "Invalid dictionary property type: ${field.type.canonicalName} (field: ${field.name})"
@@ -58,11 +56,9 @@ class ExternalCodecSettings(
 
             val type = field.getAnnotation(DictionaryProperty::class.java).type
 
-            check(!map.containsKey(type)) {
+            check(map.put(type, descriptor) == null) {
                 "Duplicate dictionary property type: $type"
             }
-
-            map[type] = descriptor
         }
 
         map

@@ -19,27 +19,31 @@ import com.exactpro.sf.configuration.suri.SailfishURI
 
 enum class DictionaryType {
     /**
-     * Main dictionary of a codec/service (mandatory)
+     * Main dictionary of a codec/service. In case of a multi-level protocol it's a
+     * dictionary for the top level. This dictionary type is mandatory except some
+     * bizarre cases when incoming and outgoing protocols are different
      */
     MAIN,
 
     /**
-     * Dictionary for the first level in a multi-level protocol
+     * Dictionary for the lowest level (e.g. a wrapper) in a multi-level protocol
      */
     LEVEL1,
 
     /**
-     * Dictionary for the second level in a multi-level protocol
+     * Dictionary for the second level (if there are more than 2 levels) in a multi-level protocol
      */
     LEVEL2,
 
     /**
-     * Dictionary for incoming messages
+     * Dictionary for incoming protocol (used in some very rare cases when incoming and outgoing
+     * protocols are different)
      */
     INCOMING,
 
     /**
-     * Dictionary for outgoing messages
+     * Dictionary for outgoing protocol (used in some very rare cases when incoming and outgoing
+     * protocols are different
      */
     OUTGOING;
 

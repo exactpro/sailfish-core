@@ -15,13 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.tcpip;
 
-import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.services.AbstractServiceSettings;
-import com.exactpro.sf.services.RequiredParam;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
+import com.exactpro.sf.services.AbstractServiceSettings;
+import com.exactpro.sf.services.RequiredParam;
 
 @XmlRootElement
 public class TCPIPSettingsServer extends AbstractServiceSettings
@@ -51,7 +54,8 @@ public class TCPIPSettingsServer extends AbstractServiceSettings
 			"If 0 than service should not be disposed.")
 	private int idleTimeout;
 
-	private SailfishURI dictionaryName;
+    @DictionaryProperty(type = DictionaryType.MAIN)
+    private SailfishURI dictionaryName;
 
 	@Description("Tag's list unexpected messages. Example: 35=a,48=B|34=4")
 	private String unexpectedMessages;

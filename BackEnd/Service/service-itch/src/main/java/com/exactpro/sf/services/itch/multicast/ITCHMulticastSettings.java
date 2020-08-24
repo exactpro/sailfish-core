@@ -15,12 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
-import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.services.AbstractServiceSettings;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
+import com.exactpro.sf.services.AbstractServiceSettings;
 
 /**
  * Created by alexey.zarovny on 11/18/14.
@@ -45,6 +48,7 @@ public class ITCHMulticastSettings extends AbstractServiceSettings {
     private int msgLength = 1;
     private boolean storeMessages = true;
     @Description("Dictionary name")
+    @DictionaryProperty(type = DictionaryType.MAIN)
     private SailfishURI dictionaryName;
     @Description("Cashe size for replay")
     private int cacheSize = 2048;

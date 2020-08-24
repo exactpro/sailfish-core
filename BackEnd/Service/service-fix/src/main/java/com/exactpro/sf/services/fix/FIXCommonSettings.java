@@ -19,6 +19,8 @@ import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.EnumeratedValues;
 import com.exactpro.sf.aml.InputMask;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.externalapi.DictionaryProperty;
+import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
 
@@ -87,6 +89,7 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     @RequiredParam
     @Description("Dictionary title")
+    @DictionaryProperty(type = DictionaryType.MAIN)
     protected SailfishURI dictionaryName;
 
     @Description("Determines if sequence numbers should be reset to 1 after a normal logout termination")
