@@ -33,6 +33,7 @@ import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
@@ -68,10 +69,11 @@ public class ClientSideIoHandler extends AbstractProxyIoHandler {
     private final ILoggingConfigurator logConfigurator;
     private final DirtyQFJIMessageConverter converter;
     private final ServiceName serviceName;
+    private final long sendMessageTimeout;
 
 	public ClientSideIoHandler(IoConnector connector,
             SocketAddress remoteAddress, IMessageStorage storage, IServiceHandler handler, TCPIPProxy proxyService, ILoggingConfigurator logConfigurator, IDictionaryStructure dictionary, IMessageFactory factory,
-            DirtyQFJIMessageConverter converter, ServiceName serviceName) {
+            DirtyQFJIMessageConverter converter, ServiceName serviceName, long sendMessageTimeout) {
 		this.connector = connector;
 		this.remoteAddress = remoteAddress;
 		this.storage = storage;
@@ -81,6 +83,7 @@ public class ClientSideIoHandler extends AbstractProxyIoHandler {
 		this.appDictionary = new QFJDictionaryAdapter(dictionary);
 		this.converter = converter;
         this.serviceName = serviceName;
+        this.sendMessageTimeout = sendMessageTimeout;
 
 		connectorHandler = new ServerSideIoHandler(connector, storage, handler, proxyService, this.factory, appDictionary, converter);
 		connectorHandler.setServiceInfo(serviceInfo);
@@ -94,7 +97,7 @@ public class ClientSideIoHandler extends AbstractProxyIoHandler {
 		logger.debug("sessionOpened");
 
 		//Store session to MAP
-        MINASession mSession = new MINASession(serviceName, session);
+        MINASession mSession = new MINASession(serviceName, session, sendMessageTimeout);
         logConfigurator.registerLogger(mSession, serviceName);
 		proxyService.addSession(session, mSession);
 

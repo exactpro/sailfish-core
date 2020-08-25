@@ -30,6 +30,8 @@ public interface IServiceSettings extends ICommonSettings {
 
 	long getWaitingTimeBeforeStarting();
 
+	long getSendMessageTimeout();
+
 	String getStoredMessageTypes();
 	
 	boolean isPerformDump();

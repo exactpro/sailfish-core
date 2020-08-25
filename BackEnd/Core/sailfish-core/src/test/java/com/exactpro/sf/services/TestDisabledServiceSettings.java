@@ -95,6 +95,7 @@ public class TestDisabledServiceSettings {
 
         Entry<String, File> next = stringFileMap.entrySet().iterator().next();
         File exported = next.getValue();
+
         compareLinesInTwoFiles(enabledExpectedFile, exported);
         exported.deleteOnExit();
 
@@ -117,7 +118,16 @@ public class TestDisabledServiceSettings {
         Iterator<String> expectedIter = Files.lines(expected.toPath()).iterator(), actualIter = Files.lines(actual.toPath()).iterator();
 
         while (expectedIter.hasNext() && actualIter.hasNext()) {
-            Assert.assertEquals(expectedIter.next(), actualIter.next());
+            String expectedLine = expectedIter.next();
+            String expectedLinesTrimmed = expectedLine.trim();
+
+            if (expectedLinesTrimmed.startsWith("<!--") ||
+                    expectedLinesTrimmed.startsWith("~") ||
+                    expectedLinesTrimmed.startsWith("-->")) {
+                continue; // skip copyright
+            }
+
+            Assert.assertEquals(expectedLine, actualIter.next());
             Assert.assertEquals(expectedIter.hasNext(), actualIter.hasNext());
         }
     }

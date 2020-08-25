@@ -45,7 +45,8 @@ public class FixProxy extends TCPIPProxy {
     @Override
     protected IProxyIoHandler getProxyIoHandler() {
         return new ClientSideIoHandler(connector.getNioSocketConnector(),
-                new InetSocketAddress(settings.getHost(), settings.getPort()), storage, handler, this, logConfigurator, dictionary, factory, converter, getServiceName());
+                new InetSocketAddress(settings.getHost(), settings.getPort()), storage, handler, this, logConfigurator,
+                        dictionary, factory, converter, getServiceName(), settings.getSendMessageTimeout());
     }
 
     public DirtyQFJIMessageConverter getConverter() {

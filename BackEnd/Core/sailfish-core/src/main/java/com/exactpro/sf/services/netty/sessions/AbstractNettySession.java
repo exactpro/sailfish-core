@@ -41,15 +41,18 @@ public abstract class AbstractNettySession implements ISession {
     
     @NotNull
     protected final AbstractNettyService service;
-    
+
+    protected final long sendMessageTimeout;
+
     protected Channel channel;
     
     private final ReadWriteLock channelLock = new ReentrantReadWriteLock();
     
-    //TODO pass service name and exception handler instead service
+    //TODO pass service settings and exception handler instead service
     public AbstractNettySession(@NotNull AbstractNettyService service, @NotNull Channel channel) {
         this.service = Objects.requireNonNull(service, "Service must not be null");
         this.channel = Objects.requireNonNull(channel, "Channel must not be null");
+        this.sendMessageTimeout = service.getSettings().getSendMessageTimeout();
     }
     
     @Override
@@ -61,7 +64,7 @@ public abstract class AbstractNettySession implements ISession {
     public IMessage sendDirty(Object message) throws InterruptedException {
         throw new UnsupportedOperationException();
     }
-    
+
     public void onExceptionCaught(Throwable cause) {
         logger.error("Exception caught in netty's pipeline", cause);
         service.onExceptionCaught(channel, cause);

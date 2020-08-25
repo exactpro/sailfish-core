@@ -159,7 +159,8 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 
     @Override
     protected MINASession createSession(IoSession session) {
-        ITCHSession itchSession = new ITCHSession(getServiceName(), session, getSettings().getMarketDataGroup()) {
+        ITCHSession itchSession = new ITCHSession(getServiceName(), session,
+                getSettings().getMarketDataGroup(), getSettings().getSendMessageTimeout()) {
             @Override
             protected Object prepareMessage(Object message) {
                 if (message instanceof IMessage) {

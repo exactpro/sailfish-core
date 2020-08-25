@@ -61,6 +61,9 @@ public abstract class AbstractService implements IService {
             this.loggingConfigurator =  Objects.requireNonNull(serviceContext.getLoggingConfigurator(), "loggingConfigurator cannot be null");
             this.storage = Objects.requireNonNull(serviceContext.getMessageStorage(), "storage cannot be null");
             this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(getServiceName()), "serviceInfo cannot be null");
+            if (settings.getSendMessageTimeout() < 1) {
+                throw new ServiceException("Send message timeout should be grated than zero");
+            }
             initDictionaryData();
             getSettings();
             internalInit();

@@ -190,7 +190,7 @@ public class TCPIPClient extends AbstractMINATCPService {
 
     @Override
     protected TCPIPSession createSession(IoSession session) {
-        TCPIPSession tcpipSession = new TCPIPSession(getServiceName(), session);
+        TCPIPSession tcpipSession = new TCPIPSession(getServiceName(), session, getSettings().getSendMessageTimeout());
         loggingConfigurator.registerLogger(tcpipSession, getServiceName());
         return tcpipSession;
     }

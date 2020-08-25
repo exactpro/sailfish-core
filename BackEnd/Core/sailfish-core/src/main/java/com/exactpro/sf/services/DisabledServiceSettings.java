@@ -98,6 +98,11 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     @Override
+    public long getSendMessageTimeout() {
+        return 1000;
+    }
+
+    @Override
     public void load(HierarchicalConfiguration config) {
 
     }

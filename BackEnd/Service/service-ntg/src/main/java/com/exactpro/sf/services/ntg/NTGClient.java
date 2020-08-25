@@ -205,7 +205,7 @@ public final class NTGClient extends AbstractMINATCPService {
 
     @Override
     protected MINASession createSession(IoSession session) {
-        NTGSession ntgSession = new NTGSession(serviceName, session) {
+        NTGSession ntgSession = new NTGSession(serviceName, session, getSettings().getSendMessageTimeout()) {
             @Override
             protected Object prepareMessage(Object message) {
                 if (message instanceof IMessage) {

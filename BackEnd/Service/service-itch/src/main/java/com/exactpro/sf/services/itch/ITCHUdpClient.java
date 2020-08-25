@@ -92,7 +92,8 @@ public class ITCHUdpClient extends AbstractMINAUDPService implements IITCHClient
 
     @Override
     protected MINASession createSession(IoSession session) {
-        ITCHSession itchSession = new ITCHSession(getServiceName(), session, getSettings().getMarketDataGroup()) {
+        ITCHSession itchSession = new ITCHSession(getServiceName(), session,
+                getSettings().getMarketDataGroup(), getSettings().getSendMessageTimeout()) {
             @Override
             public IMessage send(Object message) throws InterruptedException {
                 throw new EPSCommonException("Cannot send message: " + message);

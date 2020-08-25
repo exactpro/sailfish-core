@@ -189,7 +189,7 @@ public abstract class AbstractMINATCPServer extends AbstractInitiatorService imp
     }
 
     protected MINASession createMINASession(IoSession session) {
-        MINASession minaSession = new MINASession(serviceName, session);
+        MINASession minaSession = new MINASession(serviceName, session, getSettings().getSendMessageTimeout());
         loggingConfigurator.registerLogger(minaSession, getServiceName());
         logger.info("Server session created: {}", minaSession);
         return minaSession;

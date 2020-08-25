@@ -26,16 +26,34 @@ public interface ISession
 	String getName();
 
 	/**
-	 * Send message
-	 * @param message object to be send
+	 * Sends a message within send message timeout from service settings
+	 * @param message object to be sent
 	 */
 	IMessage send(Object message) throws InterruptedException;
 
+    /**
+     * Sends a message within timeout
+     * @param message object to be sent
+     * @param timeout time in milliseconds for message sending. It should be greater than zero.
+     */
+    default IMessage send(Object message, long timeout) throws InterruptedException {
+        return send(message);
+    }
+
 	/**
-	 * Send dirty message
-	 * @param message object to be send
+	 * Sends dirty message within send message timeout from service settings
+	 * @param message object to be sent
 	 */
 	IMessage sendDirty(Object message)  throws InterruptedException;
+
+	/**
+	 * Sends dirty message within timeout
+	 * @param message object to be sent
+     * @param timeout time in milliseconds for message sending. It should be greater than zero.
+	 */
+	default IMessage sendDirty(Object message, long timeout)  throws InterruptedException {
+	    return sendDirty(message);
+    }
 
 	/**
 	 * close session

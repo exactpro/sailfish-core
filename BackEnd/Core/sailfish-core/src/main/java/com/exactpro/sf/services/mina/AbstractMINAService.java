@@ -97,7 +97,7 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
     }
 
     protected MINASession createSession(IoSession session) {
-        MINASession minaSession = new MINASession(getServiceName(), session);
+        MINASession minaSession = new MINASession(getServiceName(), session, getSettings().getSendMessageTimeout());
         loggingConfigurator.registerLogger(minaSession, getServiceName());
         return minaSession;
     }

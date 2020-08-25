@@ -19,6 +19,7 @@ package com.exactpro.sf.services.mina;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.mina.core.future.WriteFuture;
@@ -34,13 +35,12 @@ import com.exactpro.sf.services.util.CloseSessionException;
 
 public class MINAServerSession implements ISession {
 
-    private static final int DEFAULT_TIMEOUT = 1000;
     protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
-    protected AbstractMINATCPServer server;
+    protected final AbstractMINATCPServer server;
 
     public MINAServerSession(AbstractMINATCPServer server) {
-        this.server = server;
+        this.server = Objects.requireNonNull(server, "Server can't be null");
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MINAServerSession implements ISession {
 
     @Override
     public IMessage send(Object message) throws InterruptedException {
-        return send(prepareMessage(message), DEFAULT_TIMEOUT);
+        return send(prepareMessage(message), server.getSettings().getSendMessageTimeout());
     }
 
     public IMessage send(Object message, long timeout) throws InterruptedException {

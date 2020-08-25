@@ -36,14 +36,17 @@ import io.netty.channel.ChannelFutureListener;
 public class NettySession implements ISession {
 
 	protected final Logger logger = LoggerFactory
-            .getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+            .getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
 	private final NettyClientService client;
+
+    protected final long sendMessageTimeout;
 
     public NettySession(NettyClientService client) {
         if(client == null) {
 			throw new NullPointerException();
 		}
 		this.client = client;
+        this.sendMessageTimeout = client.getSettings().getSendMessageTimeout();
 	}
 
 	@Override
@@ -51,14 +54,22 @@ public class NettySession implements ISession {
 		return client.getName();
 	}
 
+    @Override
+    public IMessage send(Object message) throws InterruptedException {
+        return send(message, sendMessageTimeout);
+    }
+	
 	@Override
-	public IMessage send(Object message) throws InterruptedException {
+	public IMessage send(Object message, long timeout) throws InterruptedException {
 		if (client.getChannel() == null) {
 			throw new EPSCommonException("Channel not ready (channel == null)");
 		}
 		if (!(message instanceof IMessage)) {
 			throw new EPSCommonException("Illegal type of Message");
 		}
+        if (timeout < 1) {
+            throw new EPSCommonException("Illegal timeout value: " + timeout);
+        }
 
 		IMessage msg = (IMessage) message;
 		ChannelFuture future = client.getChannel().writeAndFlush(msg)
@@ -66,10 +77,10 @@ public class NettySession implements ISession {
 		boolean isSendSuccess = true;
 		StringBuilder errorMsg = new StringBuilder("Cause: ");
 
-		if (future.await(1000)) {
+		if (future.await(timeout)) {
 			if (!future.isDone()) {
-				errorMsg.append("Send operation is not done.\n");
-				logger.error("Send operation is not done. Session: {}", this);
+				errorMsg.append("Send operation isn't done.\n");
+				logger.error("Send operation isn't done. Session: {}", this);
 				isSendSuccess = false;
 			}
 			if (!future.isSuccess()) {
@@ -78,8 +89,8 @@ public class NettySession implements ISession {
 				isSendSuccess = false;
 			}
 		} else {
-			errorMsg.append("Send operation is not completed.\n");
-			logger.error("Send operation is not completed. Session: {}", this);
+			errorMsg.append("Send operation isn't completed.\n");
+			logger.error("Send operation isn't completed. Session: {}", this);
 			isSendSuccess = false;
 		}
         if(future.cause() != null) {

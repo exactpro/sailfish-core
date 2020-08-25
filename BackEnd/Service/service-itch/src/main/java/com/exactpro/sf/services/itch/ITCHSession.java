@@ -21,6 +21,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.mina.core.session.IoSession;
 
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.mina.MINASession;
 
 public class ITCHSession extends MINASession {
@@ -28,8 +29,8 @@ public class ITCHSession extends MINASession {
 
 	private final byte marketDataGroup;
 
-    public ITCHSession(ServiceName serviceName, IoSession session, byte marketDataGroup) {
-        super(serviceName, session);
+    public ITCHSession(ServiceName serviceName, IoSession session, byte marketDataGroup, long sendMessageTimeout) {
+        super(serviceName, session, sendMessageTimeout);
         this.marketDataGroup = marketDataGroup;
     }
 

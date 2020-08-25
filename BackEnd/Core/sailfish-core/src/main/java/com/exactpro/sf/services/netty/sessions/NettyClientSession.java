@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty.sessions;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.common.messages.IMessage;
@@ -31,11 +32,19 @@ public class NettyClientSession extends AbstractNettySession {
     public NettyClientSession(@NotNull AbstractNettyService service, @NotNull Channel channel) {
         super(service, channel);
     }
-    
+
     @Override
     public IMessage send(Object message) throws InterruptedException {
+        return send(message, sendMessageTimeout);
+    }
+
+    @Override
+    public IMessage send(Object message, long timeout) throws InterruptedException {
         if (!(message instanceof IMessage)) {
-            throw new EPSCommonException("Illegal type of Message");
+            throw new EPSCommonException("Illegal type of Message: " + ClassUtils.getName(message));
+        }
+        if (timeout < 1) {
+            throw new EPSCommonException("Illegal timeout value: " + timeout);
         }
         
         IMessage msg = (IMessage)message;
@@ -44,10 +53,10 @@ public class NettyClientSession extends AbstractNettySession {
         boolean isSendSuccess = true;
         StringBuilder errorMsg = new StringBuilder("Cause: ");
         
-        if (future.await(1000)) {
+        if (future.await(timeout)) {
             if (!future.isDone()) {
-                errorMsg.append("Send operation is not done.\n");
-                logger.error("Send operation is not done. Session: {}", this);
+                errorMsg.append("Send operation isn't done.\n");
+                logger.error("Send operation isn't done. Session: {}", this);
                 isSendSuccess = false;
             }
             if (!future.isSuccess()) {
@@ -56,8 +65,8 @@ public class NettyClientSession extends AbstractNettySession {
                 isSendSuccess = false;
             }
         } else {
-            errorMsg.append("Send operation is not completed.\n");
-            logger.error("Send operation is not completed. Session: {}", this);
+            errorMsg.append("Send operation isn't completed.\n");
+            logger.error("Send operation isn't completed. Session: {}", this);
             isSendSuccess = false;
         }
         if (future.cause() != null) {
@@ -77,6 +86,7 @@ public class NettyClientSession extends AbstractNettySession {
                 "Service=" + getName() +
                 ", Remote address=" + channel.remoteAddress() +
                 ", ChannelId=" + channel.id() +
+                ", Send message timeout=" + sendMessageTimeout +
                 '}';
     }
     

@@ -300,7 +300,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public void sessionCreated(IoSession session) throws Exception {
-        TCPIPSession tcpipSession = new TCPIPSession(serviceName, session);
+        TCPIPSession tcpipSession = new TCPIPSession(serviceName, session, getSettings().getSendMessageTimeout());
         logConfigurator.registerLogger(tcpipSession, getServiceName());
         sessions.add(tcpipSession);
         sessionMap.put(session, tcpipSession);

@@ -55,6 +55,10 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
     @Description("Determines whether or not service should be managed by auto-start feature")
     private boolean autoStartable = true;
 
+    @Description("Send message timeout in milliseconds used for every sending operation via current service. "
+            + "It should be greater than zero, default value is 1000")
+    private long sendMessageTimeout = 1000;
+
     public String getStoredMessageTypes() {
         return storedMessageTypes;
     }
@@ -134,5 +138,13 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
 
     public void setAutoStartable(boolean autoStartable) {
         this.autoStartable = autoStartable;
+    }
+
+    public long getSendMessageTimeout() {
+        return sendMessageTimeout;
+    }
+
+    public void setSendMessageTimeout(long sendMessageTimeout) {
+        this.sendMessageTimeout = sendMessageTimeout;
     }
 }

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.mina;
 
 import java.util.Objects;
@@ -26,24 +26,27 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.services.IService;
+import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceException;
 
 public class MINASession implements ISession {
-    protected static final long DEFAULT_TIMEOUT = 1000L;
-
     protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	protected final IoSession session;
 	protected final ServiceName serviceName;
+    protected final long sendMessageTimeout;
 
     protected volatile boolean loggedOn;
 
-    public MINASession(ServiceName serviceName, IoSession session) {
+    public MINASession(ServiceName serviceName, IoSession session, long sendMessageTimeout) {
         this.serviceName = Objects.requireNonNull(serviceName, "serviceName cannot be null");
         this.session = Objects.requireNonNull(session, "session cannot be null");
+        this.sendMessageTimeout = sendMessageTimeout;
 	}
 
     @Override
@@ -53,7 +56,7 @@ public class MINASession implements ISession {
 
     @Override
     public IMessage send(Object message) throws InterruptedException {
-        return send(message, DEFAULT_TIMEOUT);
+        return send(message, sendMessageTimeout);
     }
 
     protected Object prepareMessage(Object message) {
@@ -62,21 +65,24 @@ public class MINASession implements ISession {
 
     public IMessage send(Object message, long timeout) throws InterruptedException {
         if(!isConnected()) {
-            throw new SendMessageFailedException("Session is not connected: " + this);
+            throw new SendMessageFailedException("Session isn't connected: " + this);
+        }
+        if (timeout < 1) {
+            throw new EPSCommonException("Illegal timeout value: " + timeout);
         }
 
         WriteFuture future = session.write(prepareMessage(message));
 
         if(future.await(timeout)) {
             if(!future.isDone()) {
-                throw new SendMessageFailedException("Send operation is not done. Session: " + this, future.getException());
+                throw new SendMessageFailedException("Send operation isn't done. Session: " + this, future.getException());
             }
 
             if(!future.isWritten()) {
-                throw new SendMessageFailedException("Write operation is not done. Session: " + this, future.getException());
+                throw new SendMessageFailedException("Write operation isn't done. Session: " + this, future.getException());
             }
         } else {
-            throw new SendMessageFailedException("Send operation is not completed. Session: " + this, future.getException());
+            throw new SendMessageFailedException("Send operation isn't completed. Session: " + this, future.getException());
         }
 
         if(future.getException() != null) {

@@ -20,8 +20,8 @@ import org.apache.mina.core.session.IoSession;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.services.mina.MINASession;
 
-public class TCPIPSession extends MINASession{
-    public TCPIPSession(ServiceName serviceName, IoSession session) {
-        super(serviceName, session);
+public class TCPIPSession extends MINASession {
+    public TCPIPSession(ServiceName serviceName, IoSession session, long sendMessageTimeout) {
+        super(serviceName, session, sendMessageTimeout);
     }
 }

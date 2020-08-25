@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.netty.sessions;
 
 import java.util.Collection;
@@ -35,18 +35,26 @@ public class NettyServerSession extends AbstractNettySession {
     public NettyServerSession(@NotNull AbstractNettyService service, @NotNull Channel channel) {
         super(service, channel);
     }
-    
+
     @Override
     public IMessage send(Object message) throws InterruptedException {
+        return send(message, sendMessageTimeout);
+    }
+
+    @Override
+    public IMessage send(Object message, long timeout) throws InterruptedException {
         if (!(message instanceof IMessage)) {
             throw new EPSCommonException("Illegal type of Message");
+        }
+        if (timeout < 1) {
+            throw new EPSCommonException("Illegal timeout value: " + timeout);
         }
         IMessage msg = (IMessage)message;
         Iterable<NettyClientSession> sendingSessions = getSendingSessions(msg);
         Collection<AbstractNettySession> errorSending = new HashSet<>();
         for (NettyClientSession session : sendingSessions) {
             try {
-                session.send(msg);
+                session.send(msg, timeout);
             } catch (RuntimeException e) {
                 errorSending.add(session);
             }
@@ -71,6 +79,7 @@ public class NettyServerSession extends AbstractNettySession {
                 "Service=" + getName() +
                 ", Remote address=" + channel.remoteAddress() +
                 ", ChannelId=" + channel.id() +
+                ", Send message timeout=" + sendMessageTimeout +
                 '}';
     }
 }

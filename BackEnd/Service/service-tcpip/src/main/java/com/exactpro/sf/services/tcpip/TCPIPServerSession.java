@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.util.CloseSessionException;
@@ -38,6 +39,7 @@ public class TCPIPServerSession implements ISession, Runnable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
     private final TCPIPServer server;
+    private final long sendMessageTimeout;
     private final String name;
     private final boolean loggedOn;
 
@@ -46,6 +48,7 @@ public class TCPIPServerSession implements ISession, Runnable {
 
 	public TCPIPServerSession(TCPIPServer server) {
 		this.server = server;
+		this.sendMessageTimeout = server.getSettings().getSendMessageTimeout();
 		this.name = server.getName();
 		this.loggedOn = true;
         if (logger.isInfoEnabled()) {
@@ -71,9 +74,16 @@ public class TCPIPServerSession implements ISession, Runnable {
         return name;
 	}
 
-	@Override
-	public IMessage send(Object message) throws InterruptedException {
+    @Override
+    public IMessage send(Object message) throws InterruptedException {
+        return send(message, sendMessageTimeout);
+    }
 
+    @Override
+	public IMessage send(Object message, long timeout) throws InterruptedException {
+        if (timeout < 1) {
+            throw new EPSCommonException("Illegal timeout value: " + timeout);
+        }
         List<WriteFuture> futures = new ArrayList<>();
         Set<IoSession> errorSending = new HashSet<>();
 
@@ -82,7 +92,7 @@ public class TCPIPServerSession implements ISession, Runnable {
         }
 
         if (!futures.isEmpty()) {
-            futures.get(futures.size() - 1).await(1000);
+            futures.get(futures.size() - 1).await(timeout);
             for (WriteFuture future : futures) {
                 if (!future.isDone() || !future.isWritten()) {
                     errorSending.add(future.getSession());

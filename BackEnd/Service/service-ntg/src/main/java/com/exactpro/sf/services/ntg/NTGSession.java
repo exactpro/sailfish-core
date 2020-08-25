@@ -21,7 +21,7 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.services.mina.MINASession;
 
 public class NTGSession extends MINASession {
-    public NTGSession(ServiceName serviceName, IoSession session) {
-		super(serviceName, session);
+    public NTGSession(ServiceName serviceName, IoSession session, long sendMessageTimeout) {
+		super(serviceName, session, sendMessageTimeout);
 	}
 }
