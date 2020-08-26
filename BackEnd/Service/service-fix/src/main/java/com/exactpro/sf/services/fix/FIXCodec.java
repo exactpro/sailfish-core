@@ -31,7 +31,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -53,11 +52,10 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.ICommonSettings;
-import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.services.tcpip.IFieldConverter;
@@ -305,17 +303,29 @@ public class FIXCodec extends AbstractCodec {
         Map<String, String> fields = new HashMap<>();
         String[] tagValueArray = fixMessage.split(SOH);
         boolean rejected = false;
-        for (int i = 0; i < tagValueArray.length; i++) {
-            int separatorIndex = tagValueArray[i].indexOf("=");
-            String key = tagValueArray[i].substring(0, separatorIndex);
-            String value = tagValueArray[i].substring(separatorIndex + 1);
+
+        for (String tagValue : tagValueArray) {
+            if (StringUtils.isBlank(tagValue)) {
+                throw new EPSCommonException("Empty tag-value pair");
+            }
+
+            int separatorIndex = tagValue.indexOf('=');
+
+            if (separatorIndex == -1) {
+                throw new EPSCommonException("No tag-value separator '=' in tag-value pair: " + tagValue);
+            }
+
+            String key = tagValue.substring(0, separatorIndex);
+            String value = tagValue.substring(separatorIndex + 1);
             String convertedKey = (String)fieldConverter.convertValue(key, true);
+
             if (convertedKey == null) {
                 logger.warn("Tag [{}] does not present in the [{}] dictionary, " +
                             "but exists in the [{}] incoming message", key, dictionary.getNamespace(), fixMessage);
                 convertedKey = key;
                 rejected = true;
             }
+
             fields.put(convertedKey, value);
         }
 
