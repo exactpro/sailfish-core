@@ -15,30 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.AbstractProtocolDecoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import com.exactpro.sf.actions.DirtyFixUtil;
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
@@ -52,8 +29,20 @@ import com.exactpro.sf.services.tcpip.MessageParseException;
 import com.exactpro.sf.services.tcpip.TCPIPSettings;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.DateTimeUtility;
-
+import com.google.common.collect.ImmutableList;
 import junit.framework.Assert;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.AbstractProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import quickfix.DataDictionary;
 import quickfix.FieldNotFound;
 import quickfix.InvalidMessage;
@@ -61,6 +50,18 @@ import quickfix.Message;
 import quickfix.field.converter.UtcDateOnlyConverter;
 import quickfix.field.converter.UtcTimeOnlyConverter;
 import quickfix.field.converter.UtcTimestampConverter;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class FixCodecTest extends AbstractTest {
 
@@ -369,6 +370,33 @@ public class FixCodecTest extends AbstractTest {
         Assert.assertEquals("20170428", xmlSubMessage.getField("LocalDateField"));
         Assert.assertEquals("14:15:31.766", xmlSubMessage.getField("LocalTimeField"));
         Assert.assertEquals("20170428-14:15:31.766", xmlSubMessage.getField("LocalDateTimeField"));
+    }
+
+    @Test
+    public void testAlternativeSeparator() throws Exception {
+        InputStream in = getClass().getClassLoader().getResourceAsStream("dictionary/FIX50.TEST.xml");
+        IDictionaryStructure dictionary = new XmlDictionaryStructureLoader().load(in);
+
+        TCPIPSettings settings = new TCPIPSettings();
+        settings.setDecodeByDictionary(true);
+        settings.setFieldSeparator("|");
+
+        FIXCodec codec = new FIXCodec();
+        codec.init(serviceContext, settings, msgFactory, dictionary);
+        IMessage expectedMessage = getExpectedMessage();
+
+        // | in the message end
+        decodeAndCheckMessage(codec, "8=FIXT.1.1|9=155|35=Z|34=1152|49=FIX_CSV_ds1|52=20151005-15:47:02.785" +
+                "|56=FGW|298=4|1166=1444060022986|295=1|299=test|48=7219943|22=8|1461=1|1462=FIX_CSV_ds1" +
+                "|1463=D|1464=76|10=169|", expectedMessage);
+
+        // | in the field value
+        expectedMessage.addField("QuoteMsgID", "14440600|22986");
+        ((IMessage)expectedMessage.getField("header")).addField("BodyLength", "156");
+        ((IMessage)expectedMessage.getField("trailer")).addField("CheckSum", "38");
+        decodeAndCheckMessage(codec, "8=FIXT.1.1|9=156|35=Z|34=1152|49=FIX_CSV_ds1|52=20151005-15:47:02.785" +
+                "|56=FGW|298=4|1166=14440600|22986|295=1|299=test|48=7219943|22=8|1461=1|1462=FIX_CSV_ds1" +
+                "|1463=D|1464=76|10=38|", expectedMessage);
     }
 
     @SuppressWarnings("deprecation")
@@ -729,5 +757,52 @@ public class FixCodecTest extends AbstractTest {
         } catch (EPSCommonException e) {
             Assert.assertEquals("Invalid filter [ :D; 34:71]. Tag is empty", e.getMessage());
         }
+    }
+
+    private void decodeAndCheckMessage(FIXCodec codec, String message, IMessage expectedMessage) throws Exception {
+        IoSession session = new DummySession();
+        AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
+        IoBuffer buffer = IoBuffer.wrap(message.getBytes(UTF_8));
+        codec.doDecode(session, buffer, outputDec);
+        Assert.assertEquals(outputDec.getMessageQueue().size(), 1);
+        Object decoded = outputDec.getMessageQueue().poll();
+        Assert.assertTrue(decoded instanceof IMessage);
+        AbstractTest.equals(expectedMessage, (IMessage)decoded);
+    }
+
+    @NotNull
+    private IMessage getExpectedMessage() {
+        IMessage header = new FixMessageFactory().createMessage("header", "FIX_5_0");
+        header.addField("BeginString", "FIXT.1.1");
+        header.addField("SenderCompID", "FIX_CSV_ds1");
+        header.addField("SendingTime", "20151005-15:47:02.785");
+        header.addField("TargetCompID", "FGW");
+        header.addField("MsgType", "Z");
+        header.addField("MsgSeqNum", "1152");
+        header.addField("BodyLength", "155");
+        IMessage trailer = new FixMessageFactory().createMessage("trailer", "FIX_5_0");
+        trailer.addField("CheckSum", "169");
+        IMessage targetPartyIds = new FixMessageFactory().createMessage("NoTargetPartyIDs", "FIX_5_0");
+        targetPartyIds.addField("TargetPartyRole","76");
+        targetPartyIds.addField("TargetPartyIDSource","D");
+        targetPartyIds.addField("TargetPartyID","FIX_CSV_ds1");
+        IMessage targetParty = new FixMessageFactory().createMessage("TargetParty", "FIX_5_0");
+        targetParty.addField("NoTargetPartyIDs", ImmutableList.of(targetPartyIds));
+        IMessage noQuoteEntries = new FixMessageFactory().createMessage("NoQuoteEntries", "FIX_5_0");
+        noQuoteEntries.addField("QuoteEntryID",  "test");
+        noQuoteEntries.addField("SecurityID",  "7219943");
+        noQuoteEntries.addField("SecurityIDSource",  "8");
+        IMessage quotCxlEntriesGrp = new FixMessageFactory().createMessage("QuotCxlEntriesGrp", "FIX_5_0");
+        quotCxlEntriesGrp.addField("NoQuoteEntries", ImmutableList.of(noQuoteEntries));
+
+
+        IMessage expectedMessage = new FixMessageFactory().createMessage("QuoteCancel", "FIX_5_0");
+        expectedMessage.addField("header", header);
+        expectedMessage.addField("trailer", trailer);
+        expectedMessage.addField("TargetParty", ImmutableList.of(targetParty));
+        expectedMessage.addField("QuoteCancelType", "4");
+        expectedMessage.addField("QuoteMsgID", "1444060022986");
+        expectedMessage.addField("QuotCxlEntriesGrp", ImmutableList.of(quotCxlEntriesGrp));
+        return expectedMessage;
     }
 }

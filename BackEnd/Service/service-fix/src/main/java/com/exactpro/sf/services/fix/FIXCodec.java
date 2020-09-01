@@ -15,32 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.quickfixj.CharsetSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
@@ -64,18 +38,44 @@ import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
 import com.exactpro.sf.services.tcpip.TCPIPSettings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.quickfixj.CharsetSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import quickfix.FieldMap;
 import quickfix.FieldNotFound;
 import quickfix.Group;
 import quickfix.Message;
 import quickfix.field.MsgType;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class FIXCodec extends AbstractCodec {
 	private static final Logger logger = LoggerFactory.getLogger(FIXCodec.class);
 	public static final String SOH = "\001";
 	public static final String SEP = "\\|";
-	public static final String SUB_CONDITIONS_DELIMETER = ",";
+    public static final String SUB_CONDITIONS_DELIMETER = ",";
+    private static final String SOH_REPLACEMENT = SOH + "$1";
 
 	private TCPIPSettings settings;
 	private IMessageFactory msgFactory;
@@ -87,6 +87,8 @@ public class FIXCodec extends AbstractCodec {
     private IMessageFilter<String> messageFilter;
     private final Set<String> messagesWithXmlField = new HashSet<>();
     private final DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+    private String separatorReplacePattern;
+    private String fieldSeparator = SOH;
 
     @Override
     public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
@@ -125,10 +127,23 @@ public class FIXCodec extends AbstractCodec {
         dataDict.setAllowUnknownMessageFields(true);
 
         String filterValues = this.settings.getFilterMessages();
-        messageFilter = StringUtils.isNotEmpty(filterValues) ? new TagValueFilter(filterValues) : new FakeFilter();
+        messageFilter = isNotEmpty(filterValues) ? new TagValueFilter(filterValues) : new FakeFilter();
+
+        String fieldSeparator = this.settings.getFieldSeparator();
+        if (isNotEmpty(fieldSeparator) ) {
+            this.fieldSeparator = fieldSeparator;
+            this.separatorReplacePattern = format("\\%s+(\\d+=)|\\%s+$", fieldSeparator, fieldSeparator);
+        } else {
+            this.fieldSeparator = SOH;
+            this.separatorReplacePattern = null;
+        }
     }
 
-	public static String getFixString(IoBuffer in) throws MessageParseException {
+    public static String getFixString(IoBuffer in) throws MessageParseException {
+        return getFixString(in, SOH);
+    }
+
+	public static String getFixString(IoBuffer in, String fieldSeparator) throws MessageParseException {
 	    int offset = in.position();
         byte[] buffer = new byte[in.remaining()];
 
@@ -154,10 +169,10 @@ public class FIXCodec extends AbstractCodec {
             out = out.substring(0, nextBeginStringIdx);
         }
 
-        int checkSumIdx = out.indexOf(SOH + "10=");
-        int sohIdx = out.indexOf(SOH, checkSumIdx + 1);
+        int checkSumIdx = out.indexOf(fieldSeparator + "10=");
+        int tagDelimeterIdx = out.indexOf(fieldSeparator, checkSumIdx + 1);
 
-        if(checkSumIdx == -1 || sohIdx == -1) {
+        if(checkSumIdx == -1 || tagDelimeterIdx == -1) {
             if(nextBeginStringIdx != -1) {
                 in.position(nextBeginStringIdx);
                 throw new MessageParseException("CheckSum is absent or invalid", out);
@@ -167,27 +182,27 @@ public class FIXCodec extends AbstractCodec {
             return null;
         }
 
-        sohIdx++;
+        tagDelimeterIdx++;
 
-        in.position(offset + sohIdx);
+        in.position(offset + tagDelimeterIdx);
 
-        if(sohIdx < out.length()) {
-            out = out.substring(0, sohIdx);
+        if(tagDelimeterIdx < out.length()) {
+            out = out.substring(0, tagDelimeterIdx);
         }
 
-        sohIdx = out.indexOf(SOH);
+        tagDelimeterIdx = out.indexOf(fieldSeparator);
         int lengthIdx = out.indexOf("9=");
 
-        if(lengthIdx != sohIdx + 1) {
+        if(lengthIdx != tagDelimeterIdx + 1) {
             throw new MessageParseException("BodyLength is absent or not a second tag", out);
         }
 
-        sohIdx = out.indexOf(SOH, lengthIdx);
+        tagDelimeterIdx = out.indexOf(fieldSeparator, lengthIdx);
 
         try {
-            int bodyLength = Integer.parseInt(out.substring(lengthIdx + 2, sohIdx));
+            int bodyLength = Integer.parseInt(out.substring(lengthIdx + 2, tagDelimeterIdx));
 
-            if(bodyLength != checkSumIdx - sohIdx) {
+            if(bodyLength != checkSumIdx - tagDelimeterIdx) {
                 throw new MessageParseException("BodyLength value differs from actual message length", out);
             }
         } catch(Exception e) {
@@ -205,7 +220,7 @@ public class FIXCodec extends AbstractCodec {
         while (true) {
             try {
                 in.mark();
-                fixString = getFixString(in);
+                fixString = getFixString(in, fieldSeparator);
             } catch (MessageParseException e) {
                 logger.error(e.getMessage(), e);
                 int endPosition = in.position();
@@ -236,6 +251,9 @@ public class FIXCodec extends AbstractCodec {
             }
 
             try {
+                if (isNotEmpty(separatorReplacePattern)) {
+                    fixString = fixString.replaceAll(separatorReplacePattern, SOH_REPLACEMENT);
+                }
                 message = settings.isDecodeByDictionary() ? convertToIMessageByIDictionaryStructure(fixString) : convertToIMessage(fixString);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -587,13 +605,13 @@ public class FIXCodec extends AbstractCodec {
             for (String tagValue : tagValues) {
                 String[] tagValuePair = StringUtils.split(tagValue, ":");
                 if (tagValuePair.length != 2) {
-                    throw new EPSCommonException(String.format("Invalid filter [%s]." +
+                    throw new EPSCommonException(format("Invalid filter [%s]." +
                             " Must have format 'tag:value' delimited by ';'", filters));
                 }
                 String tag = tagValuePair[0].trim();
                 String value = tagValuePair[1];
                 if (tag.isEmpty()) {
-                    throw new EPSCommonException(String.format("Invalid filter [%s]. Tag is empty", filters));
+                    throw new EPSCommonException(format("Invalid filter [%s]. Tag is empty", filters));
                 }
                 String[] values = StringUtils.split(value, ",");
                 filterTagValues.putAll(tag, Arrays.asList(values));

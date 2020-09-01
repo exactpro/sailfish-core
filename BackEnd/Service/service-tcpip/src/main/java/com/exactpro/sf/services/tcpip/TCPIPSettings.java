@@ -15,14 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.tcpip;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.apache.commons.configuration.HierarchicalConfiguration;
-
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.RequiredParam;
 import com.exactpro.sf.services.mina.AbstractMINASettings;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class TCPIPSettings extends AbstractMINASettings
@@ -90,6 +89,8 @@ public class TCPIPSettings extends AbstractMINASettings
                  "If empty then all received message will be stored.<br>" +
                  " Example: 35:D,A; 34:50,100")
     private String filterMessages;
+    @Description("Value to be used to field separation in the message upon decoding")
+    private String fieldSeparator;
 
 	public boolean isStoreMessages() {
 		return storeMessages;
@@ -253,5 +254,13 @@ public class TCPIPSettings extends AbstractMINASettings
 
     public void setFilterMessages(String filterMessages) {
         this.filterMessages = filterMessages;
+    }
+
+    public String getFieldSeparator() {
+        return fieldSeparator;
+    }
+
+    public void setFieldSeparator(String fieldSeparator) {
+        this.fieldSeparator = fieldSeparator;
     }
 }
