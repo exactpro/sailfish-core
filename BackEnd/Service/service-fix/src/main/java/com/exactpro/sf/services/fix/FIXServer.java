@@ -141,6 +141,11 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 
         configureCommonSettings(fixSettings, sessionID, settings, serviceName);
 
+        int defaultHeartbeatInterval = fixSettings.getDefaultHeartbeatInterval();
+        if (defaultHeartbeatInterval > 0) {
+            logger.info("Using default Heartbeat interval " + defaultHeartbeatInterval);
+            settings.setLong(sessionID, FixSessionFactory.DEFAULT_HEARTBEAT_INTERVAL, defaultHeartbeatInterval);
+        }
         settings.setBool(sessionID, SETTING_ACCEPTOR_TEMPLATE, true);
         settings.setBool(sessionID, Session.SETTING_CHECK_COMP_ID, false);
 

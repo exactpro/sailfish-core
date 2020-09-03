@@ -36,6 +36,7 @@ import quickfix.field.ApplVerID;
 import quickfix.field.DefaultApplVerID;
 
 public class FixSessionFactory implements SessionFactory {
+    public static final String DEFAULT_HEARTBEAT_INTERVAL = "CustomDefaultHeartbeatInterval";
 
     private final Application application;
     private final MessageStoreFactory messageStoreFactory;
@@ -195,6 +196,12 @@ public class FixSessionFactory implements SessionFactory {
             session.setLogoutTimeout(logoutTimeout);
             session.setReceiveLimit(receiveLimit);
             session.setValidateFieldsOutOfRange(validateFieldsOutOfRange);
+
+            if (settings.isSetting(sessionID, DEFAULT_HEARTBEAT_INTERVAL)) {
+                // some clients consider absent of tag 108 as using the default value for Heartbeat interval
+                int defaultHbInterval = (int) settings.getLong(sessionID, DEFAULT_HEARTBEAT_INTERVAL);
+                session.setHeartBeatInterval(defaultHbInterval);
+            }
 
             //
             // Session registration and creation callback is done here instead of in
