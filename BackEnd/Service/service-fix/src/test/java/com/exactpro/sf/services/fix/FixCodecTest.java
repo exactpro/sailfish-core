@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.quickfixj.CharsetSupport;
 import quickfix.DataDictionary;
 import quickfix.FieldNotFound;
 import quickfix.InvalidMessage;
@@ -61,7 +62,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
 
 public class FixCodecTest extends AbstractTest {
 
@@ -762,12 +763,14 @@ public class FixCodecTest extends AbstractTest {
     private void decodeAndCheckMessage(FIXCodec codec, String message, IMessage expectedMessage) throws Exception {
         IoSession session = new DummySession();
         AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
-        IoBuffer buffer = IoBuffer.wrap(message.getBytes(UTF_8));
+        IoBuffer buffer = IoBuffer.wrap(message.getBytes(CharsetSupport.getCharsetInstance()));
         codec.doDecode(session, buffer, outputDec);
         Assert.assertEquals(outputDec.getMessageQueue().size(), 1);
         Object decoded = outputDec.getMessageQueue().poll();
         Assert.assertTrue(decoded instanceof IMessage);
         AbstractTest.equals(expectedMessage, (IMessage)decoded);
+        assertArrayEquals(message.getBytes(CharsetSupport.getCharsetInstance()),
+                ((IMessage) decoded).getMetaData().getRawMessage());
     }
 
     @NotNull

@@ -250,11 +250,14 @@ public class FIXCodec extends AbstractCodec {
                 continue;
             }
 
+            String preprocessedRawMessage = isNotEmpty(separatorReplacePattern)
+                    ? fixString.replaceAll(separatorReplacePattern, SOH_REPLACEMENT)
+                    : fixString;
             try {
+                message = settings.isDecodeByDictionary() ? convertToIMessageByIDictionaryStructure(preprocessedRawMessage) : convertToIMessage(preprocessedRawMessage);
                 if (isNotEmpty(separatorReplacePattern)) {
-                    fixString = fixString.replaceAll(separatorReplacePattern, SOH_REPLACEMENT);
+                    message.getMetaData().setRawMessage(fixString.getBytes(CharsetSupport.getCharset()));
                 }
-                message = settings.isDecodeByDictionary() ? convertToIMessageByIDictionaryStructure(fixString) : convertToIMessage(fixString);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
 
@@ -263,7 +266,7 @@ public class FIXCodec extends AbstractCodec {
                 errorMessage.setCause(exMessage.replace('\001', '|'));
 
                 message = errorMessage.getMessage();
-                message.getMetaData().setRawMessage(fixString.getBytes(CharsetSupport.getCharset()));
+                message.getMetaData().setRawMessage(preprocessedRawMessage.getBytes(CharsetSupport.getCharset()));
             }
 
             logger.debug("doDecode: IMessage = {}", message);
@@ -417,6 +420,7 @@ public class FIXCodec extends AbstractCodec {
 
         throw new RuntimeException("no message structure for msgType: " + msgTypeValue);
     }
+
     private IMessage convertMessageToIMessage(Message message, String namespace) throws Exception {
         String msgType = message.getHeader().getString(MsgType.FIELD);
         String messageName = msgStructures.get(msgType).getName();
