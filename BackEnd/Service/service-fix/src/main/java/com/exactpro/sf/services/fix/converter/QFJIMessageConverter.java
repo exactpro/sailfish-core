@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -392,6 +393,10 @@ public class QFJIMessageConverter
 
     protected void traverseIMessage(FieldMap resultMessage, IMessage message) throws MessageConvertException {
         IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
+        if (messageStructure == null) {
+            throw new MessageConvertException("Message " + message.getName() + " doesn't exist in the dictionary " + dictionary.getNamespace());
+        }
+
         Set<Integer> definedTags = getDefinedTags(message, messageStructure);
 
         for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
