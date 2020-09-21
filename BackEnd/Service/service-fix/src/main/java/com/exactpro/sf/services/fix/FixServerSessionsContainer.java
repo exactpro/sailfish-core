@@ -1,12 +1,19 @@
-/******************************************************************************
- * Copyright (c) 2009-2018, Exactpro Systems LLC
- * www.exactpro.com
- * Build Software to Test Software
+/*******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
- * All rights reserved.
- * This is unpublished, licensed software, confidential and proprietary
- * information which is the property of Exactpro Systems LLC or its licensors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
+
 package com.exactpro.sf.services.fix;
 
 import java.util.Collection;
@@ -35,7 +42,7 @@ public class FixServerSessionsContainer implements ISession {
 
     @Override
     public IMessage send(Object message) throws InterruptedException {
-        Map<ISession, String> sentErrors = new HashMap<>();
+        Map<ISession, Exception> sentErrors = new HashMap<>();
         Collection<ISession> connectedSessions = application.getSessions();
         if (connectedSessions.isEmpty()) {
             throw new SendMessageFailedException("No sessions to send message: " + message);
@@ -44,18 +51,21 @@ public class FixServerSessionsContainer implements ISession {
         for (ISession session : connectedSessions) {
             try {
                 session.send(message);
-            } catch (RuntimeException e) {
-                String errorMsg = e.getCause() == null ? e.getMessage() : String.format("%s; cause: %s", e.getMessage(), e.getCause());
-                sentErrors.put(session, errorMsg);
+            } catch (Exception e) {
+                sentErrors.put(session, e);
             }
         }
 
         if (!sentErrors.isEmpty()) {
             StringBuilder errorBuilder = new StringBuilder("Not all message successfully sent: ");
-            for (Entry<ISession, String> error : sentErrors.entrySet()) {
-                errorBuilder.append(StringUtils.LF + String.format("%s : [%s]", error.getKey(), error.getValue()));
+            for (Entry<ISession, Exception> error : sentErrors.entrySet()) {
+                Exception ex = error.getValue();
+                String errorMsg = ex.getCause() == null ? ex.getMessage() : String.format("%s; cause: %s", ex.getMessage(), ex.getCause());
+                errorBuilder.append(StringUtils.LF).append(String.format("%s : [%s]", error.getKey(), errorMsg));
             }
-            throw new SendMessageFailedException(errorBuilder.toString());
+            SendMessageFailedException exception = new SendMessageFailedException(errorBuilder.toString());
+            sentErrors.values().forEach(exception::addSuppressed);
+            throw exception;
         }
 
         return message instanceof IMessage ? (IMessage)message : null;
