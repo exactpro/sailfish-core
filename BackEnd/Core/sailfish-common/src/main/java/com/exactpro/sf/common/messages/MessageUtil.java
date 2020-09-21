@@ -95,9 +95,9 @@ public class MessageUtil
 		return result.toString();
 	}
 
-	public static HashMap<String, Object> convertToHashMap(IMessage message) {
+	public static HashMapWrapper<String, Object> convertToHashMap(IMessage message) {
 	    if (message != null) {
-            HashMap<String, Object> result = new HashMap<>();
+            HashMapWrapper<String, Object> result = new HashMapWrapper<>(message.getMetaData());
 
             for (String fieldName : message.getFieldNames()) {
                 Object value = message.getField(fieldName);

@@ -62,6 +62,7 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -897,6 +898,10 @@ public class CommonActions extends AbstractCaller {
 
         if (value instanceof Long) {
             return (long)value;
+        }
+
+        if (value instanceof HashMapWrapper<?, ?>) {
+            return ((HashMapWrapper<?, ?>)value).getMetaData().getMsgTimestamp().getTime();
         }
 
         throw new EPSCommonException(format("Failed to retrieve timestamp from value: %s (unsupported type: %s)", value, value.getClass().getCanonicalName()));

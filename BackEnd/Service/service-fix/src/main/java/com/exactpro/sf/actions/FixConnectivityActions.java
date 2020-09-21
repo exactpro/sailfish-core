@@ -40,6 +40,7 @@ import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -230,9 +231,12 @@ public class FixConnectivityActions extends AbstractCaller
 		IMessage message = MessageUtil.convertToIMessage(inputData, DefaultMessageFactory.getFactory(), TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE);
 
 		message.getMetaData().setRawMessage(messageString.getBytes());
+		message.getMetaData().setDirty(true);
 		tcpipClient.sendMessage(message, 3000);
+        HashMap<Object, Object> result = new HashMapWrapper<>(message.getMetaData());
+        result.putAll(inputData);
 
-		return inputData;
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")

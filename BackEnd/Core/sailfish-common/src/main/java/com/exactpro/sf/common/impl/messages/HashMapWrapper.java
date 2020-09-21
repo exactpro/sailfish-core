@@ -17,15 +17,20 @@
 package com.exactpro.sf.common.impl.messages;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import com.exactpro.sf.common.messages.MsgMetaData;
 
 public class HashMapWrapper<K, V> extends HashMap<K, V> {
-    private MsgMetaData metaData;
+    private final MsgMetaData metaData;
 
     public HashMapWrapper() {
         this.metaData = new MsgMetaData("Namespace", "Message");
         this.metaData.setDirty(true);
+    }
+
+    public HashMapWrapper(MsgMetaData metaData) {
+        this.metaData = Objects.requireNonNull(metaData, "'Meta data' parameter");
     }
 
     private HashMapWrapper(HashMapWrapper<K,V> toCopy) {
