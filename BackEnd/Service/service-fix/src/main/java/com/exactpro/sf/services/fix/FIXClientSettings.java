@@ -119,7 +119,7 @@ public class FIXClientSettings extends FIXCommonSettings {
 	private boolean requiresOrigSendingTime = true;
 
 	@Description("Response To Resend Request By Heartbeats")
-	private boolean fakeResendRequest = true;
+	private boolean fakeResendRequest;
 
     @Override
 	public void load(HierarchicalConfiguration config)
