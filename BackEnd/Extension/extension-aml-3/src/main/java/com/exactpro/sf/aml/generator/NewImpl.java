@@ -1518,9 +1518,14 @@ public class NewImpl {
 	}
 
 	public static String generateEval(long line, String column, Value value, String indent) {
+        return generateEval(line, column, "eval", value, indent);
+    }
+
+    public static String generateEval(long line, String column, String functionName, Value value, String indent) {
         StringBuilder sb = new StringBuilder(CAPACITY_4K);
 
-        sb.append("eval(");
+        sb.append(functionName);
+        sb.append("(");
         sb.append(line);
         sb.append(", ");
         sb.append(enclose(column));

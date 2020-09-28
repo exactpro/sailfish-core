@@ -55,6 +55,7 @@ import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.aml.script.AMLHashMap;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.aml.script.MetaContainer;
+import com.exactpro.sf.aml.scriptutil.ConditionException;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
@@ -162,6 +163,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(MessageUtil.class.getCanonicalName());
         imports.add(MetaContainer.class.getCanonicalName());
         imports.add(ServiceName.class.getCanonicalName());
+        imports.add(ConditionException.class.getCanonicalName());
 
         for (String imp : imports) {
             stream.writeLine("import %s;", imp);

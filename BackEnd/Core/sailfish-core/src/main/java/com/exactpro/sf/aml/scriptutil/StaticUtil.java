@@ -87,6 +87,14 @@ public class StaticUtil {
         }
 	}
 
+    public static boolean evalCondition(long line, String column, String expression, Object... args) {
+        try {
+            return Boolean.TRUE.equals(eval(line, column, expression, args));
+        } catch (MvelException e) {
+            throw new ConditionException(e.getLine(), e.getColumn(), expression, e);
+        }
+    }
+
 	private static Object eval(long line, String column, String expression, Map<String, Object> args) {
 		try {
     	    Serializable compiledExpression = compileExpression(expression);

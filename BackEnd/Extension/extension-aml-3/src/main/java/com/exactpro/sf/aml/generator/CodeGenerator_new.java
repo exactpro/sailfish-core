@@ -74,6 +74,7 @@ import com.exactpro.sf.aml.generator.matrix.Variable;
 import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.aml.script.MetaContainer;
+import com.exactpro.sf.aml.scriptutil.ConditionException;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.services.ServiceName;
@@ -115,7 +116,9 @@ public class CodeGenerator_new implements ICodeGenerator {
 	private final Set<String> imports = new HashSet<>();
 	public static final String MAP_NAME = "messages";
 	public static final String CONTEXT_NAME = "context";
+    public static final String CONTEXT_GETTER = "getContext()";
 	public static final String REPORT_NAME = "report";
+    public static final String REPORT_GETTER = "getReport()";
 	public static final String STATIC_MAP_NAME = CONTEXT_NAME+".getStaticMap()";
     public static final String ACTION_MANAGER_CALL = CONTEXT_NAME + ".getActionManager().call";
     public static final String UTILITY_MANAGER = CONTEXT_NAME + ".getUtilityManager()";
@@ -580,13 +583,50 @@ public class CodeGenerator_new implements ICodeGenerator {
 		case END_LOOP:
 			return TAB3+"}"+EOL;
 		case BEGIN_IF:
-		    return EOL+TAB3+"if("+writeCondition(tc, action)+") {";
+            return EOL + TAB3 + "try {" + EOL + TAB3 + "if(" + writeCondition(tc, action) + ") {";
 		case BEGIN_ELIF:
 		    return TAB3+"} else if("+writeCondition(tc, action)+") {";
 		case BEGIN_ELSE:
 		    return TAB3+"} else {";
 		case END_IF:
-		    return TAB3+"}"+EOL;
+            StringBuilder builder = new StringBuilder();
+
+            builder.append(TAB3);
+            builder.append('}');
+            builder.append(EOL);
+
+            builder.append(TAB3);
+            builder.append("} catch(");
+            builder.append(ConditionException.class.getSimpleName());
+            builder.append(" e) {");
+            builder.append(EOL);
+
+            builder.append(TAB4);
+            builder.append(CONTEXT_GETTER);
+            builder.append(".setException(e);");
+            builder.append(EOL);
+
+            builder.append(TAB4);
+            builder.append(REPORT_GETTER);
+            builder.append(".createAction(\"\", null, \"evalCondition\", null, \"Condition evaluation\", null, null, null, 0, Collections.emptyList(), null);");
+            builder.append(EOL);
+
+            builder.append(TAB4);
+            builder.append(REPORT_GETTER);
+            builder.append(".closeAction(new StatusDescription(StatusType.FAILED, \"Failed to evaluate condition\", e), null);");
+            builder.append(EOL);
+
+            if (!action.getContinueOnFailed() && !amlSettings.getContinueOnFailed()) {
+                builder.append(TAB4);
+                builder.append("throw e;");
+                builder.append(EOL);
+            }
+
+            builder.append(TAB3);
+            builder.append('}');
+            builder.append(EOL);
+
+            return builder.toString();
 		default:
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: " + word));
 			return null;
@@ -602,13 +642,7 @@ public class CodeGenerator_new implements ICodeGenerator {
             return null;
         }
 
-	    StringBuilder sb = new StringBuilder(CAPACITY_4K);
-
-	    sb.append("Boolean.TRUE.equals(");
-        sb.append(NewImpl.generateEval(action.getCondition().getLineNumber(), Column.Condition.getName(), action.getCondition(), TAB4));
-        sb.append(")");
-
-        return sb.toString();
+        return NewImpl.generateEval(action.getCondition().getLineNumber(), Column.Condition.getName(), "evalCondition", action.getCondition(), TAB4);
 	}
 
 	public String createFillSettings(AMLTestCase tc, AMLAction action, String message, Variable settings, AlertCollector alertCollector)
