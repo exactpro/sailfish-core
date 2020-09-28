@@ -21,6 +21,7 @@ import java.util.Date
 
 enum class MetadataProperty(val propertyName: String, val propertyClass: Class<*>) {
     ID("id", Long::class.java),
+    SEQUENCE("sequence", Long::class.java),
     TIMESTAMP("msgTimestamp", Date::class.java),
     NAMESPACE("msgNamespace", String::class.java),
     NAME("msgName", String::class.java),

@@ -17,20 +17,7 @@
 
 package com.exactpro.sf.common.messages
 
-import com.exactpro.sf.common.messages.MetadataProperty.DICTIONARY_URI
-import com.exactpro.sf.common.messages.MetadataProperty.FROM_SERVICE
-import com.exactpro.sf.common.messages.MetadataProperty.ID
-import com.exactpro.sf.common.messages.MetadataProperty.IS_ADMIN
-import com.exactpro.sf.common.messages.MetadataProperty.IS_DIRTY
-import com.exactpro.sf.common.messages.MetadataProperty.IS_REJECTED
-import com.exactpro.sf.common.messages.MetadataProperty.NAME
-import com.exactpro.sf.common.messages.MetadataProperty.NAMESPACE
-import com.exactpro.sf.common.messages.MetadataProperty.PROTOCOL
-import com.exactpro.sf.common.messages.MetadataProperty.RAW_MESSAGE
-import com.exactpro.sf.common.messages.MetadataProperty.REJECT_REASON
-import com.exactpro.sf.common.messages.MetadataProperty.SERVICE_INFO
-import com.exactpro.sf.common.messages.MetadataProperty.TIMESTAMP
-import com.exactpro.sf.common.messages.MetadataProperty.TO_SERVICE
+import com.exactpro.sf.common.messages.MetadataProperty.*
 import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.configuration.suri.SailfishURI
 import java.util.Date
@@ -57,6 +44,10 @@ private fun IMetadata.setOnce(property: MetadataProperty, value: Any) {
 var IMetadata.id: Long
     get() = getRequired(ID)
     set(value) = setOnce(ID, value)
+
+var IMetadata.sequence: Long?
+    get() = getAs(SEQUENCE)
+    set(value) = setOrRemove(SEQUENCE, value)
 
 var IMetadata.timestamp: Date
     get() = getRequired(TIMESTAMP)

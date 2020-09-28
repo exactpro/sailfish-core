@@ -15,24 +15,24 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IFieldInfo.FieldType;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Contains message processing routines
@@ -43,7 +43,9 @@ public class MessageUtil
 {
     public static final MessageTraverser MESSAGE_TRAVERSER = new MessageTraverser();
 
+    private static final long NANOSECONDS_IN_SECOND = 1_000_000_000L;
     private static final AtomicLong counter = new AtomicLong();
+    private static final AtomicLong sequenceGenerator = new AtomicLong(getStartSequence());
     public static final String MESSAGE_REJECTED_POSTFIX = " (REJECTED)";
 
     public static String toString(IMessage msg, String separator)
@@ -619,5 +621,15 @@ public class MessageUtil
 
 	public static long generateId(){
 	    return counter.getAndIncrement();
+    }
+
+	public static long generateSequence(){
+	    return sequenceGenerator.getAndIncrement();
+    }
+
+    //FIXME: This values should be got from memcache
+    private static long getStartSequence() {
+        Instant now = Instant.now();
+        return now.getEpochSecond() * NANOSECONDS_IN_SECOND + now.getNano();
     }
 }

@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages;
 
+import com.exactpro.sf.common.messages.impl.Metadata;
+import com.exactpro.sf.common.services.ServiceInfo;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Objects;
+
 import static com.exactpro.sf.common.messages.MetadataExtensions.getDictionaryUri;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getName;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getNamespace;
@@ -23,19 +33,9 @@ import static com.exactpro.sf.common.messages.MetadataExtensions.setDictionaryUr
 import static com.exactpro.sf.common.messages.MetadataExtensions.setId;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setName;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setNamespace;
+import static com.exactpro.sf.common.messages.MetadataExtensions.setSequence;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setTimestamp;
 import static com.exactpro.sf.common.messages.MetadataProperty.ID;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
-
-import org.jetbrains.annotations.Nullable;
-
-import com.exactpro.sf.common.messages.impl.Metadata;
-import com.exactpro.sf.common.services.ServiceInfo;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * To be removed in the next release. Please use {@link IMetadata} instead
@@ -51,27 +51,33 @@ public class MsgMetaData extends Metadata {
         }
     }
 
-    public MsgMetaData(String namespace, String name, Date msgTimestamp, long id) {
+    public MsgMetaData(String namespace, String name, Date msgTimestamp, long id, long sequence) {
         setNamespace(this, namespace);
         setName(this, name);
         setTimestamp(this, msgTimestamp);
         setId(this, id);
+        setSequence(this, sequence);
     }
 
     public MsgMetaData(String namespace, String name, Date msgTimestamp) {
-        this(namespace, name, msgTimestamp, MessageUtil.generateId());
+        this(namespace, name, msgTimestamp, MessageUtil.generateId(), MessageUtil.generateSequence());
     }
 
     public MsgMetaData(String namespace, String name) {
-        this(namespace, name, new Date(), MessageUtil.generateId());
+        this(namespace, name, new Date(), MessageUtil.generateId(), MessageUtil.generateSequence());
     }
 
     public MsgMetaData(String namespace, String name, long id) {
-        this(namespace, name, new Date(), id);
+        this(namespace, name, new Date(), id, MessageUtil.generateSequence());
     }
 
     public long getId() {
         return MetadataExtensions.getId(this);
+    }
+
+    @Nullable
+    public Long getSequence() {
+        return MetadataExtensions.getSequence(this);
     }
 
     @Nullable
