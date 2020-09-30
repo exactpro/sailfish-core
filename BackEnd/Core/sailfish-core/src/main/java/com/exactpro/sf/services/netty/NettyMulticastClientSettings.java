@@ -18,7 +18,6 @@ package com.exactpro.sf.services.netty;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.configuration.suri.SailfishURI;
 
 @XmlRootElement
 public class NettyMulticastClientSettings extends NettyClientSettings {
@@ -77,15 +76,5 @@ public class NettyMulticastClientSettings extends NettyClientSettings {
 
     public void setTtl(int ttl) {
         this.ttl = ttl;
-    }
-
-    @Override
-    public SailfishURI getDictionaryName() {
-        return null;
-    }
-
-    @Override
-    public void setDictionaryName(SailfishURI dictionaryName) {
-        // TODO Auto-generated method stub
     }
 }

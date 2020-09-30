@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,39 +19,33 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.storage.IMessageStorage;
 
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
-public class MessagePersisterHandler extends ChannelDuplexHandler {
+public class MulticastMessagePersisterHandler extends MessagePersisterHandler {
+    private final String serviceName;
+    private final String remoteAddress;
 
-	private final IMessageStorage storage;
-	private final ServiceInfo serviceInfo;
-
-
-	public MessagePersisterHandler(IMessageStorage storage, ServiceInfo serviceInfo) {
-		this.storage = storage;
-		this.serviceInfo = serviceInfo;
-	}
+    public MulticastMessagePersisterHandler(String serviceName, String remoteAddress, IMessageStorage storage, ServiceInfo serviceInfo) {
+        super(storage, serviceInfo);
+        this.serviceName = serviceName;
+        this.remoteAddress = remoteAddress;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext context, Object msg) throws Exception {
-    	if (msg instanceof IMessage) {
-    		persistRecievedMessage((IMessage) msg);
-    	}
-        context.fireChannelRead(msg);
+        if (msg instanceof IMessage) {
+            ((IMessage)msg).getMetaData().setFromService(remoteAddress);
+            ((IMessage)msg).getMetaData().setToService(serviceName);
+        }
+        super.channelRead(context, msg);
     }
 
     @Override
     public void write(ChannelHandlerContext context, Object msg, ChannelPromise promise) throws Exception {
-    	if (msg instanceof IMessage) {
-    		persistRecievedMessage((IMessage) msg);
-    	}
-        context.write(msg, promise);
+        if (msg instanceof IMessage) {
+            ((IMessage)msg).getMetaData().setFromService(serviceName);
+            ((IMessage)msg).getMetaData().setToService(remoteAddress);
+        }
     }
-
-	protected void persistRecievedMessage(IMessage message) {
-		message.getMetaData().setServiceInfo(serviceInfo);
-		storage.storeMessage(message);
-	}
 }
