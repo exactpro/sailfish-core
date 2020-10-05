@@ -150,20 +150,29 @@ public class AML {
     {
         this.matrix = matrix;
 
+        logger.debug("Resolving services...");
         Map<String, SortedMap<Long, String>> definedServiceNames = AMLBlockUtility.resolveDefinedServiceNames(matrix.getBlocks(), scriptContext.getEnvironmentName(), environmentManager.getConnectionManager());
+
+        logger.debug("Resolving action URIs...");
         AMLBlockUtility.resolveActionURIs(matrix.getBlocks(), actionManager, environmentManager.getConnectionManager(), scriptContext.getEnvironmentName());
 
+        logger.debug("Detecting language...");
         SailfishURI languageURI = AMLBlockUtility.detectLanguage(matrix.getBlocks(), languageManager.getLanguageURIs(), amlSettings.getLanguageURI(), actionManager);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Language detected: " + languageURI);
+        }
 
         onDetermineLanguage(languageURI);
         amlSettings.setLanguageURI(languageURI);
 
+        logger.debug("Converting matrix to blocks...");
         ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, amlSettings, actionManager, alertCollector);
 
         if (alertCollector.getCount(AlertType.ERROR) > 0) {
             throw new AMLException("Failed to convert blocks", alertCollector);
         }
 
+        logger.debug("Processing blocks...");
         blocks = AMLBlockProcessor.process(blocks, amlSettings, actionManager, definedServiceNames);
         this.testCases = blocks.get(AMLBlockType.TestCase);
 
@@ -193,11 +202,13 @@ public class AML {
 
             GeneratedScript script = null;
 
+            logger.debug("Starting code generation...");
             try {
                 script = codeGen.generateCode(blocks.get(AMLBlockType.TestCase), blocks.get(AMLBlockType.BeforeTCBlock), blocks.get(AMLBlockType.AfterTCBlock));
             } finally {
                 alertCollector.add(codeGen.getAlertCollector());
             }
+            logger.debug("Code generation complete");
 
             for(IValidator validator : amlSettings.getValidators()) {
                 if(!validator.validate(matrix, actionManager, languageURI, alertCollector)) {

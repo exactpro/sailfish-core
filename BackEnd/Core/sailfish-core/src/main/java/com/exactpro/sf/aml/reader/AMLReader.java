@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.AMLBlockBrace;
 import com.exactpro.sf.aml.AMLException;
@@ -38,11 +40,15 @@ import com.exactpro.sf.aml.reader.struct.AMLElement;
 import com.exactpro.sf.aml.reader.struct.AMLMatrix;
 
 public class AMLReader {
+    private static final Logger logger = LoggerFactory.getLogger(AMLReader.class);
+
     public static AMLMatrix read(AdvancedMatrixReader matrixReader) throws IOException, AMLException {
         return read(matrixReader, false);
     }
 
     public static AMLMatrix read(AdvancedMatrixReader matrixReader, boolean skipOptional) throws IOException, AMLException {
+        logger.debug("Start reading matrix");
+
         AlertCollector alertCollector = new AlertCollector();
         List<AMLBlock> blocks = new ArrayList<>();
         Stack<JavaStatement> statementStack = new Stack<>();
@@ -223,6 +229,8 @@ public class AMLReader {
         if(alertCollector.getCount(AlertType.ERROR) > 0) {
             throw new AMLException("Failed to read matrix", alertCollector);
         }
+
+        logger.debug("Read is completed");
 
         return new AMLMatrix(header, blocks);
     }
