@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.exactpro.sf.externalapi.codec.impl
 
-open class ExternalCodecException(message: String, cause: Throwable?) : Exception(message, cause)
-class DecodeException(message: String, cause: Throwable? = null) : ExternalCodecException(message, cause)
-class EncodeException(message: String, cause: Throwable? = null) : ExternalCodecException(message, cause)
-class MissingContextException(message: String, cause: Throwable? = null) : ExternalCodecException(message, cause)
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext.Role
+import com.google.common.collect.ImmutableMap
 
-open class ExternalCodecSettingsException(message: String, cause: Throwable? = null) : Exception(message, cause)
-class PropertyReadException(message: String, cause: Throwable? = null) : ExternalCodecSettingsException(message, cause)
-class PropertyWriteException(message: String, cause: Throwable? = null) : ExternalCodecSettingsException(message, cause)
+/**
+ * The immutable implementation of [IExternalCodecContext].
+ */
+class ExternalCodecContext @JvmOverloads constructor(
+    override val role: Role,
+    properties: Map<String, Any> = emptyMap()
+) : IExternalCodecContext {
+    private val properties: Map<String, Any> = ImmutableMap.copyOf(properties)
+    override val propertyNames: Set<String> = properties.keys
+    override fun <T> get(propertyName: String, propertyType: Class<T>): T? = propertyType.cast(properties[propertyName])
+}

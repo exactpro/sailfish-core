@@ -23,14 +23,42 @@ interface IExternalCodec : Closeable {
      * Encodes provided [message] into a byte array
      * @param message message to encode
      * @return encoded message as a byte array
+     * @throws [com.exactpro.sf.externalapi.codec.impl.MissingContextException] the codec needs context to encode the [message].
+     *          In this case use should use [encodeContextual] method instead
      */
     fun encode(message: IMessage): ByteArray
+
+    /**
+     * Encodes provided [message] into a byte array using information from provided [context].
+     *
+     * By default this method delegates call to the [encode] method.
+     * @param message message to encode
+     * @param context the encoding context
+     * @return encoded message as a byte array
+     */
+    fun encode(message: IMessage, context: ICodecContext): ByteArray {
+        return encode(message)
+    }
 
     /**
      * Decodes provided byte array into a list of messages
      * @param data byte array to decode
      * @return list of decoded messages
+     * @throws [com.exactpro.sf.externalapi.codec.impl.MissingContextException] the codec needs context to decode the [data].
+     *          In this case use should use [decodeContextual] method instead
      */
     fun decode(data: ByteArray): List<IMessage>
+
+    /**
+     * Decodes provided byte array into a list of messages using information from provided [context].
+     *
+     * By default this method delegates call to the [decode] method.
+     * @param data byte array to decode
+     * @param context the decoding context
+     * @return list of decoded messages
+     */
+    fun decode(data: ByteArray, context: ICodecContext): List<IMessage> {
+        return decode(data)
+    }
 }
 
