@@ -32,6 +32,7 @@ import SearchPanelControl from "./SearchPanelsControl";
 
 export const REACTIVE_SEARCH_DELAY = 500;
 const INPUT_PLACEHOLDER = 'Separate words with a space to find multiple words';
+const SEARCH_INPUT_TOGGLE_HINT = 'Ctrl+shift+f to enable search';
 
 const COLORS = [
     '#E69900',
@@ -179,7 +180,12 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
                                 <SearchPanelControl/>
                             </React.Fragment>
                         ) : (
-                            <div className="search-field__icon"/>
+                            <div className="search-field__hint-wrapper">
+                                <span className="search-field__hint">
+                                    {SEARCH_INPUT_TOGGLE_HINT}
+                                </span>
+                                <div className="search-field__icon"/>
+                            </div>
                         )
                     }
                 </div>
@@ -272,8 +278,7 @@ export class SearchInputBase extends React.PureComponent<Props, State> {
     };
 
     private documentOnKeyDown = (e: KeyboardEvent) => {
-        if (e.keyCode === KeyCodes.F3 || (e.keyCode === KeyCodes.F && e.ctrlKey)) {
-            // cancel browser search opening
+        if (e.keyCode === KeyCodes.F && e.ctrlKey && e.shiftKey) {
             e.preventDefault();
 
             this.focus();

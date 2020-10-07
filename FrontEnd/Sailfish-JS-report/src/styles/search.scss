@@ -62,11 +62,32 @@
         font-weight: bold;
     }
 
+    @mixin searchHint {
+        @include unselectable;
+        color: $secondaryTextColor;
+        font-style: italic;
+        font-weight: normal;
+        font-family: Arial;
+    }
+
     &__icon {
         @include icon(url(../../resources/icons/search.svg));
         display: inline;
         float: right;
         margin-top: 3px;
+    }
+
+    &__hint {
+        @include searchHint();
+        font-size: 13.3px;
+        margin-top: 2px;
+    }
+
+    &__hint-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: none;
     }
 
     &__input {
@@ -82,9 +103,7 @@
         }
 
         &::placeholder {
-            color: $secondaryTextColor;
-            font-style: italic;
-            font-weight: normal;
+            @include searchHint();
         }
     }
 
