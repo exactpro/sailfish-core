@@ -35,12 +35,18 @@ import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.configuration.suri.SailfishURI
 import java.util.Date
 
+private const val MESSAGE_PROPERTIES_KEY = "messageProperties"
+
 @Suppress("UNCHECKED_CAST")
-private fun <T> IMetadata.getAs(property: MetadataProperty): T? = get(property.propertyName) as T?
+private fun <T> IMetadata.getAs(propertyName: String): T? = get(propertyName) as T?
+
+private fun <T> IMetadata.getAs(property: MetadataProperty): T? = getAs(property.propertyName)
 
 private fun <T : Any> IMetadata.getRequired(property: MetadataProperty): T = checkNotNull(getAs(property)) { "${property.propertyName} is not set" }
 
-private fun IMetadata.setOrRemove(property: MetadataProperty, value: Any?) = value?.run { set(property.propertyName, value) } ?: remove(property.propertyName)
+private fun IMetadata.setOrRemove(propertyName: String, value: Any?) = value?.run { set(propertyName, value) } ?: remove(propertyName)
+
+private fun IMetadata.setOrRemove(property: MetadataProperty, value: Any?) = setOrRemove(property.propertyName, value)
 
 private fun IMetadata.setOnce(property: MetadataProperty, value: Any) {
     val propertyName = property.propertyName
@@ -106,3 +112,7 @@ var IMetadata.dictionaryUri: SailfishURI?
 var IMetadata.protocol: String?
     get() = getAs(PROTOCOL)
     set(value) = setOrRemove(PROTOCOL, value)
+
+var IMetadata.messageProperties: Map<String, String>?
+    get() = getAs(MESSAGE_PROPERTIES_KEY)
+    set(value) = setOrRemove(MESSAGE_PROPERTIES_KEY, value)
