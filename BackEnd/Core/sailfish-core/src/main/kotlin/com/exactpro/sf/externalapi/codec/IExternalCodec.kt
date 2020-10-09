@@ -36,7 +36,7 @@ interface IExternalCodec : Closeable {
      * @param context the encoding context
      * @return encoded message as a byte array
      */
-    fun encode(message: IMessage, context: ICodecContext): ByteArray {
+    fun encode(message: IMessage, context: IExternalCodecContext): ByteArray {
         return encode(message)
     }
 
@@ -57,7 +57,7 @@ interface IExternalCodec : Closeable {
      * @param context the decoding context
      * @return list of decoded messages
      */
-    fun decode(data: ByteArray, context: ICodecContext): List<IMessage> {
+    fun decode(data: ByteArray, context: IExternalCodecContext): List<IMessage> {
         return decode(data)
     }
 }
