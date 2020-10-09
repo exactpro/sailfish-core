@@ -84,6 +84,7 @@ public class InternalJsonCodec extends AbstractCodec {
 
     @Override
     public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
+        super.init(serviceContext, settings, msgFactory, dictionary);
         if (msgFactory == null) {
             throw new IllegalArgumentException("Message factory can't be null");
         }
@@ -92,7 +93,7 @@ public class InternalJsonCodec extends AbstractCodec {
     }
 
     @Override
-    protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+    protected boolean doDecodeInternal(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         boolean decoded = false;
 
         while (in.remaining() > HEADER_SIZE) {

@@ -19,6 +19,7 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,7 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.EvolutionBatch;
 import com.exactpro.sf.common.util.HexDumper;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -81,6 +84,7 @@ public class ITCHCodec extends AbstractCodec {
 	@Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary)
 	{
+        super.init(serviceContext, settings, msgFactory, dictionary);
 		this.msgDictionary = Objects.requireNonNull(dictionary, "'Dictionary' parameter cannot be null");
 		this.msgFactory = msgFactory;
 
@@ -235,22 +239,43 @@ public class ITCHCodec extends AbstractCodec {
 		}
 
         if(!(someMsgDropped && messages.size() == 1 && (System.currentTimeMillis() - lastDecode < 2000))) { //Skip single "UnitHeader"
-            IMessage message = DefaultMessageFactory.getFactory().createMessage(ITCHMessageHelper.MESSAGELIST_NAME, ITCHMessageHelper.MESSAGELIST_NAMESPACE);
+            IMessage message = wrapToMessageList(messages);
 
-            message.addField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME, messages);
-
-			out.write(message);
+            out.write(message);
 
 			this.lastDecode = System.currentTimeMillis();
 		}
 		return true;
 	}
 
+    @NotNull
+    private IMessage wrapToMessageList(IMessage message) {
+        return wrapToMessageList(Collections.singletonList(message));
+    }
 
+    @NotNull
+    private IMessage wrapToMessageList(List<IMessage> messages) {
+        IMessage message = DefaultMessageFactory.getFactory().createMessage(ITCHMessageHelper.MESSAGELIST_NAME, ITCHMessageHelper.MESSAGELIST_NAMESPACE);
 
-	@Override
-	public boolean doDecode(IoSession session, IoBuffer in,
-			ProtocolDecoderOutput out) throws Exception
+        message.addField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME, messages);
+        return message;
+    }
+
+    @Override
+    protected void addToBatch(EvolutionBatch batchMessage, IMessage message) {
+        for (IMessage extractedMessage : ITCHMessageHelper.extractSubmessages(message)) {
+            super.addToBatch(batchMessage, extractedMessage);
+        }
+    }
+
+    @Override
+    protected IMessage updateBatchMessage(IMessage batchMessage) {
+        return wrapToMessageList(super.updateBatchMessage(batchMessage));
+    }
+
+    @Override
+	public boolean doDecodeInternal(IoSession session, IoBuffer in,
+                                    ProtocolDecoderOutput out) throws Exception
 	{
 		int position = in.position();
 		boolean isDecoded = realDecode(session, in, out);

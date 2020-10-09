@@ -24,6 +24,7 @@ import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.util.EvolutionBatch;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
@@ -111,14 +112,27 @@ public abstract class AbstractInitiatorService extends AbstractService implement
     protected void onMessageReceived(IMessage message) throws Exception {
         boolean admin = isAdminMessage(message);
         String endpointName = getEndpointName();
-        logger.debug("Saving message received from {} (admin: {}): {}", endpointName, admin, message);
-        saveMessage(admin, message, endpointName, getName());
-        getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.get(true, admin), message);
+        if (EvolutionBatch.MESSAGE_NAME.equals(message.getName())) {
+            if (getSettings().isEvolutionSupportEnabled()) {
+                logger.info("Saving evolution batch message: {}", message);
+                saveIncomingMessage(message, endpointName, admin);
+            } else {
+                logger.debug("Skip saving evolution batch message: {}", message);
+            }
+        } else {
+            saveIncomingMessage(message, endpointName, admin);
+        }
         long senderTime = getMessageHelper().getSenderTime(message);
 
         if(senderTime != 0) {
             latency = System.currentTimeMillis() - senderTime;
         }
+    }
+
+    private void saveIncomingMessage(IMessage message, String endpointName, boolean admin) throws ServiceHandlerException {
+        logger.debug("Saving message received from {} (admin: {}): {}", endpointName, admin, message);
+        saveMessage(admin, message, endpointName, getName());
+        getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.get(true, admin), message);
     }
 
     protected void onMessageSent(IMessage message) throws Exception {

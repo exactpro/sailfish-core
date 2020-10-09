@@ -84,6 +84,7 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
         codecSettings.setMsgLength(getSettings().getMsgLength());
         codecSettings.setFilterValues(ServiceUtil.loadStringFromAlias(serviceContext.getDataManager(), getSettings().getFilterValues(), ","));
         codecSettings.setDictionaryURI(getSettings().getDictionaryName());
+        codecSettings.setEvolutionSupportEnabled(getSettings().isEvolutionSupportEnabled());
 
         namespace = dictionary.getNamespace();
         reconecting = getSettings().isReconnecting();

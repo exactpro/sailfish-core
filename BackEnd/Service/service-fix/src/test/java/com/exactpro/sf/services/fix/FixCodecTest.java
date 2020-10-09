@@ -764,7 +764,7 @@ public class FixCodecTest extends AbstractTest {
         IoSession session = new DummySession();
         AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
         IoBuffer buffer = IoBuffer.wrap(message.getBytes(CharsetSupport.getCharsetInstance()));
-        codec.doDecode(session, buffer, outputDec);
+        codec.decode(session, buffer, outputDec);
         Assert.assertEquals(outputDec.getMessageQueue().size(), 1);
         Object decoded = outputDec.getMessageQueue().poll();
         Assert.assertTrue(decoded instanceof IMessage);

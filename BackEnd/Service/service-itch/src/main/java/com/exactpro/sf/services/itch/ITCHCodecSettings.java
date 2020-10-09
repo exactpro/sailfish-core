@@ -31,6 +31,7 @@ public class ITCHCodecSettings implements ICodecSettings {
 	private SailfishURI dictionaryURI;
 
     private boolean preprocessingEnabled = true;
+    private boolean evolutionSupportEnabled;
 
     public ITCHCodecSettings(int msgLength) {
 		this.msgLength = msgLength;
@@ -86,5 +87,14 @@ public class ITCHCodecSettings implements ICodecSettings {
 
     public void setPreprocessingEnabled(boolean preprocessingEnabled) {
         this.preprocessingEnabled = preprocessingEnabled;
+    }
+
+    @Override
+    public boolean isEvolutionSupportEnabled() {
+        return evolutionSupportEnabled;
+    }
+
+    public void setEvolutionSupportEnabled(boolean evolutionSupportEnabled) {
+        this.evolutionSupportEnabled = evolutionSupportEnabled;
     }
 }

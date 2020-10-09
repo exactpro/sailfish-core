@@ -254,9 +254,9 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 		IoSession decodeSession = new DummySession();
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 		try{
-			boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
+			codec.decode( decodeSession, toDecode, decoderOutput );
 			System.out.println((IMessage) decoderOutput.getMessageQueue().element());
-			Assert.assertTrue( "Decoding error.", decodableResult);
+			Assert.assertEquals( "No message decoded", 1, decoderOutput.getMessageQueue().size());
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());
@@ -269,6 +269,7 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 	@Ignore@Test
 	public void testDecodeMessageSymbolDirectory(){
         ITCHCodec codec = (ITCHCodec) getMessageHelper().getCodec(serviceContext);
+        // there are two packets in this array
 		int[] array = {
 				0x64, 0x00, // Size
 				0x01,       // Count
@@ -288,10 +289,11 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 		IoSession decodeSession = new DummySession();
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 		try{
-			boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
+			codec.decode( decodeSession, toDecode, decoderOutput );
 			System.out.println((IMessage) decoderOutput.getMessageQueue().element());
-			Assert.assertTrue( "Decoding error.", decodableResult);
+			Assert.assertEquals( "No messages decoded", 2, decoderOutput.getMessageQueue().size());
 			System.out.println("position = "+toDecode.position());
+			Assert.assertEquals("Not all bytes read", 0, toDecode.remaining());
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());
@@ -369,7 +371,7 @@ public class TestITCHCodecPositive extends TestITCHHelper {
         
         AbstractProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
         IoSession decodeSession = new DummySession();
-        codec.doDecode(decodeSession, toDecode, decoderOutput);
+        codec.decode(decodeSession, toDecode, decoderOutput);
         IMessage msg = (IMessage)decoderOutput.getMessageQueue().element();
         
         List<IMessage> listMsg = msg.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);

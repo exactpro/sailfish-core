@@ -69,6 +69,7 @@ public class FASTCodec extends AbstractCodec {
 			IServiceContext serviceContext,
 			ICommonSettings settings,
 			IMessageFactory msgFactory, IDictionaryStructure dictionary) {
+        super.init(serviceContext, settings, msgFactory, dictionary);
 
         this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter cannot be null");
         this.msgDictionary = Objects.requireNonNull(dictionary, "'dictionary' parameter cannot be null");
@@ -100,7 +101,7 @@ public class FASTCodec extends AbstractCodec {
 	}
 
 	@Override
-	protected boolean doDecode(
+	protected boolean doDecodeInternal(
 			IoSession session,
 			IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {

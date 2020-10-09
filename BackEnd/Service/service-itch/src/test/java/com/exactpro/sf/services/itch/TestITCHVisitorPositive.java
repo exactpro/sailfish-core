@@ -385,13 +385,13 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 	@Test
 	public void testStringAlphaNotrimDecode(){
         byte[] array = { 58, 0, 1, 48, 0, 0, 0, 0,
-                46, 13, 102, 102, 115, 116, 49, 32,
+                50, 13, 102, 102, 115, 116, 49, 32,
                 32, 32, 49, 48, 58, 52, 57, 58,
                 48, 48, 77, 111, 110, 32, 74, 117,
                 108, 32, 48, 52, 32, 49, 52, 58,
                 48, 50, 58, 51, 48, 32, 77, 83,
                 75, 32, 50, 48, 49, 54, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, };
+                0, 0, };
    		IoBuffer toDecode = IoBuffer.wrap( array );
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
 		toDecode.position(0);
@@ -399,8 +399,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 		IoSession decodeSession = new DummySession();
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 		try{
-			boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-			Assert.assertTrue( "Decoding error.", decodableResult);
+			codec.decode( decodeSession, toDecode, decoderOutput );
+			Assert.assertEquals( "No message decoded", 1, decoderOutput.getMessageQueue().size());
 			IMessage message=(IMessage) decoderOutput.getMessageQueue().element();
 			@SuppressWarnings("unchecked")
             List<IMessage> result = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);

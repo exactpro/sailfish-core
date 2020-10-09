@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import com.exactpro.sf.common.util.ICommonSettings;
+import com.exactpro.sf.common.util.IEvolutionSettings;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
-public interface IServiceSettings extends ICommonSettings {
+public interface IServiceSettings extends IEvolutionSettings {
 
     String getComment();
 

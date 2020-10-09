@@ -25,6 +25,7 @@
         <autoStartable>true</autoStartable>
         <comment>comment</comment>
         <dictionaryName>test_dictionary</dictionaryName>
+        <evolutionSupportEnabled>false</evolutionSupportEnabled>
         <expectedTimeOfStarting>555</expectedTimeOfStarting>
         <invertStoredMessageTypes>false</invertStoredMessageTypes>
         <performDump>false</performDump>

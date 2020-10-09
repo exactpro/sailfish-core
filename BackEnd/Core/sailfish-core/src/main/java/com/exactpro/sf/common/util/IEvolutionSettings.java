@@ -14,17 +14,16 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.exactpro.sf.services.codecs;
-
-import com.exactpro.sf.common.util.IEvolutionSettings;
-import com.exactpro.sf.configuration.suri.SailfishURI;
+package com.exactpro.sf.common.util;
 
 /**
- * Interface for base codec settings
+ * This interface is used to inform the Sailfish and its components
+ * to use specific logic to support the interaction with Evolution project.
  */
-public interface ICodecSettings extends IEvolutionSettings {
-
-    SailfishURI getDictionaryURI();
-    String getFilterValues();
-
+public interface IEvolutionSettings extends ICommonSettings {
+    /**
+     * Indicate whether the component should use logic for evolution.
+     * @return true if the component should use logic for evolution.
+     */
+    boolean isEvolutionSupportEnabled();
 }

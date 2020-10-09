@@ -25,6 +25,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -35,8 +36,6 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.util.AbstractTest;
-
-import junit.framework.Assert;
 
 public class TestNTGCodecNegative extends AbstractTest {
 
@@ -110,8 +109,8 @@ public class TestNTGCodecNegative extends AbstractTest {
 		}catch(IOException e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());
-		}catch(IllegalArgumentException e){
-			Assert.assertEquals("Parameter [msgFactory] could not be null", e.getMessage());
+		}catch(NullPointerException e){
+			Assert.assertEquals("'Msg factory' parameter", e.getMessage());
 		}
 		try{
 			encodeCodec.init(serviceContext, null, DefaultMessageFactory.getFactory(), null);

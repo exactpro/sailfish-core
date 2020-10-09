@@ -92,6 +92,7 @@ public class FIXCodec extends AbstractCodec {
 
     @Override
     public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
+        super.init(serviceContext, settings, msgFactory, dictionary);
         if (!(settings instanceof TCPIPSettings)) {
             throw new IllegalStateException("settings is not TCPIPSettings. settings is " + settings.getClass().getName());
         }
@@ -213,7 +214,7 @@ public class FIXCodec extends AbstractCodec {
     }
 
     @Override
-    protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+    protected boolean doDecodeInternal(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         String fixString;
         boolean decoded = false;
 

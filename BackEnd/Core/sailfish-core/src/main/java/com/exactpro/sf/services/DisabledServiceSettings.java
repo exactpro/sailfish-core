@@ -103,6 +103,11 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     @Override
+    public boolean isEvolutionSupportEnabled() {
+        return false;
+    }
+
+    @Override
     public void load(HierarchicalConfiguration config) {
 
     }

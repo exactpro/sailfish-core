@@ -37,6 +37,7 @@ public class ITCHUdpClient extends AbstractMINAUDPService implements IITCHClient
         codecSettings.setMsgLength(getSettings().getMsgLength());
         codecSettings.setFilterValues(ServiceUtil.loadStringFromAlias(serviceContext.getDataManager(), getSettings().getFilterValues(), ","));
         codecSettings.setDictionaryURI(getSettings().getDictionaryName());
+        codecSettings.setEvolutionSupportEnabled(getSettings().isEvolutionSupportEnabled());
     }
 
     @Override

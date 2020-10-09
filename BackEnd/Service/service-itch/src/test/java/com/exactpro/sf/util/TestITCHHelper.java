@@ -134,9 +134,8 @@ public class TestITCHHelper extends AbstractTest {
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 		IoSession decodeSession = new DummySession();
 		IoBuffer toDecode = IoBuffer.wrap( ((IoBuffer)lastMessage).array() );
-		boolean decodeResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-		    
-		Assert.assertTrue("Decoding error.", decodeResult);
+		codec.decode( decodeSession, toDecode, decoderOutput );
+
         Assert.assertTrue("Message queue size must not less then 1.", decoderOutput.getMessageQueue().size() >= 1);
 
 		return (IMessage) decoderOutput.getMessageQueue().element();

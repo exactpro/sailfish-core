@@ -69,6 +69,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 	@Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings,
 			IMessageFactory msgFactory, IDictionaryStructure dictionary) {
+        super.init(serviceContext, settings, msgFactory, dictionary);
 
         this.delimiter = ((ITCHCodecSettings) settings).getChunkDelimiter();
 
@@ -77,7 +78,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 	}
 
 	@Override
-	protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+	protected boolean doDecodeInternal(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 
 		boolean debugEnabled = logger.isDebugEnabled();
 

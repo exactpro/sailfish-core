@@ -92,7 +92,7 @@ public class TestITCHVisitorNegative extends TestITCHHelper {
    			MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 			IoSession decodeSession = new DummySession();
 			IoBuffer toDecode = IoBuffer.wrap( array );
-			codec.doDecode( decodeSession, toDecode, decoderOutput );
+			codec.decode( decodeSession, toDecode, decoderOutput );
 		}catch(EPSCommonException e){
 			Assert.assertEquals("Unknown type = [invalid]. in field name = [invalid]. in MessageStructure Name = [testAlphaNotrim]", e.getMessage());
 		}catch(Exception e){

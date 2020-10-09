@@ -23,6 +23,7 @@ import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,8 +37,6 @@ import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.services.MockProtocolEncoderOutput;
 import com.exactpro.sf.storage.util.JsonMessageConverter;
 import com.exactpro.sf.util.TestITCHHelper;
-
-import junit.framework.Assert;
 
 public class TestITCHCodecNegative extends TestITCHHelper {
 
@@ -99,8 +98,8 @@ public class TestITCHCodecNegative extends TestITCHHelper {
 			toDecode.position(0);
 			IoSession decodeSession = new DummySession();
 			MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-			boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-			Assert.assertFalse("Empty byte[] can not be decode",decodableResult);
+			codec.decode( decodeSession, toDecode, decoderOutput );
+			Assert.assertEquals("Empty byte[] can not be decode", 0, decoderOutput.getMessageQueue().size());
 
 			b = new byte[3];
 			b[0]=0x2E;
@@ -111,8 +110,8 @@ public class TestITCHCodecNegative extends TestITCHHelper {
 			toDecode.position(0);
 			decodeSession = new DummySession();
 			decoderOutput = new MockProtocolDecoderOutput();
-			decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-			Assert.assertFalse("Empty byte[] can not be decode",decodableResult);
+			codec.decode( decodeSession, toDecode, decoderOutput );
+            Assert.assertEquals("Empty byte[] can not be decode", 0, decoderOutput.getMessageQueue().size());
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());

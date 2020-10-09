@@ -138,13 +138,14 @@ public class TestFastCodec extends FASTServicePluginTest {
 
 		IoBuffer toDecode = IoBuffer.wrap(sourceArray);
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
-		toDecode.position(0);
 
 		IoSession decodeSession = new DummySession();
 
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-		boolean decodableResult = codec.doDecode(decodeSession, toDecode, decoderOutput);
-		Assert.assertTrue("Decoding error.", decodableResult);
+		codec.decode(decodeSession, toDecode, decoderOutput);
+        Queue<Object> decodeOut = decoderOutput.getMessageQueue();
+        Assert.assertEquals("Unexpected messages count decoded", 1, decodeOut.size());
+        Assert.assertEquals("Unexpected message decoded", "Logon", ((IMessage)decodeOut.remove()).getName());
 
 		IMessage message = msgFactory.createMessage("Logon", "Test");
 
@@ -193,15 +194,14 @@ public class TestFastCodec extends FASTServicePluginTest {
 
 		IoBuffer toDecode = IoBuffer.wrap( b );
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
-		toDecode.position(0);
 
 		IoSession decodeSession = new DummySession();
 
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-		boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-		System.out.println(decoderOutput.getMessageQueue().element());
+		codec.decode( decodeSession, toDecode, decoderOutput );
+        Assert.assertEquals( "No message decoded", 1, decoderOutput.getMessageQueue().size());
+        System.out.println(decoderOutput.getMessageQueue().element());
 
-		Assert.assertTrue( "Decoding error.", decodableResult);
 	}
 
 	@Test
@@ -217,13 +217,12 @@ public class TestFastCodec extends FASTServicePluginTest {
 
         IoBuffer toDecode = IoBuffer.wrap(sourceArray);
         toDecode.order(ByteOrder.LITTLE_ENDIAN);
-        toDecode.position(0);
 
         IoSession decodeSession = new DummySession();
 
         MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-        boolean decodableResult = codec.doDecode(decodeSession, toDecode, decoderOutput);
-        Assert.assertTrue("Decoding error.", decodableResult);
+        codec.decode(decodeSession, toDecode, decoderOutput);
+        Assert.assertEquals("No message decoded", 1, decoderOutput.getMessageQueue().size());
 
         IMessage message = DefaultMessageFactory.getFactory().createMessage("ApplicationMessageRequest", "fast");
         message.addField("MsgType", "BW");
@@ -283,17 +282,16 @@ public class TestFastCodec extends FASTServicePluginTest {
 
 		IoBuffer toDecode = IoBuffer.wrap( b );
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
-		toDecode.position(0);
 
 		IoSession decodeSession = new DummySession();
 
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-		boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-		System.out.println(decoderOutput.getMessageQueue().element());
-		System.out.println(decoderOutput.getMessageQueue().element());
+		codec.decode( decodeSession, toDecode, decoderOutput );
+        Assert.assertEquals( "No message decoded", 2, decoderOutput.getMessageQueue().size());
+        System.out.println(decoderOutput.getMessageQueue().remove());
+        System.out.println(decoderOutput.getMessageQueue().remove());
 
-		Assert.assertTrue( "Decoding error.", decodableResult);
-		System.out.println("position = "+toDecode.position());
+		Assert.assertEquals("No all bytes read", 0, toDecode.remaining());
 	}
 
 	@Test
@@ -349,13 +347,12 @@ public class TestFastCodec extends FASTServicePluginTest {
 
 		IoBuffer toDecode = IoBuffer.wrap( b );
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
-		toDecode.position(0);
 
 		IoSession decodeSession = new DummySession();
 
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-		boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-		Assert.assertFalse( "Decoding error.", decodableResult);
+		codec.decode( decodeSession, toDecode, decoderOutput );
+		Assert.assertEquals( "Message decoded", 0, decoderOutput.getMessageQueue().size());
 
 		b = new byte[array2.length];
 		for (int i=0; i<array2.length; i++)
@@ -364,12 +361,12 @@ public class TestFastCodec extends FASTServicePluginTest {
 		}
 
 		toDecode = IoBuffer.wrap( b );
-		decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
+		codec.decode( decodeSession, toDecode, decoderOutput );
 
 		System.out.println(decoderOutput.getMessageQueue().element());
 
-		Assert.assertTrue( "Decoding error.", decodableResult);
-		System.out.println("position = "+toDecode.position());
+		Assert.assertEquals( "No message decoded", 1, decoderOutput.getMessageQueue().size());
+		Assert.assertEquals("No all bytes read", 0, toDecode.remaining());
 	}
 
 	 @Test

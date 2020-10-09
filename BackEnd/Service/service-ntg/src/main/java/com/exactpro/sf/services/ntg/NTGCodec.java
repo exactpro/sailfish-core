@@ -71,6 +71,7 @@ public final class NTGCodec extends AbstractCodec {
     @Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary)
 	{
+        super.init(serviceContext, settings, msgFactory, dictionary);
 
         if(msgFactory == null) {
 			throw new IllegalArgumentException("Parameter [msgFactory] could not be null");
@@ -194,7 +195,7 @@ public final class NTGCodec extends AbstractCodec {
 	}
 
 	@Override
-	public boolean doDecode(IoSession session, IoBuffer inputBuffer, ProtocolDecoderOutput pdOutput) throws Exception
+	public boolean doDecodeInternal(IoSession session, IoBuffer inputBuffer, ProtocolDecoderOutput pdOutput) throws Exception
 	{
 		if ( !decodable(session, inputBuffer) ) {
 			return false;

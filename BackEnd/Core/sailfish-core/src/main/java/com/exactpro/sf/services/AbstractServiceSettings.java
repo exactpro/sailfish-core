@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
 import com.exactpro.sf.services.util.ServiceUtil;
@@ -58,6 +59,9 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
     @Description("Send message timeout in milliseconds used for every sending operation via current service. "
             + "It should be greater than zero, default value is 1000")
     private long sendMessageTimeout = 1000;
+
+    @Ignore
+    private boolean evolutionSupportEnabled;
 
     public String getStoredMessageTypes() {
         return storedMessageTypes;
@@ -146,5 +150,14 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
 
     public void setSendMessageTimeout(long sendMessageTimeout) {
         this.sendMessageTimeout = sendMessageTimeout;
+    }
+
+    @Override
+    public boolean isEvolutionSupportEnabled() {
+        return evolutionSupportEnabled;
+    }
+
+    public void setEvolutionSupportEnabled(boolean evolutionSupportEnabled) {
+        this.evolutionSupportEnabled = evolutionSupportEnabled;
     }
 }
