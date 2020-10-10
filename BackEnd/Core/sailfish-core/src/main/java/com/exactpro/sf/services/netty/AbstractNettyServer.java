@@ -64,6 +64,7 @@ public abstract class AbstractNettyServer extends AbstractNettyService implement
     protected void initClientSession(AbstractNettySession session, Channel channel) {
         Map<String, ChannelHandler> handlers = createChannelHandlers(serviceContext, session);
         handlers.forEach(channel.pipeline()::addLast);
+        // FIXME: probably NettyServiceHandler should be removed from here because otherwise the message might not be fully filled
         channel.pipeline().addLast(new NettyServiceHandler(handler, session),
                 new NettyServerHandler(this::stopClientChannel),
                 new ExceptionInboundHandler(this::onClientExceptionCaught));

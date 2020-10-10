@@ -47,6 +47,7 @@ import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ITaskExecutor;
 import com.exactpro.sf.services.IdleStatus;
 import com.exactpro.sf.services.ServiceStatus;
+import com.exactpro.sf.services.netty.handlers.DecodedMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -212,6 +213,9 @@ public abstract class NettyClientService implements IInitiatorService {
             cb.handler(new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
+                    if (getSettings().isEvolutionSupportEnabled()) {
+                        ch.pipeline().addLast(new DecodedMessagesDelimiterHandler());
+                    }
                     for (Entry<String, ChannelHandler> entry : handlers.entrySet()) {
                         ch.pipeline().addLast(entry.getKey(), entry.getValue());
                     }
