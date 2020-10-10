@@ -69,6 +69,9 @@ public abstract class AbstractInitiatorService extends AbstractService implement
     }
 
     protected String getHumanReadable(IMessage message) {
+        if (EvolutionBatch.MESSAGE_NAME.equals(message.getName()) && getSettings().isEvolutionSupportEnabled()) {
+            return message.toString();
+        }
         IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
         if(messageStructure == null) {
