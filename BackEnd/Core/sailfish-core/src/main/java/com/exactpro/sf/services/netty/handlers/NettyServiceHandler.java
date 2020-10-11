@@ -110,7 +110,6 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
     }
 
     private void processIncomingMessage(IMessage msg) throws ServiceHandlerException {
-        putReceivedMessage(msg);
         if (evolutionSupport) {
             EvolutionBatch batch = this.batch;
             if (batch == null) {
@@ -118,6 +117,8 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
             } else {
                 batch.addMessage(msg);
             }
+        } else {
+            putReceivedMessage(msg);
         }
     }
 

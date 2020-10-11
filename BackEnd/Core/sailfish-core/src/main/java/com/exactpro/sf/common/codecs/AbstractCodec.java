@@ -65,10 +65,11 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
             int outputSize = messageQueue.size();
             EvolutionBatch batchMessage = new EvolutionBatch(outputSize);
             for (Object obj : messageQueue) {
-                out.write(obj);
                 if (obj instanceof IMessage) {
                     IMessage message = (IMessage)obj;
                     addToBatch(batchMessage, message);
+                } else {
+                    out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
                 }
             }
             int batchSize = batchMessage.size();
