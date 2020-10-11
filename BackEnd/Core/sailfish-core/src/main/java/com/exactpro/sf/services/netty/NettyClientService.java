@@ -48,6 +48,7 @@ import com.exactpro.sf.services.ITaskExecutor;
 import com.exactpro.sf.services.IdleStatus;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.DecodedMessagesDelimiterHandler;
+import com.exactpro.sf.services.netty.handlers.EncodeMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -213,7 +214,8 @@ public abstract class NettyClientService implements IInitiatorService {
             cb.handler(new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                    if (getSettings().isEvolutionSupportEnabled()) {
+                    boolean evolutionSupportEnabled = getSettings().isEvolutionSupportEnabled();
+                    if (evolutionSupportEnabled) {
                         ch.pipeline().addLast(new DecodedMessagesDelimiterHandler());
                     }
                     for (Entry<String, ChannelHandler> entry : handlers.entrySet()) {
@@ -222,7 +224,9 @@ public abstract class NettyClientService implements IInitiatorService {
                     // add exception handler for inbound messages
                     // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
                     ch.pipeline().addLast(new ExceptionInboundHandler(nettySession::onExceptionCaught));
-
+                    if (evolutionSupportEnabled) {
+                        ch.pipeline().addLast(new EncodeMessagesDelimiterHandler());
+                    }
                 }
             });
 

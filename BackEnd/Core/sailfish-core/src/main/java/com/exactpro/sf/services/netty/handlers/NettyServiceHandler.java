@@ -27,6 +27,7 @@ import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceHandlerException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
+import com.exactpro.sf.services.netty.OutgoingMessageWrapper;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -48,7 +49,8 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
     private final boolean evolutionSupport;
     private final IMessageFactory messageFactory;
 
-    private volatile EvolutionBatch batch = new EvolutionBatch(1);
+    private volatile EvolutionBatch decodedBatch = new EvolutionBatch(1);
+    private volatile EvolutionBatch encodedBatch = new EvolutionBatch(1);
 
     public NettyServiceHandler(IServiceHandler serviceHandler, ISession session) {
         this(serviceHandler, session, null, false);
@@ -64,17 +66,27 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
         }
     }
 
-
-	@Override
+    @Override
+    @SuppressWarnings("InstanceofConcreteClass")
     public void write(ChannelHandlerContext context, Object msg, ChannelPromise promise) throws Exception {
-    	if (msg instanceof IMessage) {
-    		IMessage imsg = (IMessage) msg;
-            serviceHandler.putMessage(session, imsg.getMetaData().isAdmin() ? ServiceHandlerRoute.TO_ADMIN : ServiceHandlerRoute.TO_APP, imsg);
-    	}
-    	context.write(msg, promise);
+        if (msg instanceof IMessage) {
+            processOutgoingMessage((IMessage)msg);
+        } else if (msg instanceof OutgoingMessageWrapper) {
+            //noinspection CastToConcreteClass
+            processOutgoingMessage(((OutgoingMessageWrapper)msg).getOriginalMessage());
+        } else if (msg == DELIMITER) {
+            if (processEvolutionBatchIfNeeded(encodedBatch, this::putSentMessage)) {
+                this.encodedBatch = new EvolutionBatch(1);
+            }
+        }
+
+        if (msg == DELIMITER || msg instanceof OutgoingMessageWrapper) {
+            return;
+        }
+        context.write(msg, promise);
     }
 
-	@Override
+    @Override
     public void close(ChannelHandlerContext context, ChannelPromise promise) throws Exception {
     	serviceHandler.sessionClosed(session);
     	context.close(promise);
@@ -95,7 +107,9 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
     	if (msg instanceof IMessage) {
             processIncomingMessage((IMessage)msg);
         } else if (msg == DELIMITER) {
-            processEvolutionBatchIfNeeded(batch);
+            if (processEvolutionBatchIfNeeded(decodedBatch, this::putReceivedMessage)) {
+                this.decodedBatch = new EvolutionBatch(1);
+            }
         }
 
         if (msg != DELIMITER) {
@@ -109,14 +123,25 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
         context.fireExceptionCaught(cause);
     }
 
+    private void addToBatch(IMessage msg, EvolutionBatch batch, String direction) {
+        if (batch == null) {
+            logger.warn("Batch is null during processing {} message {}", direction, msg.getName());
+        } else {
+            batch.addMessage(msg);
+        }
+    }
+
+    private void processOutgoingMessage(IMessage msg) throws ServiceHandlerException {
+        if (evolutionSupport) {
+            addToBatch(msg, encodedBatch, "sent");
+        } else {
+            putSentMessage(msg);
+        }
+    }
+
     private void processIncomingMessage(IMessage msg) throws ServiceHandlerException {
         if (evolutionSupport) {
-            EvolutionBatch batch = this.batch;
-            if (batch == null) {
-                logger.warn("Batch is null during processing received message {}", msg.getName());
-            } else {
-                batch.addMessage(msg);
-            }
+            addToBatch(msg, decodedBatch, "received");
         } else {
             putReceivedMessage(msg);
         }
@@ -126,13 +151,21 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
         serviceHandler.putMessage(session, msg.getMetaData().isAdmin() ? ServiceHandlerRoute.FROM_ADMIN : ServiceHandlerRoute.FROM_APP, msg);
     }
 
-    private void processEvolutionBatchIfNeeded(EvolutionBatch batch) throws ServiceHandlerException {
+    private void putSentMessage(IMessage msg) throws ServiceHandlerException {
+        serviceHandler.putMessage(session, msg.getMetaData().isAdmin() ? ServiceHandlerRoute.TO_ADMIN : ServiceHandlerRoute.TO_APP, msg);
+    }
+
+    private boolean processEvolutionBatchIfNeeded(EvolutionBatch batch, BatchConsumer batchConsumer) throws ServiceHandlerException {
         if (!evolutionSupport || batch.isEmpty()) {
-            return;
+            return false;
         }
         IMessage batchMessage = batch.toMessage(messageFactory);
         logger.debug("Storing evolution batch with size {}", batch.size());
-        putReceivedMessage(batchMessage);
-        this.batch = new EvolutionBatch(1);
+        batchConsumer.onBatchMessage(batchMessage);
+        return true;
+    }
+
+    private interface BatchConsumer {
+        void onBatchMessage(IMessage batchMessage) throws ServiceHandlerException;
     }
 }

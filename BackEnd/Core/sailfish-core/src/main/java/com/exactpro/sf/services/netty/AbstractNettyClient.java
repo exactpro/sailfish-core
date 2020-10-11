@@ -21,6 +21,8 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.netty.handlers.DecodedMessagesDelimiterHandler;
+import com.exactpro.sf.services.netty.handlers.EncodeMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.netty.sessions.AbstractNettySession;
 import com.exactpro.sf.services.netty.sessions.NettyClientSession;
@@ -57,10 +59,18 @@ public abstract class AbstractNettyClient extends AbstractNettyService {
         mainSession.withWriteLock(this::initChannelCloseFuture);
     }
     
-    protected void initChannel(AbstractNettySession session, Channel channel) {
+    protected final void initChannel(AbstractNettySession session, Channel channel) {
         Map<String, ChannelHandler> handlers = createChannelHandlers(serviceContext);
+        boolean evolutionSupportEnabled = getSettings().isEvolutionSupportEnabled();
+        if (evolutionSupportEnabled) {
+            channel.pipeline().addLast(new DecodedMessagesDelimiterHandler());
+        }
         handlers.forEach(channel.pipeline()::addLast);
         channel.pipeline().addLast(new ExceptionInboundHandler(this::onExceptionCaught));
+
+        if (evolutionSupportEnabled) {
+            channel.pipeline().addLast(new EncodeMessagesDelimiterHandler());
+        }
     }
     
     @Override
