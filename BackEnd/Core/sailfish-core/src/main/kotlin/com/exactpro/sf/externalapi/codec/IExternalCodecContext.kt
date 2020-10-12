@@ -45,6 +45,6 @@ interface IExternalCodecContext {
     }
 }
 
-inline operator fun <reified T> IExternalCodecContext.get(propertyName: String): T? {
-    return get(propertyName, T::class.java)
-}
+inline operator fun <reified T> IExternalCodecContext.get(propertyName: String): T? = get(propertyName, T::class.java)
+
+inline operator fun <reified T> IExternalCodecContext.get(property: ExternalCodecContextProperty): T? = get(property.propertyName)
