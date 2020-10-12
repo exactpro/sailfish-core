@@ -18,6 +18,7 @@ package com.exactpro.sf.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -49,6 +50,10 @@ public class EvolutionBatch {
 
     public void addAllMessages(Collection<IMessage> messages) {
         batch.addAll(messages);
+    }
+
+    public List<IMessage> getBatch() {
+        return Collections.unmodifiableList(batch);
     }
 
     public boolean isEmpty() {
