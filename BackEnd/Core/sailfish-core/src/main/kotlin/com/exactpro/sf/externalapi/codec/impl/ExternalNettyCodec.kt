@@ -45,7 +45,7 @@ class ExternalNettyCodec(
     }
 
     override fun decode(data: ByteArray): List<IMessage> = decodeChannel.runCatching {
-        check(writeOutbound(Unpooled.wrappedBuffer(data))) { "Decoding did not produce any results" }
+        check(writeInbound(Unpooled.wrappedBuffer(data))) { "Decoding did not produce any results" }
         generateSequence { readInbound<IMessage>() }.toList()
     }.getOrElse {
         decodeChannel.releaseInbound()
