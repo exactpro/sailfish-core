@@ -22,11 +22,14 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure
 import com.exactpro.sf.common.util.HexDumper
 import com.exactpro.sf.common.util.ICommonSettings
 import com.exactpro.sf.externalapi.codec.IExternalCodec
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext.Role
 import com.exactpro.sf.services.IServiceContext
 import com.exactpro.sf.services.MockProtocolDecoderOutput
 import com.exactpro.sf.services.MockProtocolEncoderOutput
 import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.session.DummySession
+import org.apache.mina.core.session.IoSession
 
 class ExternalMinaCodec(
     codecClass: Class<out AbstractCodec>,
@@ -45,7 +48,10 @@ class ExternalMinaCodec(
     private val encodeOutput = MockProtocolEncoderOutput()
     private val decodeOutput = MockProtocolDecoderOutput()
 
-    override fun encode(message: IMessage): ByteArray = encodeOutput.runCatching {
+    override fun encode(message: IMessage): ByteArray = encode(message, EMPTY_CONTEXT)
+
+    override fun encode(message: IMessage, context: IExternalCodecContext): ByteArray = encodeOutput.runCatching {
+        encodeSession.setContext(context)
         codec.encode(encodeSession, message, this)
         check(messageQueue.size == 1) { "Expected 1 result, but got: ${messageQueue.size}" }
         (messageQueue.poll() as IoBuffer).run { ByteArray(remaining()).apply { get(this) } }
@@ -54,7 +60,10 @@ class ExternalMinaCodec(
         throw EncodeException("Failed to encode message: $message", it)
     }
 
-    override fun decode(data: ByteArray): List<IMessage> = decodeOutput.runCatching {
+    override fun decode(data: ByteArray): List<IMessage> = decode(data, EMPTY_CONTEXT)
+
+    override fun decode(data: ByteArray, context: IExternalCodecContext): List<IMessage> = decodeOutput.runCatching {
+        decodeSession.setContext(context)
         codec.decode(decodeSession, IoBuffer.wrap(data), this)
         check(messageQueue.isNotEmpty()) { "Decoding did not produce any results" }
         generateSequence(messageQueue::poll).map { it as IMessage }.toList()
@@ -63,5 +72,14 @@ class ExternalMinaCodec(
         throw DecodeException("Failed to decode data:${System.lineSeparator()}${HexDumper.getHexdump(data)}", it)
     }
 
+    private fun IoSession.setContext(context: IExternalCodecContext) = when (context) {
+        EMPTY_CONTEXT -> removeAttribute(IExternalCodecContext::class.java)
+        else -> setAttribute(IExternalCodecContext::class.java, context)
+    }
+
     override fun close() {}
+
+    companion object {
+        private val EMPTY_CONTEXT = ExternalCodecContext(Role.RECEIVER)
+    }
 }
