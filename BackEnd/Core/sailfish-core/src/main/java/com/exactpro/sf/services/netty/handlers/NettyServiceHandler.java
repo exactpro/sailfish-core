@@ -81,6 +81,7 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
         }
 
         if (msg == DELIMITER || msg instanceof OutgoingMessageWrapper) {
+            promise.setSuccess(); // these objects don't go further we should complete the promise. Otherwise, the write operation won't be completed
             return;
         }
         context.write(msg, promise);
