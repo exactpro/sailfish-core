@@ -14,13 +14,17 @@
  *  limitations under the License.
  ******************************************************************************/
 
-const enum FilterPath {
+export const enum FilterPath {
     ALL = 'Text',
     SERVICE = 'Service',
-    STATUS = 'Status'
+    STATUS = 'Status',
+    NAME = 'Name',
+    CONTENT = 'Content'
 }
 
-export const FILTER_PATH_VALUES: FilterPath[] = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE];
+export const FILTER_PATH_VALUES: FilterPath[] = [
+    FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE, FilterPath.NAME, FilterPath.CONTENT,
+];
 
 export function isFilterPath(value: string): value is FilterPath {
     return FILTER_PATH_VALUES.includes(value as FilterPath);

@@ -36,7 +36,9 @@ const TYPE_PATH_PREFIX = '#',
     ALL_FILTER_TYPE = 'All';
 
 const TYPE_OPTIONS = [ALL_FILTER_TYPE, FilterType.MESSAGE, FilterType.ACTION],
-    PATH_OPTIONS = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE];
+    MESSAGES_PATH_OPTIONS = [FilterPath.ALL, FilterPath.SERVICE, FilterPath.NAME, FilterPath.CONTENT],
+    ACTIONS_PATH_OPTIONS = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE],
+    ALL_PATH_OPTIONS = [FilterPath.ALL, FilterPath.SERVICE];
 
 const AUTOCOMPLETE_MAP = new Map<FilterPath, string[]>([
     [FilterPath.STATUS, [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.CONDITIONALLY_FAILED]]
@@ -65,7 +67,8 @@ export default function FilterRow(props: Props) {
         onChange({
             types: nextBlock.types ?? [FilterType.ACTION, FilterType.MESSAGE],
             path: nextBlock.path ?? FilterPath.ALL,
-            values: nextBlock.values ?? []
+            values: nextBlock.values ?? [],
+            isSimpleFilter: nextBlock.isSimpleFilter
         })
     };
 
@@ -139,13 +142,27 @@ export default function FilterRow(props: Props) {
         })
     };
 
+    const getPathOptions = () => {
+        const isActionFilter = types.includes(FilterType.ACTION);
+        const isMessageFilter = types.includes(FilterType.MESSAGE);
+        if (isActionFilter && isMessageFilter) {
+            return ALL_PATH_OPTIONS;
+        }
+        if (isActionFilter) return ACTIONS_PATH_OPTIONS;
+        if (isMessageFilter) return MESSAGES_PATH_OPTIONS;
+    }
+
     const getAutocomplete = () => {
         if (types == null) {
             return TYPE_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
         }
 
         if (path == null) {
-            return PATH_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
+            const isActionFilter = types.includes(FilterType.ACTION);
+            const isMessageFilter = types.includes(FilterType.MESSAGE);
+            if (isActionFilter && isMessageFilter) return ALL_PATH_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
+            if (isActionFilter) return ACTIONS_PATH_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
+            if (isMessageFilter) return MESSAGES_PATH_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
         }
 
         if (AUTOCOMPLETE_MAP.has(path)) {
@@ -180,6 +197,7 @@ export default function FilterRow(props: Props) {
             {
                 types != null ? (
                     <Select
+                        isDisabled={tempBlock.isSimpleFilter}
                         className="filter-row__select"
                         options={TYPE_OPTIONS}
                         selected={getTypesOptionName(types)}
@@ -192,8 +210,9 @@ export default function FilterRow(props: Props) {
                     <React.Fragment>
                         by
                         <Select
+                            isDisabled={tempBlock.isSimpleFilter}
                             className="filter-row__select"
-                            options={PATH_OPTIONS}
+                            options={getPathOptions()}
                             selected={path}
                             onChange={(nextPath: FilterPath) => submitChange({...tempBlock, path: nextPath})}
                         />

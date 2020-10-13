@@ -183,5 +183,6 @@
         height: $filterBubbleHeight;
         font-size: 15px;
         min-width: 105px;
+        flex-shrink: 0;
     }
 }

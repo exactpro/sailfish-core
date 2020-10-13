@@ -18,7 +18,7 @@ import filterEntry from "../filterEntry";
 import { MESSAGE_FIELDS } from "../../search/searchEngine";
 import Message from "../../../models/Message";
 import FilterCondition from "./FilterCondition";
-import {toRegExpArray} from "../../regexp";
+import { toRegExpArray } from "../../regexp";
 import FilterPath from "../../../models/filter/FilterPath";
 
 const STUB_FUNCTION = () => false;
@@ -32,8 +32,11 @@ export default function getMessageCondition(path: FilterPath, values: string[]):
             return STUB_FUNCTION;
 
         case FilterPath.ALL:
+        case FilterPath.CONTENT:
             return message => filterEntry(message, MESSAGE_FIELDS, toRegExpArray(values));
 
+        case FilterPath.NAME:
+            return message => filterEntry(message, ['msgName'], toRegExpArray(values));
         default:
             return STUB_FUNCTION;
     }

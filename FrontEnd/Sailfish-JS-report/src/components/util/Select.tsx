@@ -23,12 +23,24 @@ interface Props {
     selected: string;
     prefix?: string;
     onChange: (option: string) => void;
+    isDisabled?: boolean;
 }
 
-export default function Select({ options, selected, onChange, className = '', prefix= '' }: Props) {
+export default function Select(props: Props) {
+    const {
+        options,
+        selected,
+        onChange,
+        className = '',
+        prefix= '',
+        isDisabled = false,
+    } = props;
     return (
         <select
-            className={`options-select ${className}`}
+            onMouseDown={e => {
+                if (isDisabled) e.preventDefault();
+            }}
+            className={`options-select ${className} ${isDisabled ? 'disabled' : ''}`}
             value={prefix + selected}
             onChange={e => onChange(e.target.value.substring(prefix.length))}>
             {

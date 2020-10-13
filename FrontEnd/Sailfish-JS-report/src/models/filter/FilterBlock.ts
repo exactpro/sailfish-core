@@ -21,4 +21,5 @@ export interface FilterBlock {
     path: FilterPath;
     types: FilterType[];
     values: string[];
+    isSimpleFilter?: boolean;
 }

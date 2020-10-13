@@ -43,4 +43,8 @@
         font-weight: bold;
         height: 30px;
     }
+
+    &.disabled {
+        background-image: none;
+    }
 }

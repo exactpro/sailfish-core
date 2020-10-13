@@ -16,10 +16,27 @@
 
 import FilterState from '../models/FiltersState';
 import FilterType from "../../models/filter/FilterType";
+import FilterPath from '../../models/filter/FilterPath';
+import { FilterBlock } from '../../models/filter/FilterBlock';
 
 const initialFilterState : FilterState = {
     results: [],
-    blocks: [],
+    blocks: [{
+        types: [FilterType.MESSAGE],
+        path: FilterPath.NAME,
+        values: [],
+        isSimpleFilter: true,
+    }, {
+        types: [FilterType.MESSAGE],
+        path: FilterPath.SERVICE,
+        values: [],
+        isSimpleFilter: true,
+    }, {
+        types: [FilterType.MESSAGE],
+        path: FilterPath.CONTENT,
+        values: [],
+        isSimpleFilter: true,
+    }],
     isTransparent: false,
     isHighlighted: true
 };
