@@ -206,7 +206,7 @@ public class FixConnectivityActions extends AbstractCaller
 
     @Description("Attempts to send multiple messages in one TCP packet. <br/>" +
             "Sending in one TCP packet is not guaranteed due to the TCP stack. <br/>" +
-            "Accepts a list of messages as input"
+            "Accepts a list of messages as input in " + MESSAGE_COLUMN + " column"
     )
     @CommonColumns({
             @CommonColumn(Column.Reference),
@@ -231,13 +231,13 @@ public class FixConnectivityActions extends AbstractCaller
 
         Object messageObject = unwrapFilters(messages.get(MESSAGE_COLUMN));
         if (messageObject instanceof List) {
-            for (Object obj : (List)messageObject) {
-                if (!(obj instanceof IMessage)) {
-                    throw new EPSCommonException("Input data is not a list of messages");
+            for (Object item : (List)messageObject) {
+                if (!(item instanceof IMessage)) {
+                    throw new EPSCommonException("List item is of type " + item.getClass().getName() + " instead of the expected IMessage");
                 }
             }
         } else {
-            throw new EPSCommonException("Input data is not a list of messages");
+            throw new EPSCommonException("Input object is of type " + messageObject.getClass().getName() + " instead of the expected List");
         }
 
         List<IMessage> messageList = (List<IMessage>)messageObject;
@@ -248,20 +248,22 @@ public class FixConnectivityActions extends AbstractCaller
         IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
         QFJIMessageConverterSettings converterSettings = new QFJIMessageConverterSettings(dictionary, msgFactory);
         DirtyQFJIMessageConverter qfjConverter = new DirtyQFJIMessageConverter(converterSettings);
-        Map<String, IMessage> map = new HashMap<>();
+
         StringBuilder messageStringBuilder = new StringBuilder();
 
         for (IMessage message : messageList) {
             RawMessage fixMessage = qfjConverter.convertDirty(message, message.getName());
             messageStringBuilder.append(fixMessage);
-            map.put(message.getName(), message);
         }
+        HashMap<String, String> map = new HashMap<>();
+        map.put("RawMessage", messageStringBuilder.toString());
         IMessage message = MessageUtil.convertToIMessage(map, DefaultMessageFactory.getFactory(), TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE);
         message.getMetaData().setRawMessage(messageStringBuilder.toString().getBytes());
         message.getMetaData().setDirty(true);
         tcpipClient.sendMessage(message, actionContext.getTimeout());
         HashMap<Object, Object> result = new HashMapWrapper<>(message.getMetaData());
-        result.putAll(messages);
+        result.putAll(map);
+
         return result;
     }
 
