@@ -42,9 +42,12 @@ import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.ResourceAliases;
+import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.StatusType;
@@ -56,6 +59,9 @@ import com.exactpro.sf.services.IInitiatorService;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.fix.FixMessageHelper;
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
+import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
+import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.services.tcpip.TCPIPClient;
 import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
 
@@ -101,6 +107,7 @@ public class FixConnectivityActions extends AbstractCaller
             "If Dirty* fields are specified then they will replace values of according non-dirty fields in header/trailer.<br>";
 
     private static final String IS_RECEIVE_DESCRIPTION = "If " + IS_RECEIVE_FIELD + " field is set to 'y' or 'Y' then action will work with data for receive actions.<br>";
+    private static final String MESSAGE_COLUMN = "MessageBatch";
 
     private final Map<String, Map<String, Object>> sendHeaders = new HashMap<>();
     private final Map<String, Map<String, Object>> receiveHeaders = new HashMap<>();
@@ -196,6 +203,67 @@ public class FixConnectivityActions extends AbstractCaller
         applyHeaderAndTrailer((Map<String, Object>)inputData, sendHeaders, sendTrailers, sendSeqNums, actionContext.getServiceName());
 	    return connectivityActions.SendMessage(actionContext, inputData);
 	}
+
+    @Description("Attempts to send multiple messages in one TCP packet. <br/>" +
+            "Sending in one TCP packet is not guaranteed due to the TCP stack. <br/>" +
+            "Accepts a list of messages as input"
+    )
+    @CommonColumns({
+            @CommonColumn(Column.Reference),
+            @CommonColumn(value = Column.ServiceName, required = true),
+            @CommonColumn(Column.Dictionary),
+            @CommonColumn(value = Column.Timeout, required = true)
+    })
+    @CustomColumns({
+            @CustomColumn(value = MESSAGE_COLUMN, required = true)
+    })
+    @ActionMethod
+    public HashMap<?, ?> SendFixMessagesBatch(IActionContext actionContext, HashMap<?, ?> messages) throws Exception {
+        String serviceName = actionContext.getServiceName();
+        actionContext.getLogger().info("[{}] started", serviceName);
+        actionContext.getLogger().info("actionContext=[{}]", actionContext);
+
+        TCPIPClient tcpipClient = getClient(actionContext);
+
+        if (!tcpipClient.isConnected()) {
+            tcpipClient.connect();
+        }
+
+        Object messageObject = unwrapFilters(messages.get(MESSAGE_COLUMN));
+        if (messageObject instanceof List) {
+            for (Object obj : (List)messageObject) {
+                if (!(obj instanceof IMessage)) {
+                    throw new EPSCommonException("Input data is not a list of messages");
+                }
+            }
+        } else {
+            throw new EPSCommonException("Input data is not a list of messages");
+        }
+
+        List<IMessage> messageList = (List<IMessage>)messageObject;
+
+        SailfishURI dictionaryURI = actionContext.getDictionaryURI();
+        IDictionaryStructure dictionary = actionContext.getDictionary(dictionaryURI);
+
+        IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
+        QFJIMessageConverterSettings converterSettings = new QFJIMessageConverterSettings(dictionary, msgFactory);
+        DirtyQFJIMessageConverter qfjConverter = new DirtyQFJIMessageConverter(converterSettings);
+        Map<String, IMessage> map = new HashMap<>();
+        StringBuilder messageStringBuilder = new StringBuilder();
+
+        for (IMessage message : messageList) {
+            RawMessage fixMessage = qfjConverter.convertDirty(message, message.getName());
+            messageStringBuilder.append(fixMessage);
+            map.put(message.getName(), message);
+        }
+        IMessage message = MessageUtil.convertToIMessage(map, DefaultMessageFactory.getFactory(), TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE);
+        message.getMetaData().setRawMessage(messageStringBuilder.toString().getBytes());
+        message.getMetaData().setDirty(true);
+        tcpipClient.sendMessage(message, actionContext.getTimeout());
+        HashMap<Object, Object> result = new HashMapWrapper<>(message.getMetaData());
+        result.putAll(messages);
+        return result;
+    }
 
     @CommonColumns({
         @CommonColumn(Column.DoublePrecision),
