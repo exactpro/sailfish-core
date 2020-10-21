@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -43,6 +44,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -859,6 +861,17 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public int getDateComponent(LocalDateTime source, String dateComponent) {
         return getComponent(source, dateComponent);
+    }
+
+    @Description("Return UTC time in nanoseconds<br/>"
+            + "Example: #{getUTCTimeNanosecond()}")
+    @UtilityMethod
+    public long getUTCTimeNanosecond() {
+        Instant inst = Instant.now();
+        long epochSecond = inst.getEpochSecond();
+        long nanos = TimeUnit.SECONDS.toNanos(epochSecond);
+        long epochNano = nanos + inst.getNano();
+        return epochNano;
     }
 
     /**
