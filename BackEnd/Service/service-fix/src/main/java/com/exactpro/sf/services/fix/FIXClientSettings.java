@@ -121,6 +121,10 @@ public class FIXClientSettings extends FIXCommonSettings {
 	@Description("Response To Resend Request By Heartbeats")
 	private boolean fakeResendRequest;
 
+    public FIXClientSettings() {
+        setApplicationClass(FIXApplication.class.getCanonicalName());
+    }
+
     @Override
 	public void load(HierarchicalConfiguration config)
 	{

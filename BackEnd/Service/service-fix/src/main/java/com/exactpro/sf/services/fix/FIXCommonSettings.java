@@ -17,7 +17,9 @@ package com.exactpro.sf.services.fix;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.EnumeratedValues;
+import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.aml.InputMask;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.externalapi.DictionaryProperty;
 import com.exactpro.sf.externalapi.DictionaryType;
@@ -25,6 +27,8 @@ import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
 
 public class FIXCommonSettings extends AbstractServiceSettings {
+    @Ignore
+    protected Class<?> application;
 
     @RequiredParam
     @Description("Version of FIX this session should use.\n"
@@ -447,5 +451,20 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     public void setTargetSubID(String targetSubID) {
         this.targetSubID = targetSubID;
+    }
+
+    public void setApplicationClass(String clazz) {
+        if (clazz == null) {
+            return;
+        }
+        try {
+            this.application = Class.forName(clazz);
+        } catch (ClassNotFoundException e) {
+            throw new EPSCommonException("Cannot load application class: "+clazz, e);
+        }
+    }
+
+    public Class<?> getApplicationClass() {
+        return application;
     }
 }

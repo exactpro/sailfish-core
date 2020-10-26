@@ -446,7 +446,18 @@ public class FIXClient implements IInitiatorService {
     }
 
     protected FIXClientApplication createFixApplication() {
-        return new FIXApplication();
+        Class<?> applicationClass = fixSettings.getApplicationClass();
+        Objects.requireNonNull(applicationClass, "Application class should not be null.");
+        if (FIXClientApplication.class.isAssignableFrom(applicationClass)) {
+            try {
+                return (FIXClientApplication)applicationClass.getConstructor().newInstance();
+            } catch (Exception e) {
+                throw new EPSCommonException("Cannot create new instance for application: " + applicationClass.getCanonicalName(), e);
+            }
+        } else {
+            throw new EPSCommonException("Application class '" + applicationClass.getCanonicalName() + "' should implement interface: "
+                    + FIXClientApplication.class.getCanonicalName());
+        }
     }
 
 

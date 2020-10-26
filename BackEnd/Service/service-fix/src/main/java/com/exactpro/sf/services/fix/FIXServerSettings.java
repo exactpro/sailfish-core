@@ -31,8 +31,6 @@ public class FIXServerSettings extends FIXCommonSettings {
 
     private static final long serialVersionUID = -7663638300222588201L;
     
-	private Class<?> application;
-
 	@RequiredParam
 	@Description("Socket port for listening to incomming connections")
 	private int SocketAcceptPort;
@@ -66,21 +64,6 @@ public class FIXServerSettings extends FIXCommonSettings {
 	@Override
 	public void load(HierarchicalConfiguration config) {
 		// do nothing
-	}
-
-	public void setApplicationClass(String clazz) {
-		if (clazz == null) {
-			return;
-		}
-		try {
-			this.application = Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new EPSCommonException("Cannot load application class: "+clazz, e);
-		}
-	}
-
-	public Class<?> getApplicationClass() {
-		return application;
 	}
 
     public int getSocketAcceptPort() {
