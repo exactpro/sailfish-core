@@ -20,11 +20,14 @@ import com.exactpro.sf.common.util.SingleKeyHashMap;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -172,7 +175,7 @@ public final class Converters {
      *         ...
      *     }
      * </pre>
-     *
+     * <p>
      * or
      *
      * <pre>
@@ -191,7 +194,7 @@ public final class Converters {
 
         @Override
         public Map<String, JsonAttribute> convert(List<JsonAttribute> value) {
-            Map<String, JsonAttribute> map = new HashMap<>();
+            Map<String, JsonAttribute> map = new LinkedHashMap<>();
             for (JsonAttribute attribute : value) {
                 map.put(attribute.getName(), attribute);
             }
@@ -229,7 +232,7 @@ public final class Converters {
 
         @Override
         public Map<String, JsonField> convert(List<JsonField> value) {
-            Map<String, JsonField> map = new HashMap<>();
+            Map<String, JsonField> map = new LinkedHashMap<>();
             for (JsonField field : value) {
                 map.put(field.getName(), field);
             }
@@ -267,7 +270,7 @@ public final class Converters {
 
         @Override
         public Map<String, JsonMessage> convert(List<JsonMessage> value) {
-            Map<String, JsonMessage> map = new HashMap<>();
+            Map<String, JsonMessage> map = new LinkedHashMap<>();
             for (JsonMessage message : value) {
                 map.put(message.getName(), message);
             }

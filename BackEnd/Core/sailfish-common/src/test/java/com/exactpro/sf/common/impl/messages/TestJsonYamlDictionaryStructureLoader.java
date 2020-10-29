@@ -242,7 +242,7 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
     @Test
     public void testMessageCircularReferenceInInheritance() throws Exception {
         exception.expect(EPSCommonException.class);
-        exception.expectMessage("Recursion at message id: 'Message2' has been detected");
+        exception.expectMessage("Recursion at message id: 'Message1' has been detected");
 
         loadDictionaryFrom("message-circular-reference-in-inheritance.json");
     }

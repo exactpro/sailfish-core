@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-public class SingleKeyHashMap<K, V> extends HashMap<K, V> {
+public class SingleKeyHashMap<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     public V put(K key, V value) {
-        if (super.put(key, value) != null){
+        if (super.put(key, value) != null) {
             throw new IllegalArgumentException("Duplicate key \"" + key + "\"");
         }
         return null;
