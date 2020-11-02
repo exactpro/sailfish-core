@@ -15,24 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-import static com.exactpro.sf.services.MessageHelper.FIELD_MESSAGE_TYPE;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.ATTRIBUTE_MESSAGE_TYPE;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_MESSAGE_LENGTH;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_START_OF_MESSAGE;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_HEADER;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_HEARTBEAT;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_LOGON;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_REJECT;
-import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_TYPE;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.ArrayUtils;
-
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -48,9 +30,27 @@ import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ntg.NTGFieldFormat;
 import com.exactpro.sf.services.ntg.NTGProtocolAttribute;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.MessageHelper.FIELD_MESSAGE_TYPE;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.ATTRIBUTE_MESSAGE_TYPE;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_MESSAGE_LENGTH;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_START_OF_MESSAGE;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_HEADER;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_HEARTBEAT;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_LOGON;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_REJECT;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_TYPE;
 
 public class NTGDictionaryValidator extends AbstractDictionaryValidator {
 
@@ -63,7 +63,19 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     protected static final int lengthDouble = 8;
     protected static final int lengthBigDecimal = 8;
     protected static final int lengthLong = 8;
-    protected static final int[] lengthLocalDateTime = { 24 };
+    protected static final int[] lengthLocalDateTime = {24};
+
+    private static final String UINT8 = "UInt8";
+    private static final String UINT16 = "UInt16";
+    private static final String UINT32 = "UInt32";
+    private static final String UINT64 = "UInt64";
+
+    private static final ImmutableBiMap<JavaType, String> POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE = ImmutableBiMap.<JavaType, String>builder()
+            .put(JavaType.JAVA_LANG_SHORT, UINT8)
+            .put(JavaType.JAVA_LANG_INTEGER, UINT16)
+            .put(JavaType.JAVA_LANG_LONG, UINT32)
+            .put(JavaType.JAVA_MATH_BIG_DECIMAL, UINT64)
+            .build();
 
     private final Multimap<JavaType, String> typeAllowedFormats = ImmutableSetMultimap.<JavaType, String>builder()
             .putAll(JavaType.JAVA_LANG_STRING, NTGFieldFormat.A.name(), NTGFieldFormat.D.name())
@@ -104,7 +116,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IMessageStructure message, IFieldStructure field) {
         List<DictionaryValidationError> errors = super.validate(message, field);
 
-        if(message != null && !field.isComplex()) {
+        if (message != null && !field.isComplex()) {
 
             boolean containLength = ValidationHelper.checkRequiredFieldAttribute(errors, message, field,
                     NTGProtocolAttribute.Length.toString());
@@ -116,6 +128,10 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 checkFieldOffsets(errors, message, field);
             }
 
+            if (containLength) {
+                checkCompatibilityLengthAndAttributeType(errors, message, field);
+            }
+
             if (typeAllowedFormats.containsKey(field.getJavaType())) {
                 checkFormatAttribute(errors, message, field, typeAllowedFormats.get(field.getJavaType()));
             }
@@ -123,6 +139,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
 
         return errors;
     }
+
 
     private void checkFormatAttribute(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, Collection<String> allowedFormats) {
         if (ValidationHelper.checkRequiredFieldAttribute(errors, message, field, NTGProtocolAttribute.Format.name())) {
@@ -141,7 +158,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     private void checkFieldOffsets(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure structure) {
 
         long sum = 0;
-        for(IFieldStructure field : message.getFields().values()) {
+        for (IFieldStructure field : message.getFields().values()) {
 
             if (structure.getName().equals(field.getName())) {
                 int offset = getAttributeValue(field, NTGProtocolAttribute.Offset.name());
@@ -160,11 +177,11 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private void checkRequiredAttributes(List<DictionaryValidationError> errors, IMessageStructure message) {
-        if(!message.getAttributes().isEmpty()) {
+        if (!message.getAttributes().isEmpty()) {
             if (message.getName().equals(MESSAGE_HEADER)) {
                 ValidationHelper.checkRequiredAttribute(errors, message, NTGProtocolAttribute.Length.toString());
                 ValidationHelper.checkRequiredAttribute(errors, message, NTGProtocolAttribute.Offset.toString());
-    
+
             } else {
                 ValidationHelper.checkRequiredAttribute(errors, message, ATTRIBUTE_MESSAGE_TYPE);
                 ValidationHelper.checkRequiredAttribute(errors, message, MessageHelper.ATTRIBUTE_IS_ADMIN);
@@ -214,14 +231,14 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
 
             case JAVA_LANG_INTEGER:
                 checkLengthFromPossibleValues(errors, message, field, length,
-                        new Integer[] {
+                        new Integer[]{
                                 lengthByte, lengthShort, lengthInt
                         });
                 break;
 
             case JAVA_LANG_LONG:
                 checkLengthFromPossibleValues(errors, message, field, length,
-                        new Integer[] {
+                        new Integer[]{
                                 lengthInt, lengthLong
                         });
                 break;
@@ -252,34 +269,34 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 break;
         }
     }
-    
+
     private boolean isCorrectLength(int length, int[] lengthLocalDateTime) {
         return ArrayUtils.contains(lengthLocalDateTime, length);
     }
-    
+
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message,
-                                      IFieldStructure field,int expectedLength, int actualLength) {
+                                      IFieldStructure field, int expectedLength, int actualLength) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                 "Attribute <strong>\"Length\"</strong> has incorrect value = ["
                         + actualLength + "]. Must be [" + expectedLength + "]",
                 DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
 
     }
-    
+
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message,
-            IFieldStructure field, int[] expectedLength, int actualLength) {
+                                      IFieldStructure field, int[] expectedLength, int actualLength) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                 "Attribute <strong>\"Length\"</strong> has incorrect value = ["
                         + actualLength + "]. Must be [" + Arrays.toString(expectedLength) + "]",
                 DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
-        
+
     }
 
     private void checkLengthFromPossibleValues(List<DictionaryValidationError> errors, IMessageStructure message,
                                                IFieldStructure field, Integer actualLength, Integer[] possibleValues) {
 
-        for(Integer possibleValue : possibleValues) {
-            if(possibleValue.equals(actualLength)) {
+        for (Integer possibleValue : possibleValues) {
+            if (possibleValue.equals(actualLength)) {
                 return;
             }
         }
@@ -294,7 +311,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     private void addNoImplementationInVisitorsError(List<DictionaryValidationError> errors, IMessageStructure message,
                                                     IFieldStructure field, JavaType javaType) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
-                "There is no implementation in visitors for "  + javaType + " type",
+                "There is no implementation in visitors for " + javaType + " type",
                 DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
 
     }
@@ -310,14 +327,14 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
         }
         Map<String, IAttributeStructure> messageTypeValues = messageTypeEnum.getValues();
 
-        for(IMessageStructure message : dictionary.getMessages().values()) {
+        for (IMessageStructure message : dictionary.getMessages().values()) {
 
-            if(message.getAttributes().containsKey(ATTRIBUTE_MESSAGE_TYPE)) {
+            if (message.getAttributes().containsKey(ATTRIBUTE_MESSAGE_TYPE)) {
                 Object messageTypeAttribute = getAttributeValue(message, ATTRIBUTE_MESSAGE_TYPE);
                 Boolean isIncoming = getAttributeValue(message, "IsInput");
-                if(messageTypeAttribute != null) {
+                if (messageTypeAttribute != null) {
 
-                    if(!test.put(messageTypeAttribute, isIncoming)) {
+                    if (!test.put(messageTypeAttribute, isIncoming)) {
                         errors.add(new DictionaryValidationError(message.getName(), null,
                                 ATTRIBUTE_MESSAGE_TYPE + " attribute is not unique in <strong>\""
                                         + message.getName() + "\"</strong> message",
@@ -331,13 +348,13 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                     }
 
                     boolean valueMatched = messageTypeValues.values().stream()
-                            .map(attr -> (byte)attr.getValue().charAt(0))
+                            .map(attr -> (byte) attr.getValue().charAt(0))
                             .anyMatch(byteValue::equals);
                     if (valueMatched) {
                         continue;
                     }
 
-                    if(!message.getName().equals(MESSAGE_HEARTBEAT)) {
+                    if (!message.getName().equals(MESSAGE_HEARTBEAT)) {
 
                         errors.add(new DictionaryValidationError(message.getName(), null,
                                 ATTRIBUTE_MESSAGE_TYPE
@@ -347,6 +364,91 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 }
             }
 
+        }
+    }
+
+    private void checkCompatibilityLengthAndAttributeType(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field) {
+
+        String attributeType = getAttributeValue(field, NTGProtocolAttribute.Type.toString());
+
+        if (attributeType == null) {
+            return;
+        }
+
+        Integer length = getAttributeValue(field, NTGProtocolAttribute.Length.toString());
+
+        switch (attributeType) {
+            case UINT8:
+                checkAttributeTypeSatisfyFieldType(errors, message, field, attributeType);
+
+                if (length == lengthByte) {
+                    return;
+                }
+                break;
+
+            case UINT16:
+                checkAttributeTypeSatisfyFieldType(errors, message, field, attributeType);
+
+                if (length == lengthShort) {
+                    return;
+                }
+                break;
+
+            case UINT32:
+                checkAttributeTypeSatisfyFieldType(errors, message, field, attributeType);
+
+                if (length == lengthInt) {
+                    return;
+                }
+                break;
+
+            case UINT64:
+                checkAttributeTypeSatisfyFieldType(errors, message, field, attributeType);
+
+                if (length == lengthLong) {
+                    return;
+                }
+                break;
+
+            default:
+                return;
+
+        }
+        errors.add(
+                new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                        String.format("Attribute <strong>\"Type\"</strong> value [%s] has length different from the attribute <strong>\"Length\"</strong> value = [%s]",
+                                attributeType, length),
+                        DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+    }
+
+    private void checkAttributeTypeSatisfyFieldType(List<DictionaryValidationError> errors, IMessageStructure message,
+                                                    IFieldStructure field, String attributeType) {
+
+        JavaType fieldType = field.getJavaType();
+
+        String possibleType = POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.get(fieldType);
+
+        if (possibleType == null || !possibleType.equals(attributeType)) {
+
+            String errorMessage;
+
+            if (fieldType == JavaType.JAVA_LANG_BYTE) {
+
+                String fieldTypeInStringFormat = field.getJavaType().toString();
+
+                errorMessage = String.format("Attribute <strong>\"Type\"</strong> value [%s] doesn't match the field type [%s]. Field type [%s] cannot be matched to any unsigned type. Possible value for field type is [%s]",
+                        attributeType, fieldTypeInStringFormat, fieldTypeInStringFormat, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
+
+            } else {
+
+                errorMessage = String.format("Attribute <strong>\"Type\"</strong> value [%s] doesn't match the field type [%s]. Possible value for attribute type is [%s]. Possible value for field type is [%s]",
+                        attributeType, field.getJavaType().toString(), possibleType, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
+            }
+
+            errors.add(
+                    new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                            errorMessage,
+                            DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
         }
     }
 

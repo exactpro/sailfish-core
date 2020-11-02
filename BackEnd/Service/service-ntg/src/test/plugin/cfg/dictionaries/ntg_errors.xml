@@ -75,6 +75,7 @@
             <field type="java.lang.Byte" name="MessageVersion">
                 <attribute type="java.lang.Integer" name="Offset">79</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
             </field>
         </message>
         <message name="Reject">
@@ -87,6 +88,7 @@
             <field type="java.lang.Integer" name="RejectCode">
                 <attribute type="java.lang.Integer" name="Offset">4</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
             </field>
             <field type="java.lang.String" name="RejectReason">
                 <attribute type="java.lang.String" name="Format">A</attribute>
@@ -171,10 +173,12 @@
             <field defaultvalue="0" type="java.lang.Integer" name="OrderType">
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
                 <attribute type="java.lang.Integer" name="Offset">54</attribute>
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
             </field>
             <field defaultvalue="1" type="java.lang.Long" name="AnotherOrderType">
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
                 <attribute type="java.lang.Integer" name="Offset">62</attribute>
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
             </field>
         </message>
     </messages>
