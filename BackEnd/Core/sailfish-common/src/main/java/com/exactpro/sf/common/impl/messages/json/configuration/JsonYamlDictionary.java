@@ -120,6 +120,18 @@ public class JsonYamlDictionary implements IDictionary {
     }
 
     /**
+     * Sets the value of the attribute property
+     *
+     * @param value
+     *     allowed object is
+     *     {@link List<JsonAttribute>}
+     *
+     */
+    public void setAttributes(List<JsonAttribute> value) {
+        this.attributes = value;
+    }
+
+    /**
      * Gets the value of the fields property.
      *
      * @return

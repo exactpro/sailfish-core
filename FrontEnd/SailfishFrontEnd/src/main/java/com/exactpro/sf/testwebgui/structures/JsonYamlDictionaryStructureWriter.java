@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.structures;
 
-import com.exactpro.sf.common.impl.messages.json.JsonDictionaryWriter;
+import com.exactpro.sf.common.impl.messages.json.JsonYamlDictionaryWriter;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonAttribute;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonField;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonMessage;
@@ -33,19 +33,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JsonDictionaryStructureWriter {
+public class JsonYamlDictionaryStructureWriter {
 
-    public static void write(ModifiableDictionaryStructure dictionaryStructure, OutputStream output) {
+    public static void write(ModifiableDictionaryStructure dictionaryStructure, OutputStream output, boolean asYaml) {
 
         JsonYamlDictionary dictionary = convertStructureToJson(dictionaryStructure);
 
-        JsonDictionaryWriter.write(dictionary, output);
+        JsonYamlDictionaryWriter.write(dictionary, output, asYaml);
     }
 
-    public static void write(ModifiableDictionaryStructure dictionaryStructure, File file) throws IOException {
+    public static void write(ModifiableDictionaryStructure dictionaryStructure, File file, boolean asYaml) throws IOException {
 
         try (OutputStream output = new FileOutputStream(file)) {
-            write(dictionaryStructure, output);
+            write(dictionaryStructure, output, asYaml);
         } catch (FileNotFoundException e) {
             throw new EPSCommonException("Failed to write dictionary: " + dictionaryStructure.getNamespace(), e);
         }
@@ -54,8 +54,15 @@ public class JsonDictionaryStructureWriter {
     private static JsonYamlDictionary convertStructureToJson(ModifiableDictionaryStructure dictionaryStructure) {
 
         JsonYamlDictionary dictionary = new JsonYamlDictionary(dictionaryStructure.getNamespace());
-
         dictionary.setDescription(dictionaryStructure.getDescription());
+
+        List<JsonAttribute> attributes = new ArrayList<>();
+        if (dictionaryStructure.getAttributes() != null) {
+            for (IAttributeStructure attributeStructure : dictionaryStructure.getAttributes().values()) {
+                attributes.add(createAttributeFromStructure(attributeStructure));
+            }
+        }
+        dictionary.setAttributes(attributes);
 
         List<JsonField> fields = new ArrayList<>();
         List<JsonMessage> messages = new ArrayList<>();
@@ -173,12 +180,18 @@ public class JsonDictionaryStructureWriter {
     private static void addAttributes(ModifiableFieldStructure fieldStructure, JsonField jsonField) {
         for (IAttributeStructure attributeStructure : fieldStructure.getImplAttributes()) {
 
-            JsonAttribute jsonAttribute = new JsonAttribute();
-            jsonAttribute.setName(attributeStructure.getName());
-            jsonAttribute.setValue(attributeStructure.getValue());
-            jsonAttribute.setType(attributeStructure.getType());
-
-            jsonField.getAttributes().add(jsonAttribute);
+            jsonField.getAttributes().add(createAttributeFromStructure(attributeStructure));
         }
+    }
+
+    private static JsonAttribute createAttributeFromStructure(IAttributeStructure attributeStructure) {
+        JsonAttribute attribute = new JsonAttribute();
+
+        attribute.setName(attributeStructure.getName());
+        attribute.setValue(attributeStructure.getValue());
+        attribute.setType(attributeStructure.getType());
+
+        return attribute;
+
     }
 }

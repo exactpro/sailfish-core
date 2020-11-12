@@ -17,10 +17,13 @@ package com.exactpro.sf.common.impl.messages.json;
 
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,16 +31,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class JsonDictionaryWriter {
+public class JsonYamlDictionaryWriter {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper(
-                new YAMLFactory()
-                        .disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
-                        .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
-        )
-                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+    private static ObjectMapper objectMapper;
 
-    public static void write(JsonYamlDictionary dictionary, OutputStream output) {
+
+    public static void write(JsonYamlDictionary dictionary, OutputStream output, boolean asYaml) {
+
+        if (asYaml) {
+            objectMapper = new ObjectMapper(
+                    new YAMLFactory()
+                            .disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
+                            .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
+            );
+        } else {
+            objectMapper = new ObjectMapper();
+        }
+
         try {
             objectMapper.writerFor(JsonYamlDictionary.class).writeValue(output, dictionary);
         } catch (IOException exception) {
@@ -45,10 +55,10 @@ public class JsonDictionaryWriter {
         }
     }
 
-    public static void write(JsonYamlDictionary dictionary, File outputFile) {
+    public static void write(JsonYamlDictionary dictionary, File outputFile, boolean asYaml) {
 
-        try(OutputStream outputStream = new FileOutputStream(outputFile)) {
-            write(dictionary, outputStream);
+        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+            write(dictionary, outputStream, asYaml);
         } catch (IOException e) {
             throw new EPSCommonException("Failed to write dictionary:" + dictionary.getName(), e);
         }

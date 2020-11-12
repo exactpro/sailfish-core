@@ -22,7 +22,9 @@ import com.exactpro.sf.common.messages.structures.DictionaryComparator.IDiffList
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,12 +35,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonDictionaryStructureWriterTest {
+public class JsonYamlDictionaryStructureWriterTest {
 
     private static final Path BASE_DIR = Paths.get((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")).toAbsolutePath().normalize();
 
-    private static final String FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "test_aml.xml";
+    private static final String FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "writer-test-dictionary.xml";
 
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void testWriterWithoutDifference() throws IOException {
@@ -51,12 +55,11 @@ public class JsonDictionaryStructureWriterTest {
                     .load(inputStream);
         }
 
-        File tempFile = File.createTempFile("jsonDictionary", ".json");
+        File tempFile = folder.newFile("jsonDictionary.json");
 
-        JsonDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile);
+        JsonYamlDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile, false);
 
         IDictionaryStructure dictionaryStructureFromJson;
-
         try (InputStream inputStream = new FileInputStream(tempFile)) {
 
             JsonYamlDictionaryStructureLoader loader = new JsonYamlDictionaryStructureLoader();
@@ -69,7 +72,7 @@ public class JsonDictionaryStructureWriterTest {
         comparator.compare(listener,
                 modifiableDictionaryStructure, dictionaryStructureFromJson, true, false, true);
 
-        Assert.assertEquals(listener.getDifferences().isEmpty() , true);
+        Assert.assertEquals(listener.getDifferences().isEmpty(), true);
     }
 
     @Test
@@ -82,14 +85,12 @@ public class JsonDictionaryStructureWriterTest {
                     .load(inputStream);
         }
 
-        File tempFile = File.createTempFile("jsonDictionary", ".json");
+        File tempFile = folder.newFile("jsonDictionary.json");
 
-        JsonDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile);
-
+        JsonYamlDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile, false);
 
 
         IDictionaryStructure dictionaryStructureFromJson;
-
         try (InputStream inputStream = new FileInputStream(tempFile)) {
 
             JsonYamlDictionaryStructureLoader loader = new JsonYamlDictionaryStructureLoader();

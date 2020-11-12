@@ -17,6 +17,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 <dictionary xmlns="http://exactprosystems.com/dictionary" name="TestAML">
+    <attribute name="Test" type="java.lang.String">TestString</attribute>
     <fields>
         <field id="F_CHAR" reference="F_TCharacter" name="CHAR"/>
         <field id="F_STRING" reference="F_TString" name="STRING"/>
