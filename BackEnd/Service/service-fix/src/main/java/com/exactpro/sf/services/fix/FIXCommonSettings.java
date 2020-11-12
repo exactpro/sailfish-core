@@ -125,6 +125,9 @@ public class FIXCommonSettings extends AbstractServiceSettings {
     @Description("Determines if microseconds should be added to timestamp fields. Only available for AML 3. This value is more priority than 'Milliseconds In Time Stamp Fields'")
     protected boolean microsecondsInTimeStampFields;
 
+    @Description("Determines if nanoseconds should be added to timestamp fields. Only available for AML 3. This value has more priority than 'Microseconds In Time Stamp Fields'")
+    protected boolean nanosecondsInTimeStampFields;
+
     @Description("Receive limit in bytes to emulate Slow Consumer")
     protected int receiveLimit;
 
@@ -299,6 +302,14 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     public void setMicrosecondsInTimeStampFields(boolean microsecondsInTimeStampFields) {
         this.microsecondsInTimeStampFields = microsecondsInTimeStampFields;
+    }
+
+    public boolean isNanosecondsInTimeStampFields() {
+        return nanosecondsInTimeStampFields;
+    }
+
+    public void setNanosecondsInTimeStampFields(boolean nanosecondsInTimeStampFields) {
+        this.nanosecondsInTimeStampFields = nanosecondsInTimeStampFields;
     }
 
     public int getReceiveLimit() {

@@ -310,16 +310,17 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                         case JAVA_TIME_LOCAL_DATE_TIME:
                             boolean includeMillis = includeMilliseconds;
                             boolean includeMicros = includeMicroseconds;
+                            boolean includeNanos = includeNanoseconds;
 
                             Object fixType = getAttributeValue(fieldStructure, QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
                             if (FieldType.UtcTimeStampSecondPresicion.getName().equals(fixType)) {
-                                includeMillis = includeMicros = false;
+                                includeMillis = includeMicros = includeNanos = false;
                             }
 
-                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMillis, includeMicros)));
+                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMillis, includeMicros, includeNanos)));
                             break;
                         case JAVA_TIME_LOCAL_TIME:
-                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds, includeNanoseconds)));
                             break;
                         case JAVA_TIME_LOCAL_DATE:
                             resultMessage.addField(new Field(fieldName, UtcDateOnlyConverter.convert(timestamp)));
@@ -331,9 +332,9 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                         if (fieldValue instanceof LocalDate) {
                             resultMessage.addField(new Field(fieldName, UtcDateOnlyConverter.convert(timestamp)));
                         } else if (fieldValue instanceof LocalTime) {
-                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds, includeNanoseconds)));
                         } else {
-                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMilliseconds, includeMicroseconds, includeNanoseconds)));
                         }
                     }
                 }  else if (fieldValue instanceof Boolean) {
@@ -453,7 +454,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
         String sendingTimeValue =  UtcTimestampConverter.convert(
                 DateTimeUtility.toTimestamp(DateTimeUtility.nowLocalDateTime()),
-                includeMilliseconds, includeMicroseconds);
+                includeMilliseconds, includeMicroseconds, includeNanoseconds);
 
         replaceIfNotExist(header, FieldConst.SENDING_TIME, sendingTimeValue);
     }

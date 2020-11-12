@@ -26,6 +26,7 @@ public class QFJIMessageConverterSettings {
     private boolean verifyTags;
     private boolean includeMilliseconds;
     private boolean includeMicroseconds;
+    private boolean includeNanoseconds;
     private boolean skipTags;
     private boolean orderingFields;
 
@@ -46,6 +47,11 @@ public class QFJIMessageConverterSettings {
 
     public QFJIMessageConverterSettings setIncludeMicroseconds(boolean includeMicroseconds){
         this.includeMicroseconds = includeMicroseconds;
+        return this;
+    }
+
+    public QFJIMessageConverterSettings setIncludeNanoseconds(boolean includeNanoseconds) {
+        this.includeNanoseconds = includeNanoseconds;
         return this;
     }
 
@@ -77,6 +83,10 @@ public class QFJIMessageConverterSettings {
 
     public boolean isIncludeMilliseconds() {
         return includeMilliseconds;
+    }
+
+    public boolean isIncludeNanoseconds() {
+        return includeNanoseconds;
     }
 
     public boolean isSkipTags() {

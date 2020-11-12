@@ -120,6 +120,9 @@ public class FixSessionFactory implements SessionFactory {
             boolean microsInTimestamp = getSetting(settings, sessionID,
                     Session.SETTING_MICROSECONDS_IN_TIMESTAMP, false);
 
+            boolean nanosInTimestamp = getSetting(settings, sessionID,
+                    Session.SETTING_NANOSECONDS_IN_TIMESTAMP, false);
+
             boolean resetOnLogout = getSetting(settings, sessionID,
                     Session.SETTING_RESET_ON_LOGOUT, false);
 
@@ -182,7 +185,7 @@ public class FixSessionFactory implements SessionFactory {
 
             Session session = new Session(application, messageStoreFactory, sessionID,
                     dataDictionaryProvider, new SessionSchedule(settings, sessionID), logFactory,
-                    messageFactory, heartbeatInterval, checkLatency, maxLatency, millisInTimestamp, microsInTimestamp,
+                    messageFactory, heartbeatInterval, checkLatency, maxLatency, millisInTimestamp, microsInTimestamp, nanosInTimestamp,
                     resetOnLogon, resetOnLogout, resetOnDisconnect, refreshAtLogon, checkCompID,
                     redundantResentRequestAllowed, persistMessages, useClosedIntervalForResend,
                     testRequestDelayMultiplier, senderDefaultApplVerID, targetDefaultApplVerID, validateSequenceNumbers,

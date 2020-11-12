@@ -333,6 +333,8 @@ public class FIXClient implements IInitiatorService {
                 commonSettings.isMillisecondsInTimeStampFields());
         sessionSettings.setBool(sessionID, Session.SETTING_MICROSECONDS_IN_TIMESTAMP,
                 commonSettings.isMicrosecondsInTimeStampFields());
+        sessionSettings.setBool(sessionID, Session.SETTING_NANOSECONDS_IN_TIMESTAMP,
+                commonSettings.isNanosecondsInTimeStampFields());
 
         sessionSettings.setLong(sessionID, Session.RECEIVE_LIMIT, commonSettings.getReceiveLimit());
         sessionSettings.setBool(sessionID, Session.SETTING_RESET_ON_LOGOUT, commonSettings.isResetOnLogout());
@@ -410,6 +412,7 @@ public class FIXClient implements IInitiatorService {
                 .setVerifyTags(!commonSettings.isAllowUnknownMsgFields())
                 .setIncludeMilliseconds(commonSettings.isMillisecondsInTimeStampFields())
                 .setIncludeMicroseconds(commonSettings.isMicrosecondsInTimeStampFields())
+                .setIncludeNanoseconds(commonSettings.isNanosecondsInTimeStampFields())
                 .setOrderingFields(commonSettings.isOrderingFields());
 
         this.converter = new DirtyQFJIMessageConverter(settings);

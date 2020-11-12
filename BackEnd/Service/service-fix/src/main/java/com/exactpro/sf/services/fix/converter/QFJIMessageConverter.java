@@ -86,6 +86,7 @@ public class QFJIMessageConverter
 	private final boolean verifyTags;
 	protected final boolean includeMilliseconds;
 	protected final boolean includeMicroseconds;
+    protected final boolean includeNanoseconds;
 	private final boolean skipTags;
 	protected final boolean orderingFields;
 
@@ -101,6 +102,7 @@ public class QFJIMessageConverter
         this.verifyTags = settings.isVerifyTags();
         this.includeMilliseconds = settings.isIncludeMilliseconds();
         this.includeMicroseconds = settings.isIncludeMicroseconds();
+        this.includeNanoseconds = settings.isIncludeNanoseconds();
         this.skipTags = settings.isSkipTags();
         this.orderingFields = settings.isOrderingFields();
         
@@ -502,14 +504,15 @@ public class QFJIMessageConverter
                 case JAVA_TIME_LOCAL_DATE_TIME:
                     boolean includeMillis = includeMilliseconds;
                     boolean includeMicros = includeMicroseconds;
+                    boolean includeNanos = includeNanoseconds;
 
                     Object fixType = getAttributeValue(fieldStructure, ATTRIBUTE_FIX_TYPE);
                     if (FieldType.UtcTimeStampSecondPresicion.getName().equals(fixType)) {
-                        includeMillis = includeMicros = false;
+                        includeMillis = includeMicros = includeNanos = false;
                     }
 
                     Timestamp dateTime = DateTimeUtility.toTimestamp((LocalDateTime)fieldValue);
-                    resultMessage.setUtcTimeStamp(fieldTag, dateTime, includeMillis, includeMicros);
+                    resultMessage.setUtcTimeStamp(fieldTag, dateTime, includeMillis, includeMicros, includeNanos);
                     continue;
                 case JAVA_TIME_LOCAL_DATE:
                     Timestamp date = DateTimeUtility.toTimestamp((LocalDate)fieldValue);
@@ -517,7 +520,7 @@ public class QFJIMessageConverter
                     break;
                 case JAVA_TIME_LOCAL_TIME:
                     Timestamp time = DateTimeUtility.toTimestamp((LocalTime)fieldValue);
-                    resultMessage.setUtcTimeOnly(fieldTag, time, includeMilliseconds, includeMicroseconds);
+                    resultMessage.setUtcTimeOnly(fieldTag, time, includeMilliseconds, includeMicroseconds, includeNanoseconds);
                     break;
                 default:
                     throw new MessageConvertException("Unknown field type: " + fieldType);
