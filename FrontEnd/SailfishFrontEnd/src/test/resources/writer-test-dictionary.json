@@ -1,0 +1,1913 @@
+{
+  "name" : "TestAML",
+  "attributes" : {
+    "Test" : {
+      "type" : "java.lang.String",
+      "value" : "TestString"
+    }
+  },
+  "fields" : {
+    "AMT" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "AccountType" : {
+      "values" : {
+        "CLIENT" : {
+          "value" : "1"
+        },
+        "HOUSE" : {
+          "value" : "3"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "Alpha" : {
+      "type" : "java.lang.String"
+    },
+    "BOOLEAN" : {
+      "type" : "java.lang.Boolean"
+    },
+    "Byte" : {
+      "type" : "java.lang.Short"
+    },
+    "CHAR" : {
+      "type" : "java.lang.Character"
+    },
+    "CURRENCY" : {
+      "type" : "java.lang.String"
+    },
+    "ClearingAccount" : {
+      "values" : {
+        "House" : {
+          "value" : "3"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "Container" : {
+      "values" : {
+        "None" : {
+          "value" : "0"
+        },
+        "Main" : {
+          "value" : "1"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "EXCHANGE" : {
+      "type" : "java.lang.String"
+    },
+    "ExecInst" : {
+      "values" : {
+        "NOT_HELD" : {
+          "value" : "1"
+        },
+        "WORK" : {
+          "value" : "2"
+        },
+        "GO_ALONG" : {
+          "value" : "3"
+        },
+        "NO_CROSS" : {
+          "value" : "A"
+        },
+        "OK_TO_CROSS" : {
+          "value" : "B"
+        },
+        "CALL_FIRST" : {
+          "value" : "C"
+        }
+      },
+      "type" : "java.lang.String"
+    },
+    "ExecTypeFIX" : {
+      "values" : {
+        "NEW" : {
+          "value" : "0"
+        },
+        "REPLACED" : {
+          "value" : "5"
+        },
+        "REJECTED" : {
+          "value" : "8"
+        },
+        "EXPIRED" : {
+          "value" : "C"
+        },
+        "TRADE" : {
+          "value" : "F"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "ExecTypeNTG" : {
+      "values" : {
+        "New" : {
+          "value" : "0"
+        },
+        "Modified" : {
+          "value" : "5"
+        },
+        "Rejected" : {
+          "value" : "8"
+        },
+        "Trade" : {
+          "value" : "F"
+        }
+      },
+      "type" : "java.lang.String"
+    },
+    "FLOAT" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "INT" : {
+      "type" : "java.lang.Integer"
+    },
+    "InstrumentStatus" : {
+      "values" : {
+        "Normal" : {
+          "value" : "N"
+        }
+      },
+      "type" : "java.lang.String"
+    },
+    "LOCALMKTDATE" : {
+      "type" : "java.lang.String"
+    },
+    "LoginResponseStatus" : {
+      "values" : {
+        "LoginAccepted" : {
+          "value" : "65"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "MassCancelResponse" : {
+      "values" : {
+        "Accepted" : {
+          "value" : "7"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "MessageType" : {
+      "values" : {
+        "LoginRequest" : {
+          "value" : "1"
+        },
+        "LoginResponse" : {
+          "value" : "2"
+        },
+        "ReplayRequest" : {
+          "value" : "3"
+        },
+        "ReplayResponse" : {
+          "value" : "4"
+        },
+        "AddOrder" : {
+          "value" : "65"
+        },
+        "OrderDeleted" : {
+          "value" : "68"
+        },
+        "OrderExecuted" : {
+          "value" : "69"
+        },
+        "SnapshotRequest" : {
+          "value" : "129"
+        },
+        "SnapshotResponse" : {
+          "value" : "130"
+        },
+        "SnapshotComplete" : {
+          "value" : "131"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "N2" : {
+      "type" : "java.lang.Short"
+    },
+    "N4" : {
+      "type" : "java.lang.Long"
+    },
+    "N8" : {
+      "type" : "java.lang.Long"
+    },
+    "OrdStatusFIX" : {
+      "values" : {
+        "NEW" : {
+          "value" : "0"
+        },
+        "PARTIALLY_FILLED" : {
+          "value" : "1"
+        },
+        "FILLED" : {
+          "value" : "2"
+        },
+        "REJECTED" : {
+          "value" : "8"
+        },
+        "EXPIRED" : {
+          "value" : "C"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "OrdStatusNTG" : {
+      "values" : {
+        "New" : {
+          "value" : "0"
+        },
+        "PartiallyFilled" : {
+          "value" : "1"
+        },
+        "Filled" : {
+          "value" : "2"
+        },
+        "Rejected" : {
+          "value" : "8"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "OrdType" : {
+      "values" : {
+        "MARKET" : {
+          "value" : "1"
+        },
+        "LIMIT" : {
+          "value" : "2"
+        },
+        "PEGGED" : {
+          "value" : "P"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "OrderCapacity" : {
+      "values" : {
+        "AGENCY" : {
+          "value" : "A"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "OrderSubType" : {
+      "values" : {
+        "Order" : {
+          "value" : "0"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "OrderType" : {
+      "values" : {
+        "Limit" : {
+          "value" : "2"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "P10" : {
+      "type" : "java.lang.Double"
+    },
+    "P4" : {
+      "type" : "java.lang.Double"
+    },
+    "PERCENTAGE" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "PRICE" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "PartyIDSource" : {
+      "values" : {
+        "PROPRIETARY_CUSTOM_CODE" : {
+          "value" : "D"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "PartyRole" : {
+      "values" : {
+        "EXECUTING_FIRM" : {
+          "value" : "1"
+        },
+        "CLEARING_FIRM" : {
+          "value" : "4"
+        },
+        "TRADER_ID" : {
+          "value" : "12"
+        },
+        "COUNTERPARTY" : {
+          "value" : "17"
+        },
+        "TRADER_GROUP" : {
+          "value" : "76"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "Price4" : {
+      "type" : "java.lang.Double"
+    },
+    "Price_4" : {
+      "type" : "java.lang.Double"
+    },
+    "QTY" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "Quantity_2" : {
+      "type" : "java.lang.Short"
+    },
+    "ReceivedMessageType" : {
+      "values" : {
+        "UserConnection" : {
+          "value" : "TC"
+        },
+        "OutOfSequence" : {
+          "value" : "TO"
+        }
+      },
+      "type" : "java.lang.String"
+    },
+    "ReplayResponseStatus" : {
+      "values" : {
+        "RequestAccepted" : {
+          "value" : "65"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "S1" : {
+      "type" : "java.lang.String"
+    },
+    "S2" : {
+      "type" : "java.lang.String"
+    },
+    "S4" : {
+      "type" : "java.lang.String"
+    },
+    "SEQNUM" : {
+      "type" : "java.lang.Integer"
+    },
+    "STRING" : {
+      "type" : "java.lang.String"
+    },
+    "Side" : {
+      "values" : {
+        "BUY" : {
+          "value" : "1"
+        },
+        "SELL" : {
+          "value" : "2"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "SideITCH" : {
+      "values" : {
+        "BUY" : {
+          "value" : "66"
+        },
+        "SELL" : {
+          "value" : "83"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "SideNTG" : {
+      "values" : {
+        "Buy" : {
+          "value" : "1"
+        },
+        "Sell" : {
+          "value" : "2"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "Size4" : {
+      "type" : "java.lang.Double"
+    },
+    "SnapshotResponseStatus" : {
+      "values" : {
+        "RequestAccepted" : {
+          "value" : "65"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "TBigDecimal" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "TBoolean" : {
+      "type" : "java.lang.Boolean"
+    },
+    "TByte" : {
+      "type" : "java.lang.Byte"
+    },
+    "TByteEnum" : {
+      "values" : {
+        "One" : {
+          "value" : "1"
+        },
+        "Two" : {
+          "value" : "2"
+        },
+        "Three" : {
+          "value" : "3"
+        }
+      },
+      "type" : "java.lang.Byte"
+    },
+    "TCharacter" : {
+      "type" : "java.lang.Character"
+    },
+    "TCharacterEnum" : {
+      "values" : {
+        "LetterA" : {
+          "value" : "a"
+        },
+        "LetterB" : {
+          "value" : "b"
+        },
+        "LetterC" : {
+          "value" : "c"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "TDate" : {
+      "type" : "java.time.LocalDate"
+    },
+    "TDateTime" : {
+      "type" : "java.time.LocalDateTime"
+    },
+    "TDouble" : {
+      "type" : "java.lang.Double"
+    },
+    "TFloat" : {
+      "type" : "java.lang.Float"
+    },
+    "TInteger" : {
+      "type" : "java.lang.Integer"
+    },
+    "TIntegerEnum" : {
+      "values" : {
+        "Ten" : {
+          "value" : "10"
+        },
+        "Thousand" : {
+          "value" : "1000"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "TLong" : {
+      "type" : "java.lang.Long"
+    },
+    "TShort" : {
+      "type" : "java.lang.Short"
+    },
+    "TShortEnum" : {
+      "values" : {
+        "One" : {
+          "value" : "1"
+        },
+        "Two" : {
+          "value" : "2"
+        },
+        "Three" : {
+          "value" : "3"
+        }
+      },
+      "type" : "java.lang.Short"
+    },
+    "TString" : {
+      "type" : "java.lang.String"
+    },
+    "TStringEnum" : {
+      "values" : {
+        "Enum1" : {
+          "value" : "Foo"
+        },
+        "Enum2" : {
+          "value" : "Bar"
+        },
+        "EnumX" : {
+          "value" : "x"
+        }
+      },
+      "type" : "java.lang.String"
+    },
+    "TTime" : {
+      "type" : "java.time.LocalTime"
+    },
+    "TimeInForceFIX" : {
+      "values" : {
+        "DAY" : {
+          "value" : "0"
+        },
+        "GOOD_TILL_CANCEL" : {
+          "value" : "1"
+        },
+        "IMMEDIATE_OR_CANCEL" : {
+          "value" : "3"
+        },
+        "GOOD_TILL_DATE" : {
+          "value" : "6"
+        }
+      },
+      "type" : "java.lang.Character"
+    },
+    "TimeInForceNTG" : {
+      "values" : {
+        "Day" : {
+          "value" : "0"
+        }
+      },
+      "type" : "java.lang.Integer"
+    },
+    "UInt32" : {
+      "type" : "java.lang.Long"
+    },
+    "UInt64" : {
+      "type" : "java.math.BigDecimal"
+    },
+    "UInt8" : {
+      "type" : "java.lang.Short"
+    },
+    "UTCDATE" : {
+      "type" : "java.time.LocalDate"
+    },
+    "UTCTIME" : {
+      "type" : "java.time.LocalTime"
+    },
+    "UTCTIMESTAMP" : {
+      "type" : "java.time.LocalDateTime"
+    },
+    "X1" : {
+      "type" : "java.lang.String"
+    },
+    "X2" : {
+      "type" : "java.lang.String"
+    },
+    "X50" : {
+      "type" : "java.lang.String"
+    },
+    "X8" : {
+      "type" : "java.lang.String"
+    }
+  },
+  "messages" : {
+    "NoApplIDs" : {
+      "fields" : {
+        "RefApplID" : {
+          "reference" : "STRING"
+        }
+      }
+    },
+    "NoPartyIDs" : {
+      "fields" : {
+        "PartyID" : {
+          "reference" : "STRING"
+        },
+        "PartyIDSource" : {
+          "reference" : "PartyIDSource"
+        },
+        "PartyRole" : {
+          "reference" : "PartyRole"
+        }
+      }
+    },
+    "TradingParty_NoPartyIDs" : {
+      "fields" : {
+        "PartyID" : {
+          "reference" : "STRING"
+        },
+        "PartyIDSource" : {
+          "reference" : "PartyIDSource"
+        },
+        "PartyRole" : {
+          "reference" : "PartyRole"
+        }
+      }
+    },
+    "TradingParty" : {
+      "fields" : {
+        "NoPartyIDs" : {
+          "isCollection" : true,
+          "reference" : "NoPartyIDs"
+        }
+      }
+    },
+    "ApplIDRequestGrp" : {
+      "fields" : {
+        "NoApplIDs" : {
+          "isCollection" : true,
+          "reference" : "NoApplIDs"
+        }
+      }
+    },
+    "Instrument_NoSecurityAltID" : {
+      "fields" : {
+        "SecurityAltID" : {
+          "reference" : "STRING"
+        },
+        "SecurityAltIDSource" : {
+          "reference" : "STRING"
+        }
+      }
+    },
+    "Instrument" : {
+      "fields" : {
+        "Symbol" : {
+          "reference" : "STRING"
+        },
+        "SecurityID" : {
+          "reference" : "STRING"
+        },
+        "SecurityIDSource" : {
+          "reference" : "STRING"
+        },
+        "NoSecurityAltID" : {
+          "isCollection" : true,
+          "reference" : "Instrument_NoSecurityAltID"
+        }
+      }
+    },
+    "YieldData" : {
+      "fields" : {
+        "YieldType" : {
+          "reference" : "STRING"
+        },
+        "Yield" : {
+          "reference" : "PERCENTAGE"
+        }
+      }
+    },
+    "CommissionData" : {
+      "fields" : {
+        "Commission" : {
+          "reference" : "AMT"
+        },
+        "CommType" : {
+          "reference" : "CHAR"
+        },
+        "CommCurrency" : {
+          "reference" : "CURRENCY"
+        }
+      }
+    },
+    "TrdCapRptSideGrp_NoSides" : {
+      "fields" : {
+        "Side" : {
+          "reference" : "Side"
+        },
+        "OrderID" : {
+          "reference" : "STRING"
+        },
+        "Currency" : {
+          "reference" : "CURRENCY"
+        },
+        "GrossTradeAmt" : {
+          "reference" : "AMT"
+        },
+        "AccruedInterestAmt" : {
+          "reference" : "AMT"
+        },
+        "NetMoney" : {
+          "reference" : "AMT"
+        },
+        "TradingParty" : {
+          "reference" : "TradingParty"
+        },
+        "CommissionData" : {
+          "reference" : "CommissionData"
+        }
+      }
+    },
+    "TrdCapRptAckSideGrp_NoSides" : {
+      "fields" : {
+        "Side" : {
+          "reference" : "Side"
+        },
+        "OrderID" : {
+          "reference" : "STRING"
+        },
+        "Currency" : {
+          "reference" : "CURRENCY"
+        },
+        "GrossTradeAmt" : {
+          "reference" : "AMT"
+        },
+        "AccruedInterestAmt" : {
+          "reference" : "AMT"
+        },
+        "NetMoney" : {
+          "reference" : "AMT"
+        },
+        "TradingParty" : {
+          "reference" : "TradingParty"
+        },
+        "CommissionData" : {
+          "reference" : "CommissionData"
+        }
+      }
+    },
+    "TrdCapRptSideGrp" : {
+      "fields" : {
+        "NoSides" : {
+          "isCollection" : true,
+          "reference" : "TrdCapRptSideGrp_NoSides"
+        }
+      }
+    },
+    "TrdCapRptAckSideGrp" : {
+      "fields" : {
+        "NoSides" : {
+          "isCollection" : true,
+          "reference" : "TrdCapRptAckSideGrp_NoSides"
+        }
+      }
+    },
+    "ExecutionReportFIX" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "STRING"
+        },
+        "ExecType" : {
+          "reference" : "ExecTypeFIX"
+        },
+        "OrdStatus" : {
+          "reference" : "OrdStatusFIX"
+        },
+        "TransactTime" : {
+          "reference" : "UTCTIMESTAMP"
+        },
+        "TransactTimeOnly" : {
+          "reference" : "UTCTIME"
+        },
+        "TransactDateOnly" : {
+          "reference" : "UTCDATE"
+        },
+        "Side" : {
+          "reference" : "Side"
+        },
+        "OrdType" : {
+          "reference" : "OrdType"
+        },
+        "TimeInForce" : {
+          "reference" : "TimeInForceFIX"
+        },
+        "OrderQty" : {
+          "reference" : "QTY"
+        },
+        "OrderQty2" : {
+          "reference" : "QTY"
+        },
+        "Price" : {
+          "reference" : "PRICE"
+        },
+        "LeavesQty" : {
+          "reference" : "QTY"
+        },
+        "DisplayQty" : {
+          "reference" : "QTY"
+        },
+        "CumQty" : {
+          "reference" : "QTY"
+        },
+        "LastQty" : {
+          "reference" : "QTY"
+        },
+        "LastPx" : {
+          "reference" : "PRICE"
+        },
+        "SecurityIDSource" : {
+          "reference" : "STRING"
+        },
+        "SecurityExchange" : {
+          "reference" : "EXCHANGE"
+        },
+        "SecurityID" : {
+          "reference" : "STRING"
+        },
+        "TradingParty" : {
+          "reference" : "TradingParty"
+        },
+        "MsgSeqNum" : {
+          "reference" : "SEQNUM"
+        },
+        "Currency" : {
+          "reference" : "CURRENCY"
+        },
+        "AccountType" : {
+          "reference" : "AccountType"
+        },
+        "OrderCapacity" : {
+          "reference" : "OrderCapacity"
+        },
+        "RoutingInst" : {
+          "reference" : "CHAR"
+        },
+        "MinQty" : {
+          "reference" : "QTY"
+        },
+        "ExpireTime" : {
+          "reference" : "STRING"
+        },
+        "ExpireDate" : {
+          "reference" : "LOCALMKTDATE"
+        }
+      }
+    },
+    "NewOrderSingle" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "STRING"
+        },
+        "TransactTime" : {
+          "reference" : "UTCTIMESTAMP"
+        },
+        "TransactTimeOnly" : {
+          "reference" : "UTCTIME"
+        },
+        "TransactDateOnly" : {
+          "reference" : "UTCDATE"
+        },
+        "Side" : {
+          "reference" : "Side"
+        },
+        "Symbol" : {
+          "reference" : "STRING"
+        },
+        "OrdType" : {
+          "reference" : "OrdType"
+        },
+        "TimeInForce" : {
+          "reference" : "TimeInForceFIX"
+        },
+        "OrderQty" : {
+          "reference" : "QTY"
+        },
+        "OrderQty2" : {
+          "reference" : "QTY"
+        },
+        "Price" : {
+          "reference" : "PRICE"
+        },
+        "MinQty" : {
+          "reference" : "QTY"
+        },
+        "DisplayQty" : {
+          "reference" : "QTY"
+        },
+        "AccountType" : {
+          "reference" : "AccountType"
+        },
+        "OrderCapacity" : {
+          "reference" : "OrderCapacity"
+        },
+        "RoutingInst" : {
+          "reference" : "CHAR"
+        },
+        "TradingParty" : {
+          "reference" : "TradingParty"
+        },
+        "ExecInst" : {
+          "reference" : "ExecInst"
+        },
+        "SecurityIDSource" : {
+          "reference" : "STRING"
+        },
+        "SecurityExchange" : {
+          "reference" : "EXCHANGE"
+        },
+        "SecurityID" : {
+          "reference" : "STRING"
+        },
+        "Currency" : {
+          "reference" : "CURRENCY"
+        },
+        "ExpireTime" : {
+          "reference" : "STRING"
+        },
+        "ExpireDate" : {
+          "reference" : "LOCALMKTDATE"
+        }
+      }
+    },
+    "OrderCancelReplaceRequest" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "STRING"
+        },
+        "TransactTime" : {
+          "reference" : "UTCTIMESTAMP"
+        },
+        "TransactTimeOnly" : {
+          "reference" : "UTCTIME"
+        },
+        "TransactDateOnly" : {
+          "reference" : "UTCDATE"
+        },
+        "Side" : {
+          "reference" : "Side"
+        },
+        "Symbol" : {
+          "reference" : "STRING"
+        },
+        "OrdType" : {
+          "reference" : "OrdType"
+        },
+        "OrderQty" : {
+          "reference" : "QTY"
+        },
+        "Price" : {
+          "reference" : "PRICE"
+        },
+        "DisplayQty" : {
+          "reference" : "QTY"
+        },
+        "OrigClOrdID" : {
+          "reference" : "STRING"
+        },
+        "TradingParty" : {
+          "reference" : "TradingParty"
+        },
+        "MsgSeqNum" : {
+          "reference" : "SEQNUM"
+        }
+      }
+    },
+    "TradeCaptureReport" : {
+      "fields" : {
+        "TradeReportID" : {
+          "reference" : "STRING"
+        },
+        "TradeReportTransType" : {
+          "reference" : "INT"
+        },
+        "TradeReportType" : {
+          "reference" : "INT"
+        },
+        "PreviouslyReported" : {
+          "reference" : "BOOLEAN"
+        },
+        "PriceType" : {
+          "reference" : "INT"
+        },
+        "Product" : {
+          "reference" : "INT"
+        },
+        "MaturityDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "IssueDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "ContractMultiplier" : {
+          "reference" : "FLOAT"
+        },
+        "CouponRate" : {
+          "reference" : "PERCENTAGE"
+        },
+        "Issuer" : {
+          "reference" : "STRING"
+        },
+        "SecurityDesc" : {
+          "reference" : "STRING"
+        },
+        "DatedDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "InterestAccrualDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "QtyType" : {
+          "reference" : "INT"
+        },
+        "LastQty" : {
+          "reference" : "QTY"
+        },
+        "LastPx" : {
+          "reference" : "PRICE"
+        },
+        "TradeDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "TransactTime" : {
+          "reference" : "UTCTIMESTAMP"
+        },
+        "TransactTimeOnly" : {
+          "reference" : "UTCTIME"
+        },
+        "TransactDateOnly" : {
+          "reference" : "UTCDATE"
+        },
+        "SettlType" : {
+          "reference" : "STRING"
+        },
+        "SettlDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "MatchStatus" : {
+          "reference" : "STRING"
+        },
+        "Instrument" : {
+          "reference" : "Instrument"
+        },
+        "YieldData" : {
+          "reference" : "YieldData"
+        },
+        "TrdCapRptAckSideGrp" : {
+          "reference" : "TrdCapRptAckSideGrp"
+        },
+        "TrdRptStatus" : {
+          "reference" : "INT"
+        },
+        "SecondaryTradeReportID" : {
+          "reference" : "STRING"
+        }
+      }
+    },
+    "TradeCaptureReportAck" : {
+      "fields" : {
+        "TradeReportID" : {
+          "reference" : "STRING"
+        },
+        "TradeReportTransType" : {
+          "reference" : "INT"
+        },
+        "TradeReportType" : {
+          "reference" : "INT"
+        },
+        "PreviouslyReported" : {
+          "reference" : "BOOLEAN"
+        },
+        "PriceType" : {
+          "reference" : "INT"
+        },
+        "Product" : {
+          "reference" : "INT"
+        },
+        "MaturityDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "IssueDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "ContractMultiplier" : {
+          "reference" : "FLOAT"
+        },
+        "CouponRate" : {
+          "reference" : "PERCENTAGE"
+        },
+        "Issuer" : {
+          "reference" : "STRING"
+        },
+        "SecurityDesc" : {
+          "reference" : "STRING"
+        },
+        "DatedDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "InterestAccrualDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "QtyType" : {
+          "reference" : "INT"
+        },
+        "LastQty" : {
+          "reference" : "QTY"
+        },
+        "LastPx" : {
+          "reference" : "PRICE"
+        },
+        "TradeDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "TransactTime" : {
+          "reference" : "UTCTIMESTAMP"
+        },
+        "TransactTimeOnly" : {
+          "reference" : "UTCTIME"
+        },
+        "TransactDateOnly" : {
+          "reference" : "UTCDATE"
+        },
+        "SettlType" : {
+          "reference" : "STRING"
+        },
+        "SettlDate" : {
+          "reference" : "LOCALMKTDATE"
+        },
+        "MatchStatus" : {
+          "reference" : "STRING"
+        },
+        "Instrument" : {
+          "reference" : "Instrument"
+        },
+        "YieldData" : {
+          "reference" : "YieldData"
+        },
+        "TrdCapRptSideGrp" : {
+          "reference" : "TrdCapRptSideGrp"
+        },
+        "TrdRptStatus" : {
+          "reference" : "INT"
+        },
+        "SecondaryTradeReportID" : {
+          "reference" : "STRING"
+        },
+        "Text" : {
+          "reference" : "STRING"
+        },
+        "RejectText" : {
+          "reference" : "STRING"
+        }
+      }
+    },
+    "ApplicationMessageRequest" : { },
+    "LoginRequest" : {
+      "fields" : {
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "Username" : {
+          "reference" : "Alpha"
+        },
+        "Password" : {
+          "reference" : "Alpha"
+        }
+      }
+    },
+    "LoginResponse" : {
+      "fields" : {
+        "Status" : {
+          "reference" : "LoginResponseStatus"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        },
+        "MessageSequenceNumber" : {
+          "reference" : "TInteger"
+        }
+      }
+    },
+    "ReplayRequest" : {
+      "fields" : {
+        "FirstMessage" : {
+          "reference" : "UInt32"
+        },
+        "MarketDataGroup" : {
+          "reference" : "Byte"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        }
+      }
+    },
+    "ReplayResponse" : {
+      "fields" : {
+        "FirstMessage" : {
+          "reference" : "UInt32"
+        },
+        "MarketDataGroup" : {
+          "reference" : "Byte"
+        },
+        "Status" : {
+          "reference" : "ReplayResponseStatus"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        }
+      }
+    },
+    "SnapshotRequest" : {
+      "fields" : {
+        "InstrumentID" : {
+          "reference" : "UInt32"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "SubBook" : {
+          "reference" : "Byte"
+        }
+      }
+    },
+    "SnapshotResponse" : {
+      "fields" : {
+        "Status" : {
+          "reference" : "SnapshotResponseStatus"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        }
+      }
+    },
+    "SnapshotComplete" : {
+      "fields" : {
+        "InstrumentID" : {
+          "reference" : "UInt32"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "SubBook" : {
+          "reference" : "Byte"
+        }
+      }
+    },
+    "Statistics" : {
+      "fields" : {
+        "Volume" : {
+          "reference" : "Size4"
+        },
+        "VWAP" : {
+          "reference" : "Price4"
+        },
+        "Turnover" : {
+          "reference" : "Price4"
+        }
+      }
+    },
+    "AddOrder" : {
+      "fields" : {
+        "Side" : {
+          "reference" : "SideITCH"
+        },
+        "InstrumentID" : {
+          "reference" : "UInt32"
+        },
+        "Price" : {
+          "reference" : "Price4"
+        },
+        "OrderID" : {
+          "reference" : "UInt64"
+        },
+        "Quantity" : {
+          "reference" : "UInt64"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        },
+        "Flags" : {
+          "reference" : "Byte"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        }
+      }
+    },
+    "OrderDeleted" : {
+      "fields" : {
+        "InstrumentID" : {
+          "reference" : "UInt32"
+        },
+        "OrderID" : {
+          "reference" : "UInt64"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        }
+      }
+    },
+    "OrderExecuted" : {
+      "fields" : {
+        "InstrumentID" : {
+          "reference" : "UInt32"
+        },
+        "OrderID" : {
+          "reference" : "UInt64"
+        },
+        "TradeMatchID" : {
+          "reference" : "UInt64"
+        },
+        "Length" : {
+          "reference" : "UInt8"
+        },
+        "Flags" : {
+          "reference" : "Byte"
+        },
+        "MessageType" : {
+          "reference" : "MessageType"
+        },
+        "ExecutedQuantity" : {
+          "reference" : "UInt64"
+        }
+      }
+    },
+    "ClearingData" : {
+      "fields" : {
+        "AccountType" : {
+          "reference" : "X1"
+        },
+        "OpenClose" : {
+          "reference" : "X1"
+        }
+      }
+    },
+    "OwnerData" : {
+      "fields" : {
+        "Memo" : {
+          "reference" : "X50"
+        }
+      }
+    },
+    "OrderEntry" : {
+      "fields" : {
+        "ClearingData" : {
+          "reference" : "ClearingData"
+        },
+        "Group" : {
+          "reference" : "X2"
+        },
+        "Quantity" : {
+          "reference" : "N8"
+        },
+        "Price" : {
+          "reference" : "P10"
+        },
+        "PriceType" : {
+          "reference" : "X1"
+        },
+        "GTDDate" : {
+          "reference" : "X8"
+        }
+      }
+    },
+    "OrderAcknowledgement" : {
+      "fields" : {
+        "Group" : {
+          "reference" : "X2"
+        },
+        "Quantity" : {
+          "reference" : "N8"
+        },
+        "AssignedPrice" : {
+          "reference" : "P10"
+        }
+      }
+    },
+    "UserConnection" : {
+      "fields" : {
+        "ReceivedMessageType" : {
+          "isCollection" : true,
+          "reference" : "ReceivedMessageType"
+        }
+      }
+    },
+    "BasicHeader" : {
+      "fields" : {
+        "ApplicationID" : {
+          "reference" : "TString"
+        },
+        "ServiceID" : {
+          "reference" : "TInteger"
+        },
+        "LogicalTerminalAddress" : {
+          "reference" : "TString"
+        },
+        "SessionNumber" : {
+          "reference" : "TInteger"
+        },
+        "SequenceNumber" : {
+          "reference" : "TInteger"
+        }
+      }
+    },
+    "ApplicationHeaderInput" : {
+      "fields" : {
+        "Input" : {
+          "reference" : "TString"
+        },
+        "MessageType" : {
+          "reference" : "TInteger"
+        },
+        "ReceiversAddress" : {
+          "reference" : "TString"
+        },
+        "MessagePriority" : {
+          "reference" : "TString"
+        },
+        "DeliveryMonitoring" : {
+          "reference" : "TString"
+        },
+        "ObsolescencePeriod" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "GENL" : {
+      "fields" : {
+        "SendersReference" : {
+          "reference" : "TString"
+        },
+        "PreparationDateTime" : {
+          "reference" : "TString"
+        },
+        "TradeType" : {
+          "reference" : "TString"
+        },
+        "LINK" : {
+          "isCollection" : true,
+          "reference" : "LINK"
+        }
+      }
+    },
+    "LINK" : {
+      "fields" : {
+        "LinkedMessage" : {
+          "reference" : "TString"
+        },
+        "VenueTradeReference" : {
+          "reference" : "TString"
+        },
+        "TradeReference" : {
+          "reference" : "TString"
+        },
+        "PreviousReference" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "CONFDET" : {
+      "fields" : {
+        "TradeDateTime" : {
+          "reference" : "TString"
+        },
+        "SettlementDate" : {
+          "reference" : "TString"
+        },
+        "DealPriceAndCurrency_A" : {
+          "reference" : "TString"
+        },
+        "DealPriceAndCurrency_B" : {
+          "reference" : "TString"
+        },
+        "PlaceOfTrade" : {
+          "reference" : "TString"
+        },
+        "SettlementAmountAndCurrency" : {
+          "reference" : "TString"
+        },
+        "BuySellIndicator" : {
+          "reference" : "TString"
+        },
+        "PaymentIndicator" : {
+          "reference" : "TString"
+        },
+        "CONFPRTY" : {
+          "reference" : "CONFPRTY"
+        },
+        "QuantityTraded" : {
+          "reference" : "TString"
+        },
+        "FinancialInstrument" : {
+          "reference" : "TString"
+        },
+        "TradeProcessingNarrative" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "CONFPRTY" : {
+      "fields" : {
+        "Buyer_R" : {
+          "reference" : "TString"
+        },
+        "Buyer_P" : {
+          "reference" : "TString"
+        },
+        "Seller_R" : {
+          "reference" : "TString"
+        },
+        "Seller_P" : {
+          "reference" : "TString"
+        },
+        "AccountAtTradingVenue" : {
+          "reference" : "TString"
+        },
+        "TradingPartyReference" : {
+          "reference" : "TString"
+        },
+        "PartyNarrative" : {
+          "reference" : "TString"
+        },
+        "PartyCapacity" : {
+          "reference" : "TString"
+        },
+        "ClearingMember_R" : {
+          "reference" : "TString"
+        },
+        "ClearingMember_P" : {
+          "reference" : "TString"
+        },
+        "PositionAccount" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "SETDET" : {
+      "fields" : {
+        "TypeOfSettlementIndicator" : {
+          "reference" : "TString"
+        },
+        "SETPRTY" : {
+          "isCollection" : true,
+          "reference" : "SETPRTY"
+        }
+      }
+    },
+    "SETPRTY" : {
+      "fields" : {
+        "SettlementParty_Buyer_R" : {
+          "reference" : "TString"
+        },
+        "SettlementParty_Buyer_P" : {
+          "reference" : "TString"
+        },
+        "SettlementParty_Seller_R" : {
+          "reference" : "TString"
+        },
+        "SettlementParty_Seller_P" : {
+          "reference" : "TString"
+        },
+        "SettlementAccount" : {
+          "reference" : "TString"
+        },
+        "PlaceOfSettlement" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "OTHRPRTY" : {
+      "fields" : {
+        "BICcode" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "Trailer" : {
+      "fields" : {
+        "MAC" : {
+          "reference" : "TString"
+        },
+        "CHK" : {
+          "reference" : "TString"
+        },
+        "TNG" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "TradeConfirmation" : {
+      "fields" : {
+        "BasicHeader" : {
+          "reference" : "BasicHeader"
+        },
+        "ApplicationHeaderInput" : {
+          "reference" : "ApplicationHeaderInput"
+        },
+        "GENL" : {
+          "reference" : "GENL"
+        },
+        "CONFDET" : {
+          "isCollection" : true,
+          "reference" : "CONFDET"
+        },
+        "SETDET" : {
+          "reference" : "SETDET"
+        },
+        "OTHRPRTY" : {
+          "reference" : "OTHRPRTY"
+        },
+        "Trailer" : {
+          "reference" : "Trailer"
+        }
+      }
+    },
+    "MarketDepthLevel_2_4" : {
+      "fields" : {
+        "QuoteLevel" : {
+          "reference" : "N4"
+        },
+        "BidNumberOfQuotes" : {
+          "reference" : "N4"
+        },
+        "BidSize" : {
+          "reference" : "Quantity_2"
+        },
+        "BidPrice" : {
+          "reference" : "Price_4"
+        },
+        "AskNumberOfQuotes" : {
+          "reference" : "N4"
+        },
+        "AskSize" : {
+          "reference" : "Quantity_2"
+        },
+        "AskPrice" : {
+          "reference" : "Price_4"
+        }
+      }
+    },
+    "MarketDepthInstrument_2_4" : {
+      "fields" : {
+        "GroupID" : {
+          "reference" : "S2"
+        },
+        "Instrument" : {
+          "reference" : "S4"
+        },
+        "GroupStatus" : {
+          "reference" : "S1"
+        },
+        "InstrumentStatus" : {
+          "reference" : "InstrumentStatus"
+        },
+        "NumberofLevel" : {
+          "reference" : "N4"
+        },
+        "MarketDepthLevel_2_4" : {
+          "isCollection" : true,
+          "reference" : "MarketDepthLevel_2_4"
+        }
+      }
+    },
+    "SimpleMessage" : {
+      "fields" : {
+        "FBoolean" : {
+          "reference" : "TBoolean"
+        },
+        "FByte" : {
+          "reference" : "TByte"
+        },
+        "FCharacter" : {
+          "reference" : "TCharacter"
+        },
+        "FShort" : {
+          "reference" : "TShort"
+        },
+        "FInteger" : {
+          "reference" : "TInteger"
+        },
+        "FLong" : {
+          "reference" : "TLong"
+        },
+        "FFloat" : {
+          "reference" : "TFloat"
+        },
+        "FDouble" : {
+          "reference" : "TDouble"
+        },
+        "FBigDecimal" : {
+          "reference" : "TBigDecimal"
+        },
+        "FString" : {
+          "reference" : "TString"
+        },
+        "FByteEnum" : {
+          "reference" : "TByteEnum"
+        },
+        "FCharacterEnum" : {
+          "reference" : "TCharacterEnum"
+        },
+        "FShortEnum" : {
+          "reference" : "TShortEnum"
+        },
+        "FIntegerEnum" : {
+          "reference" : "TIntegerEnum"
+        },
+        "FStringEnum" : {
+          "reference" : "TStringEnum"
+        },
+        "ServiceName" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "ArrayMessage" : {
+      "fields" : {
+        "BooleanArray" : {
+          "isCollection" : true,
+          "reference" : "TBoolean"
+        },
+        "IntegerArray" : {
+          "isCollection" : true,
+          "reference" : "TInteger"
+        },
+        "DoubleArray" : {
+          "isCollection" : true,
+          "reference" : "TDouble"
+        },
+        "BigDecimalArray" : {
+          "isCollection" : true,
+          "reference" : "TBigDecimal"
+        },
+        "StringArray" : {
+          "isCollection" : true,
+          "reference" : "TString"
+        },
+        "MessageArray" : {
+          "isCollection" : true,
+          "reference" : "SimpleMessage"
+        },
+        "FByteEnumArray" : {
+          "isCollection" : true,
+          "reference" : "TByteEnum"
+        },
+        "FCharacterEnumArray" : {
+          "isCollection" : true,
+          "reference" : "TCharacterEnum"
+        },
+        "FShortEnumArray" : {
+          "isCollection" : true,
+          "reference" : "TShortEnum"
+        },
+        "FIntegerEnumArray" : {
+          "isCollection" : true,
+          "reference" : "TIntegerEnum"
+        },
+        "FStringEnumArray" : {
+          "isCollection" : true,
+          "reference" : "TStringEnum"
+        },
+        "ServiceNames" : {
+          "isCollection" : true,
+          "reference" : "TString"
+        }
+      }
+    },
+    "OrderMassCancelRequest" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "TString"
+        },
+        "InstrumentID" : {
+          "reference" : "TInteger"
+        },
+        "OrderSubType" : {
+          "reference" : "OrderSubType"
+        },
+        "MassCancelRequestType" : {
+          "reference" : "TInteger"
+        }
+      }
+    },
+    "OrderMassCancelReport" : {
+      "fields" : {
+        "AppID" : {
+          "reference" : "TInteger"
+        },
+        "ClOrdID" : {
+          "reference" : "TString"
+        },
+        "MassCancelResponse" : {
+          "reference" : "MassCancelResponse"
+        }
+      }
+    },
+    "NewQuote" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "TString"
+        },
+        "InstrumentID" : {
+          "reference" : "TInteger"
+        },
+        "BidPrice" : {
+          "reference" : "TDouble"
+        },
+        "BidSize" : {
+          "reference" : "TLong"
+        },
+        "AskPrice" : {
+          "reference" : "TDouble"
+        },
+        "AskSize" : {
+          "reference" : "TLong"
+        },
+        "ClearingAccount" : {
+          "reference" : "ClearingAccount"
+        },
+        "Capacity" : {
+          "reference" : "TInteger"
+        }
+      }
+    },
+    "ExecutionReportNTG" : {
+      "fields" : {
+        "AppID" : {
+          "reference" : "TInteger"
+        },
+        "ClOrdID" : {
+          "reference" : "TString"
+        },
+        "ExecID" : {
+          "reference" : "TString"
+        },
+        "ExecType" : {
+          "reference" : "ExecTypeNTG"
+        },
+        "OrdStatusNTG" : {
+          "reference" : "OrdStatusNTG"
+        },
+        "Side" : {
+          "reference" : "SideNTG"
+        },
+        "InstrumentID" : {
+          "reference" : "TInteger"
+        },
+        "DisplayQty" : {
+          "reference" : "TLong"
+        },
+        "Container" : {
+          "reference" : "Container"
+        },
+        "LeavesQty" : {
+          "reference" : "TLong"
+        },
+        "OrderID" : {
+          "reference" : "TString"
+        },
+        "ExecutedQty" : {
+          "reference" : "TLong"
+        },
+        "ExecutedPrice" : {
+          "reference" : "TDouble"
+        },
+        "AvgPx" : {
+          "reference" : "TDouble"
+        },
+        "TradeLiquidityIndicator" : {
+          "reference" : "TString"
+        },
+        "TradeMatchID" : {
+          "reference" : "TLong"
+        },
+        "CounterParty" : {
+          "reference" : "TString"
+        }
+      }
+    },
+    "NewOrder" : {
+      "fields" : {
+        "ClOrdID" : {
+          "reference" : "TString"
+        },
+        "Side" : {
+          "reference" : "SideNTG"
+        },
+        "InstrumentID" : {
+          "reference" : "TInteger"
+        },
+        "OrdQty" : {
+          "reference" : "TLong"
+        },
+        "DisplayQty" : {
+          "reference" : "TLong"
+        },
+        "TimeInForce" : {
+          "reference" : "TimeInForceNTG"
+        },
+        "LimitPrice" : {
+          "reference" : "TDouble"
+        },
+        "OrderType" : {
+          "reference" : "OrderType"
+        },
+        "OrderSubType" : {
+          "reference" : "OrderSubType"
+        },
+        "ClearingAccount" : {
+          "reference" : "ClearingAccount"
+        },
+        "Capacity" : {
+          "reference" : "TInteger"
+        },
+        "BidSize" : {
+          "reference" : "TLong"
+        }
+      }
+    }
+  }
+}

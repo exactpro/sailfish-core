@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,7 @@ public class JsonYamlDictionaryStructureWriter {
         referenceMap.clear();
 
         Map<ModifiableMessageStructure, JsonMessage> structureMessageMap = new LinkedHashMap<>();
+        Map<JsonMessage, ModifiableMessageStructure> messageReferenceMap = new HashMap<>();
 
         for (ModifiableMessageStructure messageStructure : dictionaryStructure.getImplMessageStructures()) {
 
@@ -101,6 +103,10 @@ public class JsonYamlDictionaryStructureWriter {
             jsonMessage.setDescription(messageStructure.getDescription());
 
             addAttributes(messageStructure, jsonMessage);
+
+            if (messageStructure.getReference() != null) {
+                messageReferenceMap.put(jsonMessage, (ModifiableMessageStructure)messageStructure.getReference());
+            }
 
             structureMessageMap.put(messageStructure, jsonMessage);
 
@@ -131,6 +137,10 @@ public class JsonYamlDictionaryStructureWriter {
             referencedJsonField.setReferenceName(referencedJsonField.getReference().getName());
         }
 
+        for (JsonMessage jsonMessage : messageReferenceMap.keySet()) {
+            jsonMessage.setReference(structureMessageMap.get(messageReferenceMap.get(jsonMessage)));
+            jsonMessage.setReferenceName(jsonMessage.getReference().getName());
+        }
 
         dictionary.setFields(fields);
         dictionary.setMessages(messages);

@@ -1,0 +1,64 @@
+{
+  "name" : "MessageInheritance",
+  "fields" : {
+    "Integer" : {
+      "type" : "java.lang.Integer"
+    },
+    "String" : {
+      "type" : "java.lang.String"
+    }
+  },
+  "messages" : {
+    "Parent" : {
+      "attributes" : {
+        "AttributeA" : {
+          "type" : "java.lang.String",
+          "value" : "ValueA"
+        }
+      },
+      "fields" : {
+        "FieldA" : {
+          "reference" : "String"
+        }
+      }
+    },
+    "ChildA" : {
+      "attributes" : {
+        "AttributeB" : {
+          "type" : "java.lang.String",
+          "value" : "ValueB"
+        }
+      },
+      "fields" : {
+        "FieldB" : {
+          "reference" : "Integer"
+        }
+      },
+      "reference" : "Parent"
+    },
+    "ChildB" : {
+      "attributes" : {
+        "AttributeC" : {
+          "type" : "java.lang.String",
+          "value" : "ValueC"
+        },
+        "AttributeA" : {
+          "type" : "java.lang.Long",
+          "value" : "1"
+        }
+      },
+      "fields" : {
+        "FieldC" : {
+          "reference" : "String"
+        },
+        "FieldA" : {
+          "reference" : "Integer"
+        },
+        "FieldD" : {
+          "reference" : "Parent"
+        }
+      },
+      "reference" : "ChildA"
+    }
+  }
+}

@@ -20,7 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exactpro.sf.common.impl.messages.xml.XmlDictionaryWriter;
@@ -57,8 +59,16 @@ public class XmlDictionaryStructureWriter {
 		Dictionary dictionary = new Dictionary();
 		dictionary.setDescription(dictionaryStructure.getDescription());
 		dictionary.setName(dictionaryStructure.getNamespace());
-		
-		Fields fields = new Fields();
+
+        List<Attribute> attributes = dictionary.getAttributes();
+        if (dictionaryStructure.getAttributes() != null) {
+            for (IAttributeStructure attributeStructure : dictionaryStructure.getAttributes().values()) {
+                attributes.add(createAttributeFromStructure(attributeStructure));
+            }
+        }
+
+
+        Fields fields = new Fields();
 		Messages messages = new Messages();
 		
 		// Fields adding
@@ -91,16 +101,21 @@ public class XmlDictionaryStructureWriter {
 		Map<ModifiableMessageStructure, Message> structureMessageMap = new LinkedHashMap<>();
 		
 		// Messages adding
-		
-		for (ModifiableMessageStructure messageStructure : dictionaryStructure.getImplMessageStructures()) {
+        Map<Message, ModifiableMessageStructure> messageReferenceMap = new HashMap<>();
+
+        for (ModifiableMessageStructure messageStructure : dictionaryStructure.getImplMessageStructures()) {
 			
 			Message message = new Message();
 			message.setId("M_" + messageStructure.getName());
 			message.setName(messageStructure.getName());
 			message.setDescription(messageStructure.getDescription());
 			addAttributes(messageStructure, message);
-			
-			structureMessageMap.put(messageStructure, message);
+            if (messageStructure.getReference() != null) {
+                messageReferenceMap.put(message, (ModifiableMessageStructure)messageStructure.getReference());
+            }
+
+
+            structureMessageMap.put(messageStructure, message);
 
             for(ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
 				
@@ -125,8 +140,11 @@ public class XmlDictionaryStructureWriter {
 		for (Field referencedField : referenceMap.keySet()) {
 			referencedField.setReference(structureMessageMap.get(referenceMap.get(referencedField)));
 		}
-		
-		dictionary.setFields(fields);
+        for (Message message : messageReferenceMap.keySet()) {
+            message.setReference(structureMessageMap.get(messageReferenceMap.get(message)));
+        }
+
+        dictionary.setFields(fields);
 		dictionary.setMessages(messages);
 		
 		return dictionary;
@@ -175,13 +193,18 @@ public class XmlDictionaryStructureWriter {
 
 	private static void addAttributes(ModifiableFieldStructure fieldStructure, Field field) {
 		for (IAttributeStructure attributeStructure : fieldStructure.getImplAttributes()) {
-			
-			Attribute attribute = new Attribute();
-			attribute.setName(attributeStructure.getName());
-			attribute.setValue(attributeStructure.getValue());
-			attribute.setType(attributeStructure.getType());
-			
-			field.getAttributes().add(attribute);
+			field.getAttributes().add(createAttributeFromStructure(attributeStructure));
 		}
 	}
+
+    private static Attribute createAttributeFromStructure(IAttributeStructure attributeStructure) {
+
+        Attribute attribute = new Attribute();
+        attribute.setName(attributeStructure.getName());
+        attribute.setValue(attributeStructure.getValue());
+        attribute.setType(attributeStructure.getType());
+        return attribute;
+
+    }
+
 }

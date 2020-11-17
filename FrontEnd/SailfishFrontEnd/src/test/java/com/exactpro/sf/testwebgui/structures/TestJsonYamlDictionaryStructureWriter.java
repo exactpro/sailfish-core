@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.structures;
 
-import com.exactpro.sf.common.messages.structures.DictionaryComparator;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.DistinctionType;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.DictionaryPath;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.IDiffListener;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,11 +24,24 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonYamlDictionaryStructureWriterTest {
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import com.exactpro.sf.common.messages.structures.DictionaryComparator;
+import com.exactpro.sf.common.messages.structures.DictionaryComparator.DictionaryPath;
+import com.exactpro.sf.common.messages.structures.DictionaryComparator.DistinctionType;
+import com.exactpro.sf.common.messages.structures.DictionaryComparator.IDiffListener;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
+
+public class TestJsonYamlDictionaryStructureWriter {
 
     private static final Path BASE_DIR = Paths.get((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")).toAbsolutePath().normalize();
 
-    private static final String FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "writer-test-dictionary.xml";
+    private static final String MESSAGE_INHERITANCE_FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "message-inheritance.json";
+    private static final String WRITER_TEST_DICTIONARY_FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "writer-test-dictionary.json";
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -49,9 +51,9 @@ public class JsonYamlDictionaryStructureWriterTest {
 
         ModifiableDictionaryStructure modifiableDictionaryStructure;
 
-        try (FileInputStream inputStream = new FileInputStream(FILE_PATH)) {
+        try (FileInputStream inputStream = new FileInputStream(MESSAGE_INHERITANCE_FILE_PATH)) {
 
-            modifiableDictionaryStructure = new ModifiableXmlDictionaryStructureLoader()
+            modifiableDictionaryStructure = new ModifiableJsonYamlDictionaryStructureLoader()
                     .load(inputStream);
         }
 
@@ -80,15 +82,14 @@ public class JsonYamlDictionaryStructureWriterTest {
 
         ModifiableDictionaryStructure modifiableDictionaryStructure;
 
-        try (FileInputStream inputStream = new FileInputStream(FILE_PATH)) {
-            modifiableDictionaryStructure = new ModifiableXmlDictionaryStructureLoader()
+        try (FileInputStream inputStream = new FileInputStream(WRITER_TEST_DICTIONARY_FILE_PATH)) {
+            modifiableDictionaryStructure = new ModifiableJsonYamlDictionaryStructureLoader()
                     .load(inputStream);
         }
 
         File tempFile = folder.newFile("jsonDictionary.json");
 
         JsonYamlDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile, false);
-
 
         IDictionaryStructure dictionaryStructureFromJson;
         try (InputStream inputStream = new FileInputStream(tempFile)) {
@@ -118,7 +119,7 @@ public class JsonYamlDictionaryStructureWriterTest {
 
         @Override
         public void differnce(DistinctionType distinctionType, Object first, Object second,
-                              DictionaryPath dictionaryPath) {
+                DictionaryPath dictionaryPath) {
 
             StringBuilder differenceStorage = new StringBuilder();
 
