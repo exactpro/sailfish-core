@@ -16,6 +16,7 @@
 package com.exactpro.sf.configuration.dictionary;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -89,6 +90,41 @@ public class ValidationHelper {
 			errors.add(new DictionaryValidationError(message.getName(), null,
 					"Message  <strong>\"" + message.getName() + "\"</strong> doesn't contain " + fieldName +" field",
 					DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
+		}
+	}
+
+	/**
+	 * Match order and field names in message against order and field names in primaryFields.
+	 *
+	 * The method assumes that message.getFields() returns Map that contain fields in order in which they are
+	 * represented in a dictionary that is validated
+	 * @param errors List to add errors found at the check
+	 * @param message Actual structure of fields to check its order against specified in @primaryFields
+	 * @param primaryFields List of field names in order that must be stand on @message
+	 * @param startPosition Start position of field in @message from where order is checked. Must be greater or equal zero
+	 */
+	public static void checkFieldsOrder(List<DictionaryValidationError> errors, IMessageStructure message,
+										List<String> primaryFields, int startPosition) {
+		List<String> fields = new ArrayList<>(message.getFields().keySet());
+		if(fields.size() - startPosition < primaryFields.size()) {
+			errors.add(new DictionaryValidationError(message.getName(), null,
+					"Not enough fields to check order of fields in message <strong>\"" + message.getName() + "\"</strong>."
+					+ " Checking the order of fields from " + startPosition + " index. Number of fields to be validated: "
+					+ primaryFields.size() + ". Actual number of fields in message: " + fields.size() +
+					". Expected number of fields in message: " + (startPosition + primaryFields.size()),
+					DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_VALUES));
+			return;
+		} else {
+			for (int i = 0; i < primaryFields.size(); i++) {
+				String actualField = fields.get(startPosition + i);
+				String expectedField = primaryFields.get(i);
+				if (!actualField.equals(expectedField))
+					errors.add(new DictionaryValidationError(message.getName(), actualField,
+							"The message <strong>" + message.getName() + "</strong> must have a field " +
+									"<strong>" + expectedField + "</strong> " + "at index " + (startPosition + i)  + " but has " +
+									"the <strong>" + actualField + "</strong> field",
+							DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_VALUES));
+			}
 		}
 	}
 

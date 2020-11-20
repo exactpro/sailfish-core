@@ -3234,6 +3234,11 @@
 			<field name="NoMDEntries" reference="group-MDIncGrp_NoMDEntries" isCollection="true" required="true"/>
 			<field name="DeleteReason" reference="field-DeleteReason" required="false"/>
 		</message>
+		<message id="headerInvalidNumberOfFields" name="headerInvalidNumberOfFields">
+			<attribute name="entity_type" type="java.lang.String">Header</attribute>
+			<field name="BeginString" reference="field-BeginString" required="true"/>
+			<field name="BodyLength" reference="field-BodyLength" required="true"/>
+		</message>
 		<message id="headerInvalidName" name="headerInvalidName">
 			<attribute name="entity_type" type="java.lang.String">Header</attribute>
 

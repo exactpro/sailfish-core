@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +95,7 @@ public class FixMessageHelper extends MessageHelper {
     public static final String PROTOCOL = "FIX";
     public static final String LANGUAGE = "LANGUAGE";
     public static final String XMLDATA = "XMLDATA";
+    public static final List<String> HEADER_FIELDS_ORDER = ImmutableList.of(BEGIN_STRING_FIELD, BODY_LENGTH_FIELD, MSG_TYPE_FIELD);
 
     //    A field with tagNumber and type DATA must have a paired field with tagNumber-1 and type LENGTH.
     //    But there are exceptions, for example field Signature with tag 89 and type DATA has a paired field with tag 93 and type LENGTH.
