@@ -233,7 +233,7 @@ public class TestAML3_0 extends TestAML3Base {
 			Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(15, "", "VWAP", "Reference 'statistics' is not yet defined in column 'VWAP': '${statistics:Turnover}/${statistics:Volume}'.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
-			alert = new Alert(15, "", "VWAP", "Subaction must predefined to use references to it's fields.", AlertType.ERROR);
+			alert = new Alert(15, "", "VWAP", "Sub-action must be predefined to use references to its fields.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
 			alert = new Alert(18, "ss1", "Unable to resolve utility function: random", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
@@ -243,15 +243,15 @@ public class TestAML3_0 extends TestAML3Base {
 			Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(21, "ss4", "#static_value", "Invalid URI: com.exactpro.sf.actions.MiscUtils.random", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(27, "ref1", "FInteger", "Subaction must predefined to use references to it's fields.", AlertType.ERROR);
+            alert = new Alert(27, "ref1", "FInteger", "Sub-action must be predefined to use references to its fields.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(27, "ref1", "FInteger", "Reference 'rs1' is not yet defined in column 'FInteger': '10 + ${rs1:FInteger}'.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(28, "ref2", "FInteger", "Subaction must predefined to use references to it's fields.", AlertType.ERROR);
+            alert = new Alert(28, "ref2", "FInteger", "Sub-action must be predefined to use references to its fields.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(28, "ref2", "FInteger", "Reference 'rs2' is not yet defined in column 'FInteger': '10 + ${rs2:FInteger}'.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
-            alert = new Alert(29, "ref3", "FInteger", "Subaction must predefined to use references to it's fields.", AlertType.ERROR);
+            alert = new Alert(29, "ref3", "FInteger", "Sub-action must be predefined to use references to its fields.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
             alert = new Alert(29, "ref3", "FInteger", "Reference 'rs3' is not yet defined in column 'FInteger': '10 + ${rs3:TInteger}'.", AlertType.ERROR);
 			Assert.assertTrue(alert.toString(), source.remove(alert));

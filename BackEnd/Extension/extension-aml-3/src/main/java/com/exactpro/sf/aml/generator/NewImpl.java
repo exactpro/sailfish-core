@@ -1394,7 +1394,7 @@ public class NewImpl {
 
                 if(dictionary != null && !dictionary.matches(actionDictionary)) {
                     alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
-                            "Subaction dictionary '%s' differs from action dictionary '%s'", dictionary, actionDictionary)));
+                            "Sub-action dictionary '%s' differs from action dictionary '%s'", dictionary, actionDictionary)));
 
                     return;
                 }
@@ -1408,13 +1408,13 @@ public class NewImpl {
                     subAction.setMessageTypeColumn(msgType);
                 } else if(!subMsgType.equals(msgType)) {
                     alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
-                            "Subaction message type '%s' differs from action message type '%s'", subMsgType, msgType)));
+                            "Sub-action message type '%s' differs from action message type '%s'", subMsgType, msgType)));
 
                     return;
                 }
             } else {
                 alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
-                    "Subaction must predefined to use references to it's fields.")));
+                    "Sub-action must be predefined to use references to its fields.")));
                 return;
             }
         }

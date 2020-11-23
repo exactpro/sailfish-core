@@ -201,9 +201,9 @@ public class TestAMLSyntaxNegative extends TestMatrix {
     public void testMissingReference() {
         logger.info("Start testMissingReference()");
         try {
-            checkErrorPresents("Found 2 error(s) during preparing script:Error in line 4 column 'ClOrdID': Subaction must predefined to use references to it's fields.", errorsReferenceNameMatrix);
+            checkErrorPresents("Error in line 4 column 'ClOrdID': Sub-action must be predefined to use references to its fields.", errorsReferenceNameMatrix);
 
-            checkErrorPresents("Error in line 4 column 'ClOrdID': Reference 'new_order' is not yet defined in column 'ClOrdID': '${new_order:ClOrdID}'.", errorsReferenceNameMatrix);
+            checkErrorPresents("Found 2 error(s) during preparing script:Error in line 4 column 'ClOrdID': Reference 'new_order' is not yet defined in column 'ClOrdID': '${new_order:ClOrdID}'.", errorsReferenceNameMatrix);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
