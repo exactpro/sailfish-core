@@ -206,43 +206,49 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         }
 
         try {
-            Map<String, IFieldStructure> fields = createFieldStructures(builder, message, namespace);
-            Map<String, ? extends IAttributeStructure> attributes = getAttributes(message, false, null);
-            IMessageStructure referencedMessage = null;
-
-            if (reference != null) {
-                referencedMessage = builder.getMessageStructure(reference.getName());
-
-                if (aggregate) {
-                    Map<String, IFieldStructure> parentFields = new LinkedHashMap<>(referencedMessage.getFields());
-                    Map<String, IAttributeStructure> parentAttributes = new HashMap<>(referencedMessage.getAttributes());
-
-                    parentFields.putAll(fields);
-                    fields = parentFields;
-
-                    if (attributes != null) {
-                        parentAttributes.putAll(attributes);
-                    }
-
-                    attributes = parentAttributes;
-                }
-            }
-
-            IMessageStructure messageStructure = createMessageStructure(
-                    message,
-                    message.getId(),
-                    message.getName(),
-                    namespace,
-                    message.getDescription(),
-                    fields,
-                    attributes,
-                    referencedMessage
-            );
+            IMessageStructure messageStructure = convertMessageInternal(namespace, builder, message, reference);
 
             builder.addMessageStructure(messageStructure);
         } catch (RuntimeException e) {
             throw new EPSCommonException("Message '" + message.getName() + "', problem with content", e);
         }
+    }
+
+    private IMessageStructure convertMessageInternal(String namespace, StructureBuilder builder, IMessage message, IField reference) {
+        Map<String, IFieldStructure> fields = createFieldStructures(builder, message, namespace);
+        Map<String, ? extends IAttributeStructure> attributes = getAttributes(message, false, null);
+        IMessageStructure referencedMessage = null;
+
+        if (reference != null) {
+            referencedMessage = builder.getMessageStructure(reference.getName());
+
+            if (aggregate) {
+                Map<String, IFieldStructure> parentFields = new LinkedHashMap<>(referencedMessage.getFields());
+                Map<String, IAttributeStructure> parentAttributes = new HashMap<>(referencedMessage.getAttributes());
+
+                parentFields.putAll(fields);
+                fields = parentFields;
+
+                if (attributes != null) {
+                    parentAttributes.putAll(attributes);
+                }
+
+                attributes = parentAttributes;
+            }
+        }
+
+        return createMessageStructure(
+                message,
+                message.getId(),
+                message.getName(),
+                namespace,
+                message.getDescription(),
+                message.isRequired(),
+                message.isIsCollection(),
+                fields,
+                attributes,
+                referencedMessage
+        );
     }
 
     protected IFieldStructure createFieldStructure(IField field, boolean isTemplate, String id, String name, String namespace,
@@ -264,9 +270,10 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
     }
 
     protected IMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace, String description,
+                                                       boolean isRequired, boolean isCollection,
                                                        Map<String, IFieldStructure> fields, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 
-        return new MessageStructure(name, namespace, description, fields, attributes, reference);
+        return new MessageStructure(name, namespace, description, fields, isRequired, isCollection, attributes, reference);
     }
 
     protected IMessageStructure createMessageStructure(IMessage message, IField field, String id, String name, String namespace,
@@ -320,8 +327,12 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                     }
                 }
 
-                fieldStructure = createMessageStructure((IMessage) field.getReference(), field, field.getId(),
-                        field.getName(), namespace, field.getDescription(), field.isRequired(), field.isIsCollection(), struct);
+                if (field instanceof IMessage && !((IMessage)field).getFields().isEmpty()) {
+                    fieldStructure = convertMessageInternal(namespace, builder, (IMessage)field, null);
+                } else {
+                    fieldStructure = createMessageStructure((IMessage)field.getReference(), field, field.getId(),
+                            field.getName(), namespace, field.getDescription(), field.isRequired(), field.isIsCollection(), struct);
+                }
 
             } else {
 

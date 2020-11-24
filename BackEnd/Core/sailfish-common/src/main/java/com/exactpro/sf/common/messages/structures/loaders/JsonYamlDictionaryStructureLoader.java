@@ -73,6 +73,9 @@ public class JsonYamlDictionaryStructureLoader extends AbstractDictionaryStructu
                     logger.warn("Field [" + field.getName() + "] have reference to unknown field [" + refName + "]");
                 }
             }
+            if (field instanceof JsonMessage) {
+                setReferenceForJsonFieldList(((JsonMessage)field).getFields(), nameToFieldOrMessage);
+            }
         }
     }
 

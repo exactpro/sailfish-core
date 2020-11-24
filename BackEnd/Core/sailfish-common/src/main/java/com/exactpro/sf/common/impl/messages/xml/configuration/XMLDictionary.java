@@ -39,12 +39,19 @@ public class XMLDictionary implements IDictionary {
     /**
      * Create adapter and reference for field or message
      * @param field {@link Field} or {@link Message}
+     * @param isRoot
      * @param listOfField {@link List}<{@link XMLField}>
      * @param listOfMessage {@link List}<{@link XMLMessage}>
      * @param fieldMap {@link Map}<{@link String}, {@link XMLField}
      * @return Adapter for object <b>field</b>.
      */
-    private XMLField createBeanWithReference(Field field, List<XMLField> listOfField, List<? super XMLMessage> listOfMessage, Map<String, XMLField> fieldMap) {
+    private XMLField createBeanWithReference(
+            Field field,
+            boolean isRoot,
+            List<XMLField> listOfField,
+            List<? super XMLMessage> listOfMessage,
+            Map<String, XMLField> fieldMap
+    ) {
         if (field == null) {
             return null;
         }
@@ -56,7 +63,11 @@ public class XMLDictionary implements IDictionary {
         }
 
         if (field instanceof Message) {
-            fieldAdapter = new XMLMessage((Message) field);
+            Message msg = (Message)field;
+            fieldAdapter = new XMLMessage(msg);
+            if (!msg.getFieldsAndMessages().isEmpty() && !isRoot) {
+                addFieldsToAdapter(msg, (XMLMessage)fieldAdapter, fieldMap);
+            }
 
             if (listOfMessage != null) {
                 listOfMessage.add((XMLMessage) fieldAdapter);
@@ -75,7 +86,7 @@ public class XMLDictionary implements IDictionary {
 
         Field reference = (Field) field.getReference();
         if (reference != null) {
-            fieldAdapter.setReference(createBeanWithReference(reference, fields, messages, fieldMap));
+            fieldAdapter.setReference(createBeanWithReference(reference, true, fields, messages, fieldMap));
         }
 
         return fieldAdapter;
@@ -99,7 +110,7 @@ public class XMLDictionary implements IDictionary {
         if (dictionary.getFields() != null && dictionary.getFields().getFields() != null) {
             fields = new ArrayList<>(dictionary.getFields().getFields().size());
             for (Field field : dictionary.getFields().getFields()) {
-               createBeanWithReference(field, fields, null, fieldMap);
+               createBeanWithReference(field, true, fields, null, fieldMap);
             }
         } else {
             fields = Collections.emptyList();
@@ -108,14 +119,18 @@ public class XMLDictionary implements IDictionary {
         if (dictionary.getMessages() != null && dictionary.getMessages().getMessages() != null) {
             messages = new ArrayList<>(dictionary.getMessages().getMessages().size());
             for (Message message : dictionary.getMessages().getMessages()) {
-                XMLMessage messageAdapter = (XMLMessage) createBeanWithReference(message, fields, messages, fieldMap);
+                XMLMessage messageAdapter = (XMLMessage) createBeanWithReference(message, true, fields, messages, fieldMap);
 
-                for (Field field : message.getFieldsAndMessages()) {
-                    createBeanWithReference(field, messageAdapter.getFields(), messageAdapter.getFields(), fieldMap);
-                }
+                addFieldsToAdapter(message, messageAdapter, fieldMap);
             }
         } else {
             messages = Collections.emptyList();
+        }
+    }
+
+    private void addFieldsToAdapter(Message message, XMLMessage messageAdapter, Map<String, XMLField> fieldMap) {
+        for (Field field : message.getFieldsAndMessages()) {
+            createBeanWithReference(field, false, messageAdapter.getFields(), messageAdapter.getFields(), fieldMap);
         }
     }
 

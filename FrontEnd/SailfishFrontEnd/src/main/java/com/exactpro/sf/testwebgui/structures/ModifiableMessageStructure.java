@@ -44,7 +44,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
         this(id, name, namespace, description, fields, attributes, false, false, reference);
 	}
 
-	private ModifiableMessageStructure(String id, String name, String namespace, String description,
+    public ModifiableMessageStructure(String id, String name, String namespace, String description,
             Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes,
 			boolean isRequired, boolean isCollection, ModifiableMessageStructure reference) {
 		super(id, name, namespace, description, attributes, null, null, isRequired, isCollection, false, null);
@@ -104,15 +104,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 		throw new UnsupportedOperationException("Messages don't have a java type. Message: " + getName());
 	}
 
-	@Override
-	public boolean isRequired() {
-        if (isFromField()) {
-			return super.isRequired();
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
-	}
-	
     @Override
     public boolean isComplex() {
         return true;
@@ -159,35 +150,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     public StructureType getStructureType() {
         return StructureType.COMPLEX;
     }
-    
-	@Override
-	public void setRequired(boolean req) {
-        if (isFromField()) {
-			super.setRequired(req);
-			return;
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
-	}
-
-	@Override
-	public boolean isCollection() {
-        if (isFromField()) {
-			return super.isCollection();
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
-	}
-
-	@Override
-	public void setCollection(boolean col) {
-        if (isFromField()) {
-			super.setCollection(col);
-			return;
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
-	}
 
     @Override
     public boolean isServiceName() {

@@ -286,7 +286,13 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
         }
 
         Assert.assertEquals(2, dictionaryStructure.getMessages().size());
-        Assert.assertTrue(dictionaryStructure.getMessages().get("Heartbeat").getFields().get("MessageHeader") instanceof IMessageStructure);
+        IFieldStructure embeddedMessage = dictionaryStructure.getMessages().get("Heartbeat").getFields().get("MessageHeader");
+        Assert.assertTrue(embeddedMessage instanceof IMessageStructure);
+        Assert.assertEquals(4, embeddedMessage.getFields().size());
+        Assert.assertArrayEquals(
+                new String[] { "StartOfMessage", "MessageLength", "MessageType", "enum" },
+                embeddedMessage.getFields().keySet().toArray(new String[0])
+        );
 
     }
 }

@@ -137,12 +137,16 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected ModifiableMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace,
-		String description, Map<String, IFieldStructure> fields, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
+    protected ModifiableMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace,
+                                                                String description, boolean isRequired, boolean isCollection,
+                                                                Map<String, IFieldStructure> fields,
+                                                                Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 
-		return new ModifiableMessageStructure(id, name, namespace, description,
+        return new ModifiableMessageStructure(id, name, namespace, description,
                 (Map<String, ModifiableFieldStructure>)(Map<String, ?>)fields,
-				(Map<String, ModifiableAttributeStructure>)(Map<String, ?>)attributes, (ModifiableMessageStructure) reference);
+                (Map<String, ModifiableAttributeStructure>)attributes,
+                isRequired, isCollection,
+                (ModifiableMessageStructure) reference);
 	}
 
 	@Override

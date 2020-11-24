@@ -30,7 +30,6 @@ import com.exactpro.sf.common.util.EPSCommonException;
  */
 public class MessageStructure extends FieldStructure implements IMessageStructure {
     private final Map<String, IFieldStructure> fields;
-    private final boolean fromField;
     private final IMessageStructure reference;
 
 	public MessageStructure(String name, String namespace, boolean isCollection, IMessageStructure reference) {
@@ -47,31 +46,20 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
         this(name, namespace, description, fields, false, false, attributes, reference);
 	}
 
-    private MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
+    public MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
 			boolean isRequired, boolean isCollection, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
         if (fields != null) {
             this.fields = Collections.unmodifiableMap(fields); // no reference, message-to-message reference
-            this.fromField = false;
         } else if (reference != null) {
             this.fields = reference.getFields(); // field-to-message reference
-            this.fromField = true;
         } else {
             this.fields = Collections.emptyMap(); // probably should not happen :(
-            this.fromField = false;
         }
 
         this.reference = reference;
 
-        this.fields.forEach((fName, fStructure) -> {
-		    if (fStructure instanceof IMessageStructure) {
-                Map<String, IFieldStructure> structureFields = fStructure.getFields();
-                if (structureFields != null && !structureFields.isEmpty() && fStructure.getReferenceName() == null) {
-                    throw new EPSCommonException("Message structure cant have a fields. Put it over reference");
-                }
-            }
-        });
 	}
 
 	@Override
@@ -87,24 +75,6 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 	@Override
 	public JavaType getJavaType() {
 		throw new UnsupportedOperationException("Messages don't have a java type. Message: " + getName());
-	}
-
-	@Override
-	public boolean isRequired() {
-        if (fromField) {
-			return super.isRequired();
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
-	}
-
-	@Override
-	public boolean isCollection() {
-        if (fromField) {
-			return super.isCollection();
-		}
-
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
 	}
 
     @Override

@@ -344,8 +344,14 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
         Assert.assertEquals(dictionary.getFields().size(), 2);
         Assert.assertEquals(dictionary.getFields().get("MessageType").getJavaType().value(), "java.lang.Short");
         Assert.assertEquals(dictionary.getMessages().size(), 2);
-        Assert.assertTrue(dictionary.getMessages().get("Heartbeat").getFields().get("MessageHeader") instanceof IMessageStructure);
-        Assert.assertTrue(dictionary.getMessages().get("Heartbeat").getFields().get("MessageHeader").isComplex());
+        IFieldStructure embeddedMessage = dictionary.getMessages().get("Heartbeat").getFields().get("MessageHeader");
+        Assert.assertTrue(embeddedMessage instanceof IMessageStructure);
+        Assert.assertTrue(embeddedMessage.isComplex());
+        Assert.assertEquals(2, embeddedMessage.getFields().size());
+        Assert.assertArrayEquals(
+                new String[] { "StartOfMessage", "MessageType1" },
+                embeddedMessage.getFields().keySet().toArray(new String[0])
+        );
         Assert.assertEquals(dictionary.getMessages().get("MissedMessageRequest").getAttributes().size(), 1);
         Assert.assertEquals(dictionary.getMessages().get("MissedMessageRequest").getFields().size(), 3);
     }
