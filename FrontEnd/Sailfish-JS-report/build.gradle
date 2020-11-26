@@ -24,11 +24,11 @@ buildscript {
         }
     }
   dependencies {
-      classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+      classpath "com.github.node-gradle:gradle-node-plugin:2.2.4"
   }
 }
 
-apply plugin: 'com.moowork.node'
+apply plugin: 'com.github.node-gradle.node'
 
 ext {
     node_modules    = file("node_modules")
@@ -103,7 +103,7 @@ clean {
     delete node_modules
 }
 
-task install (overwrite: true, type: Upload) {
+task installArchives(type: Upload) {
     repositories.mavenInstaller {
         pom.version = project.version
         pom.artifactId = project.archivesBaseName
@@ -112,6 +112,8 @@ task install (overwrite: true, type: Upload) {
     }
     configuration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
 }
+
+uploadArchives.dependsOn('installArchives')
 
 artifacts {
     archives(zipData)

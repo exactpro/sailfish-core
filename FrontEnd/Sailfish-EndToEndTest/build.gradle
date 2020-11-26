@@ -182,7 +182,6 @@ test {
         ignoreFailures = false
     }
     jacoco {
-        append = false
         destinationFile = file("${buildDir}/jacoco/restAPI.exec")
     }
 }

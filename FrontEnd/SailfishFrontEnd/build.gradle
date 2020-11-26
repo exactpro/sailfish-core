@@ -304,6 +304,15 @@ task writeWebXML(type: com.exactpro.sf.WriteFileTask) {
     outputDir   = tomcatContextDir
 }
 
+configurations {
+    cargo {
+        resolutionStrategy {
+            force 'org.apache.ant:ant:1.9.15',
+                    'org.apache.ant:ant-launcher:1.9.15'
+        }
+    }
+}
+
 cargo {
     containerId = 'tomcat9x'
     port        = tpmcatPort
@@ -324,14 +333,14 @@ cargo {
         // The home directory of your local container installation.
         //homeDir
         // The timeout (in ms) in which to determine if the container is successfully started or stopped (defaults to 120000ms).
-        timeout     = 1200000
+        startStopTimeout     = 1200000
         installer {
             installUrl = tomcatUrl
             downloadDir = downloadFolder
             extractDir = extractFolder
         }
         configFile {
-            file = file("${tomcatContextDir}/${deployPath}.xml")
+            files = files("${tomcatContextDir}/${deployPath}.xml")
             toDir = 'conf/Catalina/localhost'
         }
     }

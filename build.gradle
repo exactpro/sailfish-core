@@ -61,10 +61,10 @@ buildscript {
         classpath(group: 'com.bmuschko',                        name: 'gradle-tomcat-plugin',               version: '2.5')
         classpath(group: 'com.github.onslip',                   name: 'gradle-one-jar',                     version: '1.0.5')
         classpath(group: 'me.champeau.gradle',                  name: 'jmh-gradle-plugin',                  version: '0.2.0')
-        classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2.21')
+        classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2.22')
         classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.2.11')
         classpath(group: 'com.github.ben-manes',                name: 'gradle-versions-plugin',             version: '0.20.0')
-        classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.4')
+        classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.8.0')
         classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: "${kotlin_version}"
         classpath group: "gradle.plugin.com.github.harbby", name: "gradle-serviceloader", version: "1.1.5"
         classpath group:  "com.jfrog.bintray.gradle", name: "gradle-bintray-plugin", version: "1.8.5"
@@ -147,8 +147,8 @@ allprojects {
         }
     }
 
-	task wrapper(type: Wrapper) {
-	    gradleVersion = '4.4'
+	 wrapper {
+	    gradleVersion = '6.7.1'
         distributionType = 'all'
 	}
 
@@ -358,7 +358,6 @@ subprojects {
 
     uploadArchives {
         repositories.mavenDeployer {
-            uniqueVersion = false // publish non unique snapshots to local repository
             repository(url: "file://${sharedDir}")
             doLast {
             // Remove any invalid maven-metadata.xml files that may have been created
