@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ public class TestNTGDictionaryValidator extends AbstractTest {
         List<DictionaryValidationError> errors = validator.validate(dictionary, true, null);
 
         String[] expectedErrors = {
-                "DictionaryValidationError[message=Logon,field=MessageVersion,error=Attribute <strong>\"Type\"</strong> value [UInt8] doesn't match the field type [JAVA_LANG_BYTE]. Field type [JAVA_LANG_BYTE] cannot be matched to any unsigned type. Possible value for field type is [JAVA_LANG_SHORT],level=FIELD,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=Reject,field=RejectCode,error=Attribute <strong>\"Type\"</strong> value [UInt32] doesn't match the field type [JAVA_LANG_INTEGER]. Possible value for attribute type is [UInt16]. Possible value for field type is [JAVA_LANG_LONG],level=FIELD,type=ERR_ATTRIBUTES]",
+                "DictionaryValidationError[message=Logon,field=MessageVersion,error=Field's type [JAVA_LANG_BYTE] cannot be matched to any unsigned type. Use [JAVA_LANG_SHORT] for field's type with current Type attribute,level=FIELD,type=ERR_ATTRIBUTES]",
+                "DictionaryValidationError[message=Reject,field=RejectCode,error=Use [UInt8, UInt16] for Type attribute with current field's type or change field's type to [JAVA_LANG_LONG] to use with current Type attribute value,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=Reject,field=<null>,error=Message  <strong>\"Reject\"</strong> doesn't contain IsAdmin attribute,level=MESSAGE,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=AnotherTestMessage,field=OrderType,error=Attribute <strong>\"Length\"</strong> has incorrect value = [8]. Must be one of [1, 2, 4],level=FIELD,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=AnotherTestMessage,field=OrderType,error=Attribute <strong>\"Type\"</strong> value [UInt64] doesn't match the field type [JAVA_LANG_INTEGER]. Possible value for attribute type is [UInt16]. Possible value for field type is [JAVA_MATH_BIG_DECIMAL],level=FIELD,type=ERR_ATTRIBUTES]",
+                "DictionaryValidationError[message=AnotherTestMessage,field=OrderType,error=Use [UInt8, UInt16] for Type attribute with current field's type or change field's type to [JAVA_MATH_BIG_DECIMAL] to use with current Type attribute value,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=AnotherTestMessage,field=AnotherOrderType,error=Attribute <strong>\"Length\"</strong> has incorrect value = [1]. Must be one of [4, 8],level=FIELD,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=AnotherTestMessage,field=AnotherOrderType,error=Attribute <strong>\"Type\"</strong> value [UInt64] doesn't match the field type [JAVA_LANG_LONG]. Possible value for attribute type is [UInt32]. Possible value for field type is [JAVA_MATH_BIG_DECIMAL],level=FIELD,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=AnotherTestMessage,field=AnotherOrderType,error=Attribute <strong>\"Type\"</strong> value [UInt64] has length different from the attribute <strong>\"Length\"</strong> value = [1],level=FIELD,type=ERR_ATTRIBUTES]",
+                "DictionaryValidationError[message=AnotherTestMessage,field=AnotherOrderType,error=Use [UInt32] for Type attribute with current field's type or change field's type to [JAVA_MATH_BIG_DECIMAL] to use with current Type attribute value,level=FIELD,type=ERR_ATTRIBUTES]",
+                "DictionaryValidationError[message=AnotherTestMessage,field=AnotherOrderType,error=Attribute <strong>\"Type\"</strong> value [Uint64] has length different from the attribute <strong>\"Length\"</strong> value = [1],level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=TestMessage,field=ClOrdID,error=Attribute <strong>Format</strong> must have one of the next values [A,D] for field with type [java.lang.String] but has [S],level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=TestMessage,field=OrderType,error=Offset attribute is incorrect. actual - 50; expected - 54,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=<null>,field=<null>,error=Message  <strong>\"Heartbeat\"</strong> is missing in dictionary,level=DICTIONARY,type=ERR_REQUIRED_FIELD]",

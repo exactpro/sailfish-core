@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -173,12 +173,12 @@
             <field defaultvalue="0" type="java.lang.Integer" name="OrderType">
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
                 <attribute type="java.lang.Integer" name="Offset">54</attribute>
-                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.String" name="Type">Uint64</attribute>
             </field>
             <field defaultvalue="1" type="java.lang.Long" name="AnotherOrderType">
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
                 <attribute type="java.lang.Integer" name="Offset">62</attribute>
-                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.String" name="Type">Uint64</attribute>
             </field>
         </message>
     </messages>

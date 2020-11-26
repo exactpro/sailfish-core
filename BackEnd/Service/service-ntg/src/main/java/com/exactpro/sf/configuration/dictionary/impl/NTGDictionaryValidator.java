@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.MessageHelper.FIELD_MESSAGE_TYPE;
@@ -68,7 +69,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     private static final String UINT8 = "UInt8";
     private static final String UINT16 = "UInt16";
     private static final String UINT32 = "UInt32";
-    private static final String UINT64 = "UInt64";
+    private static final String UINT64 = "Uint64";
 
     private static final ImmutableBiMap<JavaType, String> POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE = ImmutableBiMap.<JavaType, String>builder()
             .put(JavaType.JAVA_LANG_SHORT, UINT8)
@@ -422,34 +423,36 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private void checkAttributeTypeSatisfyFieldType(List<DictionaryValidationError> errors, IMessageStructure message,
-                                                    IFieldStructure field, String attributeType) {
+            IFieldStructure field, String attributeType) {
 
         JavaType fieldType = field.getJavaType();
-
-        String possibleType = POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.get(fieldType);
-
-        if (possibleType == null || !possibleType.equals(attributeType)) {
-
-            String errorMessage;
-
-            if (fieldType == JavaType.JAVA_LANG_BYTE) {
-
-                String fieldTypeInStringFormat = field.getJavaType().toString();
-
-                errorMessage = String.format("Attribute <strong>\"Type\"</strong> value [%s] doesn't match the field type [%s]. Field type [%s] cannot be matched to any unsigned type. Possible value for field type is [%s]",
-                        attributeType, fieldTypeInStringFormat, fieldTypeInStringFormat, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
-
-            } else {
-
-                errorMessage = String.format("Attribute <strong>\"Type\"</strong> value [%s] doesn't match the field type [%s]. Possible value for attribute type is [%s]. Possible value for field type is [%s]",
-                        attributeType, field.getJavaType().toString(), possibleType, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
+        String errorMessage = null;
+        if (fieldType == JavaType.JAVA_LANG_INTEGER) {
+            if (!attributeType.equals(UINT8) && !attributeType.equals(UINT16)) {
+                errorMessage = String.format("Use [%s, %s] for Type attribute with current field's type or change field's type to [%s] to use with current Type attribute value",
+                        UINT8, UINT16, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
             }
+        } else {
+            String possibleType = POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.get(fieldType);
+            if (!Objects.equals(possibleType, attributeType)) {
 
+                if (fieldType == JavaType.JAVA_LANG_BYTE) {
+                    String fieldTypeInStringFormat = field.getJavaType().toString();
+                    errorMessage = String.format("Field's type [%s] cannot be matched to any unsigned type. Use [%s] for field's type with current Type attribute",
+                            fieldTypeInStringFormat, POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
+
+                } else {
+                    errorMessage = String.format("Use [%s] for Type attribute with current field's type or change field's type to [%s] to use with current Type attribute value",
+                            POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.get(fieldType), POSSIBLE_ATTRIBUTE_TYPE_FOR_FIELD_TYPE.inverse().get(attributeType));
+                }
+            }
+        }
+
+        if (errorMessage != null) {
             errors.add(
                     new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                             errorMessage,
                             DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
         }
     }
-
 }
