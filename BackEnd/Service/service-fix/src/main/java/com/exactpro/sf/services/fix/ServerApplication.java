@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,24 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.IDataManager;
+import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.IServiceSettings;
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.fix.converter.MessageConvertException;
+import com.exactpro.sf.services.fix.listener.IFIXListener;
+import com.exactpro.sf.services.fix.listener.StoreListener;
+import com.exactpro.sf.storage.IMessageStorage;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
-import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.IServiceHandler;
-import com.exactpro.sf.services.ISession;
-import com.exactpro.sf.services.MessageHelper;
-import com.exactpro.sf.services.ServiceHandlerRoute;
-import com.exactpro.sf.storage.IMessageStorage;
-
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
@@ -59,8 +51,19 @@ import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 import quickfix.field.Username;
 
-public class ServerApplication extends AbstractApplication implements FIXServerApplication {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
 
+import static com.exactpro.sf.services.util.ServiceUtil.createErrorMessage;
+import static com.exactpro.sf.services.util.ServiceUtil.loadValuesFromAlias;
+
+public class ServerApplication extends AbstractApplication implements FIXServerApplication {
     private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
     private ServiceName serviceName;
     private IMessageStorage messageStorage;
@@ -72,21 +75,40 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     private MessageHelper messageHelper;
     private IServiceHandler handler;
     private final ISession fixServerSessionsContainer = new FixServerSessionsContainer(this);
+    private final List<IFIXListener> listeners = new ArrayList<>();
 
     @Override
     public void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName) {
         super.init(serviceContext, applicationContext, serviceName);
+        listeners.clear();
         this.logConfigurator = serviceContext.getLoggingConfigurator();
         this.messageStorage = serviceContext.getMessageStorage();
         this.serviceName = serviceName;
         this.handler = Objects.requireNonNull(applicationContext.getServiceHandler(), "'Service handler' parameter");
         this.messageHelper = applicationContext.getMessageHelper();
         this.settings = applicationContext.getSessionSettings();
-
         this.messageStorage = serviceContext.getMessageStorage();
 
-        if (applicationContext.getServiceSettings() instanceof FIXServerSettings) {
-            this.keepMessagesInMemory = ((FIXServerSettings)applicationContext.getServiceSettings()).getKeepMessagesInMemory();
+        IServiceSettings serviceSettings = applicationContext.getServiceSettings();
+
+        if (serviceSettings instanceof FIXServerSettings) {
+            this.keepMessagesInMemory = ((FIXServerSettings)serviceSettings).getKeepMessagesInMemory();
+        }
+
+        IFIXListener storeHandler = new StoreListener(messageStorage, keepMessagesInMemory, handler);
+        listeners.add(storeHandler);
+
+        if (serviceSettings instanceof FIXServerSettings) {
+            FIXServerSettings fixServiceSettings = (FIXServerSettings) serviceSettings;
+            try {
+                IDataManager dataManager = serviceContext.getDataManager();
+                Set<String> listenersToLoad = loadValuesFromAlias(dataManager, fixServiceSettings.getListenerNames(), ",");
+                loadListeners(listenersToLoad, fixServiceSettings);
+            } catch (SailfishURIException e) {
+                throw new EPSCommonException(e.getMessage(), e);
+            }
+        } else {
+            throw new EPSCommonException("Incompatible service settings class: " + serviceSettings.getClass().getCanonicalName());
         }
     }
 
@@ -174,8 +196,15 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     @Override
     public void fromAdmin(Message message, SessionID sessionId) throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon {
         ISession iSession = getSession(sessionId);
-
-        storeMessage(iSession, message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), FROM_ADMIN);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        for (IFIXListener listener : listeners) {
+            try {
+                listener.fromAdmin(iSession, iMsg);
+            } catch (Exception e) {
+                logger.error("Cannot process 'fromAdmin' message {} by listener {}",
+                        iMsg.getName(), listener.getClass(), e);
+            }
+        }
     }
 
     @Override
@@ -187,14 +216,28 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     public void fromApp(Message message, SessionID sessionId) throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
         ISession iSession = getSession(sessionId);
 
-        storeMessage(iSession, message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), FROM_APP);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        for (IFIXListener listener : listeners) {
+            try {
+                listener.fromApp(iSession, iMsg);
+            } catch (Exception e) {
+                logger.error("Cannot process 'fromApp' message {} by listener {}", iMsg.getName(), listener.getClass(), e);
+            }
+        }
     }
 
     @Override
     public void onMessageRejected(Message message, SessionID sessionId, String reason) {
         ISession iSession = getSession(sessionId);
 
-        storeMessage(iSession, message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), reason);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), reason);
+        for (IFIXListener listener : listeners) {
+            try {
+                listener.onMessageRejected(iSession, iMsg, reason);
+            } catch (Exception e) {
+                logger.error("Cannot process 'onMessageRejected' for message {} by listener {}", iMsg.getName(), listener.getClass(), e);
+            }
+        }
     }
 
     @Override
@@ -211,43 +254,13 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
 
     protected ISession getSession(SessionID sessionID) {
         if (!sessionMap.containsKey(sessionID)) {
-            FIXSession session = new FIXSession("ServerApplication", sessionID, messageStorage, converter, messageHelper);
+            FIXSession session = new FIXSession("ServerApplication", sessionID, messageStorage,
+                    converter, messageHelper);
             session.setServiceInfo(serviceInfo);
             sessionMap.put(sessionID, session);
         }
 
         return fixServerSessionsContainer;
-    }
-
-    protected void storeMessage(ISession iSession, Message message, String from, String to, ServiceHandlerRoute route, String reason) {
-        if (keepMessagesInMemory) {
-            try {
-                IMessage iMsg = reason != null
-                        ? convert(message, from, to, message.isAdmin(), false, true)
-                        : convert(message, from, to, message.isAdmin());
-                iMsg.getMetaData().setRejectReason(reason);
-
-                try {
-                    messageStorage.storeMessage(iMsg);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
-
-                if (route != null) {
-                    handler.putMessage(iSession, route, iMsg);
-                }
-            } catch (Exception e) {
-                handler.exceptionCaught(iSession, e);
-            }
-        }
-    }
-
-    protected void storeMessage(ISession iSession, Message message, String from, String to, ServiceHandlerRoute route) {
-        storeMessage(iSession, message, from, to, route, null);
-    }
-
-    protected void storeMessage(ISession iSession, Message message, String from, String to, String reason) {
-        storeMessage(iSession, message, from, to, null, reason);
     }
 
     private String getMessageType(Message message) {
@@ -267,19 +280,66 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     @Override
     public void onSendToAdmin(Message message, SessionID sessionId) {
         ISession iSession = getSession(sessionId);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
 
-        storeMessage(iSession, message, sessionId.getSenderCompID(), sessionId.getTargetCompID(), TO_ADMIN);
+        for (IFIXListener listener : listeners) {
+            try {
+                listener.toApp(iSession, iMsg);
+            } catch (Exception e) {
+                logger.error("Cannot process 'toAdmin' message {} by listener {}", iMsg.getName(), listener.getClass(), e);
+            }
+        }
     }
 
     @Override
     public void onSendToApp(Message message, SessionID sessionId) {
         ISession iSession = getSession(sessionId);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
 
-        storeMessage(iSession, message, sessionId.getSenderCompID(), sessionId.getTargetCompID(), TO_APP);
+        for (IFIXListener listener : listeners) {
+            try {
+                listener.toAdmin(iSession, iMsg);
+            } catch (Exception e) {
+                logger.error("Cannot process 'toApp' message {} by listener {}", iMsg.getName(), listener.getClass(), e);
+            }
+        }
     }
 
     @Override
     public ISession getServerSession() {
         return fixServerSessionsContainer;
+    }
+
+    protected IMessage convertToIMessage(Message message, String from, String to, String reason) {
+        try {
+            return reason != null
+                    ? convert(message, from, to, message.isAdmin(), false, true)
+                    : convert(message, from, to, message.isAdmin());
+        } catch (MessageConvertException e) {
+            return createErrorMessage(e.getMessage(), from, to, this.serviceInfo, messageHelper.getMessageFactory());
+        }
+    }
+
+    private void loadListeners(Set<String> listenersToLoad, IServiceSettings settings) {
+        ServiceLoader<IFIXListener> serviceLoader = ServiceLoader.load(IFIXListener.class, this.getClass().getClassLoader());
+        for (IFIXListener listener : serviceLoader) {
+            String listenerClassName = listener.getClass().getSimpleName();
+            if(listenersToLoad.remove(listenerClassName)) {
+                listener.init(settings, messageHelper);
+                registerListenerLogger(listener);
+                listeners.add(listener);
+            }
+        }
+
+        if(listenersToLoad.size() > 0) {
+            throw new EPSCommonException("Can't load listeners with the following names: " +
+                    String.join(",", listenersToLoad));
+        }
+    }
+
+    private void registerListenerLogger(IFIXListener listener) {
+        if(logConfigurator != null) {
+            logConfigurator.registerLogger(listener, serviceName);
+        }
     }
 }

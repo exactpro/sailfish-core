@@ -18,6 +18,7 @@ package com.exactpro.sf.services.fix;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.exactpro.sf.services.util.ServiceUtil;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -56,6 +57,13 @@ public class FIXServerSettings extends FIXCommonSettings {
 	@Description("The heartbeat interval that will be used if tag 108 absents in the client Logon message. "
             + "If this parameter has value less than ZERO it won't be used")
 	private int defaultHeartbeatInterval;
+
+	@Description("Please provide listner names to use in service. \n"
+			+ "It can be comma separated list of values or or an alias to a data file with these values (one value per line).\n"
+			+ "Must be supported by selected server application. \n"
+			+ "Example: a,b,c or " + ServiceUtil.ALIAS_PREFIX + "listnerNames\n"
+	)
+	private String listenerNames;
 
 	public FIXServerSettings() {
         setApplicationClassName("com.exactpro.sf.services.fix.FIXTESTApplication");
@@ -129,4 +137,8 @@ public class FIXServerSettings extends FIXCommonSettings {
     public void setDefaultHeartbeatInterval(int defaultHeartbeatInterval) {
         this.defaultHeartbeatInterval = defaultHeartbeatInterval;
     }
+
+	public String getListenerNames() { return listenerNames; }
+
+	public void setListenerNames(String listenerNames) { this.listenerNames = listenerNames; }
 }
