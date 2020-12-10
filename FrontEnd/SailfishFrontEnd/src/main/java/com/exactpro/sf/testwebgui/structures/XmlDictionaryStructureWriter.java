@@ -102,37 +102,17 @@ public class XmlDictionaryStructureWriter {
         Map<Message, ModifiableMessageStructure> messageReferenceMap = new HashMap<>();
 
         for (ModifiableMessageStructure messageStructure : dictionaryStructure.getImplMessageStructures()) {
-			
-			Message message = new Message();
-			message.setId("M_" + messageStructure.getName());
-			message.setName(messageStructure.getName());
-			message.setDescription(messageStructure.getDescription());
-			addAttributes(messageStructure, message);
+
+            Message message = createMessageFromStructure(messageStructure, structureMessageMap, structureFieldMap, referenceMap);
+
             if (messageStructure.getReference() != null) {
                 messageReferenceMap.put(message, (ModifiableMessageStructure)messageStructure.getReference());
             }
 
             structureMessageMap.put(messageStructure, message);
 
-            for(ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
-				
-				Field field = createFieldFromStructure(fieldStructure, false);
-				addAttributes(fieldStructure, field);
-				
-				if (fieldStructure.getReference() != null) {
-					
-					if (fieldStructure.getImplReference().isImplSimple() || fieldStructure.getImplReference().isImplEnum()) {
-						field.setReference(structureFieldMap.get(fieldStructure.getImplReference()));
-					} else {
-						referenceMap.put(field, fieldStructure.getImplReference());
-					}
-				}
-				
-				message.getFieldsAndMessages().add(field);
-			}
-			
-			messages.getMessages().add(message);
-		}
+            messages.getMessages().add(message);
+        }
 		
 		for (Field referencedField : referenceMap.keySet()) {
 			referencedField.setReference(structureMessageMap.get(referenceMap.get(referencedField)));
@@ -202,6 +182,43 @@ public class XmlDictionaryStructureWriter {
         attribute.setType(attributeStructure.getType());
         return attribute;
 
+    }
+
+    private static Message createMessageFromStructure(ModifiableMessageStructure messageStructure,
+            Map<ModifiableMessageStructure, Message> structureMessageMap, Map<ModifiableFieldStructure, Field> structureFieldMap,
+            Map<Field, ModifiableFieldStructure> referenceMap) {
+
+        Message message = new Message();
+        message.setId("M_" + messageStructure.getName());
+        message.setName(messageStructure.getName());
+        message.setDescription(messageStructure.getDescription());
+        addAttributes(messageStructure, message);
+
+        structureMessageMap.put(messageStructure, message);
+
+        for (ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
+
+            if (fieldStructure.isMessage()) {
+                message.getFieldsAndMessages().add(createMessageFromStructure((ModifiableMessageStructure)fieldStructure,
+                        structureMessageMap, structureFieldMap, referenceMap));
+            } else {
+
+                Field field = createFieldFromStructure(fieldStructure, false);
+                addAttributes(fieldStructure, field);
+
+                if (fieldStructure.getReference() != null) {
+
+                    if (fieldStructure.getImplReference().isImplSimple() || fieldStructure.getImplReference().isImplEnum()) {
+                        field.setReference(structureFieldMap.get(fieldStructure.getImplReference()));
+                    } else {
+                        referenceMap.put(field, fieldStructure.getImplReference());
+                    }
+                }
+
+                message.getFieldsAndMessages().add(field);
+            }
+        }
+        return message;
     }
 
 }

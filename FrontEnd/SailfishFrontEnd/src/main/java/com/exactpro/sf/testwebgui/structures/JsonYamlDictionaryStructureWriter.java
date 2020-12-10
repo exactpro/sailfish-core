@@ -15,14 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.structures;
 
-import com.exactpro.sf.common.impl.messages.json.JsonYamlDictionaryWriter;
-import com.exactpro.sf.common.impl.messages.json.configuration.JsonAttribute;
-import com.exactpro.sf.common.impl.messages.json.configuration.JsonField;
-import com.exactpro.sf.common.impl.messages.json.configuration.JsonMessage;
-import com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary;
-import com.exactpro.sf.common.messages.structures.IAttributeStructure;
-import com.exactpro.sf.common.util.EPSCommonException;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -33,6 +25,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.exactpro.sf.common.impl.messages.json.JsonYamlDictionaryWriter;
+import com.exactpro.sf.common.impl.messages.json.configuration.JsonAttribute;
+import com.exactpro.sf.common.impl.messages.json.configuration.JsonField;
+import com.exactpro.sf.common.impl.messages.json.configuration.JsonMessage;
+import com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary;
+import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.util.EPSCommonException;
 
 public class JsonYamlDictionaryStructureWriter {
 
@@ -97,37 +97,13 @@ public class JsonYamlDictionaryStructureWriter {
 
         for (ModifiableMessageStructure messageStructure : dictionaryStructure.getImplMessageStructures()) {
 
-            JsonMessage jsonMessage = new JsonMessage();
-
-            jsonMessage.setName(messageStructure.getName());
-            jsonMessage.setDescription(messageStructure.getDescription());
-
-            addAttributes(messageStructure, jsonMessage);
+            JsonMessage jsonMessage = createMessageFromStructure(messageStructure, structureMessageMap, structureFieldMap, referenceMap);
 
             if (messageStructure.getReference() != null) {
                 messageReferenceMap.put(jsonMessage, (ModifiableMessageStructure)messageStructure.getReference());
             }
 
             structureMessageMap.put(messageStructure, jsonMessage);
-
-            for (ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
-
-                JsonField jsonField = createFieldFromStructure(fieldStructure);
-
-                addAttributes(fieldStructure, jsonField);
-
-                if (fieldStructure.getReference() != null) {
-
-                    if (fieldStructure.getImplReference().isImplSimple() || fieldStructure.getImplReference().isImplEnum()) {
-                        jsonField.setReference(structureFieldMap.get(fieldStructure.getImplReference()));
-                        jsonField.setReferenceName(jsonField.getReference().getName());
-                    } else {
-                        referenceMap.put(jsonField, fieldStructure.getImplReference());
-                    }
-                }
-
-                jsonMessage.getFields().add(jsonField);
-            }
 
             messages.add(jsonMessage);
         }
@@ -203,5 +179,46 @@ public class JsonYamlDictionaryStructureWriter {
 
         return attribute;
 
+    }
+
+    private static JsonMessage createMessageFromStructure(ModifiableMessageStructure messageStructure,
+            Map<ModifiableMessageStructure, JsonMessage> structureMessageMap, Map<ModifiableFieldStructure, JsonField> structureFieldMap,
+            Map<JsonField, ModifiableFieldStructure> referenceMap) {
+
+        JsonMessage jsonMessage = new JsonMessage();
+
+        jsonMessage.setName(messageStructure.getName());
+        jsonMessage.setDescription(messageStructure.getDescription());
+
+        addAttributes(messageStructure, jsonMessage);
+
+        structureMessageMap.put(messageStructure, jsonMessage);
+
+        for (ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
+
+            if (fieldStructure.isMessage()) {
+                JsonMessage embeddedMessage = createMessageFromStructure((ModifiableMessageStructure)fieldStructure,
+                        structureMessageMap, structureFieldMap, referenceMap);
+                jsonMessage.getFields().add(embeddedMessage);
+            } else {
+
+                JsonField jsonField = createFieldFromStructure(fieldStructure);
+
+                addAttributes(fieldStructure, jsonField);
+
+                if (fieldStructure.getReference() != null) {
+
+                    if (fieldStructure.getImplReference().isImplSimple() || fieldStructure.getImplReference().isImplEnum()) {
+                        jsonField.setReference(structureFieldMap.get(fieldStructure.getImplReference()));
+                        jsonField.setReferenceName(jsonField.getReference().getName());
+                    } else {
+                        referenceMap.put(jsonField, fieldStructure.getImplReference());
+                    }
+                }
+
+                jsonMessage.getFields().add(jsonField);
+            }
+        }
+        return jsonMessage;
     }
 }

@@ -1,0 +1,50 @@
+{
+  "name" : "MessageEmbedded",
+  "fields" : {
+    "Integer" : {
+      "type" : "java.lang.Integer"
+    },
+    "String" : {
+      "type" : "java.lang.String"
+    }
+  },
+  "messages" : {
+    "Parent" : {
+      "attributes" : {
+        "AttributeA" : {
+          "type" : "java.lang.String",
+          "value" : "ValueA"
+        }
+      },
+      "fields" : {
+        "FieldA" : {
+          "reference" : "String"
+        },
+        "MessageEmbedded" : {
+          "attributes" : {
+            "AttributeE" : {
+              "type" : "java.lang.String",
+              "value" : "ValueE"
+            }
+          },
+          "fields" : {
+            "EmbeddedField" : {
+              "reference" : "String"
+            },
+            "SecondLevelEmbedded" : {
+              "fields" : {
+                "ThirdLevelEmbedded" : {
+                  "fields" : {
+                    "EmbeddedFieldFromThirdLevel" : {
+                      "reference" : "Integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

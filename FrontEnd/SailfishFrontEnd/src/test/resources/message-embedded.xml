@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<dictionary name="MessageEmbedded" xmlns="http://exactprosystems.com/dictionary">
+    <fields>
+        <field name="String" id="String" type="java.lang.String"/>
+        <field name="Integer" id="Integer" type="java.lang.Integer"/>
+    </fields>
+    <messages>
+        <message name="Root" id="RootId">
+            <attribute name="AttributeA" type="java.lang.String">ValueA</attribute>
+            <message name="FirstLevelEmbedded1" id="FirstLevelEmbedded1Id">
+                <field name="FirstLevelEmbeddedField1" reference="String"/>
+                <message name="SecondLevelEmbedded1" id="SecondLevelEmbedded1Id">
+                    <field name="SecondLevelEmbeddedField1" reference="String"/>
+                </message>
+                <field name="EmbeddedField" reference="String"/>
+            </message>
+            <field name="FieldA" reference="String"/>
+            <message name="FirstLevelEmbedded2" id="FirstLevelEmbedded2Id">
+                <field name="FirstdLevelEmbeddedField2" reference="String"/>
+                <message name="SecondLevelEmbedded2" id="SecondLevelEmbedded2Id">
+                    <field name="SecondLevelEmbeddedField2" reference="String"/>
+                </message>
+                <field name="EmbeddedField" reference="String"/>
+            </message>
+        </message>
+    </messages>
+</dictionary>

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -30,18 +28,15 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.exactpro.sf.common.messages.structures.DictionaryComparator;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.DictionaryPath;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.DistinctionType;
-import com.exactpro.sf.common.messages.structures.DictionaryComparator.IDiffListener;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
 
 public class TestJsonYamlDictionaryStructureWriter {
 
     private static final Path BASE_DIR = Paths.get((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")).toAbsolutePath().normalize();
+    private static final String TEST_FILES_DIRECTORY_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources";
 
-    private static final String MESSAGE_INHERITANCE_FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "message-inheritance.json";
-    private static final String WRITER_TEST_DICTIONARY_FILE_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "writer-test-dictionary.json";
+    private static final File MESSAGE_INHERITANCE_FILE = new File(TEST_FILES_DIRECTORY_PATH, "message-inheritance.json");
+    private static final File WRITER_TEST_DICTIONARY_FILE = new File(TEST_FILES_DIRECTORY_PATH, "writer-test-dictionary.json");
+    private static final File MESSAGE_EMBEDDED_FILE = new File(TEST_FILES_DIRECTORY_PATH, "message-embedded.json");
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -49,59 +44,38 @@ public class TestJsonYamlDictionaryStructureWriter {
     @Test
     public void testWriterWithoutDifference() throws IOException {
 
-        ModifiableDictionaryStructure modifiableDictionaryStructure;
-
-        try (FileInputStream inputStream = new FileInputStream(MESSAGE_INHERITANCE_FILE_PATH)) {
-
-            modifiableDictionaryStructure = new ModifiableJsonYamlDictionaryStructureLoader()
-                    .load(inputStream);
-        }
+        ModifiableDictionaryStructure modifiableDictionaryStructure = getDictionaryStructure(MESSAGE_INHERITANCE_FILE);
 
         File tempFile = folder.newFile("jsonDictionary.json");
 
         JsonYamlDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile, false);
 
-        IDictionaryStructure dictionaryStructureFromJson;
-        try (InputStream inputStream = new FileInputStream(tempFile)) {
+        ModifiableDictionaryStructure dictionaryStructureFromJson = getDictionaryStructure(tempFile);
 
-            JsonYamlDictionaryStructureLoader loader = new JsonYamlDictionaryStructureLoader();
-            dictionaryStructureFromJson = loader.load(inputStream);
-        }
-
-        Listener listener = new Listener();
+        DifferenceListener listener = new DifferenceListener();
         DictionaryComparator comparator = new DictionaryComparator();
 
         comparator.compare(listener,
                 modifiableDictionaryStructure, dictionaryStructureFromJson, true, false, true);
 
-        Assert.assertEquals(listener.getDifferences().isEmpty(), true);
+        Assert.assertTrue(listener.getDifferences().isEmpty());
     }
 
     @Test
     public void testWriterWithDifference() throws IOException {
 
-        ModifiableDictionaryStructure modifiableDictionaryStructure;
-
-        try (FileInputStream inputStream = new FileInputStream(WRITER_TEST_DICTIONARY_FILE_PATH)) {
-            modifiableDictionaryStructure = new ModifiableJsonYamlDictionaryStructureLoader()
-                    .load(inputStream);
-        }
+        ModifiableDictionaryStructure modifiableDictionaryStructure = getDictionaryStructure(WRITER_TEST_DICTIONARY_FILE);
 
         File tempFile = folder.newFile("jsonDictionary.json");
 
         JsonYamlDictionaryStructureWriter.write(modifiableDictionaryStructure, tempFile, false);
 
-        IDictionaryStructure dictionaryStructureFromJson;
-        try (InputStream inputStream = new FileInputStream(tempFile)) {
-
-            JsonYamlDictionaryStructureLoader loader = new JsonYamlDictionaryStructureLoader();
-            dictionaryStructureFromJson = loader.load(inputStream);
-        }
+        ModifiableDictionaryStructure dictionaryStructureFromJson = getDictionaryStructure(tempFile);
 
         modifiableDictionaryStructure.setNamespace("SetDifferentNamespace");
         modifiableDictionaryStructure.setDescription("SetDifferentDescription");
 
-        Listener listener = new Listener();
+        DifferenceListener listener = new DifferenceListener();
         DictionaryComparator comparator = new DictionaryComparator();
 
         comparator.compare(listener,
@@ -113,37 +87,30 @@ public class TestJsonYamlDictionaryStructureWriter {
 
     }
 
-    private class Listener implements IDiffListener {
+    @Test
+    public void testEmbeddedMessage() throws IOException {
 
-        List<String> differences = new ArrayList<>();
+        ModifiableDictionaryStructure dictionaryStructureBeforeWriting = getDictionaryStructure(MESSAGE_EMBEDDED_FILE);
 
-        @Override
-        public void differnce(DistinctionType distinctionType, Object first, Object second,
-                DictionaryPath dictionaryPath) {
+        File tempFile = folder.newFile("jsonDictionary.json");
 
-            StringBuilder differenceStorage = new StringBuilder();
+        JsonYamlDictionaryStructureWriter.write(dictionaryStructureBeforeWriting, tempFile, false);
 
-            differenceStorage.append('[');
-            if (first != null) {
-                differenceStorage.append(first.getClass().getSimpleName()).append(" : ");
-            }
-            differenceStorage.append(first).append(']')
-                    .append(' ')
-                    .append('[');
-            if (second != null) {
-                differenceStorage.append(second.getClass().getSimpleName()).append(" : ");
-            }
-            differenceStorage.append(second).append(']');
-            if (distinctionType != null) {
-                differenceStorage.append(" - ").append(distinctionType);
-            }
+        ModifiableDictionaryStructure dictionaryStructureAfterWriting = getDictionaryStructure(tempFile);
 
-            differences.add(differenceStorage.toString());
-        }
+        DifferenceListener listener = new DifferenceListener();
+        DictionaryComparator comparator = new DictionaryComparator();
 
-        List<String> getDifferences() {
-            return differences;
-        }
+        comparator.compare(listener,
+                dictionaryStructureBeforeWriting, dictionaryStructureAfterWriting, true, false, true);
+
+        Assert.assertTrue(listener.getDifferences().isEmpty());
     }
 
+    private ModifiableDictionaryStructure getDictionaryStructure(File dictionary) throws IOException {
+        try (InputStream inputStream = new FileInputStream(dictionary)) {
+            ModifiableJsonYamlDictionaryStructureLoader loader = new ModifiableJsonYamlDictionaryStructureLoader();
+            return loader.load(inputStream);
+        }
+    }
 }
