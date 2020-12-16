@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.suri;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -45,8 +48,8 @@ public class SailfishURIUtils {
         Objects.requireNonNull(set, "set cannot be null");
         checkURI(uri, defaultRule, rules);
 
-        for(SailfishURI sailfishURI : set) {
-            if(uri.matches(sailfishURI)) {
+        for (SailfishURI sailfishURI : set) {
+            if (uri.matches(sailfishURI)) {
                 LOGGER.debug("Matching: {} -> {}", uri, sailfishURI);
                 return sailfishURI;
             }
@@ -55,7 +58,44 @@ public class SailfishURIUtils {
         return null;
     }
 
-	/**
+    /**
+     * Finds a single URI in the set which matches specified URI
+     *
+     *  @param  uri         URI for matching
+     *  @param  set         set with URI
+     *  @param  resource    URI resource name
+     *  @param  defaultRule default URI rule
+     *  @param  rules       array of URI rules
+     *
+     *  @throws IllegalArgumentException if there is more than one resource with matching URI
+     *  @throws NoSuchElementException if there are no resources with matching URIs
+     *
+     *  @return found URI
+     */
+    public static SailfishURI getSingleMatchingURI(SailfishURI uri, Set<SailfishURI> set, String resource, SailfishURIRule defaultRule, SailfishURIRule... rules) {
+        Objects.requireNonNull(set, "set cannot be null");
+        checkURI(uri, defaultRule, rules);
+
+        List<SailfishURI> matchingUris = new ArrayList<>();
+
+        for (SailfishURI sailfishUri : set) {
+            if (uri.matches(sailfishUri)) {
+                matchingUris.add(sailfishUri);
+            }
+        }
+
+        if (matchingUris.isEmpty()) {
+            throw new NoSuchElementException("No " + resource + " with URI matching: " + uri);
+        }
+
+        if (matchingUris.size() > 1) {
+            throw new IllegalArgumentException("More than one " + resource + " with URI matching '" + uri + "': " + matchingUris);
+        }
+
+        return matchingUris.get(0);
+    }
+
+    /**
      * Finds a value in multimap with key matching specified URI
      *
      *  @param  uri         URI for matching

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.externalapi;
 
+import static com.exactpro.sf.configuration.suri.SailfishURIRule.REQUIRE_RESOURCE;
+import static com.exactpro.sf.configuration.suri.SailfishURIUtils.getSingleMatchingURI;
 import static com.exactpro.sf.services.ServiceStatus.CREATED;
 import static com.exactpro.sf.services.ServiceStatus.DISABLED;
 import static com.exactpro.sf.services.ServiceStatus.DISPOSED;
@@ -285,9 +287,7 @@ public class ServiceFactory implements IServiceFactory {
 
     @Override
     public IMessageFactoryProxy getMessageFactory(SailfishURI serviceType) {
-        if (!serviceTypes.contains(serviceType)) {
-            throw new IllegalArgumentException("Unknown service type " + serviceType);
-        }
+        getSingleMatchingURI(serviceType, serviceTypes, "service", REQUIRE_RESOURCE);
         return messageFactory;
     }
 
@@ -323,9 +323,7 @@ public class ServiceFactory implements IServiceFactory {
 
     private IServiceProxy createService(SailfishURI serviceType, ServiceSettingsProxy settingsProxy, ServiceName name, IServiceListener listener)
             throws ServiceFactoryException {
-        if (!serviceTypes.contains(serviceType)) {
-            throw new IllegalArgumentException("Unknown service type " + serviceType);
-        }
+        getSingleMatchingURI(serviceType, serviceTypes, "service", REQUIRE_RESOURCE);
 
         IInitiatorService service;
         try {
@@ -381,21 +379,14 @@ public class ServiceFactory implements IServiceFactory {
 
         @Override
         public IMessage createMessage(SailfishURI dictionary, String name) {
-
-            if (!dictionaryManager.getDictionaryURIs().contains(dictionary)) {
-                throw new EPSCommonException(String.format("Dictionary %s not found", dictionary.getResourceName()));
-            }
-
+            getSingleMatchingURI(dictionary, dictionaryManager.getDictionaryURIs(), "dictionary", REQUIRE_RESOURCE);
             IDictionaryStructure structure = dictionaryManager.getDictionary(dictionary);
             return dictionaryManager.getMessageFactory(dictionary).createMessage(name, structure.getNamespace());
         }
 
         @Override
         public IMessage createStrictMessage(SailfishURI dictionary, String name) {
-            if (!dictionaryManager.getDictionaryURIs().contains(dictionary)) {
-                throw new EPSCommonException(String.format("Dictionary %s not found", dictionary.getResourceName()));
-            }
-
+            getSingleMatchingURI(dictionary, dictionaryManager.getDictionaryURIs(), "dictionary", REQUIRE_RESOURCE);
             IDictionaryStructure dictionaryStructure = dictionaryManager.getDictionary(dictionary);
             IMessageFactory messageFactory = dictionaryManager.getMessageFactory(dictionary);
 
