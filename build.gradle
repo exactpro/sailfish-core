@@ -274,14 +274,6 @@ subprojects {
                 }
             }
         } else {
-            maven { // for gradle fast plugin
-                name 'Artifactory-snapshot'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
-            }
-            maven {
-                name 'Artifactory-release'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
-            }
             maven {
                 name 'Artifactory-snapshot-oss'
                 url 'https://oss.jfrog.org/artifactory/libs-snapshot'
@@ -289,6 +281,14 @@ subprojects {
             maven {
                 name 'Artifactory-release-oss'
                 url 'https://oss.jfrog.org/artifactory/libs-release'
+            }
+            maven { // for gradle fast plugin
+                name 'Artifactory-snapshot'
+                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+            }
+            maven {
+                name 'Artifactory-release'
+                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
             }
         }
         jcenter()
