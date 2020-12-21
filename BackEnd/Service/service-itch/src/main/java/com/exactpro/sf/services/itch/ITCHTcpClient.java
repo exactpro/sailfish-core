@@ -214,7 +214,14 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
         disconnected0();
     }
 
-	protected void disconnected0() {
+    @Override
+    protected void connectionAborted(IoSession session, Throwable cause) {
+        super.connectionAborted(session, cause);
+        // The connection was hard-reset. Need to perform the reconnection if it is configured
+        disconnected0();
+    }
+
+    protected void disconnected0() {
 		if ( !disconnecting  && !connectingFromMatrix && disposeWhenSessionClosed) {
 
 			try {

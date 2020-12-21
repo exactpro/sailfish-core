@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.services.mina;
 
+import java.io.IOException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.future.ConnectFuture;
@@ -34,6 +37,8 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.util.ServiceUtil;
 
 public abstract class AbstractMINAService extends AbstractInitiatorService implements IoHandler {
+    private static final String RESET_BY_PEER_ERROR_MESSAGE = "connection reset by peer";
+
     protected static final long DEFAULT_TIMEOUT = 5000L;
 
     protected volatile MINASession session;
@@ -249,6 +254,26 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
         if(minaSession != null) {
             getServiceHandler().exceptionCaught(minaSession, cause);
         }
+
+        if (isConnectionAbortedException(cause)) {
+            connectionAborted(session, cause);
+        }
+    }
+
+    private static boolean isConnectionAbortedException(Throwable cause) {
+        return cause instanceof IOException && StringUtils.containsIgnoreCase(cause.getMessage(), RESET_BY_PEER_ERROR_MESSAGE);
+    }
+
+    /**
+     * Callback that will be called in case the connection was aborted.
+     *
+     * It will happen if the {@link IOException} with {@link #RESET_BY_PEER_ERROR_MESSAGE} message is caught by
+     * the {@link #exceptionCaught} method.
+     * @param session the current session
+     * @param cause the abortion cause
+     */
+    protected void connectionAborted(IoSession session, Throwable cause) {
+        logger.error("Connection aborted for session: {}", session);
     }
 
     @Override
