@@ -112,6 +112,7 @@ public class CommonActions extends AbstractCaller {
     public static final String FIRST_ARG = "firstArg";
     public static final String SECOND_ARG = "secondArg";
     private static final long DEFAULT_EXEC_TIMEOUT = 60000L;
+    private static final String PATH_ARGS = "PathArgs";
 
     @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
 	@ActionMethod
@@ -461,24 +462,25 @@ public class CommonActions extends AbstractCaller {
     /**
 	 * Runs a script
 	 *
+	 * Returns STDOUT of the running process
 	 * @param actionContext - an implementation of {@link IActionContext}
 	 * @param inputData - hash map of script parameters - must contain value of column "PathArgs" <br />
 	 * Value of "PathArgs" must contain path to script and its arguments, separated by space.<br />
 	 * @throws Exception - throws an exception
 	 */
     @CommonColumns(@CommonColumn(Column.Timeout))
-    @CustomColumns(@CustomColumn(value = "PathArgs", required = true))
+    @CustomColumns(@CustomColumn(value = PATH_ARGS, required = true))
     @ActionMethod
-    public void RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
-        String command = unwrapFilters(inputData.get("PathArgs"));
+    public String RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
+        String command = unwrapFilters(inputData.get(PATH_ARGS));
         command = preparePath(command);
         String[] pathArgs = toPathArgs(command);
 
         logger.debug("Script run args: {}", (Object)pathArgs);
-        execProcess(actionContext.getReport(), actionContext.getTimeout(), pathArgs);
+        return execProcess(actionContext.getReport(), actionContext.getTimeout(), pathArgs);
     }
 
-    private void execProcess(IActionReport report, long timeout, String... cmdarray) throws Exception {
+    private String execProcess(IActionReport report, long timeout, String... cmdarray) throws Exception {
         timeout = timeout > 0 ? timeout : DEFAULT_EXEC_TIMEOUT;
 
         File stdOutFile = File.createTempFile("stdout", ".txt");
@@ -519,6 +521,7 @@ public class CommonActions extends AbstractCaller {
             if(exitCode != 0) {
                 throw new Exception("Exit code: " + exitCode);
             }
+            return stdOut;
         }
     }
 
