@@ -106,7 +106,7 @@ public class ExecutorClient {
 	private final ExecutionProgressMonitor monitor;
 	
 	private final Executor executor;
-	
+
 	private SFAPIClient apiClient;
 	
 	private volatile ExecutorState state = ExecutorState.Inactive;
@@ -902,6 +902,14 @@ public class ExecutorClient {
 					if(currentList == null) {
 						continue;
 					}
+
+                    if (currentList.getFailedExecutorNames().contains(executor.getName())) {
+                        logger.debug("ScriptList {} was failed on current {} executor. Returned to the queue " +
+                                "to be processed  by another executor", currentList.getName(), executor.getName());
+                        listsQueue.add(currentList);
+                        currentList = null;
+                        continue;
+                    }
 					
 					logger.info("List {} taken", currentList);
 					
@@ -988,7 +996,7 @@ public class ExecutorClient {
 							}
 						}
                     } else {
-                        transferScriptListToAnotherNode();
+                        transferNotPreparedScriptListToAnotherNode();
 					}
 					
 					state = ExecutorState.Cleaning;
@@ -1109,7 +1117,35 @@ public class ExecutorClient {
 			currentList = null;
 		}
 
-	}
+        private void transferNotPreparedScriptListToAnotherNode() {
+            if (currentList.getExecutor() != null) {
+                logger.warn("Unable to transfer ScriptList {} to another node because it's has executor {}",
+                        currentList.getName(), currentList.getExecutor());
+                monitor.listNonPrepared(currentList);
+            } else {
+                String failedExecutorName = executor.getName();
+                Set<String> failedExecutorNames = currentList.getFailedExecutorNames();
+                failedExecutorNames.add(failedExecutorName);
+                Set<String> availableExecutorNames = monitor.getAvailableExecutorNames();
+                if (failedExecutorNames.containsAll(availableExecutorNames)) {
+                    logger.error("ScriptList {} tried to be prepared on every executors. " +
+                            "Marked as skipped and excluded from queue", currentList.getName());
+                    monitor.listNonPrepared(currentList);
+                } else {
+                    ScriptList newScriptList = new ScriptList(currentList.getName(), null, currentList.getServiceLists(),
+                            currentList.getApiOptions(), currentList.getPriority(), currentList.getLineNumber(),
+                            currentList.getVariableSet());
+                    newScriptList.getFailedExecutorNames().addAll(failedExecutorNames);
+                    newScriptList.getScripts().addAll(currentList.getScripts());
+                    monitor.listEnqueued(newScriptList);
+                    monitor.decreaseTotalScriptCount(newScriptList.getScripts().size());
+                    listsQueue.add(newScriptList);
+                }
+            }
+            monitor.listExecuted(executor, currentList);
+            currentList = null;
+        }
+    }
 
 	public Executor getExecutor() {
 		return executor;

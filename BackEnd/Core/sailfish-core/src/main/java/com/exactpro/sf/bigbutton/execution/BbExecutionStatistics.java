@@ -32,21 +32,23 @@ public class BbExecutionStatistics implements Serializable {
 	private long numFailedTcs;
 	
 	private long numInitFailed;
-	
+
+    private long numNonPreparedScripts;
+
 	public BbExecutionStatistics() {
-		
+
 	}
-	
+
 	public BbExecutionStatistics(BbExecutionStatistics toClone) {
-		
+
 		this.started = toClone.started;
 		this.finished = toClone.finished;
-		
+
 		this.numPassedTcs = toClone.numPassedTcs;
         this.numCondPassedTcs = toClone.numCondPassedTcs;
 		this.numFailedTcs = toClone.numFailedTcs;
 		this.numInitFailed = toClone.numInitFailed;
-		
+        this.numNonPreparedScripts = toClone.numNonPreparedScripts;
 	}
 
     public void incNumPassedTcs(long value) {
@@ -64,6 +66,10 @@ public class BbExecutionStatistics implements Serializable {
 	public void incNumInitFailed() {
 		this.numInitFailed++;
 	}
+
+    public void incNumNonPreparedScripts(long value) {
+        this.numNonPreparedScripts += value;
+    }
 
 	public Date getStarted() {
 		return started;
@@ -97,4 +103,7 @@ public class BbExecutionStatistics implements Serializable {
         return numCondPassedTcs;
     }
 
+    public long getNumNonPreparedScripts() {
+        return numNonPreparedScripts;
+    }
 }

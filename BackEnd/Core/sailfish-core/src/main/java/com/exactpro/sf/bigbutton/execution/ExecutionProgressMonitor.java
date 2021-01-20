@@ -18,17 +18,12 @@ package com.exactpro.sf.bigbutton.execution;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,6 +196,11 @@ public class ExecutionProgressMonitor {
 		this.totalScriptsCount += list.getScripts().size();
 
 	}
+
+    public synchronized void listNonPrepared(ScriptList list) {
+        list.setStatus(ScriptList.ScriptListStatus.SKIPPED);
+        executionStatistics.incNumNonPreparedScripts(list.getScripts().size());
+    }
 
 	public synchronized void decreaseTotalScriptCount(int count) {
 
@@ -443,13 +443,23 @@ public class ExecutionProgressMonitor {
             return;
         }
 
-        if (executionStatistics.getNumFailedTcs() > 0 || executionStatistics.getNumInitFailed() > 0) {
+        if (executionStatistics.getNumFailedTcs() > 0
+                || executionStatistics.getNumInitFailed() > 0
+                || executionStatistics.getNumNonPreparedScripts() > 0) {
             executionStatus = StatusType.FAILED;
         } else if (executionStatistics.getNumCondPassedTcs() > 0) {
             executionStatus = StatusType.CONDITIONALLY_PASSED;
         } else {
             executionStatus = StatusType.PASSED;
         }
+    }
+
+    public Set<String> getAvailableExecutorNames() {
+        return  getAllExecutors()
+                .stream()
+                .filter(client -> Boolean.TRUE.equals(client.getExecutorReady()))
+                .map(client -> client.getExecutor().getName())
+                .collect(Collectors.toSet());
     }
 
 	private class ExecutorsStatusChecker implements Runnable {

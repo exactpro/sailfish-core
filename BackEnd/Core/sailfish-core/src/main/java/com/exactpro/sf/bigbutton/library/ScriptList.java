@@ -18,6 +18,7 @@ package com.exactpro.sf.bigbutton.library;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,8 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
 	private final List<Script> scripts = new ArrayList<>();
 
 	private final Set<String> serviceLists;
+
+    private final Set<String> failedExecutorNames = new HashSet<>();
 
 	private final SfApiOptions apiOptions;
 
@@ -232,6 +235,10 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
         }
 
         return StatusType.NA;
+    }
+
+    public Set<String> getFailedExecutorNames() {
+        return failedExecutorNames;
     }
 
     @Override

@@ -1,0 +1,11 @@
+description,item,name,path,services,priority,autostart,continue_if_failed,range,tags,language,static_variables,group,ignore_ask_for_continue,skip_optional,start_mode,ignore
+,Library Folder,,TestSuite1.zip,,,,,,,,,,,,,
+,Reports Folder,,run_test,,,,,,,,,,,,,
+,Executor List,,,,,,,,,,,,,,,
+,Executor,shaitan01_master_sf01,:executor_url,,,,,,,,,,,,,
+,Service List,TestSuite1.services,,,,,,,,,,,,,,
+,Service,fake,TestSuite1/services/env/fake.xml,,,,,,,,,,,,LIST,
+,Script List,TestSuite1.matrices,,TestSuite1.services,0,,,,,,,,,,,
+,Script,,TestSuite1/csv/validTest.csv,,,,,,,,,,,,,
+,Script,,TestSuite1/csv/testMatrix.csv,,,,,,,,,,,,,
+,Script,,TestSuite1/csv/testSendDirty.csv,,,,,,,,,,,,,

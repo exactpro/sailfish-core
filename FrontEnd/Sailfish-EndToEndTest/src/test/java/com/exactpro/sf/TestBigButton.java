@@ -50,6 +50,8 @@ public class TestBigButton {
     private final static Logger logger = LoggerFactory.getLogger(TestBigButton.class.getName());
     private static SFAPIClient sfapi;
     private static final String  EXECUTOR_VARIABLE = ":executor_url";
+    private static final String  FINISHED_STATUS = "Finished";
+    private static final String  RUNNING_STATUS= "Running";
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -71,7 +73,7 @@ public class TestBigButton {
     }
 
     @Test
-    public void runBB() throws Exception {
+    public void simpleRunBB() throws Exception {
         File testSuites = Files.createTempFile(UUID.randomUUID().toString(), ".zip").toFile();
 
         try (ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream(testSuites))) {
@@ -100,7 +102,7 @@ public class TestBigButton {
         sfapi.runBB(importResult.getId());
 
         String status = "";
-        while (!"Finished".equals(status)) {
+        while (!FINISHED_STATUS.equals(status)) {
 
             XmlBbExecutionStatus bbStatus = sfapi.getBBStatus();
             status = bbStatus.getStatus();
@@ -129,13 +131,13 @@ public class TestBigButton {
 
             Assert.assertNotEquals(writer.toString(), "Error", status);
 
-            if ("Running".equals(status)) {
+            if (RUNNING_STATUS.equals(status)) {
                 sfapi.pauseBB();
                 status = sfapi.getBBStatus().getStatus();
                 Assert.assertEquals("Pause", status);
                 sfapi.resumeBB();
                 status = sfapi.getBBStatus().getStatus();
-                Assert.assertEquals("Running", status);
+                Assert.assertEquals(RUNNING_STATUS, status);
             }
 
             logger.info(status);
@@ -149,6 +151,46 @@ public class TestBigButton {
             Assert.assertArrayEquals("fail", expected.lines().toArray(String[]::new), actual.lines().toArray(String[]::new));
         }
 
+    }
+
+    @Test
+    public void invalidServiceRunBB() throws Exception {
+        File testSuites = Files.createTempFile(UUID.randomUUID().toString(), ".zip").toFile();
+
+        try (ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream(testSuites))) {
+
+            Map<String, String> testLibraryMap = new HashMap<>();
+            testLibraryMap.put("TestSuite1/csv/testMatrix.csv", "testMatrix.csv");
+            testLibraryMap.put("TestSuite1/csv/testSendDirty.csv", "aml3positive/testSendDirty.csv");
+            testLibraryMap.put("TestSuite1/csv/validTest.csv", "aml3positive/validTest.csv");
+            testLibraryMap.put("TestSuite1/services/env/fake.xml", "invalidService/fake.xml");
+
+            for (Map.Entry<String, String> entry : testLibraryMap.entrySet()) {
+                String k = entry.getKey();
+                File v = new File(getClass().getClassLoader().getResource(entry.getValue()).getFile());
+                zipStream.putNextEntry(new ZipEntry(k));
+                Files.copy(v.toPath(), zipStream);
+                zipStream.closeEntry();
+            }
+        }
+
+        File patternBBConfig = new File(getClass().getClassLoader().getResource("invalidService/testBB.csv").getFile());
+        File resultBBConfig = createResultBBConfig(patternBBConfig);
+
+        sfapi.uploadTestLibrary(new FileInputStream(testSuites), "TestSuite1.zip", true);
+        XmlLibraryImportResult importResult = sfapi.uploadBBLibrary(resultBBConfig, "testBB.csv");
+        sfapi.runBB(importResult.getId());
+
+        Thread.sleep(4000);
+
+        String status = sfapi.getBBStatus().getStatus();
+
+        if (!FINISHED_STATUS.equals(status)) {
+            sfapi.interruptBB();
+            logger.warn("BigButton was interrupted, because of out the timeout time.");
+        }
+
+        Assert.assertEquals(FINISHED_STATUS, status);
     }
 
     private static void checkStatisticsStatus() throws APICallException {

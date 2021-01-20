@@ -316,8 +316,16 @@ public class SFAPIClient implements AutoCloseable {
         }
     }
 
+    /**
+     * @deprecated Delegates the call to {@link #interruptBB} method. Will be removed in the next release.
+     */
+    @Deprecated
     public void stopBB() throws  APICallException, APIResponseException {
-        HttpGet runBB = new  HttpGet(rootUrl + "bb/stop");
+        interruptBB();
+    }
+
+    public void interruptBB() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/interrupt");
         try {
             CloseableHttpResponse runResponse = http.execute(runBB);
             checkHttpResponse(runResponse);
