@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ public class TestPrototypeDictionaryValidator {
                 "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=<strong>JavaType</strong> should be <strong>null</strong> but was <strong>JAVA_LANG_INTEGER</strong>,level=FIELD,type=ERR_FIELD_TYPE]",
                 "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=<strong>IsServiceName</strong> should be <strong>null</strong> but was <strong>false</strong>,level=FIELD,type=ERR_FIELD_TYPE]",
                 "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=<strong>IsComplex</strong> should be <strong>true</strong> but was <strong>false</strong>,level=FIELD,type=ERR_FIELD_TYPE]",
-                "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=<strong>IsEnum</strong> should be <strong>false</strong> but was <strong>true</strong>,level=FIELD,type=ERR_FIELD_TYPE]",
                 "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=Attribute <strong>BoolAttr</strong> was missed,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=SecondMessage,field=FieldWithAttr,error=Attribute <strong>NumbAttr</strong> was missed,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=SecondMessage,field=<null>,error=Attribute <strong>LongAttr</strong> should be <strong>10</strong> but was <strong>101</strong>,level=MESSAGE,type=ERR_ATTRIBUTES]",
@@ -80,7 +79,8 @@ public class TestPrototypeDictionaryValidator {
                 "DictionaryValidationError[message=FirstMessage,field=<null>,error=At this position message should have field <strong>ThirdField</strong> but it was <strong>FourthField</strong>,level=MESSAGE,type=ERR_NAME]",
                 "DictionaryValidationError[message=FourthMessage,field=<null>,error=At this position message should have field <strong>Third</strong> but it was <strong>SomeExtraField</strong>,level=MESSAGE,type=ERR_NAME]",
                 "DictionaryValidationError[message=SubMessage,field=FieldWithAttr,error=Attribute <strong>StrAttr</strong> should be <strong>value</strong> but was <strong>invalidValue</strong>,level=FIELD,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=ThirdMessage,field=<null>,error=Missed required message ThirdMessage,level=DICTIONARY,type=ERR_REQUIRED_FIELD]"
+                "DictionaryValidationError[message=ThirdMessage,field=<null>,error=Missed required message ThirdMessage,level=DICTIONARY,type=ERR_REQUIRED_FIELD]",
+                "DictionaryValidationError[message=<null>,field=<null>,error=Missed required field TestEnum,level=DICTIONARY,type=ERR_REQUIRED_FIELD]"
         };
         if (expectedErrors.length != errors.size()) {
             for(DictionaryValidationError error : errors) {

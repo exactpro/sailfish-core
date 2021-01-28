@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
             <value name="FIRST">1</value>
             <value name="SECOND">2</value>
             <value name="THIRD">3</value>
+        </field>
+        <field type="java.lang.String" name="TestEnum" id="F_TestEnum">
+            <value name="FIRST">FIRST</value>
         </field>
     </fields>
     <messages>
