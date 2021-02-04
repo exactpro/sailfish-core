@@ -222,6 +222,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
             acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
             acceptor.setHandler(this);
+            acceptor.setReuseAddress(true);
             adress = new InetSocketAddress(settings.getHost(), settings.getPort());
             acceptor.bind(adress);
 
