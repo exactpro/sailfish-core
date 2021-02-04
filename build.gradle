@@ -325,7 +325,7 @@ subprojects {
                         'commons-io:commons-io:2.6',
                         'commons-cli:commons-cli:1.4',
                         'commons-collections:commons-collections:3.2.2',
-                        'org.apache.commons:commons-collections4:4.2',
+                        'org.apache.commons:commons-collections4:4.4',
                         'org.jetbrains.kotlin:kotlin-reflect:1.3.50'
 
                 // don't cache changing modules at all
@@ -359,19 +359,6 @@ subprojects {
     uploadArchives {
         repositories.mavenDeployer {
             repository(url: "file://${sharedDir}")
-//            doLast {
-//            // Remove any invalid maven-metadata.xml files that may have been created
-//            // for SNAPSHOT versions that are *not* uniquely versioned.
-//                pom*.each { pom ->
-//                    if (pom.version.endsWith('-SNAPSHOT')) {
-//                        final File artifactDir = new File(rootProject.ext.sharedDir,
-//                                pom.groupId.replace('.', '/')
-//                                + '/' + pom.artifactId
-//                                + '/' + pom.version)
-//                        delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
-//                    }
-//                }
-//            }
         }
         doFirst { sharedDir.mkdirs() }
     }
