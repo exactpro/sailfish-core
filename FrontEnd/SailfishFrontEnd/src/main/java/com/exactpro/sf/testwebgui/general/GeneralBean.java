@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.exactpro.sf.testwebgui.general;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class GeneralBean implements Serializable {
 
 	private static final String ADMIN_ROLE_NAME = "admin";
 	private static final String DEFAULT_GUI_DATE_FORMAT = "dd-MM-yyyy hh:mm:ss";
+    private static final Calendar CALENDAR = Calendar.getInstance();
 
     private String version = "";
     private String branchName = "";
@@ -130,4 +132,8 @@ public class GeneralBean implements Serializable {
 	public String getSfUser() {
 	    return BeanUtil.getSfUser();
 	}
+
+    public int getCurrentYear() {
+        return CALENDAR.get(Calendar.YEAR);
+    }
 }
