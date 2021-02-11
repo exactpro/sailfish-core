@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,13 @@ public class NTGClientSettings extends AbstractMINASettings {
 
 	private boolean doLoginOnStart;
 
-    /**
+	@Description("Reconnect will be executed with the specified timeout in milliseconds if service has lost the connection.<br/>"
+			+ "If value is 0 (ZERO) service won't reconnect." +
+			"\nFor reconnect task work the following settings must be enabled: Do Login On Start, Autosend Heartbeat"
+	)
+	private Long reconnectTimeout = 0L;
+
+	/**
      * Connect timeout in milliseconds.
      * @return connect timeout
      */
@@ -208,6 +214,10 @@ public class NTGClientSettings extends AbstractMINASettings {
         return newPassword;
 	}
 
+	public Long getReconnectTimeout() {
+		return reconnectTimeout;
+	}
+
 	/*
 	* Setters
 	*/
@@ -241,6 +251,10 @@ public class NTGClientSettings extends AbstractMINASettings {
 
 	public void setServerIP(String serverIP) {
 		this.serverIP = serverIP;
+	}
+
+	public void setReconnectTimeout(Long reconnectTimeout) {
+		this.reconnectTimeout = reconnectTimeout;
 	}
 
 	/**

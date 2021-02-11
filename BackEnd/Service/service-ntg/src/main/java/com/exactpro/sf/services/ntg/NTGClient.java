@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ public final class NTGClient extends AbstractMINATCPService {
     private volatile NTGClientState state = NTGClientState.LoggedOut;
     private volatile NTGClientState statePrev = state;
 	private Future<?> disconnectFuture;
+	private volatile Future<?> reconnectFuture;
+	private volatile boolean externalDisposing = false;
 
 	@Override
 	public final void messageReceived(IoSession session, Object message) throws Exception {
@@ -97,6 +99,10 @@ public final class NTGClient extends AbstractMINATCPService {
             destroyHeartbeatTimer();
             this.state = NTGClientState.SessionClosed;
 		}
+        Long reconnectTimeout = getSettings().getReconnectTimeout();
+        if(reconnectTimeout != 0L) {
+            scheduleReconnectingTask(reconnectTimeout);
+        }
 	}
 
 	@Override
@@ -143,6 +149,13 @@ public final class NTGClient extends AbstractMINATCPService {
     @Override
     protected void internalInit() throws Exception {
         this.messageNamespace = dictionary.getNamespace();
+        NTGClientSettings settings = getSettings();
+        if(settings.getReconnectTimeout() < 0L) {
+            throw new IllegalStateException("Reconnect Timeout can't be less than zero.");
+        }
+        if(settings.getReconnectTimeout() != 0L && (!settings.isAutosendHeartbeat() || !settings.isDoLoginOnStart())) {
+            throw new IllegalStateException("Using reconnect without 'Do Login On Start' and 'Autosend Heartbeat' is not allowed.");
+        }
     }
 
 	@Override
@@ -253,6 +266,81 @@ public final class NTGClient extends AbstractMINATCPService {
 
         if(getSession() != null) {
             updateState(NTGClientState.SessionClosed);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        externalDisposing = true;
+        super.dispose();
+    }
+
+    @Override
+    public void preConnect() throws Exception {
+        externalDisposing = false;
+        super.preConnect();
+    }
+
+    @Override
+    protected void handleNotConnected(Throwable throwable) {
+	    Long reconnectTimeout = getSettings().getReconnectTimeout();
+	    if(reconnectTimeout == 0L) {
+	        super.handleNotConnected(throwable);
+        } else {
+            scheduleReconnectingTask(reconnectTimeout);
+        }
+    }
+
+    @Override
+    protected void connectionAborted(IoSession session, Throwable cause) {
+        Long reconnectTimeout = getSettings().getReconnectTimeout();
+        super.connectionAborted(session, cause);
+        if(reconnectTimeout != 0) {
+            scheduleReconnectingTask(reconnectTimeout);
+        }
+    }
+
+    @Override
+    protected void disposeResources() {
+	    super.disposeResources();
+	    if (externalDisposing) {
+            cancelCurrentReconnectFuture();
+            return;
+        }
+	    if(loggingConfigurator != null)
+            loggingConfigurator.registerLogger(this, getServiceName());
+    }
+
+    private void cancelCurrentReconnectFuture() {
+	    if(reconnectFuture != null && !reconnectFuture.isDone()) {
+            logger.info("Canceling reconnect task for " + getServiceName());
+            reconnectFuture.cancel(true);
+            logger.info("Reconnect task for " + getServiceName() + " is cancelled");
+        }
+    }
+
+    private void scheduleReconnectingTask(Long reconnectionTimeout) {
+        if (externalDisposing) {
+            logger.info("External disposing. Do not execute reconnect");
+            return;
+        }
+        changeStatus(ServiceStatus.WARNING, "Connection was closed. Try to reconnect in "
+                + reconnectionTimeout + " milliseconds");
+        cancelCurrentReconnectFuture();
+        reconnectFuture = taskExecutor.schedule(this::reconnect, reconnectionTimeout, TimeUnit.MILLISECONDS);
+    }
+
+    private void reconnect() {
+        try {
+            disposeResources();
+        } catch (Exception ex) {
+            logger.error("Error during disposing resources", ex);
+        }
+
+        try {
+            internalStart();
+        } catch (Exception ex) {
+            logger.error("Error during reconnecting", ex);
         }
     }
 
