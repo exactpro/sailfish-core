@@ -98,6 +98,12 @@ public class FIXCodec extends AbstractCodec {
         }
 
         this.settings = (TCPIPSettings)settings;
+        if (this.settings.isVerifyMessageStructure() &&
+                (!this.settings.isDecodeByDictionary() || this.settings.isDepersonalizationIncomingMessages())) {
+            throw new IllegalArgumentException("The 'verification message structure' feature can't be enabled because "
+                    + "the 'decode by dictionary' is " + this.settings.isDecodeByDictionary() + " (required 'true') and"
+                    + "the 'depersonalization incoming messages' is " + this.settings.isDepersonalizationIncomingMessages() + " (required 'false')");
+        }
 
         FixPropertiesReader.loadAndSetCharset(serviceContext);
 
@@ -107,6 +113,7 @@ public class FIXCodec extends AbstractCodec {
         this.fieldConverter = new FixFieldConverter();
         fieldConverter.init(dictionary, dictionary.getNamespace());
         QFJIMessageConverterSettings qfjiMessageConverterSettings = new QFJIMessageConverterSettings(dictionary, this.msgFactory);
+        qfjiMessageConverterSettings.setVerifyTags(this.settings.isVerifyMessageStructure());
         this.qfjConverter = new DirtyQFJIMessageConverter(qfjiMessageConverterSettings);
 
         this.msgStructures = new HashMap<>();

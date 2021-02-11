@@ -61,8 +61,15 @@ public class TCPIPSettings extends AbstractMINASettings
 	        + "Example: 35=a,48=B|34=4")
 	private String unexpectedMessages;
 
-	@Description("If TRUE, then the message structures <br> for decoding are taken from the dictionary, <br> otherwise message structures are taken from the current matrix <br> for decoding of all fields occur only into the message body.")
+	@Description("If TRUE, then the message structures <br> "
+            + "for decoding are taken from the dictionary, <br> "
+            + "otherwise message structures are taken from the current matrix <br> "
+            + "for decoding of all fields occur only into the message body.")
 	private boolean decodeByDictionary;
+
+    @Description("If the option is true, then the internal codec verifies structure of incoming messages by dictionary.<br>"
+            + "The verification feature requires the `decode by dictionary` to be enabled and the `depersonalization incoming messages` to be disabled.")
+	private boolean verifyMessageStructure;
 
 	@Description("If TRUE, then the trailing zeros of decimal values<br> will be removed by dictionary during decoding.<br>This option will be enable only if <br>'decode by dictionary' is TRUE.")
 	private boolean removeTrailingZeros;
@@ -180,7 +187,15 @@ public class TCPIPSettings extends AbstractMINASettings
 		this.decodeByDictionary = decodeByDictionary;
 	}
 
-	public boolean isRemoveTrailingZeros() {
+    public boolean isVerifyMessageStructure() {
+        return verifyMessageStructure;
+    }
+
+    public void setVerifyMessageStructure(boolean verifyMessageStructure) {
+        this.verifyMessageStructure = verifyMessageStructure;
+    }
+
+    public boolean isRemoveTrailingZeros() {
 		return removeTrailingZeros;
 	}
 
