@@ -42,6 +42,7 @@ import com.exactpro.sf.externalapi.codec.ResourcePath
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityInfo
 import com.exactpro.sf.services.IServiceContext
 import com.exactpro.sf.services.ITaskExecutor
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.storage.IMessageStorage
 import com.google.common.collect.ImmutableTable
 import com.google.common.collect.Table
@@ -58,6 +59,8 @@ import java.util.EnumMap
 
 abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory() {
     protected abstract val codecClass: Class<out AbstractCodec>
+    protected open val messageHelperClass: Class<out MessageHelper>? = null
+    protected open val messageHelperParams: Map<String, String> = emptyMap()
 
     override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = settings.run {
         val dictionary = checkNotNull(this[MAIN]) { "Main dictionary is not set" }
@@ -75,7 +78,9 @@ abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory()
             ),
             getSettings(),
             messageFactory,
-            dictionary
+            dictionary,
+            messageHelperClass,
+            messageHelperParams
         )
     }
 

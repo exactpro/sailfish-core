@@ -19,11 +19,15 @@ import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
 import com.exactpro.sf.configuration.factory.FixMessageFactory
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.fix.FIXCodec
+import com.exactpro.sf.services.fix.FixMessageHelper
 import com.exactpro.sf.services.tcpip.TCPIPSettings
 
 class ExternalFixCodecFactory : AbstractExternalMinaCodecFactory() {
     override val codecClass: Class<out AbstractCodec> = FIXCodec::class.java
     override val settingsClass: Class<out ICommonSettings> = TCPIPSettings::class.java
     override val messageFactoryClass: Class<out IMessageFactory> = FixMessageFactory::class.java
+    override val messageHelperClass: Class<out MessageHelper> = FixMessageHelper::class.java
+    override val messageHelperParams: Map<String, String> = emptyMap()
 }

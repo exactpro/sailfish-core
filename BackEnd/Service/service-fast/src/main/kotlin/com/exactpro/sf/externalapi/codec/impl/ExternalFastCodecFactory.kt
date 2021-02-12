@@ -19,11 +19,15 @@ import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
 import com.exactpro.sf.configuration.factory.FASTMessageFactory
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.fast.FASTCodec
 import com.exactpro.sf.services.fast.FASTCodecSettings
+import com.exactpro.sf.services.fast.FASTMessageHelper
 
 class ExternalFastCodecFactory : AbstractExternalMinaCodecFactory() {
     override val codecClass: Class<out AbstractCodec> = FASTCodec::class.java
     override val settingsClass: Class<out ICommonSettings> = FASTCodecSettings::class.java
     override val messageFactoryClass: Class<out IMessageFactory> = FASTMessageFactory::class.java
+    override val messageHelperClass: Class<out MessageHelper> = FASTMessageHelper::class.java
+    override val messageHelperParams: Map<String, String> = emptyMap()
 }

@@ -19,11 +19,19 @@ import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
 import com.exactpro.sf.configuration.factory.ITCHMessageFactory
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.itch.ITCHCodec
 import com.exactpro.sf.services.itch.ITCHCodecSettings
+import com.exactpro.sf.services.itch.ITCHMessageHelper
 
 class ExternalItchCodecFactory : AbstractExternalMinaCodecFactory() {
     override val codecClass: Class<out AbstractCodec> = ITCHCodec::class.java
     override val messageFactoryClass: Class<out IMessageFactory> = ITCHMessageFactory::class.java
     override val settingsClass: Class<out ICommonSettings> = ITCHCodecSettings::class.java
+    override val messageHelperClass: Class<out MessageHelper> = ITCHMessageHelper::class.java
+    override val messageHelperParams: Map<String, String> = mapOf(ITCHMessageHelper.FIELD_MARKET_DATA_GROUP_NAME to "0",
+            ITCHMessageHelper.FIELD_SEQUENCE_NUMBER_NAME to "0",
+            ITCHMessageHelper.FIELD_MESSAGE_COUNT_NAME to "1",
+            ITCHMessageHelper.FIELD_LENGTH_NAME to "0"
+    )
 }

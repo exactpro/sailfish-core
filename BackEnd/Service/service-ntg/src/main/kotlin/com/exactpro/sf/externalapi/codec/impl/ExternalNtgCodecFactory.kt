@@ -19,10 +19,14 @@ import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
 import com.exactpro.sf.configuration.factory.NTGMessageFactory
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.ntg.NTGCodec
+import com.exactpro.sf.services.ntg.NTGMessageHelper
 
 class ExternalNtgCodecFactory : AbstractExternalMinaCodecFactory() {
     override val codecClass: Class<out AbstractCodec> = NTGCodec::class.java
     override val settingsClass: Class<out ICommonSettings> = DummyCodecSettings::class.java
     override val messageFactoryClass: Class<out IMessageFactory> = NTGMessageFactory::class.java
+    override val messageHelperClass: Class<out MessageHelper> = NTGMessageHelper::class.java
+    override val messageHelperParams: Map<String, String> = emptyMap()
 }

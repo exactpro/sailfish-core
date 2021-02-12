@@ -25,6 +25,7 @@ import com.exactpro.sf.externalapi.codec.IExternalCodec
 import com.exactpro.sf.externalapi.codec.IExternalCodecContext
 import com.exactpro.sf.externalapi.codec.IExternalCodecContext.Role
 import com.exactpro.sf.services.IServiceContext
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.MockProtocolDecoderOutput
 import com.exactpro.sf.services.MockProtocolEncoderOutput
 import org.apache.mina.core.buffer.IoBuffer
@@ -36,10 +37,16 @@ class ExternalMinaCodec(
     serviceContext: IServiceContext,
     settings: ICommonSettings,
     messageFactory: IMessageFactory,
-    dictionary: IDictionaryStructure
+    dictionary: IDictionaryStructure,
+    messageHelperClass: Class<out MessageHelper>?,
+    private val messageHelperParams: Map<String, String> = emptyMap()
 ) : IExternalCodec {
     private val codec: AbstractCodec = codecClass.newInstance().apply {
         init(serviceContext, settings, messageFactory, dictionary)
+    }
+
+    private val messageHelper: MessageHelper? = messageHelperClass?.newInstance()?.apply {
+        init(messageFactory, dictionary)
     }
 
     private val encodeSession = DummySession()
@@ -52,7 +59,7 @@ class ExternalMinaCodec(
 
     override fun encode(message: IMessage, context: IExternalCodecContext): ByteArray = encodeOutput.runCatching {
         encodeSession.setContext(context)
-        codec.encode(encodeSession, message, this)
+        codec.encode(encodeSession, messageHelper?.prepareMessageToEncode(message, messageHelperParams) ?: message, this)
         check(messageQueue.size == 1) { "Expected 1 result, but got: ${messageQueue.size}" }
         (messageQueue.poll() as IoBuffer).run { ByteArray(remaining()).apply { get(this) } }
     }.getOrElse {
