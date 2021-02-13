@@ -16,12 +16,12 @@
 
 package com.exactpro.sf.scriptrunner;
 
-import java.util.Set;
+import java.util.Collection;
 
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 
 public interface IScriptReportLoader extends ILoadableManager {
-    Set<IScriptReport> createScriptReports(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, long scriptId);
+    Collection<IScriptReport> createScriptReports(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, TestScriptDescription testScriptDescription);
 }

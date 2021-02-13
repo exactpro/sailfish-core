@@ -16,6 +16,9 @@
 
 package com.exactpro.sf.scriptrunner;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -45,23 +48,23 @@ public class ScriptReportLoader implements IScriptReportLoader {
     }
 
     @Override
-    public Set<IScriptReport> createScriptReports(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, long scriptId) {
+    public Collection<IScriptReport> createScriptReports(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, TestScriptDescription testScriptDescription) {
         return factories.entries().stream().map(entry ->
            createScriptReport(entry.getValue(),
                    reportFolder,
                    workspaceDispatcher,
                    dictionaryManager,
                    entry.getKey(),
-                   scriptId)
-        ).filter(Objects::nonNull).collect(Collectors.toSet());
+                   testScriptDescription)
+        ).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private IScriptReport createScriptReport(IScriptReportFactory factory, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, String pluginName, long scriptID) {
+    private IScriptReport createScriptReport(IScriptReportFactory factory, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, String pluginName, TestScriptDescription testScriptDescription) {
         try {
-            return factory.createScriptReport(reportFolder, workspaceDispatcher, dictionaryManager);
+            return factory.createScriptReport(reportFolder, workspaceDispatcher, dictionaryManager, testScriptDescription);
         } catch (Exception e) {
             if (logger.isWarnEnabled()) {
-                logger.warn("Can not create script report from class '{}' from plugin '{}' for script with id '{}'", factory.getClass().getName(), pluginName, scriptID, e);
+                logger.warn("Can not create script report from class '{}' from plugin '{}' for script with id '{}'", factory.getClass().getName(), pluginName, testScriptDescription.getId(), e);
             }
         }
         return null;

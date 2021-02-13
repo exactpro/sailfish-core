@@ -21,6 +21,6 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 
 public interface IScriptReportFactory {
 
-    IScriptReport createScriptReport(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager) throws Exception;
+    IScriptReport createScriptReport(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, TestScriptDescription testScriptDescription) throws Exception;
 
 }
