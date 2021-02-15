@@ -46,6 +46,16 @@ public interface IServiceProxy {
      * @throws IllegalStateException if called when service can't send messages
      */
     IMessage send(IMessage message) throws InterruptedException;
+
+    /**
+     * Sends the raw message to the system
+     * @param rawData the full raw message in the corresponding to the system format. It must contain all part of the message
+     *               (business message part and session layer part)
+     * @throws InterruptedException if messages sending was interrupted
+     */
+    default void sendRaw(byte[] rawData) throws InterruptedException {
+        throw new UnsupportedOperationException("Sending raw messages is not supported");
+    }
     
     /**
      * @return service name

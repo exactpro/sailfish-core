@@ -502,14 +502,16 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public IMessage send(IMessage message) throws InterruptedException {
 
-            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
-                IInitiatorService xService = service;
-                xService.getSession().send(message);
-            } else {
-                throw new IllegalStateException("Service not started");
-            }
+            ISession session = getInternalSession();
+            session.send(message);
 
             return message;
+        }
+
+        @Override
+        public void sendRaw(byte[] rawData) throws InterruptedException {
+            ISession session = getInternalSession();
+            session.sendRaw(rawData);
         }
 
         @Override
@@ -531,6 +533,13 @@ public class ServiceFactory implements IServiceFactory {
         public ISettingsProxy getSettings() {
 
             return settingsProxy;
+        }
+
+        private ISession getInternalSession() {
+            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
+                return service.getSession();
+            }
+            throw new IllegalStateException("Service is not started");
         }
 
         private boolean checkServiceState(ServiceStatus actual, ServiceStatus... expected) {

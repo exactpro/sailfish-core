@@ -78,4 +78,8 @@ public interface ISession
     default void forceClose() {
         throw new UnsupportedOperationException("Force close is not implemented");
     }
+
+    default void sendRaw(byte[] rawData) throws InterruptedException {
+        throw new UnsupportedOperationException("Sending raw data is not supported");
+    }
 }

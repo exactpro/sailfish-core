@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fix;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 import org.quickfixj.CharsetSupport;
@@ -36,6 +37,7 @@ import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.storage.IMessageStorage;
 
 import quickfix.DataDictionary;
+import quickfix.InvalidMessage;
 import quickfix.Message;
 import quickfix.Session;
 import quickfix.SessionID;
@@ -56,6 +58,7 @@ public class FIXSession implements ISession {
 	private final IMessageStorage storage;
 	private final DirtyQFJIMessageConverter converter;
 	private final MessageHelper messageHelper;
+    private final DataDictionary dataDictionary;
 
 	private volatile ServiceInfo serviceInfo;
 
@@ -63,10 +66,12 @@ public class FIXSession implements ISession {
 		this.name = sessionName;
 		this.sessionId = sessionId;
 		this.storage = storage;
-		this.converter = converter;
-		this.messageHelper = messageHelper;
+        this.converter = converter;
+        this.messageHelper = messageHelper;
         this.logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
-	}
+        // it is the simples way to get the data dictionary here
+        dataDictionary = new QFJDictionaryAdapter(converter.getDictionary());
+    }
 
 	@Override
 	public void close() {
@@ -159,7 +164,28 @@ public class FIXSession implements ISession {
         }
     }
 
-	@Override
+    @Override
+    public void sendRaw(byte[] rawData) throws InterruptedException {
+        // FIX uses this encoding by default
+        String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)).toString();
+        try {
+            logger.trace("Processing raw message: {}", messageData);
+            Message message = new Message();
+            // do not validate anything. it will be checked during the regular send action
+            message.fromString(messageData, dataDictionary, false);
+            IMessage converted = converter.convert(message, false, false);
+            converted.removeField(FixMessageHelper.HEADER);
+            converted.removeField(FixMessageHelper.TRAILER);
+            logger.debug("Sending message converted from raw: {} - {}", converted.getName(), converted);
+            send(converted);
+        } catch (InvalidMessage ex) {
+            throw new SendMessageFailedException("Cannot parse the raw message: " + messageData, ex);
+        } catch (MessageConvertException ex) {
+            throw new SendMessageFailedException("Cannot convert QFJ message to IMessage", ex);
+        }
+    }
+
+    @Override
 	public String getName() {
         return name;
 	}
