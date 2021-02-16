@@ -37,6 +37,7 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.util.ServiceUtil;
 
 public abstract class AbstractMINAService extends AbstractInitiatorService implements IoHandler {
+    static final String CODEC_FILTER_NAME = "codec";
     private static final String RESET_BY_PEER_ERROR_MESSAGE = "connection reset by peer";
 
     protected static final long DEFAULT_TIMEOUT = 5000L;
@@ -90,7 +91,7 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
 
     protected void initFilterChain(DefaultIoFilterChainBuilder filterChain) throws Exception {
         CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getCodecSettings());
-        filterChain.addLast("codec", new ProtocolCodecFilter(codecFactory));
+        filterChain.addLast(CODEC_FILTER_NAME, new ProtocolCodecFilter(codecFactory));
     }
 
     protected long getConnectTimeout() {

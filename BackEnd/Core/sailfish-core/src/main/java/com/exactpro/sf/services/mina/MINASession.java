@@ -16,11 +16,15 @@
 package com.exactpro.sf.services.mina;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolDecoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +33,6 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
-import com.exactpro.sf.services.IService;
-import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceException;
 
@@ -95,6 +97,56 @@ public class MINASession implements ISession {
     @Override
     public IMessage sendDirty(Object message) throws InterruptedException {
         throw new UnsupportedOperationException("Dirty send is not supported");
+    }
+
+    @Override
+    public void sendRaw(byte[] rawData) throws InterruptedException {
+        IoFilter codecFilter = session.getFilterChain().get(AbstractMINAService.CODEC_FILTER_NAME);
+        if (codecFilter == null) {
+            throw new IllegalStateException("Cannot get filter '" + AbstractMINAService.CODEC_FILTER_NAME + "' from session " + session);
+        }
+        try {
+            MessageNextFilter nextFilter = new MessageNextFilter();
+            codecFilter.messageReceived(nextFilter, session, IoBuffer.wrap(rawData));
+            if (!nextFilter.getExceptions().isEmpty()) {
+                SendMessageFailedException exception = new SendMessageFailedException("Exception accurate during decoding");
+                nextFilter.getExceptions().forEach(exception::addSuppressed);
+                throw exception;
+            }
+            boolean sent = false;
+            for (IMessage result : nextFilter.getResults()) {
+                if (filterResultFromSendRaw(result)) {
+                    continue;
+                }
+                removeSessionFields(result);
+                send(result);
+                sent = true;
+            }
+            if (!sent) {
+                throw new SendMessageFailedException("No messages were sent to the system. Result size: "
+                        + nextFilter.getResults().size()
+                        + ". Messages in the result: " + nextFilter.getResults().stream()
+                        .map(IMessage::getName)
+                        .collect(Collectors.joining(", "))
+                );
+            }
+        } catch (ProtocolDecoderException e) {
+            throw new SendMessageFailedException("Cannot decode raw bytes to messages", e);
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                throw (InterruptedException)e;
+            }
+            throw new SendMessageFailedException("Cannot send message", e);
+        }
+    }
+
+    protected boolean filterResultFromSendRaw(IMessage result) {
+        // all messages by default are allowed for sending
+        return false;
+    }
+
+    protected void removeSessionFields(IMessage result) {
+        // do nothing by default
     }
 
     @Override
