@@ -33,6 +33,12 @@ public class ITCHCodecSettings implements ICodecSettings {
     private boolean preprocessingEnabled = true;
     private boolean evolutionSupportEnabled;
 
+    /**
+     * Wraps result messages to {@link ITCHMessageHelper#MESSAGELIST_NAME} message.
+     * Adds them as a list to the {@link ITCHMessageHelper#SUBMESSAGES_FIELD_NAME} field in this message.
+     */
+    private boolean wrapMessages = true;
+
     public ITCHCodecSettings(int msgLength) {
 		this.msgLength = msgLength;
 	}
@@ -96,5 +102,13 @@ public class ITCHCodecSettings implements ICodecSettings {
 
     public void setEvolutionSupportEnabled(boolean evolutionSupportEnabled) {
         this.evolutionSupportEnabled = evolutionSupportEnabled;
+    }
+
+    public boolean isWrapMessages() {
+        return wrapMessages;
+    }
+
+    public void setWrapMessages(boolean wrapMessages) {
+        this.wrapMessages = wrapMessages;
     }
 }

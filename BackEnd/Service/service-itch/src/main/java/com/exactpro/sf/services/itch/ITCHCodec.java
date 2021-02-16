@@ -76,6 +76,7 @@ public class ITCHCodec extends AbstractCodec {
     private CodecMessageFilter codecMessageFilter;
     private long lastDecode;
     private IITCHPreprocessor preprocessor;
+    private boolean wrapMessages = true;
 
     public ITCHCodec() {
 		this.lastDecode = System.currentTimeMillis();
@@ -95,6 +96,7 @@ public class ITCHCodec extends AbstractCodec {
             this.preprocessor = msettings.isPreprocessingEnabled() ? DefaultPreprocessor.loadPreprocessor(serviceContext,
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
                     getClass().getClassLoader()) : null;
+            this.wrapMessages = msettings.isWrapMessages();
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
@@ -182,7 +184,7 @@ public class ITCHCodec extends AbstractCodec {
             IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory);
 
 			MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
-            
+
             int endCurMsgPosition = in.position();
             in.position(startCurMsgPosition);
             int lengthReadByte = endCurMsgPosition - startCurMsgPosition;
@@ -194,7 +196,7 @@ public class ITCHCodec extends AbstractCodec {
             } else {
                 in.position(endCurMsgPosition);
             }
-            
+
 			// RM9425, RM23982, RM25261, RM25262, RM34032
 			if (preprocessor != null) {
 				preprocessor.process(message, session, msgStructure);
@@ -239,9 +241,13 @@ public class ITCHCodec extends AbstractCodec {
 		}
 
         if(!(someMsgDropped && messages.size() == 1 && (System.currentTimeMillis() - lastDecode < 2000))) { //Skip single "UnitHeader"
-            IMessage message = wrapToMessageList(messages);
+            if (wrapMessages) {
+                IMessage message = wrapToMessageList(messages);
 
-            out.write(message);
+                out.write(message);
+            } else {
+                messages.forEach(out::write);
+            }
 
 			this.lastDecode = System.currentTimeMillis();
 		}
