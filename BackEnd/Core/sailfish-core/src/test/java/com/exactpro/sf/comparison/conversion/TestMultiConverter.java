@@ -26,12 +26,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 
 import com.exactpro.sf.util.DateTimeUtility;
 
 import junit.framework.Assert;
 
 public class TestMultiConverter {
+    private static final ChronoUnit CHRONO_UNIT_MILLIS = ChronoUnit.MILLIS;
     private static final Object[][] VALUES = {
             { null, null, null, null, null, null, null, null, null, true, null, null, null },
             { null, null, (byte)65, (byte)66, (byte)67, (byte)68, (byte)69, (byte)70, (byte)71, (byte)72, null, null, null },
@@ -44,8 +46,8 @@ public class TestMultiConverter {
             { null, 'x', 'y', 'z', null, null, null, null, null, 'w', null, null, null },
             { "true", "29", "30", "31", "32", "33.5", "34.5", "35.5", "v", null, "2017-12-13", "15:34:07.279", "2017-12-13T15:34:07.281" },
             { null, null, null, null, LocalDate.now(), null, null, null, null, LocalDate.now(), null, null, LocalDate.now() },
-            { null, null, null, null, LocalTime.now(), null, null, null, null, LocalTime.now(), null, null, LocalTime.now() },
-            { null, null, null, null, LocalDateTime.now(), null, null, null, null, LocalDateTime.now(), DateTimeUtility.toLocalDateTime(LocalDate.now()), DateTimeUtility.toLocalDateTime(LocalTime.now()), null }
+            { null, null, null, null, LocalTime.now().truncatedTo(CHRONO_UNIT_MILLIS), null, null, null, null, LocalTime.now().truncatedTo(CHRONO_UNIT_MILLIS), null, null, LocalTime.now().truncatedTo(CHRONO_UNIT_MILLIS) },
+            { null, null, null, null, LocalDateTime.now().truncatedTo(CHRONO_UNIT_MILLIS), null, null, null, null, LocalDateTime.now().truncatedTo(CHRONO_UNIT_MILLIS), DateTimeUtility.toLocalDateTime(LocalDate.now()), DateTimeUtility.toLocalDateTime(LocalTime.now().truncatedTo(CHRONO_UNIT_MILLIS)), null }
     };
 
     @Rule
