@@ -39,6 +39,11 @@ public class ITCHCodecSettings implements ICodecSettings {
      */
     private boolean wrapMessages = true;
 
+    /**
+     * The decoded messages with have the format that is supported by th2
+     */
+    private boolean evolutionaryOutput = false;
+
     public ITCHCodecSettings(int msgLength) {
 		this.msgLength = msgLength;
 	}
@@ -110,5 +115,13 @@ public class ITCHCodecSettings implements ICodecSettings {
 
     public void setWrapMessages(boolean wrapMessages) {
         this.wrapMessages = wrapMessages;
+    }
+
+    public boolean isEvolutionaryOutput() {
+        return evolutionaryOutput;
+    }
+
+    public void setEvolutionaryOutput(boolean evolutionaryOutput) {
+        this.evolutionaryOutput = evolutionaryOutput;
     }
 }

@@ -77,6 +77,7 @@ public class ITCHCodec extends AbstractCodec {
     private long lastDecode;
     private IITCHPreprocessor preprocessor;
     private boolean wrapMessages = true;
+    private boolean evolutionaryOutput;
 
     public ITCHCodec() {
 		this.lastDecode = System.currentTimeMillis();
@@ -97,6 +98,7 @@ public class ITCHCodec extends AbstractCodec {
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
                     getClass().getClassLoader()) : null;
             this.wrapMessages = msettings.isWrapMessages();
+            this.evolutionaryOutput = msettings.isEvolutionaryOutput();
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
@@ -151,7 +153,7 @@ public class ITCHCodec extends AbstractCodec {
 
 			if (i == 0) {
                 messageType = ITCHMessageHelper.UNITHEADERMSGTYPE;
-				messageLength = length;
+				messageLength = evolutionaryOutput ? HEADER_SIZE : length;
 			} else {
 				int currentPos = in.position();
 				messageLength = (msgLengthFieldSize == 2) ? in.getUnsignedShort() : in.getUnsigned();
@@ -179,7 +181,7 @@ public class ITCHCodec extends AbstractCodec {
                 message.addField(ITCHMessageHelper.FAKE_FIELD_MESSAGE_SEQUENCE_NUMBER, (int) (seqNum + i - 1));
 			}
 
-			logger.debug("Message for decoding {} [ Name = {}; position = {}; remaining = {} ]", message.getName(), in.position(), in.remaining());
+			logger.debug("Message for decoding [ Name = {}; position = {}; remaining = {} ]", message.getName(), in.position(), in.remaining());
 
             IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory);
 
@@ -210,7 +212,10 @@ public class ITCHCodec extends AbstractCodec {
 			if (drop) {
 				someMsgDropped = true;
 			} else {
-                boolean isAdmin = getAttributeValue(msgStructure, MessageHelper.ATTRIBUTE_IS_ADMIN);
+                boolean isAdmin = Objects.requireNonNull(
+                        getAttributeValue(msgStructure, MessageHelper.ATTRIBUTE_IS_ADMIN),
+                        () -> "Message " + msgStructure.getName() + " does not have attribute " + MessageHelper.ATTRIBUTE_IS_ADMIN
+                );
 
 				MsgMetaData metaData = message.getMetaData();
 				metaData.setAdmin(isAdmin);
