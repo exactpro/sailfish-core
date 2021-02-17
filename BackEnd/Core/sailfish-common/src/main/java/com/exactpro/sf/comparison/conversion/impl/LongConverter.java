@@ -19,10 +19,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAccessor;
+import java.util.concurrent.TimeUnit;
 
+import com.exactpro.sf.comparison.conversion.ConversionException;
 import com.exactpro.sf.util.DateTimeUtility;
 
 public class LongConverter extends AbstractNumberConverter<Long> {
+    private final static long NANOS_IN_MILLISECOND = TimeUnit.MILLISECONDS.toNanos(1);
     @Override
     public Long convert(LocalDate value) {
         return convertTemporal(value);
@@ -30,11 +33,17 @@ public class LongConverter extends AbstractNumberConverter<Long> {
 
     @Override
     public Long convert(LocalTime value) {
+        if(checkNanosecondPrecision(value.getNano())){
+          throw new ConversionException("Cannot convert from LocalTime to Long with a given precision, time contains nanoseconds: " + value);
+        }
         return convertTemporal(value);
     }
 
     @Override
     public Long convert(LocalDateTime value) {
+        if(checkNanosecondPrecision(value.getNano())){
+            throw new ConversionException("Cannot convert from LocalDateTime to Long with a given precision, time contains nanoseconds: " + value);
+        }
         return convertTemporal(value);
     }
 
@@ -55,5 +64,9 @@ public class LongConverter extends AbstractNumberConverter<Long> {
     @Override
     public Class<Long> getTargetClass() {
         return Long.class;
+    }
+
+    private boolean checkNanosecondPrecision(long value){
+        return (value % NANOS_IN_MILLISECOND != 0);
     }
 }

@@ -25,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
@@ -125,6 +126,25 @@ public class TestMultiConverter {
         thrown.expect(ConversionException.class);
         thrown.expectMessage(CoreMatchers.is("No converter for type: BigInteger"));
         MultiConverter.convert("125", BigInteger.class);
+    }
+    @Test
+    public void testIncorrectLocalTimePrecision() {
+        String str = "12:30:30.123456789";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSSSS");
+        LocalTime localTime = LocalTime.parse(str, formatter);
+        thrown.expect(ConversionException.class);
+        thrown.expectMessage(CoreMatchers.is("Cannot convert from LocalTime to Long with a given precision, time contains nanoseconds: " + localTime));
+        MultiConverter.convert(localTime, Long.class);
+    }
+
+    @Test
+    public void testIncorrectLocaDatelTimePrecision() {
+        String str = "2021-02-02 12:30:30.123456789";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+        LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
+        thrown.expect(ConversionException.class);
+        thrown.expectMessage(CoreMatchers.is("Cannot convert from LocalDateTime to Long with a given precision, time contains nanoseconds: " + localDateTime));
+        MultiConverter.convert(localDateTime, Long.class);
     }
 
 }
