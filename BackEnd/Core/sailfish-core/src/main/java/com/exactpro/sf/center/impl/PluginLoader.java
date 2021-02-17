@@ -59,6 +59,7 @@ import com.exactpro.sf.scriptrunner.ValidatorLoader;
 import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.util.DirectoryFilter;
 
+// This is public class and used in other tools
 public class PluginLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
@@ -151,6 +152,33 @@ public class PluginLoader {
 
 		this.pluginVersions = new ArrayList<>();
 	}
+
+    /**
+     * @deprecated please use {@link #PluginLoader(IWorkspaceDispatcher, ILoadableManager, ILoadableManager, ILoadableManager,
+     * PreprocessorLoader, ValidatorLoader, ILoadableManager, ILoadableManager, ILoadableManager, MatrixProviderHolder,
+     * ILoadableManager, ILoadableManager, PluginServiceLoader, IVersion, ILoadableManager, ILoadableManager)}
+     */
+	@Deprecated
+    public PluginLoader(
+            IWorkspaceDispatcher wd,
+            ILoadableManager staticServiceManager,
+            ILoadableManager actionManager,
+            ILoadableManager dictionaryManager,
+            PreprocessorLoader preprocessorLoader,
+            ValidatorLoader validatorLoader,
+            ILoadableManager adapterManager,
+            ILoadableManager dataManager,
+            ILoadableManager languageManager,
+            MatrixProviderHolder matrixProviderHolder,
+            ILoadableManager matrixConverterManager,
+            ILoadableManager statisticsReportsLoader,
+            PluginServiceLoader pluginServiceLoader,
+            IVersion coreVersion,
+            ILoadableManager messageStorageLoader) {
+	    this(wd, staticServiceManager, actionManager,
+                dictionaryManager, preprocessorLoader, validatorLoader, adapterManager, dataManager, languageManager, matrixProviderHolder,
+                matrixConverterManager, statisticsReportsLoader, pluginServiceLoader, coreVersion, messageStorageLoader, null);
+    }
 
 	public LoadInfo load() throws FileNotFoundException, WorkspaceSecurityException, SailfishURIException {
 
