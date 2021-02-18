@@ -62,7 +62,9 @@ buildscript {
         classpath(group: 'com.github.onslip',                   name: 'gradle-one-jar',                     version: '1.0.5')
         classpath(group: 'me.champeau.gradle',                  name: 'jmh-gradle-plugin',                  version: '0.2.0')
         classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2.22')
-        classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.2.11')
+        classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.3.1')
+        classpath(group: 'com.sun.xml.bind',                    name: 'jaxb-core',                          version: '3.0.0')
+        classpath(group: 'com.sun.xml.bind',                    name: 'jaxb-impl',                          version: '2.3.1')
         classpath(group: 'com.github.ben-manes',                name: 'gradle-versions-plugin',             version: '0.20.0')
         classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.8.0')
         classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: "${kotlin_version}"
@@ -420,9 +422,9 @@ subprojects {
     }
     
     dependencies {
-        compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.7'
-        compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.2.7'
-        compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.2.7'
+        compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+        compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '3.0.0'
+        compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.1'
         compile group: 'javax.activation', name: 'activation', version: '1.1.1'
         compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: "${kotlin_version}"
         compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "${kotlin_version}"

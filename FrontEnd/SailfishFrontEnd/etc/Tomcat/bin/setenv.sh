@@ -40,7 +40,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells
 export CATALINA_OPTS="$CATALINA_OPTS -Duser.dir=$CATALINA_BASE/temp" # Uses to specify directory for relative paths
 
 #Deployer Jvm arguments:
-export DEPLOYER_JAVA_OPTS=""
+export DEPLOYER_JAVA_OPTS="-Djdk.tls.client.protocols=TLSv1.2"
 export CATALINA_OPTS="$CATALINA_OPTS $DEPLOYER_JAVA_OPTS"
 
 #Get extends environment variables

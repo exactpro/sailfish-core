@@ -41,7 +41,7 @@ set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells
 set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
 
 rem Deployer Jvm arguments:
-set "DEPLOYER_JAVA_OPTS="
+set "DEPLOYER_JAVA_OPTS=-Djdk.tls.client.protocols=TLSv1.2"
 set "CATALINA_OPTS=%CATALINA_OPTS% %DEPLOYER_JAVA_OPTS%"
 
 rem Get extends environment variables
