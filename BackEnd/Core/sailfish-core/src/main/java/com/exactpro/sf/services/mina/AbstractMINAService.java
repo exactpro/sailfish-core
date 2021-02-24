@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.mina;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -43,6 +44,7 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
     protected static final long DEFAULT_TIMEOUT = 5000L;
 
     protected volatile MINASession session;
+    private volatile Future<?> connectionAbortedFuture;
 
     protected void initConnector() throws Exception {
 
@@ -257,7 +259,13 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
         }
 
         if (isConnectionAbortedException(cause)) {
-            connectionAborted(session, cause);
+            Future<?> future = connectionAbortedFuture;
+            if(future != null && !future.isDone() ) {
+                logger.info("Canceling connection aborted task for " + getServiceName());
+                future.cancel(true);
+                logger.info("Connection aborted task for " + getServiceName() + " is cancelled");
+            }
+            connectionAbortedFuture = taskExecutor.addTask(() -> connectionAborted(session, cause));
         }
     }
 

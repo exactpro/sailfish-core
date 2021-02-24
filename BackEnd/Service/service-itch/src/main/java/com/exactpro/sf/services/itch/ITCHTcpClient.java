@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
@@ -45,9 +46,12 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 
 	private volatile boolean reconecting;
 	private volatile boolean disposeWhenSessionClosed;
+	private volatile boolean externalDisposing = false;
 
     private final Runnable reconectCommand;
     private final Runnable sentHeartbeatCommand;
+
+    private volatile Future<?> reconnectFuture;
 
     private int reconnectiongTimeout;
     private ITCHCodecSettings codecSettings;
@@ -57,12 +61,13 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 		this.reconectCommand = new Runnable() {
 			@Override
 			public void run() {
-				try {
-				    internalStart();
-				}
-				catch ( Exception e ) {
-					logger.error("Could not connect", e);
-				}
+			    if(!externalDisposing) {
+                    try {
+                        internalStart();
+                    } catch (Exception e) {
+                        logger.error("Could not connect", e);
+                    }
+                }
 			}
 		};
 
@@ -154,9 +159,16 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 
 	@Override
     public void internalStart() throws Exception {
+        externalDisposing = false;
         super.internalStart();
         connect();
 	}
+
+	@Override
+    public void dispose() {
+        externalDisposing = true;
+        super.dispose();
+    }
 
     @Override
     protected MINASession createSession(IoSession session) {
@@ -201,7 +213,8 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
     @Override
     protected void handleNotConnected(Throwable throwable) {
         if(reconecting) {
-            taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
+            cancelReconnectFuture();
+            reconnectFuture = taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
             logger.error("Cannot establish session to address: {}:{}", getHostname(), getPort());
         } else {
             super.handleNotConnected(throwable);
@@ -232,7 +245,8 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 			}
 
 			if ( reconecting ) {
-                taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
+			    cancelReconnectFuture();
+                reconnectFuture = taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
                 changeStatus(ServiceStatus.WARNING, "Connection was forcibly closed by the remote machine."
                         + "Service will be reconnect after " + reconnectiongTimeout + " milliseconds");
             } else {
@@ -250,6 +264,15 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 	    disconnecting = true;
 	    super.preDisconnect();
 	}
+
+    private void cancelReconnectFuture() {
+        Future<?> future = reconnectFuture;
+        if(future != null && !future.isDone()) {
+            logger.info("Canceling reconnect task for " + getServiceName());
+            future.cancel(true);
+            logger.info("Canceled reconnect task for " + getServiceName());
+        }
+    }
 
 	protected void sendLiteLogin() throws InterruptedException {
         ITCHTCPClientSettings settings = getSettings();
