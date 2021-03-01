@@ -100,22 +100,14 @@ public abstract class AbstractNettyMulticastClient extends AbstractNettyClient {
     
     @Override
     protected void initChannelCloseFuture(AbstractNettySession session, Channel channel) {
-        ((DatagramChannel)channel).leaveGroup(multicastGroup, localNetworkInterface).addListener(new ChannelFutureListener() {
+        channel.closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                if (!future.isSuccess()) {
-                    logger.error("Failed to leave multicast group [{}]", multicastGroup);
+                if (future.isSuccess()) {
+                    changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
+                } else {
+                    changeStatus(ServiceStatus.ERROR, "Failed to close channel", future.cause());
                 }
-                channel.close().addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        if (future.isSuccess()) {
-                            changeStatus(ServiceStatus.DISPOSED, "", null);
-                        } else {
-                            changeStatus(ServiceStatus.ERROR, "Failed to close channel", future.cause());
-                        }
-                    }
-                });
             }
         });
     }
