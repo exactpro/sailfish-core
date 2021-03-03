@@ -16,6 +16,7 @@
 package com.exactpro.sf.externalapi;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.ServiceStatus;
@@ -48,12 +49,22 @@ public interface IServiceProxy {
     IMessage send(IMessage message) throws InterruptedException;
 
     /**
+     * @see #sendRaw(byte[], IMetadata)
+     * @deprecated use {{@link #sendRaw(byte[], IMetadata)}} instead
+     */
+    @Deprecated
+    default void sendRaw(byte[] rawData) throws InterruptedException {
+        sendRaw(rawData, IMetadata.EMPTY);
+    }
+
+    /**
      * Sends the raw message to the system
      * @param rawData the full raw message in the corresponding to the system format. It must contain all part of the message
      *               (business message part and session layer part)
+     * @param extraMetadata the metadata that should be added to the message that will be actually sent
      * @throws InterruptedException if messages sending was interrupted
      */
-    default void sendRaw(byte[] rawData) throws InterruptedException {
+    default void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
         throw new UnsupportedOperationException("Sending raw messages is not supported");
     }
     

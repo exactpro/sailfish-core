@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
@@ -100,7 +102,7 @@ public class MINASession implements ISession {
     }
 
     @Override
-    public void sendRaw(byte[] rawData) throws InterruptedException {
+    public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
         IoFilter codecFilter = session.getFilterChain().get(AbstractMINAService.CODEC_FILTER_NAME);
         if (codecFilter == null) {
             throw new IllegalStateException("Cannot get filter '" + AbstractMINAService.CODEC_FILTER_NAME + "' from session " + session);
@@ -119,6 +121,7 @@ public class MINASession implements ISession {
                     continue;
                 }
                 removeSessionFields(result);
+                MetadataExtensions.merge(result.getMetaData(), extraMetadata);
                 send(result);
                 sent = true;
             }

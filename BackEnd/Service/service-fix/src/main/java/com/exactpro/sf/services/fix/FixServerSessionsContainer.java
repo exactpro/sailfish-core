@@ -17,6 +17,7 @@
 package com.exactpro.sf.services.fix;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.ISession;
 import org.apache.commons.lang3.StringUtils;
@@ -58,9 +59,9 @@ public class FixServerSessionsContainer implements ISession {
     }
 
     @Override
-    public void sendRaw(byte[] rawData) throws InterruptedException {
+    public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
         tryActionToSessions(() -> "No sessions to send raw message: " + CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)),
-                session -> session.sendRaw(rawData));
+                session -> session.sendRaw(rawData, extraMetadata));
     }
 
     @Override

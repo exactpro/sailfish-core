@@ -16,6 +16,7 @@
 package com.exactpro.sf.services;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 
 public interface ISession
 {
@@ -79,7 +80,16 @@ public interface ISession
         throw new UnsupportedOperationException("Force close is not implemented");
     }
 
+    /**
+     * @see #sendRaw(byte[], IMetadata)
+     * @deprecated will be removed in the future. Use {@link #sendRaw(byte[], IMetadata)}
+     */
+    @Deprecated
     default void sendRaw(byte[] rawData) throws InterruptedException {
+        sendRaw(rawData, IMetadata.EMPTY);
+    }
+
+    default void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
         throw new UnsupportedOperationException("Sending raw data is not supported");
     }
 }

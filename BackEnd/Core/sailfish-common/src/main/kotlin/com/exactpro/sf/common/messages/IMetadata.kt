@@ -21,4 +21,23 @@ interface IMetadata : Cloneable {
     operator fun set(key: String, value: Any)
     fun contains(key: String): Boolean
     fun remove(key: String)
+
+    companion object {
+        @JvmField
+        val EMPTY: IMetadata = EmptyMetadata()
+    }
+}
+
+private class EmptyMetadata : IMetadata {
+    override val keys: Set<String> = emptySet()
+
+    override fun get(key: String): Any? = null
+
+    override fun set(key: String, value: Any) = Unit
+
+    override fun contains(key: String): Boolean = false
+
+    override fun remove(key: String) = Unit
+
+    override fun clone(): EmptyMetadata = this
 }

@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -59,6 +61,8 @@ import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.common.impl.messages.StrictMessageWrapper;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -106,6 +110,7 @@ import com.exactpro.sf.storage.EmptyServiceStorage;
 import com.exactpro.sf.storage.IMessageStorage;
 import com.exactpro.sf.storage.IServiceStorage;
 import com.exactpro.sf.storage.impl.FakeMessageStorage;
+import com.google.common.collect.Sets;
 
 public class ServiceFactory implements IServiceFactory {
 
@@ -450,6 +455,9 @@ public class ServiceFactory implements IServiceFactory {
     }
 
     private static class ServiceProxy implements IServiceProxy {
+        private static final Set<String> PROHIBITED_METADATA_KEYS = Stream.of(MetadataProperty.values())
+                .map(MetadataProperty::getPropertyName)
+                .collect(Collectors.toSet());
 
         private final IServiceContext serviceContext;
         private final IInitiatorService service;
@@ -509,9 +517,10 @@ public class ServiceFactory implements IServiceFactory {
         }
 
         @Override
-        public void sendRaw(byte[] rawData) throws InterruptedException {
+        public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
+            validateMetadataKeys(extraMetadata);
             ISession session = getInternalSession();
-            session.sendRaw(rawData);
+            session.sendRaw(rawData, extraMetadata);
         }
 
         @Override
@@ -540,6 +549,13 @@ public class ServiceFactory implements IServiceFactory {
                 return service.getSession();
             }
             throw new IllegalStateException("Service is not started");
+        }
+
+        private void validateMetadataKeys(IMetadata extraMetadata) {
+            Set<String> intersection = Sets.intersection(extraMetadata.getKeys(), PROHIBITED_METADATA_KEYS);
+            if (!intersection.isEmpty()) {
+                throw new IllegalArgumentException("'extraMetadata' contains prohibited keys: " + intersection);
+            }
         }
 
         private boolean checkServiceState(ServiceStatus actual, ServiceStatus... expected) {

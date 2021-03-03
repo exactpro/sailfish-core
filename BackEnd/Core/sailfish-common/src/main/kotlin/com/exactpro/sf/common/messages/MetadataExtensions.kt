@@ -41,6 +41,17 @@ private fun IMetadata.setOnce(property: MetadataProperty, value: Any) {
     set(propertyName, value)
 }
 
+/**
+ * Adds all data from the [other] metadata to the current [IMetadata].
+ *
+ * @return the same [IMetadata] the method was invoked for. All key from [other] will be added to the original metadata.
+ */
+fun IMetadata.merge(other: IMetadata): IMetadata = apply {
+    for (key in other.keys) {
+        set(key, checkNotNull(other[key]) { "Metadata contains key '$key' but the value is 'null'" })
+    }
+}
+
 var IMetadata.id: Long
     get() = getRequired(ID)
     set(value) = setOnce(ID, value)
