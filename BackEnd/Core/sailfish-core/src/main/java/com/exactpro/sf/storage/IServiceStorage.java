@@ -20,6 +20,8 @@ import java.util.List;
 
 import java.time.Instant;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.center.IDisposable;
@@ -27,6 +29,7 @@ import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceEvent;
 
 public interface IServiceStorage extends IDisposable {
+    @NotNull
     ServiceInfo lookupService(ServiceName serviceName);
 
 	void addServiceDescription(ServiceDescription description);

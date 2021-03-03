@@ -145,10 +145,10 @@ public class AbstractTest {
                     serviceContext = SFLocalContext.createContext(workspaceDispatcher, settings, new SfInstanceInfo("localhost", 80, "sfgui")).getServiceContext();
                     serviceContext = Mockito.spy(serviceContext);
 
-                    Mockito.when(serviceContext.lookupService(ArgumentMatchers.any(ServiceName.class))).thenAnswer(invocation -> {
+                    Mockito.doAnswer(invocation -> {
                         ServiceName serviceName = invocation.getArgument(0);
                         return new ServiceInfo(serviceName.toString(), serviceName);
-                    });
+                    }).when(serviceContext).lookupService(ArgumentMatchers.any(ServiceName.class));
 		        }
 		    } catch (Exception e) {
 		    	System.err.println(e);

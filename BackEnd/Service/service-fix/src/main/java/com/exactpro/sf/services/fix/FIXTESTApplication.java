@@ -134,7 +134,7 @@ public class FIXTESTApplication implements FIXServerApplication {
         this.converter = applicationContext.getConverter();
         this.dictionaryProvider = applicationContext.getDictionaryProvider();
         this.storage = serviceContext.getMessageStorage();
-        this.serviceInfo = serviceContext.lookupService(serviceName);
+        this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
         this.messageHelper = applicationContext.getMessageHelper();
         fixFieldConverter = new FixFieldConverter();

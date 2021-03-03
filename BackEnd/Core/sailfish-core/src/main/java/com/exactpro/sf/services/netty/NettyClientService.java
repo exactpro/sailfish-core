@@ -154,7 +154,7 @@ public abstract class NettyClientService implements IInitiatorService {
             this.settings = (NettyClientSettings) settings;
             this.msgFactory = this.serviceContext.getDictionaryManager().getMessageFactory(this.settings.getDictionaryName());
             this.storage = this.serviceContext.getMessageStorage();
-            this.serviceInfo = serviceContext.lookupService(name);
+            this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
             this.serviceMonitor = serviceMonitor;
             this.logConfigurator = this.serviceContext.getLoggingConfigurator();
             this.taskExecutor = this.serviceContext.getTaskExecutor();

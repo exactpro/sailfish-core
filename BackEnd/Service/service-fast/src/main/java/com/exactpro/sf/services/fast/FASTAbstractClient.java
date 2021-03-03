@@ -164,7 +164,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         this.workspaceDispatcher = Objects.requireNonNull(serviceContext.getWorkspaceDispatcher(), "'Workspace dispatcher' parameter");
 
         this.logConfigurator = Objects.requireNonNull(this.serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter");
-        this.serviceInfo = serviceContext.lookupService(serviceName);
+        this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
         logger.info("Initializing service [{}] ... done", serviceName);
 

@@ -24,6 +24,7 @@ import com.exactpro.sf.services.fix.converter.MessageConvertException
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter
 import org.quickfixj.CharsetSupport
 import quickfix.Message
+import java.util.Objects
 
 abstract class AbstractApplication {
 
@@ -33,7 +34,7 @@ abstract class AbstractApplication {
 
     open fun init(serviceContext: IServiceContext, applicationContext: ApplicationContext, serviceName: ServiceName) {
         this.applicationContext = applicationContext
-        serviceInfo = serviceContext.lookupService(serviceName)
+        serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
         converter = applicationContext.converter
     }
 

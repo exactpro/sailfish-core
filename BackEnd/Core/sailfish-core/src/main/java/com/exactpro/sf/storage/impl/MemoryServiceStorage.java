@@ -71,7 +71,7 @@ public class MemoryServiceStorage implements IServiceStorage {
             descriptionLock.readLock().unlock();
         }
 
-        return null;
+        throw new StorageException("Could not get the '" + serviceName + "' service from memory cache");
     }
 
 	@Override

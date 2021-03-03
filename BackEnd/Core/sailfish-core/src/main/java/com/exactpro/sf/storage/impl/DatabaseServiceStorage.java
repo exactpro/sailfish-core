@@ -103,8 +103,6 @@ public class DatabaseServiceStorage implements IServiceStorage {
 	/**
 	 * Will search for hibernate.cfg.xml file in folder specified by 'workFolderPath' parameter.
 	 * @param staticServiceManager
-	 * @param cfgFolderPath
-	 * @param factory
 	 */
     public DatabaseServiceStorage(SessionFactory sessionFactory, IStaticServiceManager staticServiceManager, IDictionaryManager dictionaryManager, IMessageStorage messageStorage) {
 
@@ -113,7 +111,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		this.dictionaryManager = Objects.requireNonNull(dictionaryManager, "dictionaryManager cannot be null");
         this.messageStorage = Objects.requireNonNull(messageStorage, "messageStorage cannot be null");
 
-		this.flusher = new ObjectFlusher<>(new HibernateFlushProvider<StoredServiceEvent>(this.sessionFactory), BUFFER_SIZE);
+		this.flusher = new ObjectFlusher<>(new HibernateFlushProvider<>(this.sessionFactory), BUFFER_SIZE);
         flusher.start();
 
 		loadServiceDescriptions();
@@ -131,17 +129,22 @@ public class DatabaseServiceStorage implements IServiceStorage {
             criteria.createAlias("environment", "environment");
             criteria.add(Restrictions.eq("environment.name", serviceName.getEnvironment()));
 
-            StoredService storedService = (StoredService) criteria.uniqueResult();
+            StoredService storedService = (StoredService)criteria.uniqueResult();
 
             // hotfix to load services from default environment of old DB
-            if(storedService == null && serviceName.isDefault()) {
-                criteria = session.createCriteria(StoredService.class);
-                criteria.add(Restrictions.eq("name", serviceName.getServiceName()));
-                criteria.add(Restrictions.isNull("environment"));
-                storedService = (StoredService) criteria.uniqueResult();
+            if (storedService == null && serviceName.isDefault()) {
+                Criteria defaultServiceCriteria = session.createCriteria(StoredService.class);
+                defaultServiceCriteria.add(Restrictions.eq("name", serviceName.getServiceName()));
+                defaultServiceCriteria.add(Restrictions.isNull("environment"));
+                storedService = (StoredService)defaultServiceCriteria.uniqueResult();
             }
 
-            return storedService != null ? new ServiceInfo(storedService.getId(), serviceName) : null;
+            if (storedService == null) {
+                throw new StorageException("Could not get the '" + serviceName + "' service from data base");
+            }
+            return new ServiceInfo(storedService.getId(), serviceName);
+        } catch (StorageException e) {
+            throw e;
         } catch (RuntimeException e) {
             logger.error("Could not retrieve a service for name: {}", serviceName, e);
             throw new StorageException("Could not retrieve a service for name: " + serviceName, e);

@@ -147,7 +147,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 
 			this.taskExecutor = this.serviceContext.getTaskExecutor();
 
-            this.serviceInfo = serviceContext.lookupService(serviceName);
+            this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
 			if(StringUtils.isEmpty(settings.getCodecClassName())){
 				throw new NullPointerException("Codec class name");

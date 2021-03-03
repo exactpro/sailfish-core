@@ -94,7 +94,7 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter is null");
 
             this.msgStorage = Objects.requireNonNull(this.serviceContext.getMessageStorage(), "'Storage' parameter is null");
-            this.serviceInfo = serviceContext.lookupService(name);
+            this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
             this.monitor = serviceMonitor;
             this.taskExecutor = Objects.requireNonNull(this.serviceContext.getTaskExecutor(), "'Task executor' parameter is null");

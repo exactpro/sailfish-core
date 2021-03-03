@@ -390,7 +390,7 @@ public class FIXClient implements IInitiatorService {
 
         this.logConfigurator = Objects.requireNonNull(this.serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter");
         this.msgStorage = Objects.requireNonNull(this.serviceContext.getMessageStorage(), "'Message storage' parameter");
-        this.serviceInfo = serviceContext.lookupService(serviceName);
+        this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
         if(serviceInfo == null) {
             logger.debug("A service named {} was not found.", serviceName);

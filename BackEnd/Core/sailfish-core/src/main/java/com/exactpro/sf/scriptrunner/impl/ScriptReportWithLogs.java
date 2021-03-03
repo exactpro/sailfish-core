@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -250,13 +251,8 @@ public class ScriptReportWithLogs implements IScriptReport {
         Set<String> servicesId = new HashSet<>();
 
         for(String serviceName: serviceNames) {
-            ServiceInfo serviceInfo = serviceStorage.lookupService(ServiceName.parse(serviceName));
-
-            if(serviceInfo != null) {
-                servicesId.add(serviceInfo.getID());
-            } else {
-                throw new EPSCommonException("Unknown service: " + serviceName);
-            }
+            ServiceInfo serviceInfo = Objects.requireNonNull(serviceStorage.lookupService(ServiceName.parse(serviceName)), "serviceInfo cannot be null");
+            servicesId.add(serviceInfo.getID());
         }
 
         filter.setServicesIdSet(servicesId);

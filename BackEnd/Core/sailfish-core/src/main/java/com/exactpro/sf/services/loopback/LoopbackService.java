@@ -72,7 +72,7 @@ public class LoopbackService implements IInitiatorService {
 		this.storage = Objects.requireNonNull(serviceContext.getMessageStorage(), "'Message storage' parameter");
 		this.logConfigurator = Objects.requireNonNull(serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter");
         this.context = serviceContext;
-        this.serviceInfo = serviceContext.lookupService(name);
+        this.serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
 
 		status = ServiceStatus.INITIALIZED;
 	}
