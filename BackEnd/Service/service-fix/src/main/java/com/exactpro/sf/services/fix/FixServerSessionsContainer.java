@@ -16,16 +16,18 @@
 
 package com.exactpro.sf.services.fix;
 
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.SendMessageFailedException;
+import com.exactpro.sf.services.ISession;
+import org.apache.commons.lang3.StringUtils;
+import org.quickfixj.CharsetSupport;
+
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.SendMessageFailedException;
-import com.exactpro.sf.services.ISession;
+import java.util.function.Supplier;
 
 public class FixServerSessionsContainer implements ISession {
 
@@ -42,32 +44,8 @@ public class FixServerSessionsContainer implements ISession {
 
     @Override
     public IMessage send(Object message) throws InterruptedException {
-        Map<ISession, Exception> sentErrors = new HashMap<>();
-        Collection<ISession> connectedSessions = application.getSessions();
-        if (connectedSessions.isEmpty()) {
-            throw new SendMessageFailedException("No sessions to send message: " + message);
-        }
-
-        for (ISession session : connectedSessions) {
-            try {
-                session.send(message);
-            } catch (Exception e) {
-                sentErrors.put(session, e);
-            }
-        }
-
-        if (!sentErrors.isEmpty()) {
-            StringBuilder errorBuilder = new StringBuilder("Not all message successfully sent: ");
-            for (Entry<ISession, Exception> error : sentErrors.entrySet()) {
-                Exception ex = error.getValue();
-                String errorMsg = ex.getCause() == null ? ex.getMessage() : String.format("%s; cause: %s", ex.getMessage(), ex.getCause());
-                errorBuilder.append(StringUtils.LF).append(String.format("%s : [%s]", error.getKey(), errorMsg));
-            }
-            SendMessageFailedException exception = new SendMessageFailedException(errorBuilder.toString());
-            sentErrors.values().forEach(exception::addSuppressed);
-            throw exception;
-        }
-
+        tryActionToSessions(() -> "No sessions to send message: " + message,
+                session -> session.send(message));
         return message instanceof IMessage ? (IMessage)message : null;
     }
 
@@ -77,6 +55,12 @@ public class FixServerSessionsContainer implements ISession {
             session.sendDirty(message);
         }
         return message instanceof IMessage ? (IMessage)message : null;
+    }
+
+    @Override
+    public void sendRaw(byte[] rawData) throws InterruptedException {
+        tryActionToSessions(() -> "No sessions to send raw message: " + CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)),
+                session -> session.sendRaw(rawData));
     }
 
     @Override
@@ -105,5 +89,38 @@ public class FixServerSessionsContainer implements ISession {
         for (ISession session : application.getSessions()) {
             ((FIXSession)session).addExpectedSenderNum(seq);
         }
+    }
+
+    private void tryActionToSessions(Supplier<String> onEmptyMessage, SessionAction actionForSession) {
+        Collection<ISession> connectedSessions = application.getSessions();
+
+        if (connectedSessions.isEmpty()) {
+            throw new SendMessageFailedException(onEmptyMessage.get());
+        }
+
+        Map<ISession, Exception> sentErrors = new HashMap<>();
+        for (ISession session : connectedSessions) {
+            try {
+                actionForSession.accept(session);
+            } catch (Exception e) {
+                sentErrors.put(session, e);
+            }
+        }
+
+        if (!sentErrors.isEmpty()) {
+            StringBuilder errorBuilder = new StringBuilder("Not all message successfully sent: ");
+            for (Entry<ISession, Exception> error : sentErrors.entrySet()) {
+                Exception ex = error.getValue();
+                String errorMsg = ex.getCause() == null ? ex.getMessage() : String.format("%s; cause: %s", ex.getMessage(), ex.getCause());
+                errorBuilder.append(StringUtils.LF).append(String.format("%s : [%s]", error.getKey(), errorMsg));
+            }
+            SendMessageFailedException exception = new SendMessageFailedException(errorBuilder.toString());
+            sentErrors.values().forEach(exception::addSuppressed);
+            throw exception;
+        }
+    }
+
+    private interface SessionAction {
+        void accept(ISession session) throws Exception;
     }
 }
