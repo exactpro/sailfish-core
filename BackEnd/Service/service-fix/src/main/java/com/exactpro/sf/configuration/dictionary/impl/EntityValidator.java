@@ -15,17 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import java.util.List;
+
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
-import java.util.List;
 
 public abstract class EntityValidator {
-    protected IDictionaryStructure dictionary;
 
-    abstract void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message);
-
-    public void setDictionary(IDictionaryStructure dictionary) {
-        this.dictionary = dictionary;
-    }
+    abstract void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary, IMessageStructure message);
 }

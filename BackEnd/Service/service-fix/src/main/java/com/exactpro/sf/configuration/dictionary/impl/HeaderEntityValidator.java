@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.ValidationHelper;
@@ -26,7 +27,8 @@ import java.util.List;
 public class HeaderEntityValidator extends EntityValidator {
 
     @Override
-    public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
+    public void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary,
+                               IMessageStructure message) {
         ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.BEGIN_STRING_FIELD);
         ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.BODY_LENGTH_FIELD);
         ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.MSG_TYPE_FIELD);

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 
@@ -22,7 +23,8 @@ import java.util.List;
 
 public class ComponentEntityValidator extends EntityValidator {
     @Override
-    public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
+    public void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary,
+                               IMessageStructure message) {
         // do nothing - component doesn't have required attributes
         // 'entity_type' attribute is checked in FixMessageValidator
     }

@@ -16,13 +16,12 @@
 
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
-import com.exactpro.sf.configuration.dictionary.ValidationHelper;
-import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
@@ -32,8 +31,9 @@ import java.util.List;
 public class FullMessageEntityValidator extends BaseMessageEntityValidator {
 
     @Override
-    public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
-        super.validateEntity(errors, message);
+    public void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary,
+                               IMessageStructure message) {
+        super.validateEntity(errors, dictionary, message);
         checkUniqueness(errors, message);
     }
 

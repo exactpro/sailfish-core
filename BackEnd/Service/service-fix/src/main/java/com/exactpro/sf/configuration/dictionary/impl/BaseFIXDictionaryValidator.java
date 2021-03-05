@@ -185,13 +185,10 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
 
     @Override
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, boolean full, Boolean fieldsOnly) {
-        entityNamesToEntityValidators.get(GROUP_ENTITY).setDictionary(dictionary);
-
         List<DictionaryValidationError> errors = super.validate(dictionary, full, fieldsOnly);
         checkMessageTypes(errors, dictionary);
         checkRequiredMessages(errors, dictionary);
         checkTagDuplicates(errors, dictionary);
-        entityNamesToEntityValidators.get(GROUP_ENTITY).setDictionary(null);
         return errors;
     }
 
@@ -199,7 +196,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, IMessageStructure message, boolean full) {
         List<DictionaryValidationError> errors = super.validate(dictionary, message, full);
 
-        validateEntity(errors, message);
+        validateEntity(errors, dictionary, message);
 
         return errors;
     }
@@ -375,7 +372,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
         ValidationHelper.checkRequiredMessageExistence(errors, dictionary, TRAILER);
     }
 
-    private void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
+    private void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary, IMessageStructure message) {
         if(message.getAttributes().isEmpty()) {
             errors.add(new DictionaryValidationError(message.getName(), null,
                     "Message  <strong>\"" + message.getName() + "\"</strong> doesn't contain attributes",
@@ -403,7 +400,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
                 return;
             }
 
-            entityValidator.validateEntity(errors, message);
+            entityValidator.validateEntity(errors, dictionary, message);
         }
     }
 

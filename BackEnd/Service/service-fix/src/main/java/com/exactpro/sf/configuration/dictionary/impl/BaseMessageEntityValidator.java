@@ -18,6 +18,7 @@ package com.exactpro.sf.configuration.dictionary.impl;
 import java.util.List;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.ValidationHelper;
@@ -26,7 +27,8 @@ import com.exactpro.sf.services.fix.FixMessageHelper;
 
 public class BaseMessageEntityValidator extends EntityValidator {
     @Override
-    public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
+    public void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary,
+                               IMessageStructure message) {
         checkAttributes(errors, message);
 
         ValidationHelper.checkRequiredField(errors, message, FixMessageHelper.HEADER);

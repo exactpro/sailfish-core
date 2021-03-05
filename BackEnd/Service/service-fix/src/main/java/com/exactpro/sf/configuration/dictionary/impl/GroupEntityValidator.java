@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
@@ -32,11 +33,11 @@ import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 
 public class GroupEntityValidator extends EntityValidator {
     @Override
-    public void validateEntity(List<DictionaryValidationError> errors, IMessageStructure message) {
-        checkAttributes(errors, message);
+    public void validateEntity(List<DictionaryValidationError> errors, IDictionaryStructure dictionary, IMessageStructure message) {
+        checkAttributes(errors, dictionary, message);
     }
 
-    private void checkAttributes(List<DictionaryValidationError> errors, IMessageStructure message) {
+    private void checkAttributes(List<DictionaryValidationError> errors, IDictionaryStructure dictionary, IMessageStructure message) {
 
         ValidationHelper.checkMessageAttributeType(errors, message,
                 QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE, JavaType.JAVA_LANG_STRING, null);
