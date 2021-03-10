@@ -266,8 +266,8 @@ public class MessageComparator {
                     }
 
                     resultMatrix[actualIndex][expectedIndex] = subResult;
-                    countMatrix[actualIndex][expectedIndex] = getCount(calculationResult, StatusType.PASSED) * 1_000_000
-                            + getCount(calculationResult, StatusType.CONDITIONALLY_PASSED);
+                    countMatrix[actualIndex][expectedIndex] = ComparisonUtil.getResultCount(calculationResult, StatusType.PASSED) * 1_000_000
+                            + ComparisonUtil.getResultCount(calculationResult, StatusType.CONDITIONALLY_PASSED);
                 }
             }
 
@@ -615,18 +615,6 @@ public class MessageComparator {
         }
 
         return wrapper;
-    }
-
-    private static int getCount(ComparisonResult result, StatusType statusType) {
-        int count = 0;
-
-        for(ComparisonResult subResult : result) {
-            if(subResult.getStatus() == statusType) {
-                count++;
-            }
-        }
-
-        return count;
     }
 
     protected static void invertResults(ComparisonResult result, Map<String, Boolean> negativeMap) {

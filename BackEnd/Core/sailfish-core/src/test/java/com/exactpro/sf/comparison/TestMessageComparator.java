@@ -1160,8 +1160,68 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNull(result);
     }
 
+    @Test
+    public void testKeyFieldInSubMessageCollectionKeyFieldIsNotFirst() {
+        IMessage message = createMessage(msg -> {
+            msg.addField("rootField", 1);
+            msg.addField("collection", asList(
+                    createMessage(subMsg -> {
+                        subMsg.addField("nonKeyField", 2);
+                        subMsg.addField("anotherInnerMessage", createMessage(innerMsg -> {
+                            innerMsg.addField("anotherField", 1);
+                        }));
+                    }),
+                    createMessage(subMsg -> {
+                        subMsg.addField("nonKeyField", 4);
+                        subMsg.addField("innerMessage", createMessage(innerMsg -> {
+                            innerMsg.addField("keyField", 1);
+                        }));
+                    })
+            ));
+        });
+
+        IMessage wrongFilter = createMessage(msg -> {
+            msg.addField("collection", asList(
+                    createMessage(subMsg -> {
+                        subMsg.addField("nonKeyField", 2);
+                        subMsg.addField("anotherInnerMessage", createMessage(innerMsg -> {
+                            innerMsg.addField("anotherField", 2); // does not match
+                        }));
+                    }),
+                    createMessage(subMsg -> {
+                        subMsg.addField("innerMessage", createMessage(innerMsg -> {
+                            innerMsg.addField("keyField", 1);
+                        }));
+                    })
+            ));
+        });
+
+        IMessage rightFilter = wrongFilter.cloneMessage();
+        rightFilter.<List<IMessage>>getField("collection").get(0)
+                .<IMessage>getField("anotherInnerMessage").addField("anotherField", 1); // match the message
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+
+        metaContainer.add("collection", new MetaContainer());
+
+        MetaContainer innerContainer = new MetaContainer();
+        innerContainer.add("innerMessage", new MetaContainer().setKeyFields(singleton("keyField")));
+        metaContainer.add("collection", innerContainer);
+
+        ComparisonResult result = MessageComparator.compare(message, wrongFilter, settings);
+        Assert.assertNotNull("Key is not matched", result);
+        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+
+        result = MessageComparator.compare(message, rightFilter, settings);
+        Assert.assertNotNull("Key is not matched", result);
+        Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+    }
+
     private static IMessage createMessage(Consumer<IMessage> initializer) {
-        IMessage message = new MapMessage("namespace", "name");
+        IMessage message = DefaultMessageFactory.getFactory().createMessage("name", "namespace");
         initializer.accept(message);
         return message;
     }
