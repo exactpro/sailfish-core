@@ -171,19 +171,20 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
                         int seqNum = Integer.parseInt(text.split(" ")[4]);
                         // experimentally checked
                         // only here set next seq num as seqMum-1.
-                        seqNum = seqNum - 1;
-                        logger.debug("set seqNum after logout to: {}", seqNum);
+                        seqNum -= 1; // decrementing the target sequence might cause the problem with 'seq to height' if the client increments seq as well
+                        logger.info("Set target seqNum after logout to: {}", seqNum);
                         try {
                             session.setNextTargetMsgSeqNum(seqNum);
                         } catch (IOException e) {
-                            logger.error(e.getMessage(), e);
+                            logger.error("Cannot set next target sequence: " + e.getMessage(), e);
                         }
 
-                        int targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
+                        // prevent incrementing our own sequence
+                        int oursSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
                         try {
-                            session.setNextTargetMsgSeqNum(targSeq);
+                            session.setNextSenderMsgSeqNum(oursSeq);
                         } catch (IOException e) {
-                            logger.error(e.getMessage(), e);
+                            logger.error("Cannot set next sender sequence" + e.getMessage(), e);
                         }
                     }
                 }
