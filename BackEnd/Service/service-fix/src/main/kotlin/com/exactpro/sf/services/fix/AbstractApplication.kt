@@ -41,9 +41,7 @@ abstract class AbstractApplication {
     @JvmOverloads
     @Throws(MessageConvertException::class)
     protected fun convert(message: Message, from: String, to: String, isAdmin: Boolean, verifyTags: Boolean? = null, isRejected: Boolean = false): IMessage {
-        val messageData: String? = message.messageData
-        val rawMessage: ByteArray = messageData?.toByteArray(CharsetSupport.getCharsetInstance())
-                ?: message.toString().toByteArray(CharsetSupport.getCharsetInstance())
+        val rawMessage: ByteArray = extractRawData(message)
         val msg = converter.run {
             if (isRejected) {
                 convertDirty(message, verifyTags, false, false, true)
@@ -60,5 +58,12 @@ abstract class AbstractApplication {
         meta.serviceInfo = serviceInfo
 
         return msg
+    }
+
+    protected fun extractRawData(message: Message): ByteArray {
+        val messageData: String? = message.messageData
+        val rawMessage: ByteArray = messageData?.toByteArray(CharsetSupport.getCharsetInstance())
+                ?: message.toString().toByteArray(CharsetSupport.getCharsetInstance())
+        return rawMessage
     }
 }

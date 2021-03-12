@@ -317,7 +317,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
                     ? convert(message, from, to, message.isAdmin(), false, true)
                     : convert(message, from, to, message.isAdmin());
         } catch (MessageConvertException e) {
-            return createErrorMessage(e.getMessage(), from, to, this.serviceInfo, messageHelper.getMessageFactory());
+            return createErrorMessage(e.getMessage(), extractRawData(message), from, to, this.serviceInfo, messageHelper.getMessageFactory());
         }
     }
 
