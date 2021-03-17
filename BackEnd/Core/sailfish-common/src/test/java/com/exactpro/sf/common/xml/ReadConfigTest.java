@@ -218,16 +218,10 @@ public class ReadConfigTest extends EPSTestCase {
         File xmlFile = new File(PATH_PREFIX, "recursion.xml");
 
         try (InputStream in = new FileInputStream(xmlFile)) {
-            try {
-            loader.load(in);
-            } catch (EPSCommonException e) {
-                Assert.assertEquals("Message 'message_name', problem with content", e.getMessage());
-                Assert.assertEquals("Recursion at message id: 'self' has been detected!", e.getCause().getMessage());
-                return;
-            }
+            IDictionaryStructure dictionaryStructure = loader.load(in);
+            Assert.assertTrue(dictionaryStructure.getMessages().get("message_name").getFields().get("self") instanceof IMessageStructure);
         }
-        Assert.fail("Incorrect structure has been sucess loaded.");
-    }
+	}
 
     @Test
     public void duplicateNameTest() throws Exception {

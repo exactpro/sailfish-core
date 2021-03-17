@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,11 +187,10 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
 
     @Test
     public void testRecursion() throws Exception {
-        exception.expect(EPSCommonException.class);
-        exception.expectMessage("Message 'self', problem with content");
-        exception.expectCause(new CauseMatcher(EPSCommonException.class, "Recursion at message id: 'self' has been detected!"));
 
-        loadDictionaryFrom("recursion.json");
+        IDictionaryStructure dictionaryStructure = loadDictionaryFrom("recursion.json");
+        IFieldStructure selfMessage = dictionaryStructure.getMessages().get("self").getFields().get("s_name");
+        Assert.assertTrue(selfMessage instanceof IMessageStructure);
     }
 
     @Test
@@ -249,10 +248,8 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
 
     @Test
     public void testMessageCircularReferenceThroughInheritance() throws Exception {
-        exception.expect(EPSCommonException.class);
-        exception.expectMessage("Message 'Message2', problem with content");
-
-        loadDictionaryFrom("message-circular-reference-through-inheritance.json");
+        IDictionaryStructure dictionaryStructure = loadDictionaryFrom("message-circular-reference-through-inheritance.json");
+        Assert.assertTrue(dictionaryStructure.getMessages().get("Message2").getFields().get("Field1") instanceof IMessageStructure);
     }
 
     @Test
@@ -374,5 +371,12 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
         exception.expectMessage("It is impossible to keep message 'Short' in fields");
 
         loadDictionaryFrom("messageInFields.json");
+    }
+
+    @Test
+    public void testMessageCiclicReferences() throws Exception {
+        IDictionaryStructure dictionary = loadDictionaryFrom("cyclicReferences.json");
+        Assert.assertTrue(dictionary.getMessages().get("A").getFields().get("self") instanceof IMessageStructure);
+        Assert.assertTrue(dictionary.getMessages().get("InnerMessage").getFields().get("circlied") instanceof IMessageStructure);
     }
 }

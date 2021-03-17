@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static java.util.Collections.singleton;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
@@ -115,7 +114,7 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
         Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessages().get("MessageHeader").getFields().get("enum").getJavaType());
         Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessages().get("MessageHeader").getFields().get("MessageLength").getJavaType());
         Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getFields().get("enum").getJavaType());
-        Assert.assertEquals(true, dictionary.getFields().get("enum").isEnum());
+        Assert.assertTrue(dictionary.getFields().get("enum").isEnum());
         Assert.assertEquals(2, dictionary.getFields().get("enum").getValues().size());
         
     }
@@ -175,19 +174,9 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
     @Test
     public void testMessageCircularReferenceInInheritance() throws Exception {
         exception.expect(EPSCommonException.class);
-        exception.expectMessage("Recursion at message id: 'Message1Id' has been detected");
+        exception.expectMessage("Recursion at message id: 'Message1Id' has been detected!");
 
         try (InputStream stream = new FileInputStream(path + "message-circular-reference-in-inheritance.xml")) {
-            new XmlDictionaryStructureLoader().load(stream);
-        }
-    }
-
-    @Test
-    public void testMessageCircularReferenceThroughInheritance() throws Exception {
-        exception.expect(EPSCommonException.class);
-        exception.expectMessage("Message 'Message2', problem with content");
-
-        try (InputStream stream = new FileInputStream(path + "message-circular-reference-through-inheritance.xml")) {
             new XmlDictionaryStructureLoader().load(stream);
         }
     }
@@ -293,6 +282,23 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
                 new String[] { "StartOfMessage", "MessageLength", "MessageType", "enum" },
                 embeddedMessage.getFields().keySet().toArray(new String[0])
         );
+
+    }
+
+    @Test
+    public void testMessageCyclicReferences() throws Exception {
+        IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
+        IDictionaryStructure dictionaryStructure;
+        try (InputStream inputStream = new FileInputStream(Paths.get(path,"messageCyclicReferences.xml").toFile())) {
+            dictionaryStructure = loader.load(inputStream);
+        }
+        Map<String, IMessageStructure> messages = dictionaryStructure.getMessages();
+        IFieldStructure selfMessage = messages.get("A").getFields().get("self");
+        Assert.assertTrue(selfMessage instanceof IMessageStructure);
+        IFieldStructure fieldFromReference = messages.get("mes2").getFields().get("field2").getFields().get("field3");
+        IFieldStructure fieldStructure = messages.get("mes3").getFields().get("field3");
+        Assert.assertEquals(fieldFromReference, fieldStructure);
+
 
     }
 }

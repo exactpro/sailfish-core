@@ -1,0 +1,26 @@
+{
+  "name": "CyclicReferences",
+  "messages": {
+    "A": {
+      "fields": {
+        "self": {
+          "reference": "A"
+        }
+      }
+    },
+    "B": {
+      "fields": {
+        "inner": {
+          "reference": "InnerMessage"
+        }
+      }
+    },
+    "InnerMessage": {
+      "fields": {
+        "circlied": {
+          "reference": "B"
+        }
+      }
+    }
+  }
+}

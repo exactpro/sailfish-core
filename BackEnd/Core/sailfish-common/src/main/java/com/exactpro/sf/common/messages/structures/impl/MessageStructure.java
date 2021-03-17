@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@ package com.exactpro.sf.common.messages.structures.impl;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureType;
-import com.exactpro.sf.common.util.EPSCommonException;
 
 /**
  * This structure should be immutable
  */
 public class MessageStructure extends FieldStructure implements IMessageStructure {
-    private final Map<String, IFieldStructure> fields;
+    private final Supplier<Map<String, IFieldStructure>> fieldsSupplier;
     private final IMessageStructure reference;
 
 	public MessageStructure(String name, String namespace, boolean isCollection, IMessageStructure reference) {
@@ -51,11 +51,12 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
         if (fields != null) {
-            this.fields = Collections.unmodifiableMap(fields); // no reference, message-to-message reference
+            Map<String, IFieldStructure> map = Collections.unmodifiableMap(fields); // no reference, message-to-message reference
+            fieldsSupplier = () -> map;
         } else if (reference != null) {
-            this.fields = reference.getFields(); // field-to-message reference
+            fieldsSupplier = reference::getFields; // field-to-message reference
         } else {
-            this.fields = Collections.emptyMap(); // probably should not happen :(
+            fieldsSupplier = Collections::emptyMap; // probably should not happen :(
         }
 
         this.reference = reference;
@@ -64,7 +65,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
     public Map<String, IFieldStructure> getFields() {
-        return fields;
+	    return fieldsSupplier.get();
     }
 
 	@Override

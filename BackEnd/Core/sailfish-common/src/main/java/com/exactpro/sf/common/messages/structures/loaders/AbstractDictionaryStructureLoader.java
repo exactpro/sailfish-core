@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
 import com.exactpro.sf.common.messages.structures.impl.DictionaryStructure;
 import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.common.messages.structures.impl.MessageStructure;
+import com.exactpro.sf.common.messages.structures.impl.MessageStructurePromise;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.sun.istack.NotNull;
 
@@ -57,8 +58,15 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
 
     protected final boolean aggregate;
     protected final Set<String> pendingMessages = new HashSet<>();
+    protected final Map<String, MessageStructurePromise> promiseMap = new HashMap<>();
 
     protected final Logger logger;
+
+    private boolean isRecursion;
+    private IField lastMessage;
+    private IFieldStructure messageFinalRecursionField;
+    private String startRecursionMessageName;
+    private boolean isCircledAttribute;
 
     public AbstractDictionaryStructureLoader(boolean aggregate) {
         this.aggregate = aggregate;
@@ -180,7 +188,9 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                 convertMessage(dictionary.getName(), builder, msg);
             }
 
+            startRecursionMessageName = null;
             pendingMessages.clear();
+            promiseMap.clear();
         }
 
         Map<String, IAttributeStructure> dictAttributes = getDictionaryAttributes(dictionary);
@@ -189,10 +199,13 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                 builder.getMsgStructureMap(), builder.getFieldStructureMap());
     }
 
-    private void convertMessage(String namespace, StructureBuilder builder, IMessage message) {
-
+    private IMessageStructure convertMessage(String namespace, StructureBuilder builder, IMessage message) {
         if (!pendingMessages.add(message.getId())) {
-            throw new EPSCommonException(String.format("Recursion at message id: '%s' has been detected!", message.getId()));
+            if (message.getReference() instanceof IMessage
+                && message.getReference().getReference() instanceof IMessage) {
+                    throw new EPSCommonException(String.format("Recursion at message id: '%s' has been detected!", message.getId()));
+            }
+            return promiseMap.computeIfAbsent(message.getId(), (key) -> new MessageStructurePromise(message.getName()));
         }
 
         IField reference = message.getReference();
@@ -207,8 +220,14 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
 
         try {
             IMessageStructure messageStructure = convertMessageInternal(namespace, builder, message, reference);
-
             builder.addMessageStructure(messageStructure);
+
+            MessageStructurePromise promise = promiseMap.get(message.getId());
+            if (promise != null) {
+                promise.setOrigin(messageStructure);
+            }
+
+            return messageStructure;
         } catch (RuntimeException e) {
             throw new EPSCommonException("Message '" + message.getName() + "', problem with content", e);
         }
@@ -322,8 +341,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                     struct = builder.getMessageStructure(field.getReference().getName());
 
                     if (struct == null) {
-                        convertMessage(namespace, builder, (IMessage)field.getReference());
-                        struct = builder.getMessageStructure(field.getReference().getName());
+                        struct = convertMessage(namespace, builder, (IMessage)field.getReference());
                     }
                 }
 
@@ -456,6 +474,14 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         if (aggregate) {
             IField reference = field.getReference();
             if (reference != null) {
+                if (isRecursion && reference.getName().equals(startRecursionMessageName)) {
+                    if (isCircledAttribute) {
+                        return;
+                    } else {
+                        collectFieldAttributesOrValues(reference, target, isValue);
+                    }
+                    isCircledAttribute = !isCircledAttribute;
+                }
                 collectFieldAttributesOrValues(reference, target, isValue);
             }
         }
