@@ -37,8 +37,8 @@ configurations {
 
 dependencies {
     if (incremental_build) {
-        testCompile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT"
-        testCompile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${sailfishVersion}-SNAPSHOT"
+        testCompile group: "com.exactpro.sf", name: "sailfish-core", version: "${artifactCoreVersion}"
+        testCompile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${artifactCoreVersion}"
     } else {
         testCompile project(':BackEnd:Core:sailfish-core')
         testCompile project(':FrontEnd:Sailfish-REST-API-client')
