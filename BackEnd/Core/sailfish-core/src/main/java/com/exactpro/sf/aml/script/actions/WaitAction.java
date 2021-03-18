@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -75,7 +76,7 @@ public class WaitAction {
     static Logger log = LoggerFactory.getLogger(WaitAction.class);
 
     public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp) throws InterruptedException {
-        return waitForMessage(actionContext, messageFilter, fromApp, "");
+        return waitForMessage(actionContext, messageFilter, fromApp, Objects.toString(actionContext.getDescription(), ""));
     }
 
 	public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp, String description) throws InterruptedException
@@ -84,10 +85,53 @@ public class WaitAction {
 	}
 
     public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp, IPostValidation postValidation) throws InterruptedException {
-        return waitForMessage(actionContext, messageFilter, fromApp, postValidation, "");
+        return waitForMessage(actionContext, messageFilter, fromApp, postValidation, Objects.toString(actionContext.getDescription(), ""));
     }
 
-    public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp, IPostValidation postValidation, String description)
+    public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp,
+                                                SailfishURI dictionary, String storageMessageTypes, boolean invertStoredMessageTypes)
+            throws InterruptedException
+    {
+        String serviceName = actionContext.getServiceName();
+        IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
+
+        long waitTime = actionContext.getTimeout();
+        boolean addToReport = actionContext.isAddToReport();
+
+        actionContext.getLogger().info("{} client instance [{}] has been obtained.", client.getClass().getSimpleName(), serviceName);
+        actionContext.getLogger().info("Settings [{}]", actionContext);
+
+        IServiceHandler handler = getServiceHandler(client);
+        ISession session = getSession(client);
+
+        ComparatorSettings settings = createCompareSettings(actionContext, null, messageFilter);
+
+        IService service = actionContext.getServiceManager().getService(new ServiceName(serviceName));
+
+        if (dictionary != null) {
+            settings.setDictionaryStructure(actionContext.getDictionary(dictionary));
+        }
+
+        Collection<String> storedMessageTypes = getStoredMessageTypes(actionContext);
+
+        Logger logger = actionContext.getLogger();
+        List<Pair<IMessage, ComparisonResult>> results = null;
+
+        logger.debug("[{}]  start wait for message in {} queue", serviceName, fromApp ? "application" : "admin");
+        CheckPoint checkpoint = actionContext.getCheckPoint();
+        try {
+            results = waitMessage(handler, session, fromApp ? FROM_APP : FROM_ADMIN, checkpoint,
+                    waitTime, messageFilter, settings, storedMessageTypes, invertStoredMessageTypes);
+        } catch (InterruptedException e) {
+            logger.error("[{}]  InterruptedException:{}", serviceName, e.getMessage(), e);
+            throw e;
+        }
+        return processResults(actionContext.getReport(), settings, results, messageFilter, serviceName,
+                false, addToReport, Objects.toString(actionContext.getDescription(), ""), checkpoint);
+    }
+
+    public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp,
+                                                IPostValidation postValidation, String description)
 	throws InterruptedException
 	{
         String serviceName = actionContext.getServiceName(); // for example "NativeClient"
@@ -178,18 +222,23 @@ public class WaitAction {
 	}
 
     private static Collection<String> getStoredMessageTypes(IActionContext actionContext) {
+        IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
+        String rawStoredMessageTypes = client.getSettings().getStoredMessageTypes();
+
+        return getStoredMessageTypes(actionContext, rawStoredMessageTypes);
+    }
+
+    private static Collection<String> getStoredMessageTypes(IActionContext actionContext, String rawStoredMessageTypes) {
         Collection<String> storedMessageTypes = Collections.emptySet();
-        try{
-            IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
-            String rawStoredMessageTypes = client.getSettings().getStoredMessageTypes();
+        try {
             if (StringUtils.isNotBlank(rawStoredMessageTypes)) {
                 rawStoredMessageTypes = ServiceUtil.loadStringFromAlias(actionContext.getDataManager(), rawStoredMessageTypes, ",");
-                storedMessageTypes =  stream(rawStoredMessageTypes.split(","))
+                storedMessageTypes = stream(rawStoredMessageTypes.split(","))
                         .map(String::trim)
                         .filter(StringUtils::isNoneEmpty)
                         .collect(Collectors.toSet());
             }
-        }catch(SailfishURIException e){
+        } catch(SailfishURIException e){
             log.error("An Error occurs while getting client StoredMessageTypes property", e);
         }
         return storedMessageTypes;
