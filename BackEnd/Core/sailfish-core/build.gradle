@@ -364,8 +364,12 @@ test {
     systemProperties "basedir": "${projectDir}"
 }
 
-artifacts {
-	archives(zipWorkspaceData)
+publishing {
+    publications {
+        MavenJava(MavenPublication) {
+            artifact zipWorkspaceData
+        }
+    }
 }
 
 artifactoryPublish {

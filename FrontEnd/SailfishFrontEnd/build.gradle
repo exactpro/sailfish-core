@@ -426,3 +426,11 @@ def getReleaseName() {
 def getReleaseDir(buildDir) {
     return  file("${buildDir}/release")
 }
+
+publishing {
+    publications {
+        MavenJava(MavenPublication) {
+            artifact war
+        }
+    }
+}

@@ -173,7 +173,7 @@ artifactory {
             // Reference to Gradle configurations defined in the build script.
             // This is how we tell the Artifactory Plugin which artifacts should be
             // published to Artifactory.
-            publishConfigs('archives')
+            publications("MavenJava")
         }
     }
 }
@@ -181,7 +181,8 @@ artifactory {
 subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'com.jfrog.bintray'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'java'
     apply plugin: 'jacoco'
 
     group = 'com.exactpro.sf'
@@ -191,10 +192,14 @@ subprojects {
     targetCompatibility = 1.8 //Java version to generate classes for.
     compileJava.options.debugOptions.debugLevel = "source,lines,vars" // Include debug information
 
+    java {
+        withSourcesJar()
+    }
+
     bintray {
         user = System.getenv("BINTRAY_USER") // The publisher user name
         key = System.getenv("BINTRAY_PASS") // The publisher password
-        configurations = ['archives']
+        publications = ['MavenJava']
         pkg {
             repo = 'sailfish'
             name = project.name
@@ -358,13 +363,6 @@ subprojects {
         }
     }
 
-    uploadArchives {
-        repositories.mavenDeployer {
-            repository(url: "file://${sharedDir}")
-        }
-        doFirst { sharedDir.mkdirs() }
-    }
-
     clean {
         delete genDir
         delete extDir
@@ -387,11 +385,6 @@ subprojects {
         into "${project.buildDir}/dependencies"
     }
 
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
     task testsJar(type: Jar, dependsOn: classes) {
         classifier = 'tests'
         from sourceSets.test.output
@@ -407,10 +400,32 @@ subprojects {
         from externalWorkspaceDir
     }
 
-    artifacts {
-        testArtifacts testsJar
-        archives testsJar
-        archives sourcesJar
+    def testArtifact = artifacts.add('testArtifacts', testsJar) {
+        classifier 'test-artifact'
+    }
+
+    publishing {
+        publications {
+            MavenJava(MavenPublication) {
+                from components.java
+                artifact testsJar
+                groupId group
+                version project.version
+                artifactId project.archivesBaseName
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('name', project.archivesBaseName)
+                    root.appendNode('url', project.vcs_url)
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name 'MavenLocal' // for local builds only
+                url sharedDir
+            }
+        }
     }
 
     artifactoryPublish {
