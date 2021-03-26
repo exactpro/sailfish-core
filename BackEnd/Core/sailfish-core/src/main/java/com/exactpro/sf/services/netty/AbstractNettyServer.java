@@ -27,6 +27,8 @@ import com.exactpro.sf.services.IAcceptorService;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceStatus;
+import com.exactpro.sf.services.netty.handlers.DecodedMessagesDelimiterHandler;
+import com.exactpro.sf.services.netty.handlers.EncodeMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.netty.handlers.NettyServerHandler;
 import com.exactpro.sf.services.netty.handlers.NettyServiceHandler;
@@ -63,12 +65,24 @@ public abstract class AbstractNettyServer extends AbstractNettyService implement
     
     protected void initClientSession(AbstractNettySession session, Channel channel) {
         Map<String, ChannelHandler> handlers = createChannelHandlers(serviceContext, session);
+
+        boolean evolutionSupportEnabled = getSettings().isEvolutionSupportEnabled();
+        if (evolutionSupportEnabled) {
+            channel.pipeline().addLast(new DecodedMessagesDelimiterHandler());
+        }
+
         handlers.forEach(channel.pipeline()::addLast);
         // FIXME: probably NettyServiceHandler should be removed from here because otherwise the message might not be fully filled
         channel.pipeline().addLast(new NettyServiceHandler(handler, session),
                 new NettyServerHandler(this::stopClientChannel),
                 new ExceptionInboundHandler(this::onClientExceptionCaught));
+
+        if (evolutionSupportEnabled) {
+            channel.pipeline().addLast(new EncodeMessagesDelimiterHandler());
+        }
+
         initChannelCloseFuture(session, channel);
+        addRawSendHandler(channel.pipeline());
     }
     
     private void onClientExceptionCaught(Channel channel, Throwable cause) {

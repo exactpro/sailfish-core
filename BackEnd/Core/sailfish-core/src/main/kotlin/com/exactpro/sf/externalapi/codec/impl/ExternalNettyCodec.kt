@@ -16,8 +16,11 @@
 package com.exactpro.sf.externalapi.codec.impl
 
 import com.exactpro.sf.common.messages.IMessage
+import com.exactpro.sf.common.messages.IMetadata
 import com.exactpro.sf.common.util.HexDumper
 import com.exactpro.sf.externalapi.codec.IExternalCodec
+import com.exactpro.sf.services.netty.internal.NettyEmbeddedPipeline
+import com.exactpro.sf.services.netty.internal.RawDataHolder
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandler
@@ -27,37 +30,22 @@ import io.netty.channel.embedded.EmbeddedChannel
 import org.slf4j.LoggerFactory
 
 class ExternalNettyCodec(
-    encodeHandlers: List<ChannelOutboundHandler>,
-    decodeHandlers: List<ChannelInboundHandler>
+    private val embeddedPipeline: NettyEmbeddedPipeline
 ) : IExternalCodec {
-    private val logger = LoggerFactory.getLogger("${this::class.java.canonicalName}@${this.hashCode().toString(16)}")
 
-    private val encodeChannel: EmbeddedChannel = createChannel(encodeHandlers)
-    private val decodeChannel: EmbeddedChannel = createChannel(decodeHandlers)
-
-    override fun encode(message: IMessage): ByteArray = encodeChannel.runCatching {
-        check(writeOutbound(message)) { "Encoding did not produce any results" }
-        check(outboundMessages().size == 1) { "Expected 1 result, but got: ${outboundMessages().size}" }
-        readOutbound<ByteBuf>().run { ByteArray(readableBytes()).apply { readBytes(this) } }
+    override fun encode(message: IMessage): ByteArray = embeddedPipeline.runCatching {
+        encode(message)
     }.getOrElse {
-        encodeChannel.releaseOutbound()
         throw EncodeException("Failed to encode message: $message", it)
     }
 
-    override fun decode(data: ByteArray): List<IMessage> = decodeChannel.runCatching {
-        check(writeInbound(Unpooled.wrappedBuffer(data))) { "Decoding did not produce any results" }
-        generateSequence { readInbound<IMessage>() }.toList()
+    override fun decode(data: ByteArray): List<IMessage> = embeddedPipeline.runCatching {
+        decode(RawDataHolder(data, IMetadata.EMPTY))
     }.getOrElse {
-        decodeChannel.releaseInbound()
         throw DecodeException("Failed to decode data:${System.lineSeparator()}${HexDumper.getHexdump(data)}", it)
     }
 
-    private fun createChannel(handlers: List<ChannelHandler>): EmbeddedChannel = EmbeddedChannel().apply {
-        handlers.forEach { pipeline().addLast(it) }
-    }
-
     override fun close() {
-        runCatching(encodeChannel.close()::sync).onFailure { logger.error("Failed to close encode channel", it) }
-        runCatching(decodeChannel.close()::sync).onFailure { logger.error("Failed to close decode channel", it) }
+        embeddedPipeline.close()
     }
 }

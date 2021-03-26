@@ -19,9 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.netty.internal.RawDataHolder;
 import com.exactpro.sf.services.netty.sessions.AbstractNettySession;
 
 import io.netty.channel.Channel;
@@ -61,10 +63,8 @@ public class NettySession implements ISession {
 	
 	@Override
 	public IMessage send(Object message, long timeout) throws InterruptedException {
-		if (client.getChannel() == null) {
-			throw new EPSCommonException("Channel not ready (channel == null)");
-		}
-		if (!(message instanceof IMessage)) {
+        checkChannelIsReady();
+        if (!(message instanceof IMessage)) {
 			throw new EPSCommonException("Illegal type of Message");
 		}
         if (timeout < 1) {
@@ -72,40 +72,56 @@ public class NettySession implements ISession {
         }
 
 		IMessage msg = (IMessage) message;
-		ChannelFuture future = client.getChannel().writeAndFlush(msg)
-				.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-		boolean isSendSuccess = true;
-		StringBuilder errorMsg = new StringBuilder("Cause: ");
+        realSend(msg, timeout);
 
-		if (future.await(timeout)) {
-			if (!future.isDone()) {
-				errorMsg.append("Send operation isn't done.\n");
-				logger.error("Send operation isn't done. Session: {}", this);
-				isSendSuccess = false;
-			}
-			if (!future.isSuccess()) {
-				errorMsg.append("Write operation was not successful.\n");
-				logger.error("Write operation was not successful. Session: {}", this);
-				isSendSuccess = false;
-			}
-		} else {
-			errorMsg.append("Send operation isn't completed.\n");
-			logger.error("Send operation isn't completed. Session: {}", this);
-			isSendSuccess = false;
-		}
+        return msg;
+	}
+
+    @Override
+    public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
+        checkChannelIsReady();
+        realSend(new RawDataHolder(rawData, extraMetadata), sendMessageTimeout);
+    }
+
+    private void checkChannelIsReady() {
+        if (client.getChannel() == null) {
+            throw new EPSCommonException("Channel not ready (channel == null)");
+        }
+    }
+
+    private void realSend(Object msg, long timeout) throws InterruptedException {
+        ChannelFuture future = client.getChannel().writeAndFlush(msg)
+                .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        boolean isSendSuccess = true;
+        StringBuilder errorMsg = new StringBuilder("Cause: ");
+
+        if (future.await(timeout)) {
+            if (!future.isDone()) {
+                errorMsg.append("Send operation isn't done.\n");
+                logger.error("Send operation isn't done. Session: {}", this);
+                isSendSuccess = false;
+            }
+            if (!future.isSuccess()) {
+                errorMsg.append("Write operation was not successful.\n");
+                logger.error("Write operation was not successful. Session: {}", this);
+                isSendSuccess = false;
+            }
+        } else {
+            errorMsg.append("Send operation isn't completed.\n");
+            logger.error("Send operation isn't completed. Session: {}", this);
+            isSendSuccess = false;
+        }
         if(future.cause() != null) {
             throw new EPSCommonException("Message sent failed. Session: " + this, future.cause());
         }
 
-		if (!isSendSuccess) {
-			throw new SendMessageFailedException(
-                    "Message wasn't send during 1 second." + errorMsg + " Session: " + this);
-		}
+        if (!isSendSuccess) {
+            throw new SendMessageFailedException(
+"Message wasn't send during 1 second." + errorMsg + " Session: " + this);
+        }
+    }
 
-		return msg;
-	}
-
-	@Override
+    @Override
 	public IMessage sendDirty(Object message) throws InterruptedException {
 		throw new UnsupportedOperationException();
 	}

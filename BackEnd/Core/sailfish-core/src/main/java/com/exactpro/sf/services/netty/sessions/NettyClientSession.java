@@ -19,9 +19,11 @@ import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.netty.AbstractNettyService;
+import com.exactpro.sf.services.netty.internal.RawDataHolder;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -48,11 +50,21 @@ public class NettyClientSession extends AbstractNettySession {
         }
         
         IMessage msg = (IMessage)message;
+        realSend(msg, timeout);
+        return msg;
+    }
+
+    @Override
+    public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
+        realSend(new RawDataHolder(rawData, extraMetadata), sendMessageTimeout);
+    }
+
+    private void realSend(Object msg, long timeout) throws InterruptedException {
         ChannelFuture future = channel.writeAndFlush(msg)
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         boolean isSendSuccess = true;
         StringBuilder errorMsg = new StringBuilder("Cause: ");
-        
+
         if (future.await(timeout)) {
             if (!future.isDone()) {
                 errorMsg.append("Send operation isn't done.\n");
@@ -72,14 +84,13 @@ public class NettyClientSession extends AbstractNettySession {
         if (future.cause() != null) {
             throw new EPSCommonException("Message sent failed. Session: " + this, future.cause());
         }
-        
+
         if (!isSendSuccess) {
             throw new SendMessageFailedException(
                     "Message wasn't send during 1 second." + errorMsg + " Session: " + this);
         }
-        return msg;
     }
-    
+
     @Override
     public String toString() {
         return "NettyClientSession{" +

@@ -19,8 +19,10 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.netty.AbstractNettyServer;
@@ -50,11 +52,28 @@ public class NettyServerSession extends AbstractNettySession {
             throw new EPSCommonException("Illegal timeout value: " + timeout);
         }
         IMessage msg = (IMessage)message;
-        Iterable<NettyClientSession> sendingSessions = getSendingSessions(msg);
+        realSend(getSendingSessions(msg), session -> session.send(msg, timeout));
+        return msg;
+    }
+
+    @Override
+    public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
+        realSend(getSendingSessions(extraMetadata), session -> session.sendRaw(rawData, extraMetadata));
+    }
+
+    protected Iterable<NettyClientSession> getSendingSessions(IMessage msg) {//TODO change to supplier in constructor
+        return server.getActiveSessionMap().values();
+    }
+
+    protected Iterable<NettyClientSession> getSendingSessions(IMetadata extraMetadata) {//TODO change to supplier in constructor
+        return server.getActiveSessionMap().values();
+    }
+
+    private <T> void realSend(Iterable<NettyClientSession> sessions, SendAction<T> action) throws InterruptedException {
         Collection<AbstractNettySession> errorSending = new HashSet<>();
-        for (NettyClientSession session : sendingSessions) {
+        for (NettyClientSession session : sessions) {
             try {
-                session.send(msg, timeout);
+                action.sendTo(session);
             } catch (RuntimeException e) {
                 errorSending.add(session);
             }
@@ -66,13 +85,8 @@ public class NettyServerSession extends AbstractNettySession {
             }
             throw new SendMessageFailedException("Message wasn't send. " + errors.toString().trim());
         }
-        return msg;
     }
-    
-    protected Iterable<NettyClientSession> getSendingSessions(IMessage msg) {//TODO change to supplier in constructor
-        return server.getActiveSessionMap().values();
-    }
-    
+
     @Override
     public String toString() {
         return "NettyServerSession{" +
@@ -81,5 +95,10 @@ public class NettyServerSession extends AbstractNettySession {
                 ", ChannelId=" + channel.id() +
                 ", Send message timeout=" + sendMessageTimeout +
                 '}';
+    }
+
+    @FunctionalInterface
+    private interface SendAction<T> {
+        void sendTo(AbstractNettySession session) throws InterruptedException;
     }
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,8 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.DecodedMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.EncodeMessagesDelimiterHandler;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
+import com.exactpro.sf.services.netty.internal.NettyEmbeddedPipeline;
+import com.exactpro.sf.services.netty.internal.handlers.RawSendHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
 
@@ -204,6 +207,11 @@ public abstract class NettyClientService implements IInitiatorService {
 
             LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
+            NettyEmbeddedPipeline embeddedPipeline = createEmbeddedPipeline();
+            if (embeddedPipeline != null) {
+                logConfigurator.registerLogger(embeddedPipeline, getServiceName());
+            }
+            RawSendHandler rawSendHandler = new RawSendHandler(embeddedPipeline, this::acceptToSendRaw);
             Bootstrap cb = new Bootstrap();
             // Fixme: use ITaskExecutor ?
             cb.group(nioEventLoopGroup);
@@ -227,6 +235,7 @@ public abstract class NettyClientService implements IInitiatorService {
                     if (evolutionSupportEnabled) {
                         ch.pipeline().addLast(new EncodeMessagesDelimiterHandler());
                     }
+                    ch.pipeline().addLast(rawSendHandler);
                 }
             });
 
@@ -243,7 +252,25 @@ public abstract class NettyClientService implements IInitiatorService {
         }
 	}
 
-	protected void initChannelCloseFuture(Channel channel) {
+    /**
+     * Filters for decoded messages when user tries to send raw
+     * @param message the decoded message
+     * @return {@code true} if the message should be sent further. Otherwise, returns {@code false}
+     */
+    protected boolean acceptToSendRaw(IMessage message) {
+        return true;
+    }
+
+    /**
+     *
+     * @return embedded pipeline to use in sending raw messages or {@code null} if it is not supported
+     */
+    @Nullable
+    protected NettyEmbeddedPipeline createEmbeddedPipeline() {
+        return null;
+    }
+
+    protected void initChannelCloseFuture(Channel channel) {
 	    channel.closeFuture().addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {

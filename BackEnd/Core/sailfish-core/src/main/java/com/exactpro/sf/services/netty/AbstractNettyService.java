@@ -38,12 +38,15 @@ import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceEvent.Type;
 import com.exactpro.sf.services.ServiceEventFactory;
 import com.exactpro.sf.services.ServiceStatus;
+import com.exactpro.sf.services.netty.internal.NettyEmbeddedPipeline;
+import com.exactpro.sf.services.netty.internal.handlers.RawSendHandler;
 import com.exactpro.sf.services.netty.sessions.AbstractNettySession;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 
 public abstract class AbstractNettyService extends AbstractService implements IInitiatorService {
@@ -168,6 +171,32 @@ public abstract class AbstractNettyService extends AbstractService implements II
                 stopSendHeartBeats(session);
             }
         });
+    }
+
+    protected void addRawSendHandler(ChannelPipeline pipeline) {
+        NettyEmbeddedPipeline embeddedPipeline = createEmbeddedPipeline();
+        if (embeddedPipeline != null) {
+            loggingConfigurator.registerLogger(embeddedPipeline, getServiceName());
+        }
+        pipeline.addLast(new RawSendHandler(embeddedPipeline, this::acceptToSendRaw));
+    }
+
+    /**
+     * Filters for decoded messages when user tries to send raw
+     * @param message the decoded message
+     * @return {@code true} if the message should be sent further. Otherwise, returns {@code false}
+     */
+    protected boolean acceptToSendRaw(IMessage message) {
+        return true;
+    }
+
+    /**
+     *
+     * @return embedded pipeline to use in sending raw messages or {@code null} if it is not supported
+     */
+    @Nullable
+    protected NettyEmbeddedPipeline createEmbeddedPipeline() {
+        return null;
     }
     
     @NotNull

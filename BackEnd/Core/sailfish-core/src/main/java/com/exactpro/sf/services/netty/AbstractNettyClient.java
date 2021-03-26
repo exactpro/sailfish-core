@@ -71,6 +71,7 @@ public abstract class AbstractNettyClient extends AbstractNettyService {
         if (evolutionSupportEnabled) {
             channel.pipeline().addLast(new EncodeMessagesDelimiterHandler());
         }
+        addRawSendHandler(channel.pipeline());
     }
     
     @Override

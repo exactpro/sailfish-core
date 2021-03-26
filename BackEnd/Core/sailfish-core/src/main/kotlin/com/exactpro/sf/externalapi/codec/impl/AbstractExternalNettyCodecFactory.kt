@@ -18,6 +18,7 @@ package com.exactpro.sf.externalapi.codec.impl
 import com.exactpro.sf.common.messages.IMessage
 import com.exactpro.sf.externalapi.codec.IExternalCodec
 import com.exactpro.sf.externalapi.codec.IExternalCodecSettings
+import com.exactpro.sf.services.netty.internal.NettyEmbeddedPipeline
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandler
@@ -28,7 +29,9 @@ abstract class AbstractExternalNettyCodecFactory : AbstractExternalCodecFactory(
     protected abstract fun getEncodeHandlers(settings: IExternalCodecSettings): List<ChannelOutboundHandler>
     protected abstract fun getDecodeHandlers(settings: IExternalCodecSettings): List<ChannelInboundHandler>
 
-    override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = ExternalNettyCodec(getEncodeHandlers(settings), getDecodeHandlers(settings))
+    override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = ExternalNettyCodec(
+        NettyEmbeddedPipeline(getEncodeHandlers(settings), getDecodeHandlers(settings))
+    )
 
     protected class IMessageToByteBufEncoder : MessageToByteEncoder<IMessage>() {
         override fun encode(context: ChannelHandlerContext, msg: IMessage, out: ByteBuf) {
