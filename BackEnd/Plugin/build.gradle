@@ -76,10 +76,11 @@ subprojects {
     }
 }
 
-// Setting this property to true will make the artifactoryPublish task
+// Setting this property to true will make the publish tasks
 // skip this module (in our case, the root module):
-artifactoryPublish.skip = true
-bintrayUpload.enabled = false
+tasks.withType(PublishToMavenRepository).all { publishTask ->
+    publishTask.enabled = false
+}
 
 //Functions
 def configureGenerateSailfishMessage(files, inputs, outputs, genDir) {

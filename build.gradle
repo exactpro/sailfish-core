@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,15 @@
  ******************************************************************************/
 buildscript {
     ext {
-        kotlin_version  = '1.3.50'
-        sharedDir       = file("${project.rootDir}/shared")
+        kotlin_version          = '1.3.50'
+        sharedDir               = file("${project.rootDir}/shared")
+
+        sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
+        artifactVersion         = build_mode == 'snapshot' ? "${sailfishVersion}-SNAPSHOT" : "${sailfishVersion}.${sailfishCoreArtifactMaintenance}"
+        sailfishCoreVersion		= "${sailfishVersion}"
+        artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : "${sailfishCoreVersion}.${sailfishCoreArtifactMaintenance}"
+
+        artifactGroup           = 'com.exactpro.sf'
     }
 
     repositories {
@@ -72,21 +79,31 @@ buildscript {
         classpath group:  "com.jfrog.bintray.gradle", name: "gradle-bintray-plugin", version: "1.8.5"
     }
 }
+plugins {
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+}
+
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+    nexusPublishing {
+        repositories {
+            sonatype {
+                nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+                snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            }
+        }
+    }
+}
+
+group = artifactGroup
+version = artifactCoreVersion
 
 allprojects {
-    apply plugin: 'com.jfrog.bintray'
-    apply plugin: 'com.jfrog.artifactory'
     apply plugin: 'eclipse-wtp'
     apply plugin: 'sailfish'
     apply plugin: 'com.github.ben-manes.versions'
     apply plugin: 'com.github.harbby.gradle.serviceloader'
 
     ext {
-        sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
-        artifactVersion         = build_mode == 'snapshot' ? "${sailfishVersion}-SNAPSHOT" : "${sailfishVersion}.${sailfishCoreArtifactMaintenance}"
-		sailfishCoreVersion		= "${sailfishVersion}"
-        artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : "${sailfishCoreVersion}.${sailfishCoreArtifactMaintenance}"
-
         sharedWorkspaceDir      = file("${project.rootDir}/shared_workspace")
         tmpWorkspaceDir         = file("${project.rootDir}/tmp_workspace")
 
@@ -162,58 +179,31 @@ allprojects {
     }
 }
 
-// Setting this property to true will make the artifactoryPublish task
-// skip this module (in our case, the root module):
-artifactoryPublish.skip = true
-bintrayUpload.enabled = false
-
-artifactory {
-    publish {
-        defaults {
-            // Reference to Gradle configurations defined in the build script.
-            // This is how we tell the Artifactory Plugin which artifacts should be
-            // published to Artifactory.
-            publications("MavenJava")
-        }
-    }
+tasks.withType(PublishToMavenRepository).all { publishTask ->
+    publishTask.enabled = false
 }
 
 subprojects {
     apply plugin: 'kotlin'
-    apply plugin: 'com.jfrog.bintray'
     apply plugin: 'maven-publish'
     apply plugin: 'java'
     apply plugin: 'jacoco'
+    apply plugin: 'signing'
 
-    group = 'com.exactpro.sf'
+    group = artifactGroup
     version = artifactCoreVersion
 
     sourceCompatibility = 1.8 //Java version compatibility to use when compiling Java source.
     targetCompatibility = 1.8 //Java version to generate classes for.
     compileJava.options.debugOptions.debugLevel = "source,lines,vars" // Include debug information
 
-    java {
-        withSourcesJar()
+    javadoc {
+        failOnError = false
     }
 
-    bintray {
-        user = System.getenv("BINTRAY_USER") // The publisher user name
-        key = System.getenv("BINTRAY_PASS") // The publisher password
-        publications = ['MavenJava']
-        pkg {
-            repo = 'sailfish'
-            name = project.name
-            userOrg = 'exactpro'
-            licenses = ['Apache-2.0']
-            vcsUrl = vcs_url
-            version {
-                name = sailfishVersion
-                desc = 'This repository contains a library ${project.name} ${sailfishVersion}'
-                released  = new Date()
-            }
-        }
-        publish = true
-        override = true
+    java {
+        withSourcesJar()
+        withJavadocJar()
     }
 
     buildscript { // artifacrory plugin
@@ -290,12 +280,12 @@ subprojects {
                 url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
             }
             maven {
-                name 'Artifactory-snapshot-oss'
-                url 'https://oss.jfrog.org/artifactory/libs-snapshot'
+                name 'Sonatype_snapshots'
+                url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             }
             maven {
-                name 'Artifactory-release-oss'
-                url 'https://oss.jfrog.org/artifactory/libs-release'
+                name 'Sonatype_releases'
+                url 'https://s01.oss.sonatype.org/content/repositories/releases/'
             }
         }
         jcenter()
@@ -394,7 +384,7 @@ subprojects {
         classifier = 'data'
         includeEmptyDirs = false
         duplicatesStrategy = 'EXCLUDE'
-        
+
         from mainWorkspaceDir
         from genWorkspaceDir
         from externalWorkspaceDir
@@ -412,10 +402,30 @@ subprojects {
                 groupId group
                 version project.version
                 artifactId project.archivesBaseName
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('name', project.archivesBaseName)
-                    root.appendNode('url', project.vcs_url)
+                pom {
+                    name = project.archivesBaseName
+                    packaging = 'jar'
+                    description = rootProject.description
+                    url = vcs_url
+                    scm {
+                        url = vcs_url
+                    }
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'developer'
+                            name = 'developer'
+                            email = 'developer@exactpro.com'
+                        }
+                    }
+                    scm {
+                        url = vcs_url
+                    }
                 }
             }
         }
@@ -428,14 +438,19 @@ subprojects {
         }
     }
 
-    artifactoryPublish {
-        dependsOn testsJar, sourcesJar
+    tasks.withType(Sign) {
+        onlyIf { project.hasProperty('signingKey') &&
+                project.hasProperty('signingPassword')
+        }
     }
 
-    bintrayUpload  {
-        dependsOn testsJar, sourcesJar
+    signing {
+        def signingKey = findProperty("signingKey")
+        def signingPassword = findProperty("signingPassword")
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.MavenJava
     }
-    
+
     dependencies {
         compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
         compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'
@@ -446,7 +461,7 @@ subprojects {
         compile group: 'io.github.microutils', name: 'kotlin-logging', version: '1.7.8'
         compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.7'
     }
-    
+
     jacoco {
         toolVersion = '0.8.5'
     }

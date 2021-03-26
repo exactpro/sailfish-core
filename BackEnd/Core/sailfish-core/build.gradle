@@ -372,10 +372,6 @@ publishing {
     }
 }
 
-artifactoryPublish {
-	dependsOn zipWorkspaceData
-}
-
 build {
 	dependsOn.add("checkCompatibility")
 }
