@@ -32,4 +32,12 @@
         <utilityClassName>com.exactpro.sf.actions.MiscUtils</utilityClassName>
 	</dictionary>
 
+    <dictionary title="Broken">
+        <resource>broken.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ConvertUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.MiscUtils</utilityClassName>
+    </dictionary>
+
 </dictionaries>

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services;
 
 import java.io.File;
@@ -56,12 +56,14 @@ import com.exactpro.sf.externalapi.impl.EmptyListener;
 @RunWith(Parameterized.class)
 public class TestExternalApi {
 
+    private static final String SERVICE_CONFIG_FILE = "src/test/resources/fake.xml";
     private final File writableLayer = Paths.get("build", "tmp", "test_external_api", RandomStringUtils.randomAlphanumeric(16)).toFile();
     private final ServiceName serviceName = new ServiceName("env", "serviceName");
     private SailfishURI serviceType;
     private SailfishURI testServiceType;
     private SailfishURI testDictionary;
     private SailfishURI dictionary;
+    private SailfishURI brokenDictionary;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -79,6 +81,7 @@ public class TestExternalApi {
 
         this.serviceType = new SailfishURI(IVersion.GENERAL, null, "FAKE_CLIENT_SERVICE");
         this.dictionary = new SailfishURI(IVersion.GENERAL, null, "TestAML");
+        this.brokenDictionary = new SailfishURI(IVersion.GENERAL, null, "Broken");
         this.testServiceType = new SailfishURI(IVersion.GENERAL, null, "TEST_SERVICE");
         this.testDictionary = new SailfishURI(IVersion.GENERAL, null, "Test");
     }
@@ -108,7 +111,7 @@ public class TestExternalApi {
     public void testFromResources() {
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener() {
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener() {
                 @Override
                 public void onMessage(IServiceProxy service, IMessage message, boolean rejected, ServiceHandlerRoute route) {
                     Assert.assertTrue("SimpleMessage".equals(message.getName()));
@@ -135,7 +138,7 @@ public class TestExternalApi {
     public void test() {
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -170,7 +173,7 @@ public class TestExternalApi {
         IServiceFactory ssf;
         try {
             ssf = new ServiceFactory(0, 2, 2, new File("src/test/workspace"), Files.createTempDirectory("sf-tests").toFile());
-            ssf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            ssf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -185,7 +188,7 @@ public class TestExternalApi {
 
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
 
             IMessage msg = sf.getMessageFactory(serviceType).createMessage(sp.getSettings().getDictionary(), "Test");
             boolean catched = false;
@@ -218,7 +221,7 @@ public class TestExternalApi {
 
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
 
             IMessage msg = sf.getMessageFactory(serviceType).createMessage(sp.getSettings().getDictionary(), "Test");
             boolean catched = false;
@@ -235,7 +238,7 @@ public class TestExternalApi {
     public void testServiceProxy() {
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
 
             sp.start();
             Assert.assertEquals(ServiceStatus.STARTED, sp.getStatus());
@@ -297,7 +300,7 @@ public class TestExternalApi {
 
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {
-            sp = sf.createService(new FileInputStream(new File("src/test/resources/fake.xml")), new EmptyListener());
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
             ISettingsProxy ssp = sp.getSettings();
 
             for (String name : ssp.getParameterNames()) {
@@ -315,6 +318,20 @@ public class TestExternalApi {
             }
         }
 
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testDictionaryValidation() throws Exception {
+        IServiceProxy sp = null;
+        try (IServiceFactory sf = createServiceFactory()) {
+            sp = sf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
+            sp.getSettings().setParameterValue("dictionaryName", brokenDictionary);
+            sp.start();
+        } finally {
+            if(sp != null && sp.getStatus() == ServiceStatus.STARTED) {
+                sp.stop();
+            }
+        }
     }
 
 }

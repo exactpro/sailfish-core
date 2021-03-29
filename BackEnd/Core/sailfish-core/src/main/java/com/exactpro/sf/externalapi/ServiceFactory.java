@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.externalapi;
 
 import static com.exactpro.sf.configuration.suri.SailfishURIRule.REQUIRE_RESOURCE;
 import static com.exactpro.sf.configuration.suri.SailfishURIUtils.getSingleMatchingURI;
+import static com.exactpro.sf.externalapi.DictionaryType.MAIN;
 import static com.exactpro.sf.services.ServiceStatus.CREATED;
 import static com.exactpro.sf.services.ServiceStatus.DISABLED;
 import static com.exactpro.sf.services.ServiceStatus.DISPOSED;
@@ -24,6 +25,8 @@ import static com.exactpro.sf.services.ServiceStatus.ERROR;
 import static com.exactpro.sf.services.ServiceStatus.INITIALIZED;
 import static com.exactpro.sf.services.ServiceStatus.STARTED;
 import static com.exactpro.sf.services.ServiceStatus.WARNING;
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation;
 
 import java.beans.PropertyDescriptor;
@@ -72,6 +75,9 @@ import com.exactpro.sf.configuration.DictionaryManager;
 import com.exactpro.sf.configuration.IDictionaryRegistrator;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.configuration.LoggingConfigurator;
+import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
+import com.exactpro.sf.configuration.dictionary.impl.DefaultDictionaryValidator;
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceDispatcherBuilder;
@@ -331,8 +337,10 @@ public class ServiceFactory implements IServiceFactory {
         getSingleMatchingURI(serviceType, serviceTypes, "service", REQUIRE_RESOURCE);
 
         IInitiatorService service;
+        IDictionaryValidator dictionaryValidator;
         try {
             IService tmp = staticServiceManager.createService(serviceType);
+            dictionaryValidator = staticServiceManager.createDictionaryValidator(serviceType);
             if (!(tmp instanceof IInitiatorService)) {
                 throw new ServiceFactoryException("Only IInitiator service supported");
             }
@@ -351,7 +359,7 @@ public class ServiceFactory implements IServiceFactory {
             settingsProxy = new ServiceSettingsProxy(settings);
         }
 
-        return new ServiceProxy(name, service, serviceType, listener, settingsProxy, emptyServiceHandler, emptyServiceMonitor, emptyServiceContext);
+        return new ServiceProxy(name, service, dictionaryValidator, serviceType, listener, settingsProxy, emptyServiceHandler, emptyServiceMonitor, emptyServiceContext);
     }
 
     private static class MessageStorageProxy extends FakeMessageStorage {
@@ -461,19 +469,21 @@ public class ServiceFactory implements IServiceFactory {
 
         private final IServiceContext serviceContext;
         private final IInitiatorService service;
+        private final IDictionaryValidator dictionaryValidator;
         private final SailfishURI sURI;
         private final ServiceSettingsProxy settingsProxy;
         private final ServiceName name;
         private final IServiceHandler serviceHandler;
         private final IServiceMonitor serviceMonitor;
 
-        public ServiceProxy(ServiceName name, IInitiatorService service, SailfishURI sURI, IServiceListener listener,
+        public ServiceProxy(ServiceName name, IInitiatorService service, IDictionaryValidator dictionaryValidator, SailfishURI sURI, IServiceListener listener,
                 ServiceSettingsProxy serviceSettingsProxy, IServiceHandler defaultHandler, IServiceMonitor defaultMonitor,
                 IServiceContext defaultServiceContext) {
-            this.name = name;
-            this.service = service;
-            this.sURI = sURI;
-            this.settingsProxy = serviceSettingsProxy;
+            this.name = requireNonNull(name, "'Name' can't be null");
+            this.service = requireNonNull(service, "'Service' can't be null");
+            this.dictionaryValidator =  requireNonNull(dictionaryValidator, "'Dictionary validator' can't be null");
+            this.sURI = requireNonNull(sURI, "'Service URI' can't be null");
+            this.settingsProxy = requireNonNull(serviceSettingsProxy, "'Settings' can't be null");
             if (listener != null) {
                 IMessageStorage messageStorage = new MessageStorageProxy(this, listener);
                 IServiceStorage serviceStorage = new EmptyServiceStorage();
@@ -500,10 +510,32 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public void start() {
             if (checkServiceState(service.getStatus(), ERROR, CREATED, DISPOSED, INITIALIZED)) {
+                validateDictionary();
+
                 service.init(serviceContext, serviceMonitor, serviceHandler, settingsProxy.getSettings(), name);
                 service.start();
             } else {
                 throw new IllegalStateException(String.format("Service in illegal statate: %s", service.getStatus()));
+            }
+        }
+
+        private void validateDictionary() {
+            if (dictionaryValidator != null) {
+                for (DictionaryType dictionaryType : settingsProxy.getDictionaryTypes()) {
+                    IDictionaryValidator validator = dictionaryType == MAIN ? dictionaryValidator : DefaultDictionaryValidator.INSTANCE;
+                    SailfishURI dictionaryURI = settingsProxy.getDictionary(MAIN);
+
+                    if (dictionaryURI != null) {
+                        IDictionaryStructure dictionary = serviceContext.getDictionaryManager().getDictionary(dictionaryURI);
+                        List<DictionaryValidationError> errors = validator.validate(dictionary, true, null);
+
+                        if (isNotEmpty(errors)) {
+                            throw new IllegalStateException(errors.stream()
+                                    .map(Objects::toString)
+                                    .collect(Collectors.joining("\n", "Got following errors during '" + dictionaryType + "' dictionary validation:\n", "")));
+                        }
+                    }
+                }
             }
         }
 
@@ -615,13 +647,13 @@ public class ServiceFactory implements IServiceFactory {
 
         @Override
         public SailfishURI getDictionary(DictionaryType dictionaryType) {
-            String propertyName = Objects.requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
+            String propertyName = requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
             return getParameterValue(propertyName);
         }
 
         @Override
         public void setDictionary(DictionaryType dictionaryType, SailfishURI dictionaryUri) {
-            String propertyName = Objects.requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
+            String propertyName = requireNonNull(dictionaryProperties.get(dictionaryType), () -> "No dictionary property with type: " + dictionaryType);
             setParameterValue(propertyName, dictionaryUri);
         }
     }

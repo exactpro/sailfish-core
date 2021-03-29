@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.scriptrunner.services;
 
 import java.io.InputStream;
@@ -34,6 +34,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.ILoadableManagerContext;
 import com.exactpro.sf.configuration.StaticServiceDescription;
+import com.exactpro.sf.configuration.dictionary.impl.DefaultDictionaryValidator;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidatorFactory;
 import com.exactpro.sf.configuration.services.ServiceDefinition;
@@ -124,7 +125,7 @@ public class DefaultStaticServiceManager implements IStaticServiceManager, ILoad
 
         if (description == null) {
             logger.warn("Could not find service description for service = [{}]", serviceURI);
-            return null;
+            return DefaultDictionaryValidator.INSTANCE;
         }
 
         ClassLoader classLoader = description.getClassLoader();
@@ -138,7 +139,7 @@ public class DefaultStaticServiceManager implements IStaticServiceManager, ILoad
 			}
         }
 
-        return null;
+        return DefaultDictionaryValidator.INSTANCE;
 	}
 
 	@Override
