@@ -39,7 +39,7 @@ rem set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+UnlockCommercialFeatures -XX:+Flight
 set "CATALINA_OPTS=%CATALINA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
 set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
 set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
-set "CATALINA_OPTS=%CATALINA_OPTS% -Djdk.tls.client.protocols=TLSv1.2" rem Use TLSv1.2 protocol by default
+set "CATALINA_OPTS=%CATALINA_OPTS% -Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2" rem Use TLSv1.2 protocol by default
 
 rem Deployer Jvm arguments:
 set "DEPLOYER_JAVA_OPTS="

@@ -38,7 +38,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -XX:+HeapDumpOnOutOfMemoryError" #Option te
 export CATALINA_OPTS="$CATALINA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells that JVM should terminate process if OutOfMemoryError had been thrown
 export CATALINA_OPTS="$CATALINA_OPTS -Duser.dir=$CATALINA_BASE/temp" # Uses to specify directory for relative paths
-export CATALINA_OPTS="$CATALINA_OPTS -Djdk.tls.client.protocols=TLSv1.2" # rem Use TLSv1.2 protocol by default
+export CATALINA_OPTS="$CATALINA_OPTS -Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2" # rem Use TLSv1.2 protocol by default
 
 #Deployer Jvm arguments:
 export DEPLOYER_JAVA_OPTS=""
