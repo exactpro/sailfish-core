@@ -743,8 +743,7 @@ public class DateUtil extends AbstractCaller {
         LocalDateTime time = getDateTime();
         time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatPattern).withZone(ZoneId.of(timeZoneId));
-        return time.format(formatter);
+        return formatDateTimeByZoneId(time, modifyPattern, timeZoneId);
     }
 
     @Description("Modifies a date/time string using format and modify patterns." + FORMAT_HELP + MODIFY_HELP + "Example; #{modifyDateTime(source, formatPattern, modifyPattern)}")
