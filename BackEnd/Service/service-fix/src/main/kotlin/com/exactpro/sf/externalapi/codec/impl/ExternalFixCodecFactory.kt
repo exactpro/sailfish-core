@@ -18,7 +18,11 @@ package com.exactpro.sf.externalapi.codec.impl
 import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
+import com.exactpro.sf.configuration.dictionary.FullFIXDictionaryValidatorFactory
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidatorFactory
 import com.exactpro.sf.configuration.factory.FixMessageFactory
+import com.exactpro.sf.externalapi.DictionaryType
 import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.fix.FIXCodec
 import com.exactpro.sf.services.fix.FixMessageHelper
@@ -30,4 +34,6 @@ class ExternalFixCodecFactory : AbstractExternalMinaCodecFactory() {
     override val messageFactoryClass: Class<out IMessageFactory> = FixMessageFactory::class.java
     override val messageHelperClass: Class<out MessageHelper> = FixMessageHelper::class.java
     override val messageHelperParams: Map<String, String> = emptyMap()
+    override val dictionaryValidators: Map<DictionaryType, IDictionaryValidator> =
+        mapOf(DictionaryType.MAIN to FullFIXDictionaryValidatorFactory().createDictionaryValidator())
 }

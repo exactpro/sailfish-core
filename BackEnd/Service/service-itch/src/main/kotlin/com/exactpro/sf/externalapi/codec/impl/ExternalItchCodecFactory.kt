@@ -18,7 +18,10 @@ package com.exactpro.sf.externalapi.codec.impl
 import com.exactpro.sf.common.codecs.AbstractCodec
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.util.ICommonSettings
+import com.exactpro.sf.configuration.dictionary.ITCHDictionaryValidatorFactory
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator
 import com.exactpro.sf.configuration.factory.ITCHMessageFactory
+import com.exactpro.sf.externalapi.DictionaryType
 import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.itch.ITCHCodec
 import com.exactpro.sf.services.itch.ITCHCodecSettings
@@ -34,4 +37,6 @@ class ExternalItchCodecFactory : AbstractExternalMinaCodecFactory() {
             ITCHMessageHelper.FIELD_MESSAGE_COUNT_NAME to "1",
             ITCHMessageHelper.FIELD_LENGTH_NAME to "0"
     )
+    override val dictionaryValidators: Map<DictionaryType, IDictionaryValidator> =
+        mapOf(DictionaryType.MAIN to ITCHDictionaryValidatorFactory().createDictionaryValidator())
 }

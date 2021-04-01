@@ -18,6 +18,9 @@ package com.exactpro.sf.externalapi.codec.impl
 import com.exactpro.sf.common.messages.IMessageFactory
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure
 import com.exactpro.sf.common.util.ICommonSettings
+import com.exactpro.sf.configuration.dictionary.impl.DefaultDictionaryValidator
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator
+import com.exactpro.sf.externalapi.DictionaryType
 import com.exactpro.sf.externalapi.DictionaryType.MAIN
 import com.exactpro.sf.externalapi.codec.IExternalCodecFactory
 import com.exactpro.sf.externalapi.codec.IExternalCodecSettings
@@ -27,6 +30,7 @@ abstract class AbstractExternalCodecFactory : IExternalCodecFactory {
     protected abstract val settingsClass: Class<out ICommonSettings>
     protected abstract val messageFactoryClass: Class<out IMessageFactory>
     override val protocolName: String by lazy { messageFactoryClass.newInstance().protocol }
+    protected open val dictionaryValidators: Map<DictionaryType, IDictionaryValidator> = emptyMap()
 
     override fun createSettings(): IExternalCodecSettings {
         return ExternalCodecSettings(settingsClass.newInstance())
@@ -36,6 +40,28 @@ abstract class AbstractExternalCodecFactory : IExternalCodecFactory {
         return createSettings().apply {
             this[MAIN] = dictionary
         }
+    }
+
+    protected fun validateDictionaries(settings: IExternalCodecSettings) {
+        val builder = StringBuilder()
+
+        for (dictionaryType in settings.dictionaryTypes) {
+            val dictionary = checkNotNull(settings[dictionaryType]) { "Dictionary type is not set: $dictionaryType" }
+
+            val validator: IDictionaryValidator = dictionaryValidators[dictionaryType]
+                ?: DefaultDictionaryValidator.INSTANCE
+
+            val errors = validator.validate(dictionary, true, null)
+            if (errors.isNotEmpty()) {
+                errors.joinTo(
+                    buffer = builder,
+                    prefix = "Got following errors during '$dictionaryType' dictionary validation:${System.lineSeparator()}",
+                    separator = System.lineSeparator()
+                )
+            }
+        }
+
+        check(builder.isEmpty()) { builder }
     }
 
     protected class DummyCodecSettings : ICommonSettings {

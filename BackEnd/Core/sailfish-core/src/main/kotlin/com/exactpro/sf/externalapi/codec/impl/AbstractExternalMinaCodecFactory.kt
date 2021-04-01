@@ -63,6 +63,7 @@ abstract class AbstractExternalMinaCodecFactory : AbstractExternalCodecFactory()
     protected open val messageHelperParams: Map<String, String> = emptyMap()
 
     override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = settings.run {
+        validateDictionaries(this)
         val dictionary = checkNotNull(this[MAIN]) { "Main dictionary is not set" }
 
         val messageFactory = messageFactoryClass.newInstance().apply {

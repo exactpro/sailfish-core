@@ -29,9 +29,10 @@ abstract class AbstractExternalNettyCodecFactory : AbstractExternalCodecFactory(
     protected abstract fun getEncodeHandlers(settings: IExternalCodecSettings): List<ChannelOutboundHandler>
     protected abstract fun getDecodeHandlers(settings: IExternalCodecSettings): List<ChannelInboundHandler>
 
-    override fun createCodec(settings: IExternalCodecSettings): IExternalCodec = ExternalNettyCodec(
-        NettyEmbeddedPipeline(getEncodeHandlers(settings), getDecodeHandlers(settings))
-    )
+    override fun createCodec(settings: IExternalCodecSettings): IExternalCodec {
+        validateDictionaries(settings)
+        return ExternalNettyCodec(NettyEmbeddedPipeline(getEncodeHandlers(settings), getDecodeHandlers(settings)))
+    }
 
     protected class IMessageToByteBufEncoder : MessageToByteEncoder<IMessage>() {
         override fun encode(context: ChannelHandlerContext, msg: IMessage, out: ByteBuf) {

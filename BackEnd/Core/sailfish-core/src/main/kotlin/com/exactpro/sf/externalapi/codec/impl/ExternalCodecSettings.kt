@@ -31,7 +31,7 @@ import org.apache.commons.beanutils.PropertyUtilsBean
 import org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation
 import java.beans.PropertyDescriptor
 import java.io.File
-import java.util.Collections
+import java.util.Collections.unmodifiableMap
 import java.util.EnumMap
 
 class ExternalCodecSettings(
@@ -70,7 +70,7 @@ class ExternalCodecSettings(
     override val dataResources: Table<PluginAlias, ResourcePath, File> = HashBasedTable.create()
     override val dictionaryFiles: MutableMap<SailfishURI, File> = hashMapOf()
     override val workspaceFolders: MutableMap<FolderType, File> = EnumMap(FolderType::class.java)
-    override val propertyTypes: Map<String, Class<*>> = Collections.unmodifiableMap(properties.mapValues { (_, descriptor) -> descriptor.propertyType })
+    override val propertyTypes: Map<String, Class<*>> = unmodifiableMap(properties.mapValues { (_, descriptor) -> descriptor.propertyType })
     override val dictionaryTypes: Set<DictionaryType> = dictionaryProperties.keys + MAIN
 
     @Suppress("UNCHECKED_CAST")
