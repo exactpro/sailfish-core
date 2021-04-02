@@ -23,6 +23,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -259,6 +260,10 @@ public class TestDateUtil {
         Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime2.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
         Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime3.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
         Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime4.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+
+        DateUtil spyDateUtil = Mockito.spy(dateUtil);
+        Mockito.when(spyDateUtil.getTime()).thenReturn(localDateTime3.toLocalTime());
+        Assert.assertEquals(resultTime, spyDateUtil.formatTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
     }
 
     @Test
@@ -277,6 +282,10 @@ public class TestDateUtil {
         Assert.assertEquals(resultTime2, dateUtil.formatDateByZoneId(localDateTime2.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
         Assert.assertEquals(resultTime3, dateUtil.formatDateByZoneId(localDateTime3.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
         Assert.assertEquals(resultTime4, dateUtil.formatDateByZoneId(localDateTime4.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+
+        DateUtil spyDateUtil = Mockito.spy(dateUtil);
+        Mockito.when(spyDateUtil.getDate()).thenReturn(localDateTime3.toLocalDate());
+        Assert.assertEquals(resultTime3, spyDateUtil.formatDateByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
     }
 
     @Test
@@ -290,6 +299,10 @@ public class TestDateUtil {
         Assert.assertEquals("20190331-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime2, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
         Assert.assertEquals("20191026-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime3, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
         Assert.assertEquals("20191027-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime4, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+
+        DateUtil spyDateUtil = Mockito.spy(dateUtil);
+        Mockito.when(spyDateUtil.getDateTime()).thenReturn(localDateTime3);
+        Assert.assertEquals("20191026-15:05:23.000", spyDateUtil.formatDateTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
     }
 
     @Test

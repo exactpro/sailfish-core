@@ -725,6 +725,18 @@ public class DateUtil extends AbstractCaller {
         return mergeDateTimeByZoneId(firstDateTime.toLocalDate(), secondDateTime.toLocalTime(), modifyPattern, timeZoneId);
     }
 
+    @Description("Formats the current time in the UTC time zone modified according to a pattern into a string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatTimeByZoneId(formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatTimeByZoneId(String formatPattern, String modifyPattern, String timeZoneId) {
+        return formatTimeByZoneId(getTime(), formatPattern, modifyPattern, timeZoneId);
+    }
+
+    @Description("Formats the current date in the UTC time zone modified according to a pattern into a string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateByZoneId(formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatDateByZoneId(String formatPattern, String modifyPattern, String timeZoneId) {
+        return formatDateByZoneId(getDate(), formatPattern, modifyPattern, timeZoneId);
+    }
+
     @Description("Formats the current date/time in the UTC time zone into a string using format pattern." + FORMAT_HELP + "Example: #{formatDateTime(formatPattern)}")
     @UtilityMethod
     public String formatDateTime(String formatPattern) {
@@ -740,10 +752,7 @@ public class DateUtil extends AbstractCaller {
     @Description("Formats the current date time in the UTC time zone modified according to a pattern into a string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateTimeByZoneId(formatPattern, modifyPattern, timeZoneId)}")
     @UtilityMethod
     public String formatDateTimeByZoneId(String formatPattern, String modifyPattern, String timeZoneId) {
-        LocalDateTime time = getDateTime();
-        time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
-
-        return formatDateTimeByZoneId(time, modifyPattern, timeZoneId);
+        return formatDateTimeByZoneId(getDateTime(), formatPattern, modifyPattern, timeZoneId);
     }
 
     @Description("Modifies a date/time string using format and modify patterns." + FORMAT_HELP + MODIFY_HELP + "Example; #{modifyDateTime(source, formatPattern, modifyPattern)}")
