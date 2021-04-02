@@ -439,15 +439,13 @@ subprojects {
     }
 
     tasks.withType(Sign) {
-        onlyIf { project.hasProperty('signingKey') &&
-                project.hasProperty('signingPassword')
+        onlyIf { project.hasProperty('signing.keyId') &&
+                project.hasProperty('signing.password')&&
+                project.hasProperty('signing.secretKeyRingFile')
         }
     }
 
     signing {
-        def signingKey = findProperty("signingKey")
-        def signingPassword = findProperty("signingPassword")
-        useInMemoryPgpKeys(signingKey, signingPassword)
         sign publishing.publications.MavenJava
     }
 
