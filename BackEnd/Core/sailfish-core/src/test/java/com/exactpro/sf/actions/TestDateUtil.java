@@ -39,8 +39,10 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,14 +71,14 @@ public class TestDateUtil {
     public void testGetTimeByZoneId() {
         LocalTime calculatedTime = dateUtil.getTimeByZoneId("h=12:m=30:s=10:ns=123456789", "+03:01");
         LocalTime awaitingTime = LocalTime.of(9, 29, 10, 123456789);
-        Assert.assertEquals(awaitingTime, calculatedTime);
+        assertEquals(awaitingTime, calculatedTime);
     }
 
     @Test
     public void testGetDateByZoneId() {
         LocalDate calculatedDate = dateUtil.getDateByZoneId("Y=2019:M=3:D=13:h+0:m+0:s+0:ns+0", "+03:01");
         LocalDate awaitingDate = LocalDate.of(2019, 3, 13);
-        Assert.assertEquals(awaitingDate, calculatedDate);
+        assertEquals(awaitingDate, calculatedDate);
     }
 
     @Test
@@ -89,333 +91,269 @@ public class TestDateUtil {
         result = dateUtil.modifyDateTime(result, "D+5", true);
         result2 = dateUtil.modifyDateTime(result2, "D+5", false);
 
-        Assert.assertEquals(awaitingResult, result);
-        Assert.assertEquals(awaitingResult2, result2);
+        assertEquals(awaitingResult, result);
+        assertEquals(awaitingResult2, result2);
     }
 
     @Test
     public void testToTimeByZoneId() {
-        long time1 = 1552313123000L; //2019/03/11 14:05:23.000
-        long time2 = 1554041123000L; //2019/03/31 14:05:23.000
-        long time3 = 1572098723000L; //2019/10/26 14:05:23.000
-        long time4 = 1572185123000L; //2019/10/27 14:05:23.000
-
+        Collection<TestPair<LocalTime, Long>> testPairs = new ArrayList<>();
         LocalTime awaitingTime = LocalTime.of(14, 5, 23);
 
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId(time1, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId(time2, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId(time3, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId(time4, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
+        testPairs.add(new TestPair<>(awaitingTime, 1552313123000L)); //2019/03/11 14:05:23.000
+        testPairs.add(new TestPair<>(awaitingTime, 1554041123000L)); //2019/03/31 14:05:23.000
+        testPairs.add(new TestPair<>(awaitingTime, 1572098723000L)); //2019/10/26 14:05:23.000
+        testPairs.add(new TestPair<>(awaitingTime, 1572185123000L)); //2019/10/27 14:05:23.000
+
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toTimeByZoneId(pair.source, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToTimeByZoneId2() {
+        Collection<TestPair<LocalTime, String>> testPairs = new ArrayList<>();
         LocalTime awaitingTime = LocalTime.of(14, 5, 23);
 
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId("20190311-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId("20190331-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId("20191026-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.equals(dateUtil.toTimeByZoneId("20191027-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
+        testPairs.add(new TestPair<>(awaitingTime, "20190311-14:05:23.507"));
+        testPairs.add(new TestPair<>(awaitingTime, "20190331-14:05:23.507"));
+        testPairs.add(new TestPair<>(awaitingTime, "20191026-14:05:23.507"));
+        testPairs.add(new TestPair<>(awaitingTime, "20191027-14:05:23.507"));
 
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toTimeByZoneId(pair.source, "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
     }
 
     @Test
     public void testToTimeByZoneId3() {
+        Collection<TestPair<LocalTime, LocalDateTime>> testPairs = new ArrayList<>();
         LocalTime awaitingTime = LocalTime.of(14, 5, 23, 0);
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertEquals(awaitingTime, dateUtil.toTimeByZoneId(localDateTime1, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toTimeByZoneId(localDateTime2, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toTimeByZoneId(localDateTime3, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toTimeByZoneId(localDateTime4, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toTimeByZoneId(pair.source, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToDateByZoneId() {
-        long time1 = 1552313123000L; //2019/03/11 14:05:23.000
-        long time2 = 1554041123000L; //2019/03/31 14:05:23.000
-        long time3 = 1572098723000L; //2019/10/26 14:05:23.000
-        long time4 = 1572185123000L; //2019/10/27 14:05:23.000
+        Collection<TestPair<LocalDate, Long>> testPairs = new ArrayList<>();
 
-        LocalDate awaitingTime1 = LocalDate.of(2019, 3, 11);
-        LocalDate awaitingTime2 = LocalDate.of(2019, 3, 31);
-        LocalDate awaitingTime3 = LocalDate.of(2019, 10, 26);
-        LocalDate awaitingTime4 = LocalDate.of(2019, 10, 27);
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 11),1552313123000L)); //2019/03/11 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 31),1554041123000L)); //2019/03/31 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 26),1572098723000L)); //2019/10/26 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 27),1572185123000L)); //2019/10/27 14:05:23.000
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.toDateByZoneId(time1, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.toDateByZoneId(time2, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.toDateByZoneId(time3, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.toDateByZoneId(time4, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateByZoneId(pair.source, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToDateByZoneId2() {
-        LocalDate awaitingTime1 = LocalDate.of(2019, 3, 11);
-        LocalDate awaitingTime2 = LocalDate.of(2019, 3, 31);
-        LocalDate awaitingTime3 = LocalDate.of(2019, 10, 26);
-        LocalDate awaitingTime4 = LocalDate.of(2019, 10, 27);
+        Collection<TestPair<LocalDate, String>> testPairs = new ArrayList<>();
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.toDateByZoneId("20190311-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.toDateByZoneId("20190331-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.toDateByZoneId("20191026-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.toDateByZoneId("20191027-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 11), "20190311-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 31), "20190331-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 26), "20191026-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 27), "20191027-14:05:23.507"));
+
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateByZoneId(pair.source, "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
     }
 
     @Test
     public void testToDateByZoneId3() {
-        LocalDate awaitingTime1 = LocalDate.of(2019, 3, 11);
-        LocalDate awaitingTime2 = LocalDate.of(2019, 3, 31);
-        LocalDate awaitingTime3 = LocalDate.of(2019, 10, 26);
-        LocalDate awaitingTime4 = LocalDate.of(2019, 10, 27);
+        Collection<TestPair<LocalDate, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 11), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 31), LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 26), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 27), LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertEquals(awaitingTime1, dateUtil.toDateByZoneId(localDateTime1, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime2, dateUtil.toDateByZoneId(localDateTime2, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime3, dateUtil.toDateByZoneId(localDateTime3, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime4, dateUtil.toDateByZoneId(localDateTime4, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateByZoneId(pair.source, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToDateTimeByZoneId() {
-        long time1 = 1552313123000L; //2019/03/11 14:05:23.000
-        long time2 = 1554041123000L; //2019/03/31 14:05:23.000
-        long time3 = 1572098723000L; //2019/10/26 14:05:23.000
-        long time4 = 1572185123000L; //2019/10/27 14:05:23.000
+        Collection<TestPair<LocalDateTime, Long>> testPairs = new ArrayList<>();
 
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), 1552313123000L)); //2019/03/11 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), 1554041123000L)); //2019/03/31 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23),1572098723000L)); //2019/10/26 14:05:23.000
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23),1572185123000L)); //2019/10/27 14:05:23.000
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.toDateTimeByZoneId(time1, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.toDateTimeByZoneId(time2, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.toDateTimeByZoneId(time3, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.toDateTimeByZoneId(time4, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateTimeByZoneId(pair.source, "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToDateTimeByZoneId2() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDateTime, String>> testPairs = new ArrayList<>();
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.toDateTimeByZoneId("20190311-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.toDateTimeByZoneId("20190331-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.toDateTimeByZoneId("20191026-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.toDateTimeByZoneId("20191027-14:05:23.507", "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), "20190311-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), "20190331-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23), "20191026-14:05:23.507"));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23), "20191027-14:05:23.507"));
+
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateTimeByZoneId(pair.source, "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns=0", "Europe/London")));
     }
 
     @Test
     public void testToDateTimeByZoneId3() {
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
         LocalDateTime awaitingTime = LocalDateTime.of(1970, 1, 1, 14, 5, 23);
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(awaitingTime, LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertEquals(awaitingTime, dateUtil.toDateTimeByZoneId(localDateTime1.toLocalTime(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toDateTimeByZoneId(localDateTime2.toLocalTime(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toDateTimeByZoneId(localDateTime3.toLocalTime(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime, dateUtil.toDateTimeByZoneId(localDateTime4.toLocalTime(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateTimeByZoneId(pair.source.toLocalTime(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testToDateTimeByZoneId4() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 0, 0, 0);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 4, 1, 0, 0, 0);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 0, 0, 0);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 28, 0, 0, 0);
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 0, 0, 0), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 4, 1, 0, 0, 0), LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 0, 0, 0), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 28, 0, 0, 0), LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0)));
 
-        Assert.assertEquals(awaitingTime1, dateUtil.toDateTimeByZoneId(localDateTime1.toLocalDate(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime2, dateUtil.toDateTimeByZoneId(localDateTime2.toLocalDate(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime3, dateUtil.toDateTimeByZoneId(localDateTime3.toLocalDate(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(awaitingTime4, dateUtil.toDateTimeByZoneId(localDateTime4.toLocalDate(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.toDateTimeByZoneId(pair.source.toLocalDate(), "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
     }
 
     @Test
     public void testFormatTimeByZoneId() {
+        Collection<TestPair<String, LocalDateTime>> testPairs = new ArrayList<>();
         String resultTime = "19700101-15:05:23.000";
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(resultTime, LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(resultTime, LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(resultTime, LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(resultTime, LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0)));
 
-        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime1.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime2.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime3.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime4.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.formatTimeByZoneId(pair.source.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
 
-        DateUtil spyDateUtil = Mockito.spy(dateUtil);
-        Mockito.when(spyDateUtil.getTime()).thenReturn(localDateTime3.toLocalTime());
-        Assert.assertEquals(resultTime, spyDateUtil.formatTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> {
+            DateUtil spyDateUtil = Mockito.spy(dateUtil);
+            Mockito.when(spyDateUtil.getTime()).thenReturn(pair.source.toLocalTime());
+            assertEquals(pair.expected, spyDateUtil.formatTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        });
     }
 
     @Test
     public void testFormatDateByZoneId() {
-        String resultTime1 = "20190311-00:00:00.000";
-        String resultTime2 = "20190401-01:00:00.000";
-        String resultTime3 = "20191026-01:00:00.000";
-        String resultTime4 = "20191028-00:00:00.000";
+        Collection<TestPair<String, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>("20190311-00:00:00.000", LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>("20190401-01:00:00.000", LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>("20191026-01:00:00.000", LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>("20191028-00:00:00.000", LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0)));
 
-        Assert.assertEquals(resultTime1, dateUtil.formatDateByZoneId(localDateTime1.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime2, dateUtil.formatDateByZoneId(localDateTime2.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime3, dateUtil.formatDateByZoneId(localDateTime3.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
-        Assert.assertEquals(resultTime4, dateUtil.formatDateByZoneId(localDateTime4.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.formatDateByZoneId(pair.source.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
 
-        DateUtil spyDateUtil = Mockito.spy(dateUtil);
-        Mockito.when(spyDateUtil.getDate()).thenReturn(localDateTime3.toLocalDate());
-        Assert.assertEquals(resultTime3, spyDateUtil.formatDateByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        testPairs.forEach(pair -> {
+            DateUtil spyDateUtil = Mockito.spy(dateUtil);
+            Mockito.when(spyDateUtil.getDate()).thenReturn(pair.source.toLocalDate());
+            assertEquals(pair.expected, spyDateUtil.formatDateByZoneId("yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        });
     }
 
     @Test
     public void testFormatDateTimeByZoneId() {
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0); // before summer time start | 2019-03-11T14:05:23 2019-03-11T14:05:23Z[Europe/London] 2019-03-11T14:05:23+03:00[Europe/Moscow]
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0); // start of summer time | 2019-03-31T14:05:23 2019-03-31T14:05:23+01:00[Europe/London] 2019-03-31T14:05:23+03:00[Europe/Moscow]
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0); // before summer time end | 2019-10-26T14:05:23 2019-10-26T14:05:23+01:00[Europe/London] 2019-10-26T14:05:23+03:00[Europe/Moscow]
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0); // end of summer time | 2019-10-27T14:05:23 2019-10-27T14:05:23Z[Europe/London] 2019-10-27T14:05:23+03:00[Europe/Moscow]
+        Collection<TestPair<String, LocalDateTime>> testPairs = new ArrayList<>();
 
-        Assert.assertEquals("20190311-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime1, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
-        Assert.assertEquals("20190331-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime2, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
-        Assert.assertEquals("20191026-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime3, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
-        Assert.assertEquals("20191027-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime4, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+        testPairs.add(new TestPair<>("20190311-14:05:23.000", LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0))); // before summer time start | 2019-03-11T14:05:23 2019-03-11T14:05:23Z[Europe/London] 2019-03-11T14:05:23+03:00[Europe/Moscow]
+        testPairs.add(new TestPair<>("20190331-15:05:23.000", LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0))); // start of summer time | 2019-03-31T14:05:23 2019-03-31T14:05:23+01:00[Europe/London] 2019-03-31T14:05:23+03:00[Europe/Moscow]
+        testPairs.add(new TestPair<>("20191026-15:05:23.000", LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0))); // before summer time end | 2019-10-26T14:05:23 2019-10-26T14:05:23+01:00[Europe/London] 2019-10-26T14:05:23+03:00[Europe/Moscow]
+        testPairs.add(new TestPair<>("20191027-14:05:23.000", LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0))); // end of summer time | 2019-10-27T14:05:23 2019-10-27T14:05:23Z[Europe/London] 2019-10-27T14:05:23+03:00[Europe/Moscow]
 
-        DateUtil spyDateUtil = Mockito.spy(dateUtil);
-        Mockito.when(spyDateUtil.getDateTime()).thenReturn(localDateTime3);
-        Assert.assertEquals("20191026-15:05:23.000", spyDateUtil.formatDateTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.formatDateTimeByZoneId(pair.source, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London")));
+
+        testPairs.forEach(pair -> {
+            DateUtil spyDateUtil = Mockito.spy(dateUtil);
+            Mockito.when(spyDateUtil.getDateTime()).thenReturn(pair.source);
+            assertEquals(pair.expected, spyDateUtil.formatDateTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+        });
     }
 
     @Test
     public void testMergeDateTimeByZoneId() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23), LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.mergeDateTimeByZoneId(localDateTime1.toLocalDate(), localDateTime1.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.mergeDateTimeByZoneId(localDateTime2.toLocalDate(), localDateTime2.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.mergeDateTimeByZoneId(localDateTime3.toLocalDate(), localDateTime3.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.mergeDateTimeByZoneId(localDateTime4.toLocalDate(), localDateTime4.toLocalTime(), "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.mergeDateTimeByZoneId(pair.source.toLocalDate(), pair.source.toLocalTime(), "h+0", "Europe/London")));
     }
 
     @Test
     public void testMergeDateTimeByZoneId2() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23), LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.mergeDateTimeByZoneId(localDateTime1.toLocalDate(), localDateTime1, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.mergeDateTimeByZoneId(localDateTime2.toLocalDate(), localDateTime2, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.mergeDateTimeByZoneId(localDateTime3.toLocalDate(), localDateTime3, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.mergeDateTimeByZoneId(localDateTime4.toLocalDate(), localDateTime4, "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.mergeDateTimeByZoneId(pair.source.toLocalDate(), pair.source, "h+0", "Europe/London")));
     }
 
     @Test
     public void testMergeDateTimeByZoneId3() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23), LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.mergeDateTimeByZoneId(localDateTime1, localDateTime1.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.mergeDateTimeByZoneId(localDateTime2, localDateTime2.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.mergeDateTimeByZoneId(localDateTime3, localDateTime3.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.mergeDateTimeByZoneId(localDateTime4, localDateTime4.toLocalTime(), "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.mergeDateTimeByZoneId(pair.source, pair.source.toLocalTime(), "h+0", "Europe/London")));
     }
 
     @Test
     public void testMergeDateTimeByZoneId4() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDateTime, LocalDateTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 11, 14, 5, 23), LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 3, 31, 14, 5, 23), LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 26, 14, 5, 23), LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0)));
+        testPairs.add(new TestPair<>(LocalDateTime.of(2019, 10, 27, 14, 5, 23), LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0)));
 
-        Assert.assertTrue(awaitingTime1.equals(dateUtil.mergeDateTimeByZoneId(localDateTime1, localDateTime1, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.equals(dateUtil.mergeDateTimeByZoneId(localDateTime2, localDateTime2, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.equals(dateUtil.mergeDateTimeByZoneId(localDateTime3, localDateTime3, "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.equals(dateUtil.mergeDateTimeByZoneId(localDateTime4, localDateTime4, "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.mergeDateTimeByZoneId(pair.source, pair.source, "h+0", "Europe/London")));
     }
 
     @Test
     public void testModifyDateTimeByZoneId() {
-        Assert.assertTrue("20190311-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-03-11 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
-        Assert.assertTrue("20190331-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-03-31 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
-        Assert.assertTrue("20191026-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-10-26 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
-        Assert.assertTrue("20191027-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-10-27 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
+        Collection<TestPair<String, String>> testPairs = new ArrayList<>();
+
+        testPairs.add(new TestPair<>("20190311-14:05:23", "2019-03-11 14:05:23.000"));
+        testPairs.add(new TestPair<>("20190331-13:05:23", "2019-03-31 14:05:23.000"));
+        testPairs.add(new TestPair<>("20191026-13:05:23", "2019-10-26 14:05:23.000"));
+        testPairs.add(new TestPair<>("20191027-14:05:23", "2019-10-27 14:05:23.000"));
+
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.modifyDateTimeByZoneId(pair.source, "yyyyMMdd-HH:mm:ss", "h=14", "Europe/London")));
     }
 
     @Test
     public void testModifyTimeByZoneId() {
-        LocalDateTime awaitingTime = LocalDateTime.of(1970, 1, 1, 14, 5, 23);
+        Collection<TestPair<LocalTime, LocalTime>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        //01.01.1970
+        testPairs.add(new TestPair<>(LocalTime.of(13, 5, 23), LocalTime.of(14, 5, 23, 0)));
 
-        Assert.assertTrue(awaitingTime.toLocalTime().equals(dateUtil.modifyTimeByZoneId(localDateTime1.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.toLocalTime().equals(dateUtil.modifyTimeByZoneId(localDateTime2.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.toLocalTime().equals(dateUtil.modifyTimeByZoneId(localDateTime3.toLocalTime(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime.toLocalTime().equals(dateUtil.modifyTimeByZoneId(localDateTime4.toLocalTime(), "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.modifyTimeByZoneId(pair.source, "h=14", "Europe/London")));
     }
 
     @Test
     public void testModifyDateByZoneId() {
-        LocalDateTime awaitingTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23);
-        LocalDateTime awaitingTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23);
-        LocalDateTime awaitingTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23);
-        LocalDateTime awaitingTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23);
+        Collection<TestPair<LocalDate, LocalDate>> testPairs = new ArrayList<>();
 
-        LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
-        LocalDateTime localDateTime2 = LocalDateTime.of(2019, 3, 31, 14, 5, 23, 0);
-        LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
-        LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0);
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 11), LocalDate.of(2019, 3, 11)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 3, 31), LocalDate.of(2019, 3, 31)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 26), LocalDate.of(2019, 10, 26)));
+        testPairs.add(new TestPair<>(LocalDate.of(2019, 10, 27), LocalDate.of(2019, 10, 27)));
 
-        Assert.assertTrue(awaitingTime1.toLocalDate().equals(dateUtil.modifyDateByZoneId(localDateTime1.toLocalDate(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime2.toLocalDate().equals(dateUtil.modifyDateByZoneId(localDateTime2.toLocalDate(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime3.toLocalDate().equals(dateUtil.modifyDateByZoneId(localDateTime3.toLocalDate(), "h+0", "Europe/London")));
-        Assert.assertTrue(awaitingTime4.toLocalDate().equals(dateUtil.modifyDateByZoneId(localDateTime4.toLocalDate(), "h+0", "Europe/London")));
+        testPairs.forEach(pair -> assertEquals(pair.expected, dateUtil.modifyDateByZoneId(pair.source, "h+0", "Europe/London")));
     }
 
     @Test
@@ -1006,5 +944,15 @@ public class TestDateUtil {
     private void checkDiff(LocalDateTime subtrahend, LocalDateTime minuend, String dateComponent, long diff) {
         assertEquals(dateUtil.diffDateTime(minuend, subtrahend, dateComponent), diff);
         assertEquals(dateUtil.diffDateTime(subtrahend, minuend, dateComponent), -diff);
+    }
+
+    private static class TestPair<E, S> {
+	    private final E expected;
+	    private final S source;
+
+        private TestPair(E expected, S source) {
+            this.expected = expected;
+            this.source = source;
+        }
     }
 }
