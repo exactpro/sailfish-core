@@ -26,7 +26,7 @@ subprojects {
         writeFile {
             if (project.hasProperty('plugin_alias')) {
                 line("plugin_alias: ${project.plugin_alias}")
-                line("name: ${project.archivesBaseName}")
+                line("name: ${project.name}")
             }
 
             outputDir = genPluginDir
@@ -36,7 +36,7 @@ subprojects {
             if (project.hasProperty('plugin_alias')) {
                 line('lightweight: true')
                 line("plugin_alias: ${project.plugin_alias}_dictionary")
-                line("name: ${project.archivesBaseName}_dictionary")
+                line("name: ${project.name}_dictionary")
             }
 
             outputDir = pluginDictionaryDir

@@ -36,7 +36,6 @@ ext {
     npmDir          = file("${project.buildDir}/nodejs")
 }
 
-archivesBaseName = 'sailfish-js-report'
 
 defaultTasks 'zipData'
 
@@ -109,7 +108,7 @@ publishing {
             artifact zipData
             pom {
                 version = project.version
-                artifactId = project.archivesBaseName
+                artifactId = project.name
                 groupId = project.group
                 packaging = 'zip'
             }

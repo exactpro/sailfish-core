@@ -340,13 +340,13 @@ subprojects {
         min_core_revision   = project.min_core_revision.toInteger()
         build               = build_number.toInteger()
         branch              = project.branch
-        artifactName        = project.archivesBaseName
+        artifactName        = project.name
     }
 
     jar {
         manifest {
             attributes('Implementation-Version': "${revision}")
-            attributes('Build_Name': "${archivesBaseName}")
+            attributes('Build_Name': "${project.name}")
             attributes('Build_Number': "${build_number}")
             attributes('Git_Hash': "${git_hash}")
             attributes('Project_Name': "${collectDependencies.repository}-${project.name}")
@@ -401,9 +401,8 @@ subprojects {
                 artifact testsJar
                 groupId group
                 version project.version
-                artifactId project.archivesBaseName
                 pom {
-                    name = project.archivesBaseName
+                    name = project.name
                     packaging = 'jar'
                     description = rootProject.description
                     url = vcs_url

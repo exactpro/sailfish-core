@@ -1,5 +1,3 @@
-archivesBaseName = 'service-ntg'
-
 dependencies {
 	if (incremental_build) {
         testCompile group: 'com.exactpro.sf', name: 'service-tcpip', version: "${artifactVersion}"

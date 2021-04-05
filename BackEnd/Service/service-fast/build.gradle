@@ -1,5 +1,3 @@
-archivesBaseName = 'service-fast'
-
 dependencies {
     compile 'org.openfast:openfast:1.0.0'
 }

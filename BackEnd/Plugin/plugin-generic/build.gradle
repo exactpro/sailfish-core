@@ -3,7 +3,6 @@ ext {
     plugin_alias = plugin_name
 }
 
-archivesBaseName = "plugin-${plugin_name}"
 
 dependencies {
 

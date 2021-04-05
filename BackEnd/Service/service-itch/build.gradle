@@ -1,5 +1,3 @@
-archivesBaseName = "service-itch"
-
 configurations {
     jaxb
 }

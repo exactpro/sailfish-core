@@ -4,7 +4,6 @@ ext {
     plugin_alias    = 'aml_3'
 }
 
-archivesBaseName = "extension-${plugin_name}"
 
 dependencies {
     compile 'commons-cli:commons-cli:1.4'

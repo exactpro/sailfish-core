@@ -1,6 +1,5 @@
 defaultTasks 'build'
 
-archivesBaseName = 'sailfish-common'
 
 // Define properties
 ext {
@@ -23,7 +22,7 @@ dependencies {
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
     } else {
-        compile project(':FrontEnd:Sailfish-REST-API-client')
+        compile project(':FrontEnd:sailfish-rest-api-client')
     }
 
     compile 'com.exactpro.mina:apache-mina-core:2.0.9.1'

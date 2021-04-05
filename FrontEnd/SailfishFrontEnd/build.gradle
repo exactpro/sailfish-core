@@ -33,7 +33,6 @@ ext {
     tomcatUrl           = 'http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.24/bin/apache-tomcat-9.0.24.zip'
     tpmcatPort          = 8080
 }
-archivesBaseName = 'sailfish-frontend'
 
 if(project.hasProperty('rmServer')) {
     ext.redmimeParams.uri = project.property('rmServer')
@@ -128,7 +127,7 @@ dependencies {
         data files("${project(':BackEnd:Core:sailfish-core').projectDir}/src/gen/workspace/")
 
         compile project(':BackEnd:Core:sailfish-core')
-        compile project(':FrontEnd:Sailfish-REST-API-client')
+        compile project(':FrontEnd:sailfish-rest-api-client')
         compile project(':BackEnd:Extension:extension-aml-3')
     }
 
@@ -266,7 +265,7 @@ war {
 	    'Built-By':  System.getProperty('user.name'),
 	    'Built-JDK': System.getProperty('java.version')
 	)
-    attributes('Build_Name': "${archivesBaseName}")
+    attributes('Build_Name': "${project.name}")
 	attributes('Build_Number': "${build_number}")
     attributes('Branch_Name': "${branch}")
     attributes('Git_Hash': "${git_hash}")

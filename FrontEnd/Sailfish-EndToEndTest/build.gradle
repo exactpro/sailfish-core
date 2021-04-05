@@ -23,7 +23,7 @@ ext {
         }
     } else {
         pluginPath = "${project(':BackEnd:Plugin:plugin-generic').buildDir}/release/generic"
-        sfReleasePath = "${project(':FrontEnd:SailfishFrontEnd').buildDir}/release"
+        sfReleasePath = "${project(':FrontEnd:sailfish-frontend').buildDir}/release"
     }
 }
 
@@ -41,7 +41,7 @@ dependencies {
         testCompile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${artifactCoreVersion}"
     } else {
         testCompile project(':BackEnd:Core:sailfish-core')
-        testCompile project(':FrontEnd:Sailfish-REST-API-client')
+        testCompile project(':FrontEnd:sailfish-rest-api-client')
     }
     testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7'
     testCompile 'junit:junit:4.12'
@@ -72,7 +72,7 @@ task buildJar(dependsOn: ['jar']) {
 
 task unzipRelease {
     if (!incremental_build) {
-        dependsOn ':FrontEnd:SailfishFrontEnd:zipRelease'
+        dependsOn ':FrontEnd:sailfish-frontend:zipRelease'
     }
     doLast {
         println("Looking for core artifact in ${sfReleasePath}")

@@ -34,7 +34,6 @@ ext {
     npmInstallDir            = file("${buildDir}/npm/")
 }
 
-archivesBaseName = 'sailfish-core'
 
 eclipse.classpath {
     plusConfigurations += [ configurations.jmh ]
@@ -62,12 +61,12 @@ dependencies {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
         testCompile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}:tests@jar"
     } else {
-        project(':FrontEnd:Sailfish-JS-report').afterEvaluate { Project project ->
+        project(':FrontEnd:sailfish-js-report').afterEvaluate { Project project ->
             js_report files(project.tasks.findByPath('buildProd'))
         }
 
         compile project(':BackEnd:Core:sailfish-common')
-        compile project(':FrontEnd:Sailfish-REST-API-client')
+        compile project(':FrontEnd:sailfish-rest-api-client')
         testCompile project(path:':BackEnd:Core:sailfish-common', configuration: 'testArtifacts')
     }
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
