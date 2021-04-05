@@ -8,6 +8,7 @@ include 'BackEnd:Service:service-ntg'
 include 'BackEnd:Service:service-fix'
 include 'BackEnd:Service:service-fast'
 include 'BackEnd:Service:service-tcpip'
+include 'BackEnd:Service:service-http'
 
 include 'BackEnd:Extension:extension-aml-3'
 
@@ -28,3 +29,4 @@ project(':BackEnd:Extension:extension-aml-3').name = 'extension-aml-3'
 project(':FrontEnd:SailfishFrontEnd').name = 'sailfish-frontend'
 project(':FrontEnd:Sailfish-REST-API-client').name = 'sailfish-rest-api-client'
 project(':FrontEnd:Sailfish-JS-report').name = 'sailfish-js-report'
+project(':BackEnd:Service:service-http').name = 'service-http'

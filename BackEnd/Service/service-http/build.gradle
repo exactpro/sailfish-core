@@ -1,0 +1,44 @@
+ext {
+    dictionaryDir = file("${mainResDir}/service.dictionary_prototype")
+}
+
+dependencies {
+    compile "io.netty:netty-codec-http:${netty_version}"
+    compile "io.netty:netty-handler:${netty_version}" // SslContextBuilder is in here
+    compile 'com.sun.xml.ws:jaxws-ri:2.3.2'
+}
+
+compileKotlin {
+    dependsOn.add("generatePrototypeMessages")
+}
+def configureGenerateSailfishMessage(files, inputs, outputs, genDir) {
+    files.each { dict ->
+        inputs.file "$dict"
+        def namespace = ((new XmlParser()).parse(dict).@name).toLowerCase()
+        outputs.dir file("${genDir}/com/exactpro/sf/messages/${namespace}")
+    }
+}
+
+def generateSailfishMessage(dictionaries, runtimeClasspath, genDir) {
+    dictionaries.each { dict ->
+        println "\t${dict.name}"
+        javaexec {
+            classpath runtimeClasspath
+            main "com.exactpro.sf.common.util.CodeGenerator"
+            args = ["${dict}", "${genDir}", "com.exactpro.sf.messages"]
+        }
+    }
+}
+
+task generatePrototypeMessages {
+
+    def dictionaries = fileTree ("${dictionaryDir}") {
+        include 'websocket_prototype.xml'
+    }
+
+    configureGenerateSailfishMessage(dictionaries, inputs, outputs, genJavaDir)
+
+    doLast {
+        generateSailfishMessage(dictionaries, sourceSets.main.runtimeClasspath, genJavaDir)
+    }
+}

@@ -148,6 +148,7 @@ allprojects {
         //Lib versions
         version_slf4j = '1.7.26'
         version_hibernate = '4.3.11.Final'
+        netty_version = '4.1.39.Final'
     }
 
     eclipse {

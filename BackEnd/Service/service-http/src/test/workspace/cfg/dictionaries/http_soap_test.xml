@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="SOAP"  xmlns="http://exactprosystems.com/dictionary">
+
+	<fields>
+
+		<field type="java.lang.String" id="example" name="example">
+			<value type="java.lang.String" name="example">example</value>
+		</field>
+
+	</fields>
+
+	<messages>
+		<message name="GetAirportsListIn">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute type="java.lang.String" name="SOAPAction">http://webservices.belavia.by/GetAirportsList</attribute>
+			<attribute type="java.lang.String" name="Response">GetAirportsListOut</attribute>
+			<attribute type="java.lang.String" name="TargetNamespace">http://webservices.belavia.by/</attribute>
+
+			<field name="GetAirportsList" reference="GetAirportsList">
+<!-- 				<attribute type="java.lang.String" name="XMLNS">http://webservices.belavia.by/</attribute> -->
+			</field>
+
+		</message>
+
+		<message name="GetAirportsList" id="GetAirportsList">
+			<field name="Language" type="java.lang.String" />
+		</message>
+
+		<message name="GetAirportsListOut">
+			<attribute type="java.lang.String" name="soapAction">http://webservices.belavia.by/GetAirportsList</attribute>
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute type="java.lang.String" name="TargetNamespace">http://webservices.belavia.by/</attribute>
+
+			<field name="GetAirportsListResponse" reference="GetAirportsListResponse" />
+		</message>
+
+		<message name="GetAirportsListResponse" id="GetAirportsListResponse">
+
+			<field name="GetAirportsListResult" reference="GetAirportsListResult" />
+		</message>
+
+		<message name="GetAirportsListResult" id="GetAirportsListResult">
+			<field name="Airport" reference="Airport" isCollection="true">
+				<attribute type="java.lang.Boolean" name="IsAttribute">true</attribute>
+			</field>
+		</message>
+
+		<message name="Airport" id="Airport">
+			<field name="IATA" type="java.lang.String">
+				<attribute type="java.lang.Boolean" name="IsAttribute">true</attribute>
+				<attribute type="java.lang.String" name="XMLNS"></attribute>
+			</field>
+			<field name="Name" type="java.lang.String">
+				<attribute type="java.lang.Boolean" name="IsAttribute">true</attribute>
+				<attribute type="java.lang.String" name="XMLNS"></attribute>
+			</field>
+		</message>
+
+        <message name="TestMessage" id="TestMessage">
+            <field name="Integer" type="java.lang.Integer"/>
+            <field name="Boolean" type="java.lang.Boolean"/>
+            <field name="String" type="java.lang.String"/>
+            <field name="Message" reference="TestInnerMessage" />
+            <field name="LocalDateTime" type="java.time.LocalDateTime">
+                <attribute type="java.lang.String" name="format">ISO_UTC</attribute>
+            </field>
+            <field name="IntegerArray" type="java.lang.Integer" isCollection="true"/>
+            <field name="BooleanArray" type="java.lang.Boolean" isCollection="true"/>
+            <field name="StringArray" type="java.lang.String" isCollection="true"/>
+            <field name="MessageArray" reference="TestInnerMessage" isCollection="true"/>
+        </message>
+
+        <message name="TestInnerMessage" id="TestInnerMessage">
+            <field name="InnerInteger" type="java.lang.Integer"/>
+            <field name="InnerBoolean" type="java.lang.Boolean"/>
+            <field name="InnerString" type="java.lang.String"/>
+            <field name="InnerLocalDateTime" type="java.time.LocalDateTime"/>
+        </message>
+
+        <message name="FromArrayMessage">
+            <attribute name="fromArray" type="java.lang.Boolean">true</attribute>
+            <field name="Number" type="java.lang.Integer"/>
+            <field name="Message" reference="FromArraySubMessage"/>
+            <field isCollection="true" name="MessageCollection" reference="FromArraySubMessage"/>
+        </message>
+
+        <message name="FromArraySubMessage" id="FromArraySubMessage">
+            <attribute name="fromArray" type="java.lang.Boolean">true</attribute>
+            <field name="String" type="java.lang.String"/>
+        </message>
+    </messages>
+</dictionary>
