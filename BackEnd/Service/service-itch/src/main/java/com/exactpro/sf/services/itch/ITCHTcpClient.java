@@ -32,6 +32,7 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceStatus;
@@ -161,7 +162,21 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
     public void internalStart() throws Exception {
         externalDisposing = false;
         super.internalStart();
-        connect();
+        try {
+            connect();
+        } catch (SendMessageFailedException ex) {
+            ITCHTCPClientSettings settings = getSettings();
+            if (reconecting && disposeWhenSessionClosed
+                    && (settings.isDoLoginOnStart() || settings.isDoLiteLoginOnStart())) {
+                // We need to avoid throwing the exception from internalStart method.
+                // Otherwise, the start method will throw the exception and the service won't be started at all
+                // We should give a chance to reconnecting task
+                logger.error("Failed to perform login to the endpoint {}. Wait for reconnect", getEndpointName(), ex);
+                changeStatus(ServiceStatus.WARNING, "Failed to perform login", ex);
+            } else {
+                throw ex;
+            }
+        }
 	}
 
 	@Override
