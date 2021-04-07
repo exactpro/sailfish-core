@@ -42,13 +42,13 @@ abstract class AbstractApplication {
     @Throws(MessageConvertException::class)
     protected fun convert(message: Message, from: String, to: String, isAdmin: Boolean, verifyTags: Boolean? = null, isRejected: Boolean = false): IMessage {
         val rawMessage: ByteArray = extractRawData(message)
-        val msg = converter.run {
+        val msg: IMessage = checkNotNull(converter.run {
             if (isRejected) {
                 convertDirty(message, verifyTags, false, false, true)
             } else {
                 convert(message, verifyTags, null)
             }
-        }
+        }) { "Converted message can't be null, origin message: $message" }
         val meta: MsgMetaData = msg.metaData
 
         meta.fromService = from

@@ -174,8 +174,8 @@ public class FIXSession implements ISession {
             logger.trace("Processing raw message: {}", messageData);
             Message message = new Message();
             // do not validate anything. it will be checked during the regular send action
-            message.fromString(messageData, dataDictionary, false);
-            IMessage converted = converter.convert(message, false, false);
+            message.fromString(messageData, dataDictionary, true);
+            IMessage converted = converter.convert(message, true, false);
             converted.removeField(FixMessageHelper.HEADER);
             converted.removeField(FixMessageHelper.TRAILER);
             logger.debug("Sending message converted from raw: {} - {}", converted.getName(), converted);

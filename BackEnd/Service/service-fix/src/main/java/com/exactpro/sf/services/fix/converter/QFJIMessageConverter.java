@@ -154,16 +154,18 @@ public class QFJIMessageConverter
 	//
 	// QFJ to SF
 	//
-	public IMessage convert(Message message) throws MessageConvertException {
+	@Nullable
+    public IMessage convert(@Nullable Message message) throws MessageConvertException {
 		return convert(message, null, null, false);
 	}
 
-    public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride) throws MessageConvertException {
+    @Nullable
+    public IMessage convert(@Nullable Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride) throws MessageConvertException {
         return convert(message, verifyTagsOverride, skipTagsOverride, false);
     }
 
     @Nullable
-    public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
+    public IMessage convert(@Nullable Message message, @Nullable Boolean verifyTagsOverride, @Nullable Boolean skipTagsOverride,
             boolean ignoreFieldType) throws MessageConvertException {
 
         if(message == null) {

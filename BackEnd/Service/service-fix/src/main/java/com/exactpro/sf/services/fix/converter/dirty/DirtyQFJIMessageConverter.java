@@ -34,6 +34,7 @@ import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,16 +83,19 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
         fieldConverter.init(dictionary, dictionary.getNamespace());
     }
 
-    public IMessage convertDirty(Message message, Boolean inlineHeaderAndTrailer) throws MessageConvertException {
+    @Nullable
+    public IMessage convertDirty(@Nullable Message message, Boolean inlineHeaderAndTrailer) throws MessageConvertException {
         return convertDirty(message, null, null, inlineHeaderAndTrailer, false);
     }
 
-    public IMessage convertDirty(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
+    @Nullable
+    public IMessage convertDirty(@Nullable Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
                                  Boolean inlineHeaderAndTrailer) throws MessageConvertException {
         return convertDirty(message, verifyTagsOverride, skipTagsOverride, inlineHeaderAndTrailer, false);
     }
 
-    public IMessage convertDirty(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
+    @Nullable
+    public IMessage convertDirty(@Nullable Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
                                  Boolean inlineHeaderAndTrailer, boolean ignoreFieldType) throws MessageConvertException {
         if(message == null) {
             return null;

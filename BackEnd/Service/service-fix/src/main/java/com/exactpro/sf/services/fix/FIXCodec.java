@@ -101,7 +101,7 @@ public class FIXCodec extends AbstractCodec {
         if (this.settings.isVerifyMessageStructure() &&
                 (!this.settings.isDecodeByDictionary() || this.settings.isDepersonalizationIncomingMessages())) {
             throw new IllegalArgumentException("The 'verification message structure' feature can't be enabled because "
-                    + "the 'decode by dictionary' is " + this.settings.isDecodeByDictionary() + " (required 'true') and"
+                    + "the 'decode by dictionary' is " + this.settings.isDecodeByDictionary() + " (required 'true') and "
                     + "the 'depersonalization incoming messages' is " + this.settings.isDepersonalizationIncomingMessages() + " (required 'false')");
         }
 
@@ -309,7 +309,7 @@ public class FIXCodec extends AbstractCodec {
 
         IMessage iMessage = settings.isDepersonalizationIncomingMessages() ?
                                 convertMessageToIMessage(fixMessageSrc, dictionary.getNamespace()) :
-                                qfjConverter.convert(fixMessageSrc, false, false);
+                                qfjConverter.convert(fixMessageSrc);
 
         parseXmlFields(iMessage, new MessageFieldExtractor(fixMessageSrc),
                 fixMessageSrc.getHeader().getString(MsgType.FIELD));

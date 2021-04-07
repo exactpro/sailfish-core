@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.fix;
+
+import static org.junit.Assert.assertArrayEquals;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.AbstractProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.quickfixj.CharsetSupport;
 
 import com.exactpro.sf.actions.DirtyFixUtil;
 import com.exactpro.sf.common.messages.IMessage;
@@ -24,26 +52,14 @@ import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructure
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.services.tcpip.MessageParseException;
 import com.exactpro.sf.services.tcpip.TCPIPSettings;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.ImmutableList;
-import junit.framework.Assert;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.AbstractProtocolDecoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.quickfixj.CharsetSupport;
+
 import quickfix.DataDictionary;
 import quickfix.FieldNotFound;
 import quickfix.InvalidMessage;
@@ -52,23 +68,20 @@ import quickfix.field.converter.UtcDateOnlyConverter;
 import quickfix.field.converter.UtcTimeOnlyConverter;
 import quickfix.field.converter.UtcTimestampConverter;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.Assert.assertArrayEquals;
-
 public class FixCodecTest extends AbstractTest {
 
-    private FIXCodec codec;
-    private IMessageFactory msgFactory;
-    private IDictionaryStructure dictionary;
+    private final SailfishURI dictionaryURI = SailfishURI.unsafeParse("dictionary");
+    private final IoSession session = new DummySession();
+
+    private final IDictionaryStructure dictionary;
+
+    {
+        try {
+            this.dictionary = loadDictionaryFromResource("dictionary/FIX50.TEST.xml");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
 	@Test
 	@Ignore //Tests for manual testing
@@ -100,31 +113,54 @@ public class FixCodecTest extends AbstractTest {
 		System.out.println(msg);
 	}
 
-	@Before
-	public void init() {
-        InputStream in = getClass().getClassLoader().getResourceAsStream("dictionary/FIX50.TEST.xml");
-        this.dictionary = new XmlDictionaryStructureLoader().load(in);
-
+    @Test(expected = IllegalArgumentException.class)
+    public void testVerifyMessageStructureSetting1() throws Exception {
         TCPIPSettings settings = new TCPIPSettings();
+        settings.setVerifyMessageStructure(true);
+        createCodec(dictionary, settings);
+    }
 
-        this.msgFactory = new FixMessageFactory();
+    @Test(expected = IllegalArgumentException.class)
+    public void testVerifyMessageStructureSetting2() throws Exception {
+        TCPIPSettings settings = new TCPIPSettings();
+        settings.setVerifyMessageStructure(true);
+        settings.setDecodeByDictionary(true);
+        createCodec(dictionary, settings);
+    }
 
-        this.codec = new FIXCodec();
-        codec.init(serviceContext, settings, msgFactory, dictionary);
+    @Test(expected = IllegalArgumentException.class)
+    public void testVerifyMessageStructureSetting3() throws Exception {
+        TCPIPSettings settings = new TCPIPSettings();
+        settings.setVerifyMessageStructure(true);
+        settings.setDepersonalizationIncomingMessages(false);
+        createCodec(dictionary, settings);
+    }
+
+    @Test
+    public void testVerifyMessageStructure() throws Exception {
+        TCPIPSettings settings = new TCPIPSettings();
+        settings.setVerifyMessageStructure(true);
+        settings.setDecodeByDictionary(true);
+        settings.setDepersonalizationIncomingMessages(false);
+        FIXCodec codec = createCodec(dictionary, settings);
+
+        IoBuffer buffer = IoBuffer.wrap("8=FIXT.1.1\0019=77\00135=Z\00134=1152\00149=FIX_CSV_ds1\00152=20151005-15:47:02.785\00156=FGW\00199999=fake\001298=4\00110=115\001".getBytes());
+        AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
+        codec.decode(session, buffer, outputDec);
+
+        IMessage message = (IMessage)outputDec.getMessageQueue().poll();
+        Assert.assertEquals(ErrorMessage.MESSAGE_NAME, message.getName());
+        Assert.assertEquals("Unknown tag: 99999, verify tags enabled", new ErrorMessage(message).getCause());
     }
 
     @Test
     public void testXmlSubMessage() throws Exception {
-        InputStream in = getClass().getClassLoader().getResourceAsStream("dictionary/FIX50.XML_MESSAGE.xml");
-        IDictionaryStructure dictionary = new XmlDictionaryStructureLoader().load(in);
+        IDictionaryStructure dictionary = loadDictionaryFromResource("dictionary/FIX50.XML_MESSAGE.xml");
 
         TCPIPSettings settings = new TCPIPSettings();
         settings.setDecodeByDictionary(false);
 
-        FIXCodec codec = new FIXCodec();
-        codec.init(serviceContext, settings, msgFactory, dictionary);
-
-        IoSession session = new DummySession();
+        FIXCodec codec = createCodec(dictionary, settings);
         AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
 
         @SuppressWarnings("ConfusingOctalEscapeSequence")
@@ -212,9 +248,9 @@ public class FixCodecTest extends AbstractTest {
 
         settings.setDecodeByDictionary(true);
         settings.setDepersonalizationIncomingMessages(false);
-        codec.init(serviceContext, settings, msgFactory, dictionary);
 
-        session = new DummySession();
+        codec = createCodec(dictionary, settings);
+
         outputDec = new MockProtocolDecoderOutput();
         buffer = IoBuffer.wrap(message.getBytes());
 
@@ -225,7 +261,7 @@ public class FixCodecTest extends AbstractTest {
         // check fields with by dictionary decoding
         Assert.assertEquals("StringField", decodedMessage.getField("StringField"));
         Assert.assertEquals((Integer)333, decodedMessage.getField("IntegerField"));
-        Assert.assertEquals(-444.555666, decodedMessage.getField("DoubleField"));
+        Assert.assertEquals((Double)(-444.555666), decodedMessage.getField("DoubleField"));
         Assert.assertEquals(new BigDecimal("777.888999"), decodedMessage.getField("BigDecimalField"));
         Assert.assertEquals((Boolean)true, decodedMessage.getField("BooleanField"));
         Assert.assertEquals((Character)'C', decodedMessage.getField("CharacterField"));
@@ -241,7 +277,7 @@ public class FixCodecTest extends AbstractTest {
         Assert.assertEquals(dateTime, decodedMessage.getField("LocalDateTimeField"));
 
         //header
-        IMessage header = (IMessage) decodedMessage.getField("header");
+        IMessage header = decodedMessage.getField("header");
         Assert.assertEquals("FIXT.1.1", header.getField("BeginString"));
         Assert.assertEquals((Integer)1232, header.getField("BodyLength"));
         Assert.assertEquals("777", header.getField("MsgType"));
@@ -287,7 +323,7 @@ public class FixCodecTest extends AbstractTest {
 
         Assert.assertEquals("It's work", xmlSubMessage.getField("StringField"));
         Assert.assertEquals((Integer)13, xmlSubMessage.getField("IntegerField"));
-        Assert.assertEquals(444.555666, xmlSubMessage.getField("DoubleField"));
+        Assert.assertEquals((Double)444.555666, xmlSubMessage.getField("DoubleField"));
         Assert.assertEquals(new BigDecimal("111.222333"), xmlSubMessage.getField("BigDecimalField"));
         Assert.assertEquals((Boolean)true, xmlSubMessage.getField("BooleanField"));
         Assert.assertEquals((Character)'C', xmlSubMessage.getField("CharacterField"));
@@ -304,9 +340,9 @@ public class FixCodecTest extends AbstractTest {
         // with depersonalization
         settings.setDecodeByDictionary(true);
         settings.setDepersonalizationIncomingMessages(true);
-        codec.init(serviceContext, settings, msgFactory, dictionary);
 
-        session = new DummySession();
+        codec = createCodec(dictionary, settings);
+
         outputDec = new MockProtocolDecoderOutput();
         buffer = IoBuffer.wrap(message.getBytes());
 
@@ -375,15 +411,11 @@ public class FixCodecTest extends AbstractTest {
 
     @Test
     public void testAlternativeSeparator() throws Exception {
-        InputStream in = getClass().getClassLoader().getResourceAsStream("dictionary/FIX50.TEST.xml");
-        IDictionaryStructure dictionary = new XmlDictionaryStructureLoader().load(in);
-
         TCPIPSettings settings = new TCPIPSettings();
         settings.setDecodeByDictionary(true);
         settings.setFieldSeparator("|");
 
-        FIXCodec codec = new FIXCodec();
-        codec.init(serviceContext, settings, msgFactory, dictionary);
+        FIXCodec codec = createCodec(dictionary, settings);
         IMessage expectedMessage = getExpectedMessage();
 
         // | in the message end
@@ -403,9 +435,10 @@ public class FixCodecTest extends AbstractTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testSendMessage() throws Exception {
-        HashMap<String, Object> map = new HashMap<>();
-        HashMap<String, Object> subMap1 = new HashMap<>();
-        HashMap<String, Object> subMap2 = new HashMap<>();
+
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> subMap1 = new HashMap<>();
+        Map<String, Object> subMap2 = new HashMap<>();
 
         subMap1.put("NetChgPrevDay", "2163");
         subMap1.put("TestMessageIndicator", "MDRT006");
@@ -430,6 +463,9 @@ public class FixCodecTest extends AbstractTest {
         map.put("3182", "225");
         map.put("9", "001");
         map.put("10", "2");
+
+        IMessageFactory msgFactory = createMessageFactory(dictionary);
+        FIXCodec codec = createCodec(dictionary, msgFactory, new TCPIPSettings());
 
         IMessage iMessage = MessageUtil.convertToIMessage(map, msgFactory, "namespace", "name");
         ProtocolEncoderOutput out = Mockito.mock(ProtocolEncoderOutput.class);
@@ -676,10 +712,8 @@ public class FixCodecTest extends AbstractTest {
         settings.setDecodeByDictionary(false);
         settings.setFilterMessages("35:D; 34:71; 805:ez_mbp3");
 
-        FIXCodec codec = new FIXCodec();
-        codec.init(serviceContext, settings, msgFactory, dictionary);
+        FIXCodec codec = createCodec(dictionary, settings);
 
-        IoSession session = new DummySession();
         AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
 
         IoBuffer buffer = IoBuffer.wrap(builder.toString().getBytes());
@@ -692,8 +726,7 @@ public class FixCodecTest extends AbstractTest {
 
         // check without space in value
         settings.setFilterMessages("35:D; 34:71,72");
-        codec.init(serviceContext, settings, msgFactory, dictionary);
-        session = new DummySession();
+        codec = createCodec(dictionary, settings);
         outputDec = new MockProtocolDecoderOutput();
         buffer = IoBuffer.wrap(builder.toString().getBytes());
         codec.decode(session, buffer, outputDec);
@@ -709,8 +742,7 @@ public class FixCodecTest extends AbstractTest {
 
         // check with space in value
         settings.setFilterMessages("35:D; 34:71,72 ");
-        codec.init(serviceContext, settings, msgFactory, dictionary);
-        session = new DummySession();
+        codec = createCodec(dictionary, settings);
         outputDec = new MockProtocolDecoderOutput();
         buffer = IoBuffer.wrap(builder.toString().getBytes());
         codec.decode(session, buffer, outputDec);
@@ -733,7 +765,7 @@ public class FixCodecTest extends AbstractTest {
         // no tag
         settings.setFilterMessages(":D; 34:71");
         try {
-            codec.init(serviceContext, settings, msgFactory, dictionary);
+            codec = createCodec(dictionary, settings);
             Assert.fail("Must throw EPSCommonException with message " +
                     "[Invalid filter [:D; 34:71]. Must have format 'tag:value' delimited by ';']");
         } catch (EPSCommonException e) {
@@ -743,7 +775,7 @@ public class FixCodecTest extends AbstractTest {
         // no value
         settings.setFilterMessages("35:; 34:71");
         try {
-            codec.init(serviceContext, settings, msgFactory, dictionary);
+            codec = createCodec(dictionary, settings);
             Assert.fail("Must throw EPSCommonException with message " +
                     "[Invalid filter [35:; 34:71]. Must have format 'tag:value' delimited by ';']");
         } catch (EPSCommonException e) {
@@ -753,7 +785,7 @@ public class FixCodecTest extends AbstractTest {
         // empty tag
         settings.setFilterMessages(" :D; 34:71");
         try {
-            codec.init(serviceContext, settings, msgFactory, dictionary);
+            codec = createCodec(dictionary, settings);
             Assert.fail("Must throw EPSCommonException with message [Invalid filter [ :D; 34:71]. Tag is empty");
         } catch (EPSCommonException e) {
             Assert.assertEquals("Invalid filter [ :D; 34:71]. Tag is empty", e.getMessage());
@@ -771,6 +803,29 @@ public class FixCodecTest extends AbstractTest {
         AbstractTest.equals(expectedMessage, (IMessage)decoded);
         assertArrayEquals(message.getBytes(CharsetSupport.getCharsetInstance()),
                 ((IMessage) decoded).getMetaData().getRawMessage());
+    }
+
+    private IMessageFactory createMessageFactory(IDictionaryStructure dictionary) {
+        IMessageFactory messageFactory = new FixMessageFactory();
+        messageFactory.init(dictionaryURI, dictionary);
+        return messageFactory;
+    }
+
+    private FIXCodec createCodec(IDictionaryStructure dictionary, IMessageFactory messageFactory, TCPIPSettings settings) {
+        FIXCodec codec = new FIXCodec();
+        codec.init(serviceContext, settings, messageFactory, dictionary);
+        return codec;
+    }
+
+    private FIXCodec createCodec(IDictionaryStructure dictionary, TCPIPSettings settings) {
+        IMessageFactory messageFactory = createMessageFactory(dictionary);
+        return createCodec(dictionary, messageFactory, settings);
+    }
+
+    private IDictionaryStructure loadDictionaryFromResource(String name) throws IOException {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(name)) {
+            return new XmlDictionaryStructureLoader().load(in);
+        }
     }
 
     @NotNull
