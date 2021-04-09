@@ -116,8 +116,7 @@ public class NettySession implements ISession {
         }
 
         if (!isSendSuccess) {
-            throw new SendMessageFailedException(
-"Message wasn't send during 1 second." + errorMsg + " Session: " + this);
+            throw new SendMessageFailedException("Message wasn't send during " + timeout + " mls." + errorMsg + " Session: " + this);
         }
     }
 
