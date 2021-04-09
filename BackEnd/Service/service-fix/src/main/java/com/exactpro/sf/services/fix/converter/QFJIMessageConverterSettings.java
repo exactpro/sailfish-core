@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,17 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.fix.converter;
 
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverterSettings;
+import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 
 import java.util.Objects;
+
+import quickfix.Message;
 
 public class QFJIMessageConverterSettings {
     private final IDictionaryStructure dictionary;
     private final IMessageFactory factory;
+    /** Verify tags by dictionary dufing convertation from {@link Message} to {@link IMessage}*/
     private boolean verifyTags;
     private boolean includeMilliseconds;
     private boolean includeMicroseconds;
@@ -33,6 +39,17 @@ public class QFJIMessageConverterSettings {
     public QFJIMessageConverterSettings(IDictionaryStructure dictionary, IMessageFactory factory){
         this.dictionary = Objects.requireNonNull(dictionary, "Dictionary can't be null");
         this.factory = Objects.requireNonNull(factory, "Factory can't be null");
+    }
+
+    @SuppressWarnings("ClassReferencesSubclass")
+    public DirtyQFJIMessageConverterSettings toDirtySettings() {
+        return new DirtyQFJIMessageConverterSettings(dictionary, factory)
+                .setVerifyTags(verifyTags)
+                .setIncludeMilliseconds(includeMilliseconds)
+                .setIncludeMicroseconds(includeMicroseconds)
+                .setIncludeNanoseconds(includeNanoseconds)
+                .setSkipTags(skipTags)
+                .setOrderingFields(orderingFields);
     }
 
     public QFJIMessageConverterSettings setVerifyTags(boolean verifyTags){

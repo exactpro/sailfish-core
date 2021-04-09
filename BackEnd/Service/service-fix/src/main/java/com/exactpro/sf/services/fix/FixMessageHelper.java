@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,10 +99,18 @@ public class FixMessageHelper extends MessageHelper {
     public static final String XMLDATA = "XMLDATA";
     public static final List<String> HEADER_FIELDS_ORDER = ImmutableList.of(BEGIN_STRING_FIELD, BODY_LENGTH_FIELD, MSG_TYPE_FIELD);
 
+    private String fixVersion = null;
+
     //    A field with tagNumber and type DATA must have a paired field with tagNumber-1 and type LENGTH.
     //    But there are exceptions, for example field Signature with tag 89 and type DATA has a paired field with tag 93 and type LENGTH.
     //    Fields with such tags should be excluded from validation.
     public static final Map<Integer, Integer> EXCEPTIONAL_DATA_LENGTH_TAGS = ImmutableMap.of(89, 93);
+
+    @Override
+    public void init(IMessageFactory messageFactory, IDictionaryStructure dictionaryStructure) {
+        super.init(messageFactory, dictionaryStructure);
+        this.fixVersion = QFJDictionaryAdapter.extractFixVersion(dictionaryStructure.getNamespace()).getBeginString();
+    }
 
     @Override
     public AbstractCodec getCodec(IServiceContext serviceContext) {
@@ -116,7 +126,11 @@ public class FixMessageHelper extends MessageHelper {
             subMessage = getMessageFactory().createMessage(HEADER, getNamespace());
         }
         message.addField(HEADER, subMessage);
-        
+
+        if (!subMessage.isFieldSet(BEGIN_STRING_FIELD)) {
+            subMessage.addField(BEGIN_STRING_FIELD, fixVersion);
+        }
+
         if (!subMessage.isFieldSet(MSG_TYPE_FIELD)) {
             IMessageStructure structure = getDictionaryStructure().getMessages().get(message.getName());
             if (structure == null) {

@@ -31,6 +31,7 @@ import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
+import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.services.tcpip.IFieldConverter;
 import com.exactpro.sf.services.tcpip.MessageParseException;
@@ -44,6 +45,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.jetbrains.annotations.Nullable;
 import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,9 +114,10 @@ public class FIXCodec extends AbstractCodec {
         this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
         this.fieldConverter = new FixFieldConverter();
         fieldConverter.init(dictionary, dictionary.getNamespace());
-        QFJIMessageConverterSettings qfjiMessageConverterSettings = new QFJIMessageConverterSettings(dictionary, this.msgFactory);
-        qfjiMessageConverterSettings.setVerifyTags(this.settings.isVerifyMessageStructure());
-        this.qfjConverter = new DirtyQFJIMessageConverter(qfjiMessageConverterSettings);
+        DirtyQFJIMessageConverterSettings dirtySettings = new DirtyQFJIMessageConverterSettings(dictionary, this.msgFactory)
+            .setVerifyTags(this.settings.isVerifyMessageStructure())
+            .setVerifyFields(this.settings.isVerifyMessageStructure());
+        this.qfjConverter = new DirtyQFJIMessageConverter(dirtySettings);
 
         this.msgStructures = new HashMap<>();
 
@@ -401,6 +404,7 @@ public class FIXCodec extends AbstractCodec {
 		return false;
 	}
 
+    @Nullable
     protected String getMessageName(IMessage message) {
         String targetMsgType = message.getField(FixMessageHelper.MSG_TYPE_FIELD);
 
@@ -415,7 +419,7 @@ public class FIXCodec extends AbstractCodec {
 
         if(targetMsgType != null) {
             IMessageStructure msgStructure = msgStructures.get(targetMsgType);
-            return msgStructure != null ? msgStructure.getName() : null;
+            return msgStructure == null ? null : msgStructure.getName();
         }
 
         return null;

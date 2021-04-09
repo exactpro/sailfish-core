@@ -18,6 +18,7 @@ package com.exactpro.sf.services.fix.converter;
 import java.sql.Timestamp;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,11 +41,13 @@ import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
+import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
 import com.exactpro.sf.services.fix.converter.dirty.struct.Field;
 import com.exactpro.sf.services.fix.converter.dirty.struct.FieldList;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.util.ConverterTest;
+import com.google.common.collect.Lists;
 
 import quickfix.DataDictionary;
 import quickfix.InvalidMessage;
@@ -669,6 +672,66 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     }
 
     @Test
+    public void testDirtyVerifyFieldsInRoot() throws MessageConvertException {
+        exception.expect(MessageConvertException.class);
+        exception.expectMessage("QuoteCancel doesn't conatin field or tag 11");
+
+        DirtyQFJIMessageConverterSettings settings = getSettings()
+                .setVerifyFields(true);
+        DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(settings);
+
+        IMessage iMessage = messageFactory.createMessage("QuoteCancel", "FIX_5_0");
+        iMessage.addField("QuoteReqID", "QuoteReqID");
+        iMessage.addField("ClOrdID", "ClOrdID");
+
+        //noinspection ResultOfMethodCallIgnored
+        converter.convertDirty(iMessage);
+    }
+
+    @Test
+    public void testDirtyVerifyFieldsInComponent() throws MessageConvertException {
+        exception.expect(MessageConvertException.class);
+        exception.expectMessage("QuoteCancel.TargetParty doesn't conatin field or tag 11");
+
+        DirtyQFJIMessageConverterSettings settings = getSettings()
+                .setVerifyFields(true);
+        DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(settings);
+
+        IMessage component = messageFactory.createMessage("TargetParty", "FIX_5_0");
+        component.addField("ClOrdID", "ClOrdID");
+
+        IMessage iMessage = messageFactory.createMessage("QuoteCancel", "FIX_5_0");
+        iMessage.addField("QuoteReqID", "QuoteReqID");
+        iMessage.addField("TargetParty", component);
+
+        //noinspection ResultOfMethodCallIgnored
+        converter.convertDirty(iMessage);
+    }
+
+    @Test
+    public void testDirtyVerifyFieldsInGroup() throws MessageConvertException {
+        exception.expect(MessageConvertException.class);
+        exception.expectMessage("QuoteCancel.TargetParty.NoTargetPartyIDs doesn't conatin field or tag 11");
+
+        DirtyQFJIMessageConverterSettings settings = getSettings()
+                .setVerifyFields(true);
+        DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(settings);
+
+        IMessage group = messageFactory.createMessage("NoTargetPartyIDs", "FIX_5_0");
+        group.addField("ClOrdID", "ClOrdID");
+
+        IMessage component = messageFactory.createMessage("TargetParty", "FIX_5_0");
+        component.addField("NoTargetPartyIDs", Lists.newArrayList( group));
+
+        IMessage iMessage = messageFactory.createMessage("QuoteCancel", "FIX_5_0");
+        iMessage.addField("QuoteReqID", "QuoteReqID");
+        iMessage.addField("TargetParty", component);
+
+        //noinspection ResultOfMethodCallIgnored
+        converter.convertDirty(iMessage);
+    }
+
+    @Test
     public void testFieldComparator() throws Exception {
         FieldList msg = new FieldList();
 
@@ -728,8 +791,8 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
         Assert.assertTrue("RawMessage doesn't contain 1461=2", raw.toString().contains("1461=2"));
     }
 
-    private QFJIMessageConverterSettings getSettings(){
-        return new QFJIMessageConverterSettings(dictionary, messageFactory).setIncludeMilliseconds(true);
+    private DirtyQFJIMessageConverterSettings getSettings(){
+        return new DirtyQFJIMessageConverterSettings(dictionary, messageFactory).setIncludeMilliseconds(true);
 
     }
 }

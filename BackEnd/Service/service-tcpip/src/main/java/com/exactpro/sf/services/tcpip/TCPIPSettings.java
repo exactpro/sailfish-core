@@ -67,7 +67,7 @@ public class TCPIPSettings extends AbstractMINASettings
             + "for decoding of all fields occur only into the message body.")
 	private boolean decodeByDictionary;
 
-    @Description("If the option is true, then the internal codec verifies structure of incoming messages by dictionary.<br>"
+    @Description("If the option is true, then the internal codec verifies structure of incoming/outgoing messages by dictionary.<br>"
             + "The verification feature requires the `decode by dictionary` to be enabled and the `depersonalization incoming messages` to be disabled.")
 	private boolean verifyMessageStructure;
 

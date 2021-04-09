@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.fix;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,12 +64,13 @@ import quickfix.field.converter.UtcTimestampConverter;
 
 public class QFJDictionaryAdapter extends DataDictionary {
 
-	private static final Logger logger = LoggerFactory.getLogger(QFJDictionaryAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(QFJDictionaryAdapter.class);
 
 	public static final String ATTRIBUTE_FIX_TYPE = "fixtype";
 
     private static final String MESSAGE_CATEGORY_ADMIN = "admin".intern();
-	private boolean checkFieldsOutOfOrder = true;
+    private static final Pattern FIX_VERSION_PATTERN = Pattern.compile("(.*)(FIXT?_[0-9]+_[0-9]+)");
+    private boolean checkFieldsOutOfOrder = true;
 	private boolean checkFieldsHaveValues = true;
 	private boolean checkUserDefinedFields = true;
 	private boolean checkRequiredFields = true;
@@ -188,14 +190,21 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 	private String getVersionFromDictName() {
 		namespace = iMsgDict.getNamespace();
-		return getVersionFromNs(namespace);
+		return extractFixVersion(namespace).getBeginString();
 	}
 
-	private String getVersionFromNs(String ns) {
-		Pattern p = Pattern.compile("(.*)(FIXT?_[0-9]+_[0-9]+)");
-		Matcher m = p.matcher(ns);
-		m.find();
-		return m.group(2).replace('_', '.');
+    /**
+     * Extracts FIX version in the begin string (tag 8) format from text
+     * @param text which contains substring in format {@link #FIX_VERSION_PATTERN}
+     * @return FIX version in the begin string (tag 8) format
+     * @throws IllegalArgumentException
+     */
+	public static FIXBeginString extractFixVersion(String text) {
+		Matcher m = FIX_VERSION_PATTERN.matcher(requireNonNull(text, "'text' cannot be null"));
+		if (!m.find()) {
+		    throw new IllegalArgumentException("String " + text + " doesn't conatain pattern " + FIX_VERSION_PATTERN.pattern() + " ");
+        }
+		return FIXBeginString.parse(m.group(2).replace('_', '.'));
 	}
 
 	@Override

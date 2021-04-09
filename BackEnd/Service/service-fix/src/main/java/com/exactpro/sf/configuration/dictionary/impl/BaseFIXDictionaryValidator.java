@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.configuration.dictionary.impl;
+
 import static com.exactpro.sf.common.impl.messages.xml.configuration.JavaType.JAVA_LANG_INTEGER;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel.DICTIONARY;
+import static com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType.ERR_NAME;
 import static com.exactpro.sf.services.fix.FixMessageHelper.ATTRIBUTE_ENTITY_TYPE;
 import static com.exactpro.sf.services.fix.FixMessageHelper.ATTRIBUTE_TAG;
 import static com.exactpro.sf.services.fix.FixMessageHelper.COMPONENT_ENTITY;
@@ -186,6 +189,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
     @Override
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, boolean full, Boolean fieldsOnly) {
         List<DictionaryValidationError> errors = super.validate(dictionary, full, fieldsOnly);
+        checkNamespace(errors, dictionary);
         checkMessageTypes(errors, dictionary);
         checkRequiredMessages(errors, dictionary);
         checkTagDuplicates(errors, dictionary);
@@ -304,6 +308,16 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
         Integer tag = getAttributeValue(field, ATTRIBUTE_TAG);
         if (tag != null) {
             tags.put(tag, new FieldHolder(message == null ? null : message.getName(), field.getName()));
+        }
+    }
+
+    private void checkNamespace(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
+        try {
+            QFJDictionaryAdapter.extractFixVersion(dictionary.getNamespace());
+        } catch (RuntimeException e) {
+            errors.add(new DictionaryValidationError(null, null,
+                    "Namespace has incorrect format: " + e.getMessage(),
+                    DICTIONARY, ERR_NAME));
         }
     }
 
