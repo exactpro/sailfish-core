@@ -172,7 +172,7 @@ public abstract class WebSocketClient extends HTTPClient {
             connector.join(settings.getExpectedTimeOfStarting());
             connector.interrupt();
             if (!clientHandshakerHandler.isHandshakeComplete()) {
-                throw new EPSCommonException("Handshake not complete");
+                handleNotConnected();
             }
         } catch (Exception ex) {
             changeStatus(ServiceStatus.ERROR, ex.getMessage(), ex);
@@ -182,6 +182,10 @@ public abstract class WebSocketClient extends HTTPClient {
 
     protected void startHandshake() throws Exception {
         // do nothing cause handshake start on channelActive() in BaseAuthorizationManager
+    }
+
+    private void handleNotConnected() {
+        throw new EPSCommonException("Handshake not complete");
     }
 
     /* (non-Javadoc)

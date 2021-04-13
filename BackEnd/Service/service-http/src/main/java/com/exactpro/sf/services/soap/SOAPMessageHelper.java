@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.services.soap;
 
+import com.exactpro.sf.common.util.EPSCommonException;
+
+import javax.xml.soap.MessageFactory;
+
 public class SOAPMessageHelper {
     
     public static final String IS_ATTRIBUTE = "IsAttribute";
@@ -22,5 +26,25 @@ public class SOAPMessageHelper {
     public static final String PREFIX = "Prefix";
     public static final String TNS = "TargetNamespace";
     public static final String SOAPACTION = "SOAPAction";
-    
+    public static final String IGNORE_ATTRIBUTE = "ignore";
+
+    public static MessageFactory getSoapMessageFactory() {
+        // Java 8 had java web services library as part of Java SE.
+        // In java 11 web services library was removed (http://openjdk.java.net/jeps/320).
+        // Because of that we should use external dependencies for web services.
+        // Thread context class loader under which this code is run doesn't have plugin dependencies in classpath.
+        // So we need redefine thread context class loader for factory creation
+        // And set it back after factory created.
+        MessageFactory factory;
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(SOAPMessageHelper.class.getClassLoader());
+            factory = MessageFactory.newInstance();
+        } catch (Exception e) {
+            throw new EPSCommonException("Unable to create SOAP message factory");
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+        return factory;
+    }
 }

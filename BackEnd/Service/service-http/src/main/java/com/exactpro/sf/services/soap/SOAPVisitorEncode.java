@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.soap;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.soap.SOAPMessageHelper.IGNORE_ATTRIBUTE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ import javax.xml.soap.SOAPException;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,6 +237,9 @@ public class SOAPVisitorEncode extends DefaultMessageStructureVisitor {
         String newTargetNamespace = getAttributeValue(fldStruct, SOAPMessageHelper.TNS);
         try {
             nestedElement = addSimpleNode(fieldName, fldStruct);
+            if(nestedElement == null) {
+                return;
+            }
             nestedVistor = new SOAPVisitorEncode(nestedElement, defaultIfNull(newTargetNamespace, targetNamespace));
         } catch (SOAPException e) {
             logger.error(e.getMessage(), e);
@@ -268,7 +273,11 @@ public class SOAPVisitorEncode extends DefaultMessageStructureVisitor {
 
     private void processSimpleNode(Object value, String fieldName, IFieldStructure fldStruct, boolean isDefault) {
         try {
-            addSimpleNode(fieldName, fldStruct).addTextNode(value.toString());
+            SOAPElement node = addSimpleNode(fieldName, fldStruct);
+            if(node == null) {
+                return;
+            }
+            node.addTextNode(value.toString());
         } catch (SOAPException e) {
             logger.error(e.getMessage(), e);
         }
@@ -285,10 +294,14 @@ public class SOAPVisitorEncode extends DefaultMessageStructureVisitor {
         }
     }
 
-    private SOAPElement addSimpleNode(String fieldName, IFieldStructure fldStruct) throws SOAPException {
+    private @Nullable SOAPElement addSimpleNode(String fieldName, IFieldStructure fldStruct) throws SOAPException {
         // FIXME how to manage xml namespace and his prefixes
         String xmlns = getAttributeValue(fldStruct, SOAPMessageHelper.XMLNS);
         String prefix = getAttributeValue(fldStruct, SOAPMessageHelper.PREFIX);
+        boolean ignore = BooleanUtils.toBoolean(StructureUtils.<Boolean>getAttributeValue(fldStruct, IGNORE_ATTRIBUTE));
+        if(ignore) {
+            return null;
+        }
 
         if (prefix != null) {
             if (xmlns != null) {

@@ -54,7 +54,7 @@ public class SOAPEncoder extends AbstractHTTPEncoder {
     @Override
     protected void encode(ChannelHandlerContext handlerContext, IMessage msg, List<Object> out) throws Exception {
 
-        MessageFactory factory = MessageFactory.newInstance();
+        MessageFactory factory = SOAPMessageHelper.getSoapMessageFactory();
         SOAPMessage soapMessage = factory.createMessage();
         SOAPBody body = soapMessage.getSOAPBody();
 

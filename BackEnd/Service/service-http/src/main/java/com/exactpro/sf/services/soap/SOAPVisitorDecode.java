@@ -251,16 +251,19 @@ public class SOAPVisitorDecode extends DefaultMessageStructureVisitor {
     }
 
     private <T> List<T> extractValues(IFieldStructure fldStruct, String fieldName, Class<T> targetElementClass) {
-        NodeList elements = rootNode.getElementsByTagName(fieldName);
+        String xmlns = getAttributeValue(fldStruct, SOAPMessageHelper.XMLNS);
+        String prefix = getAttributeValue(fldStruct, SOAPMessageHelper.PREFIX);
+        Iterator<Node> elements = rootNode.getChildElements(buildName(xmlns, prefix, fieldName));
 
-        if(elements == null || elements.getLength() == 0) {
+        if(elements == null || !elements.hasNext()) {
             return null;
         }
 
         List<T> values = new ArrayList<>();
 
-        for(int i = 0; i < elements.getLength(); i++) {
-            values.add(MultiConverter.convert(elements.item(i).getTextContent(), targetElementClass));
+        while (elements.hasNext()) {
+            Node element = elements.next();
+            values.add(MultiConverter.convert(element.getTextContent(), targetElementClass));
         }
 
         return values;

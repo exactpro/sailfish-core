@@ -58,7 +58,7 @@ public class SOAPDecoder extends AbstractHTTPDecoder {
 
         if (msg.getMetaData().getRawMessage().length > 0) {
 
-            MessageFactory factory = MessageFactory.newInstance();
+            MessageFactory factory = SOAPMessageHelper.getSoapMessageFactory();
             SOAPMessage soapMessage = factory.createMessage(new MimeHeaders(),
                     handleContentEncoding(MatcherHandlerUtil.getEncodingString(msg), msg.getMetaData().getRawMessage()));
 
