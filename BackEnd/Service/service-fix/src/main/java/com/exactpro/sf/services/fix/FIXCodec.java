@@ -19,7 +19,9 @@ import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -91,6 +93,7 @@ public class FIXCodec extends AbstractCodec {
     private final DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
     private String separatorReplacePattern;
     private String fieldSeparator = SOH;
+    private FIXBeginString beginStringByDictionary;
 
     @Override
     public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
@@ -118,6 +121,7 @@ public class FIXCodec extends AbstractCodec {
             .setVerifyTags(this.settings.isVerifyMessageStructure())
             .setVerifyFields(this.settings.isVerifyMessageStructure());
         this.qfjConverter = new DirtyQFJIMessageConverter(dirtySettings);
+        beginStringByDictionary = QFJDictionaryAdapter.extractFixVersion(dictionary.getNamespace());
 
         this.msgStructures = new HashMap<>();
 
@@ -292,18 +296,30 @@ public class FIXCodec extends AbstractCodec {
         if (message instanceof IMessage) {
             IMessage originIMessage = (IMessage)message;
 
-            MsgMetaData metaData = originIMessage.getMetaData();
+            IMetadata metaData = originIMessage.getMetaData();
             IMessage encoded = originIMessage.cloneMessage();
             String messageName = getMessageName(encoded);
-            RawMessage rawMessage = qfjConverter.convertDirty(encoded, messageName);
+            byte[] rawMessage = settings.isVerifyMessageStructure() // that is enough to check that settings
+                    // because if it is enabled other settings are enabled as well
+                    ? encodeByDictionary(encoded)
+                    : encodeDirty(encoded, messageName);
 
-            metaData.setRawMessage(rawMessage.getBytes());
+            MetadataExtensions.setRawMessage(metaData, rawMessage);
 
-            IoBuffer buffer = IoBuffer.wrap(metaData.getRawMessage());
+            IoBuffer buffer = IoBuffer.wrap(rawMessage);
             out.write(buffer);
         } else {
             out.write(message);
         }
+    }
+
+    private byte[] encodeDirty(IMessage encoded, String messageName) throws MessageConvertException {
+        RawMessage rawMessage = qfjConverter.convertDirty(encoded, messageName);
+        return Objects.requireNonNull(rawMessage, () -> "Raw message for " + encoded.getName() + " is `null`").getBytes();
+    }
+
+    private byte[] encodeByDictionary(IMessage encoded) throws MessageConvertException {
+        return FixUtil.getRawMessage(qfjConverter.convert(encoded, beginStringByDictionary == FIXBeginString.FIXT_1_1));
     }
 
     protected IMessage convertToIMessageByIDictionaryStructure(String fixMessage) throws Exception {
