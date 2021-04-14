@@ -184,7 +184,7 @@ public abstract class WebSocketClient extends HTTPClient {
         // do nothing cause handshake start on channelActive() in BaseAuthorizationManager
     }
 
-    private void handleNotConnected() {
+    protected void handleNotConnected() {
         throw new EPSCommonException("Handshake not complete");
     }
 
