@@ -302,13 +302,10 @@ public final class NTGClient extends AbstractMINATCPService {
 
     @Override
     protected void disposeResources() {
-	    super.disposeResources();
-	    if (externalDisposing) {
+        if (externalDisposing) {
             cancelCurrentReconnectFuture();
-            return;
         }
-	    if(loggingConfigurator != null)
-            loggingConfigurator.registerLogger(this, getServiceName());
+	    super.disposeResources();
     }
 
     private void cancelCurrentReconnectFuture() {
@@ -336,6 +333,9 @@ public final class NTGClient extends AbstractMINATCPService {
         } catch (Exception ex) {
             logger.error("Error during disposing resources", ex);
         }
+
+        if(loggingConfigurator != null)
+            loggingConfigurator.createAndRegister(getServiceName(), this);
 
         try {
             internalStart();
