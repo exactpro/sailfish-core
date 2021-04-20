@@ -271,7 +271,9 @@ public abstract class AbstractScriptRunner implements IDisposable {
             aggregateReportListeners.add(new ReportDictionaries(reportFolder));
             //services report
             aggregateReportListeners.add(new ReportServices(reportFolder));
-
+            //th2 report
+            aggregateReportListeners.addAll(sfContext.getScriptReportLoader().createScriptReports(
+                    reportFolder, workspaceDispatcher, dictionaryManager, scriptDescription));
             BroadcastScriptReport aggregateReport = new BroadcastScriptReport(aggregateReportListeners);
 
             reportListeners.add(new ScriptReportWithLogs(aggregateReport, settings.getExcludedMessages()));
@@ -279,8 +281,6 @@ public abstract class AbstractScriptRunner implements IDisposable {
             if (userListeners != null) {
                 reportListeners.addAll(userListeners);
             }
-
-            reportListeners.addAll(sfContext.getScriptReportLoader().createScriptReports(reportFolder, workspaceDispatcher, dictionaryManager, scriptDescription));
 
             // NOTE: ZipReport must be latest
             reportListeners.add(new ZipReport(reportFolder, workspaceDispatcher, scriptDescription,  ReportOutputFormat.ZIP));
