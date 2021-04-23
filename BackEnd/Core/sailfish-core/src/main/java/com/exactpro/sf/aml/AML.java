@@ -251,8 +251,7 @@ public class AML {
         return reader;
     }
 
-    public static void compileScript(GeneratedScript script, File binFolderPath, TestScriptDescription description, String compilerClassPath) throws InterruptedException
-    {
+    public static void compileScript(GeneratedScript script, File binFolderPath, TestScriptDescription description, String compilerClassPath) throws InterruptedException, IOException {
         Thread.sleep(0); // let interrupt script compilation
         if (description != null) {
             logger.debug("compileScript: {}", description);
@@ -301,29 +300,29 @@ public class AML {
         }
     }
 
-    private static void doCompile(List<String> option, List<File> javaFiles) throws InterruptedException
-    {
+    private static void doCompile(List<String> option, List<File> javaFiles) throws InterruptedException, IOException {
         logger.debug("doCompile");
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        for (int i = 0; i < javaFiles.size(); i++) {
-            if (!javaFiles.get(i).exists()) {
-                throw new ScriptRunException("Could not find file: '" + javaFiles.get(i) + "'");
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
+            for (int i = 0; i < javaFiles.size(); i++) {
+                if (!javaFiles.get(i).exists()) {
+                    throw new ScriptRunException("Could not find file: '" + javaFiles.get(i) + "'");
+                }
             }
-        }
 
-        Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(
-                javaFiles.toArray(new File[javaFiles.size()])
-        );
+            Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(
+                    javaFiles.toArray(new File[javaFiles.size()])
+            );
 
-        Thread.sleep(0); // let interrupt script compilation
-        StringWriter writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        printWriter.flush();
-        boolean isCompiled = compiler.getTask(printWriter, fileManager,null, option, null, units).call();
+            Thread.sleep(0); // let interrupt script compilation
+            StringWriter writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            printWriter.flush();
+            boolean isCompiled = compiler.getTask(printWriter, fileManager, null, option, null, units).call();
 
-        if(!isCompiled) {
-            throw new ScriptRunException("Could not compile sources: " + EOL + writer);
+            if (!isCompiled) {
+                throw new ScriptRunException("Could not compile sources: " + EOL + writer);
+            }
         }
     }
 

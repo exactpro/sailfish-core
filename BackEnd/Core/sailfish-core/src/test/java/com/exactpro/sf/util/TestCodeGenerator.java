@@ -99,19 +99,19 @@ public class TestCodeGenerator extends EPSTestCase {
         
         
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(
-                javaFiles.stream()
-                    .map(Path::toFile)
-                    .collect(Collectors.toList())
-                    .toArray(new File[javaFiles.size()])
-        );
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
+            Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(
+                    javaFiles.stream()
+                            .map(Path::toFile)
+                            .collect(Collectors.toList())
+                            .toArray(new File[javaFiles.size()])
+            );
 
-        StringWriter writer = new StringWriter();
-        try (PrintWriter printWriter = new PrintWriter(writer)) {
-            Assert.assertTrue(testName + ": " + writer, compiler.getTask(printWriter, fileManager,null, option, null, units).call());
+            StringWriter writer = new StringWriter();
+            try (PrintWriter printWriter = new PrintWriter(writer)) {
+                Assert.assertTrue(testName + ": " + writer, compiler.getTask(printWriter, fileManager, null, option, null, units).call());
+            }
         }
-        
         try (URLClassLoader classLoader = new URLClassLoader(new URL[] { compileFolder.toUri().toURL() }, getClass().getClassLoader())) {
             for (Path path : javaFiles) {
                 Assert.assertEquals(testName + ": contains underscore '" + path + "'", underscoreAsPackageSeparator, !path.getFileName().toString().contains("_"));
