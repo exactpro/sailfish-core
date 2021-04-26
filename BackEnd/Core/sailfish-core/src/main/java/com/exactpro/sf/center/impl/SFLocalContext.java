@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,10 @@ import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.ITestScriptStorage;
 import com.exactpro.sf.storage.IVariableSetStorage;
 import com.exactpro.sf.storage.MessageStorageLoader;
+import com.exactpro.sf.storage.ServiceStorageLoader;
 import com.exactpro.sf.storage.impl.AbstractMessageStorage;
 import com.exactpro.sf.storage.impl.BroadcastMessageStorage;
+import com.exactpro.sf.storage.impl.BroadcastServiceStorage;
 import com.exactpro.sf.storage.impl.DatabaseAuthStorage;
 import com.exactpro.sf.storage.impl.DatabaseEnvironmentStorage;
 import com.exactpro.sf.storage.impl.DatabaseMatrixStorage;
@@ -313,6 +315,8 @@ public class SFLocalContext implements ISFContext {
 
         PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
         MessageStorageLoader messageStorageLoader = new MessageStorageLoader();
+        ServiceStorageLoader serviceStorageLoader = new ServiceStorageLoader();
+
         scriptReportLoader = new ScriptReportLoader();
 
         // 5) Load core & plugins
@@ -332,7 +336,8 @@ public class SFLocalContext implements ISFContext {
                 pluginServiceLoader,
                 version,
                 messageStorageLoader,
-                scriptReportLoader);
+                scriptReportLoader,
+                serviceStorageLoader);
 
         LoadInfo loadInfo = pluginLoader.load();
         loadInfo.appendClassPath(compilerClassPath);
@@ -341,7 +346,7 @@ public class SFLocalContext implements ISFContext {
         messageStorage = createMessageStorage(envSettings, sessionFactory, dictionaryManager, messageStorageLoader.getSecondaryMessageStorages(workspaceDispatcher, envSettings, dictionaryManager));
         disposables.add(messageStorage);
 
-        serviceStorage = createServiceStorage(envSettings, sessionFactory, workspaceDispatcher, staticServiceManager, dictionaryManager, messageStorage);
+        serviceStorage = createServiceStorage(envSettings, sessionFactory, workspaceDispatcher, staticServiceManager, dictionaryManager, messageStorage, serviceStorageLoader.getSecondaryServiceStorages(workspaceDispatcher, envSettings, dictionaryManager));
         disposables.add(serviceStorage);
 
         this.serviceContext = new DefaultServiceContext(dictionaryManager, messageStorage, serviceStorage, loggingConfigurator, taskExecutor, dataManager, wd);
@@ -439,17 +444,22 @@ public class SFLocalContext implements ISFContext {
 	}
 
     private IServiceStorage createServiceStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, IWorkspaceDispatcher workspaceDispatcher, IStaticServiceManager staticServiceManager, IDictionaryManager dictionaryManager,
-            IMessageStorage messageStorage) {
+            IMessageStorage messageStorage, List<IServiceStorage> secondaryStorages) {
+	    IServiceStorage primaryStorage;
         switch(envSettings.getStorageType()) {
         case DB:
-            return new DatabaseServiceStorage(sessionFactory, staticServiceManager, dictionaryManager, messageStorage);
+            primaryStorage = new DatabaseServiceStorage(sessionFactory, staticServiceManager, dictionaryManager, messageStorage);
+            break;
 		case FILE:
-            return new FileServiceStorage(envSettings.getFileStoragePath(), workspaceDispatcher, staticServiceManager, messageStorage);
+            primaryStorage = new FileServiceStorage(envSettings.getFileStoragePath(), workspaceDispatcher, staticServiceManager, messageStorage);
+            break;
         case MEMORY:
-            return new MemoryServiceStorage();
+            primaryStorage = new MemoryServiceStorage();
+            break;
 		default:
             throw new EPSCommonException("Unsupported service storage type. Check your descriptor.xml file.");
 		}
+		return new BroadcastServiceStorage(primaryStorage, secondaryStorages);
 	}
 
     private IEnvironmentStorage createEnvironmentStorage(EnvironmentSettings envSettings, IStorage storage, IWorkspaceDispatcher workspaceDispatcher) {

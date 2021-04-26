@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,8 @@ public class PluginLoader {
 
     private final ILoadableManager scriptReportLoader;
 
+    private final ILoadableManager serviceStorageLoader;
+
 	public PluginLoader(
             IWorkspaceDispatcher wd,
             ILoadableManager staticServiceManager,
@@ -128,7 +130,8 @@ public class PluginLoader {
             PluginServiceLoader pluginServiceLoader,
             IVersion coreVersion,
             ILoadableManager messageStorageLoader,
-            ILoadableManager scriptReportLoader) {
+            ILoadableManager scriptReportLoader,
+            ILoadableManager serviceStorageLoader) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
 		}
@@ -149,6 +152,7 @@ public class PluginLoader {
         this.coreVersion = coreVersion;
         this.messageStorageLoader = messageStorageLoader;
         this.scriptReportLoader = scriptReportLoader;
+        this.serviceStorageLoader = serviceStorageLoader;
 
 		this.pluginVersions = new ArrayList<>();
 	}
@@ -156,7 +160,7 @@ public class PluginLoader {
     /**
      * @deprecated please use {@link #PluginLoader(IWorkspaceDispatcher, ILoadableManager, ILoadableManager, ILoadableManager,
      * PreprocessorLoader, ValidatorLoader, ILoadableManager, ILoadableManager, ILoadableManager, MatrixProviderHolder,
-     * ILoadableManager, ILoadableManager, PluginServiceLoader, IVersion, ILoadableManager, ILoadableManager)}
+     * ILoadableManager, ILoadableManager, PluginServiceLoader, IVersion, ILoadableManager, ILoadableManager, ILoadableManager)}
      */
 	@Deprecated
     public PluginLoader(
@@ -177,7 +181,7 @@ public class PluginLoader {
             ILoadableManager messageStorageLoader) {
 	    this(wd, staticServiceManager, actionManager,
                 dictionaryManager, preprocessorLoader, validatorLoader, adapterManager, dataManager, languageManager, matrixProviderHolder,
-                matrixConverterManager, statisticsReportsLoader, pluginServiceLoader, coreVersion, messageStorageLoader, null);
+                matrixConverterManager, statisticsReportsLoader, pluginServiceLoader, coreVersion, messageStorageLoader, null, null);
     }
 
 	public LoadInfo load() throws FileNotFoundException, WorkspaceSecurityException, SailfishURIException {
@@ -560,6 +564,19 @@ public class PluginLoader {
             }
         } else {
             logger.info("Ignore scripts reports [No ScriptReportLoader]. Plugin: {}", pluginPath);
+        }
+
+        //
+        // Load Th2ServiceStorage
+        //
+        if (serviceStorageLoader != null) {
+            try {
+                serviceStorageLoader.load(loadableContext);
+            } catch (Exception e) {
+                throw new EPSCommonException(e);
+            }
+        } else {
+            logger.info("Ignore service storage [No ServiceStorageLoader]. Plugin: {}", pluginPath);
         }
 
         // Collect service description files

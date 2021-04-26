@@ -211,7 +211,7 @@ public class ServiceFactory implements IServiceFactory {
         IVersion coreVersion = new CoreVersion();
         PluginLoader pluginLoader = new PluginLoader(wd, staticServiceManager, null,
                 dictionaryManager, null, null, null, dataManager, null, null, null, null,
-                null, coreVersion, null, null);
+                null, coreVersion, null, null, null);
         pluginLoader.load();
 
         this.marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);

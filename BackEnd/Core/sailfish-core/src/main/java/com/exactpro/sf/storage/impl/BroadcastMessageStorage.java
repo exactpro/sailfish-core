@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package com.exactpro.sf.storage.impl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -50,7 +49,7 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
     }
 
     public BroadcastMessageStorage(AbstractMessageStorage primaryStorage, AbstractMessageStorage... secondaryStorages) {
-        this(primaryStorage, secondaryStorages.length > 0 ? Arrays.asList(secondaryStorages) : null);
+        this(primaryStorage, secondaryStorages.length > 0 ? Arrays.asList(secondaryStorages) : Collections.emptyList());
     }
 
     @Override
