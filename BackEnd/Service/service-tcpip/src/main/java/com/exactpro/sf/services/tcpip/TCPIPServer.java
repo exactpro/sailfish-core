@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -70,7 +71,7 @@ import com.exactpro.sf.services.mina.MINAUtil;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
 
-public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, IInitiatorService {
+public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, IInitiatorService, ITCPIPService {
 
     private final Logger logger = LoggerFactory
             .getLogger(ILoggingConfigurator.getLoggerName(this));
@@ -443,5 +444,33 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     private String getRemoteAddress(IoSession session) {
         return Objects.toString(session.getRemoteAddress(), "UNKNOWN");
+    }
+
+    @Override
+    public boolean sendMessage(IMessage message, long timeOut) throws InterruptedException {
+
+        if(session == null) {
+            return false;
+        }
+
+        MsgMetaData metaData = message.getMetaData();
+        byte[] data = metaData.getRawMessage();
+        IoBuffer buffer = IoBuffer.wrap(data);
+
+        session.send(buffer, timeOut);
+
+        metaData.setAdmin(false);
+        metaData.setFromService(getName());
+        metaData.setToService(session.toString());
+        metaData.setServiceInfo(serviceInfo);
+
+        storage.storeMessage(message);
+
+        return true;
+    }
+
+    @Override
+    public boolean isConnected() {
+        return !sessionMap.isEmpty();
     }
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import com.exactpro.sf.services.mina.AbstractMINATCPService;
 import com.exactpro.sf.services.mina.MINAUtil;
 import com.exactpro.sf.services.util.ServiceUtil;
 
-public class TCPIPClient extends AbstractMINATCPService {
+public class TCPIPClient extends AbstractMINATCPService implements ITCPIPService {
 	private Class<? extends AbstractCodec> codecClass;
 	private IFieldConverter fieldConverter;
 	protected IDataManager dataManager;
@@ -125,7 +125,7 @@ public class TCPIPClient extends AbstractMINATCPService {
 	    byte[] data = metaData.getRawMessage();
 		IoBuffer buffer = IoBuffer.wrap(data);
 
-        session.send(buffer);
+        session.send(buffer, timeOut);
 
         metaData.setAdmin(false);
         metaData.setFromService(getName());

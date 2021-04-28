@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
+import com.exactpro.sf.services.tcpip.ITCPIPService;
 import com.exactpro.sf.services.tcpip.TCPIPClient;
 import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
 
@@ -282,10 +283,10 @@ public class FixConnectivityActions extends AbstractCaller
 		actionContext.getLogger().info("[{}] started", serviceName);
 		actionContext.getLogger().info("actionContext=[{}]", actionContext);
 
-		TCPIPClient tcpipClient = getClient(actionContext);
+        ITCPIPService service = getTCPIPService(actionContext);
 
-        if(!tcpipClient.isConnected()) {
-            tcpipClient.connect();
+        if(!service.isConnected()) {
+            service.connect();
         }
 
         if(!inputData.containsKey("RawMessage")) {
@@ -302,7 +303,7 @@ public class FixConnectivityActions extends AbstractCaller
 
 		message.getMetaData().setRawMessage(messageString.getBytes());
 		message.getMetaData().setDirty(true);
-		tcpipClient.sendMessage(message, 3000);
+		service.sendMessage(message, 3000);
         HashMap<Object, Object> result = new HashMapWrapper<>(message.getMetaData());
         result.putAll(inputData);
 
@@ -600,6 +601,9 @@ public class FixConnectivityActions extends AbstractCaller
 	private static TCPIPClient getClient(IActionContext actionContext) {
 		return ActionUtil.getService(actionContext, TCPIPClient.class);
 	}
+    private static ITCPIPService getTCPIPService(IActionContext actionContext) {
+        return ActionUtil.getService(actionContext, ITCPIPService.class);
+    }
 
 	private static IService getService(IActionContext actionContext) {
 		return ActionUtil.getService(actionContext, IService.class);
