@@ -42,7 +42,7 @@ public class LogEntry implements IJsonReportNode {
         this.thread = row.getThread();
         this.message = row.getMessage();
         this.clazz = row.getClazz();
-        this.exception = row.getEx() != null ? new ReportException(row.getEx()) : null;
+        this.exception = row.getThrowable() != null ? new ReportException(row.getThrowable()) : null;
     }
 
     public Instant getTimestamp() {

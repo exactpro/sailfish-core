@@ -104,7 +104,7 @@ public class TestJsonReport extends AbstractTest {
 
         LoggerRow row = new LoggerRow();
         row.setClazz("someclazz");
-        row.setEx(new Exception("exception"));
+        row.setThrowable(new Exception("exception"));
         row.setLevel(Level.ERROR);
         row.setMessage("somemessage");
         row.setTimestamp(123123123);

@@ -24,7 +24,7 @@ public class LoggerRow {
 	private String thread;
 	private String clazz;
 	private String message;
-	private Exception ex;
+	private Throwable throwable;
 	
 	public String getThread() {
 		return thread;
@@ -57,11 +57,11 @@ public class LoggerRow {
 	public void setClazz(String clazz) {
 		this.clazz = clazz;
 	}
-	public Exception getEx() {
-		return ex;
+	public Throwable getThrowable() {
+		return throwable;
 	}
-	public void setEx(Exception ex) {
-		this.ex = ex;
+	public void setThrowable(Throwable throwable) {
+		this.throwable = throwable;
 	}
 
 }

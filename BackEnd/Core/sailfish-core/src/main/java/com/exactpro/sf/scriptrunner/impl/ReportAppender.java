@@ -86,7 +86,7 @@ public class ReportAppender extends AppenderSkeleton{
 		row.setMessage(arg0.getRenderedMessage());
 
 		if(arg0.getThrowableInformation() != null){
-			row.setEx((Exception)arg0.getThrowableInformation().getThrowable());
+			row.setThrowable(arg0.getThrowableInformation().getThrowable());
 		}
 
 		rows.add(row);
