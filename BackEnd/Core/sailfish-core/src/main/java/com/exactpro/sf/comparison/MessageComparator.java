@@ -358,10 +358,12 @@ public class MessageComparator {
 
             boolean uncheckedField = unchecked || settings.getUncheckedFields().contains(fieldName);
             boolean checkKeyFieldsOnly = keyFieldsOnly && keyFields.get(fieldName);
-            IFieldStructure fieldStructure = structure != null ? structure.getFields().get(fieldName) : null;
+            IFieldStructure fieldStructure = structure == null ? null : structure.getFields().get(fieldName);
             List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName, checkKeyFieldsOnly);
 
-            result.addResult(compareValues(fieldName, actualValue, expectedValue, uncheckedField, checkKeyFieldsOnly, fieldStructure, subMetaContainers, settings));
+            ComparisonResult subResult = compareValues(fieldName, actualValue, expectedValue, uncheckedField, checkKeyFieldsOnly, fieldStructure, subMetaContainers, settings);
+            subResult.setKey(isKeyField(fieldName, metaContainers.get(0)));
+            result.addResult(subResult);
         }
 
         return result;
@@ -372,6 +374,12 @@ public class MessageComparator {
 
         result.setActual(getValue(actual));
         result.setExpected(getValue(expected));
+
+        // We can determinate if the field is key only if we have a single MetaContainer
+        // Otherwise, the caller must determinate whether the field is key or not
+        if (metaContainers.size() == 1) {
+            result.setKey(isKeyField(name, metaContainers.get(0)));
+        }
 
         if (settings.getIgnoredFields().contains(name)) {
             //TODO NA status must be set for nested structures
@@ -428,6 +436,10 @@ public class MessageComparator {
         }
 
         return result;
+    }
+
+    private static boolean isKeyField(String name, MetaContainer metaContainer) {
+        return BooleanUtils.isFalse(metaContainer.getKeyFields().get(name));
     }
 
     private static ComparisonResult addToResult(Object object, ComparisonResult result, StatusType status, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings, boolean actual) {

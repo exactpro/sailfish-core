@@ -47,6 +47,7 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
     private Set<BugDescription> reproducedBugs = Collections.emptySet();
     private ComparisonResult parent;
     private MsgMetaData metaData;
+    private boolean key;
 
     public ComparisonResult(String name) {
         setName(name);
@@ -216,6 +217,15 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
 
     public ComparisonResult setMetaData(MsgMetaData metaData) {
         this.metaData = Objects.requireNonNull(metaData, "metaData cannot be null");
+        return this;
+    }
+
+    public boolean isKey() {
+        return key;
+    }
+
+    public ComparisonResult setKey(boolean key) {
+        this.key = key;
         return this;
     }
 

@@ -1049,6 +1049,9 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNotNull(result);
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("keyField is not key in " + result, result
+                .getResult("keyField")
+                .isKey());
     }
 
     @Test
@@ -1091,6 +1094,10 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNotNull(result);
         Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("keyField is not key in " + result, result
+                .getResult("subMessage")
+                .getResult("keyField")
+                .isKey());
 
         // override key field in submessage by marking submessage field as a key one
         metaContainer.setKeyFields(singleton("subMessage"));
@@ -1134,8 +1141,8 @@ public class TestMessageComparator extends AbstractTest {
         ComparatorSettings settings = new ComparatorSettings();
         MetaContainer metaContainer = settings.getMetaContainer();
 
-        metaContainer.add("collection", new MetaContainer());
-        metaContainer.add("collection", new MetaContainer().setKeyFields(singleton("keyField")));
+        metaContainer.add("collection", new MetaContainer()); // does not have key fields
+        metaContainer.add("collection", new MetaContainer().setKeyFields(singleton("keyField"))); // have single key field
 
         ComparisonResult result = MessageComparator.compare(message, filter, settings);
 
@@ -1151,6 +1158,16 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNotNull(result);
         Assert.assertEquals(4, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertFalse("keyField is a key in 0 result " + result,
+                result.getResult("collection")
+                        .getResult("0")
+                        .getResult("keyField")
+                        .isKey());
+        Assert.assertTrue("keyField is not a key in 1 result " + result,
+                result.getResult("collection")
+                        .getResult("1")
+                        .getResult("keyField")
+                        .isKey());
 
         // override key field in collection by marking collection field as a key one
         metaContainer.setKeyFields(singleton("collection"));
@@ -1213,11 +1230,150 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNotNull("Key is not matched", result);
         Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("keyField is not a key in 1 result " + result,
+                result.getResult("collection")
+                        .getResult("1")
+                        .getResult("innerMessage")
+                        .getResult("keyField")
+                        .isKey());
 
         result = MessageComparator.compare(message, rightFilter, settings);
         Assert.assertNotNull("Key is not matched", result);
         Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("keyField is not a key in 1 result " + result,
+                result.getResult("collection")
+                        .getResult("1")
+                        .getResult("innerMessage")
+                        .getResult("keyField")
+                        .isKey());
+    }
+
+    @Test
+    public void testMessageAsKeyField() {
+        IMessage message = createMessage(root -> {
+            root.addField("inner", createMessage(inner -> {
+                inner.addField("test", 1);
+            }));
+        });
+
+        IMessage correctFilter = createMessage(root -> {
+            root.addField("inner", createMessage(inner -> {
+                inner.addField("test", 1);
+            }));
+        });
+
+        IMessage wrongFilter = createMessage(root -> {
+            root.addField("inner", createMessage(inner -> {
+                inner.addField("test", 2);
+            }));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+        metaContainer.setKeyFields(singleton("inner"));
+
+        ComparisonResult result = MessageComparator.compare(message, wrongFilter, settings);
+        Assert.assertNull(result);
+
+        result = MessageComparator.compare(message, correctFilter, settings);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("inner is not a key in 1 result " + result,
+                result.getResult("inner")
+                        .isKey());
+    }
+
+    @Test
+    public void testMessageInCollectionAsKeyField() {
+        IMessage message = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(inner -> {
+                        inner.addField("test", 1);
+                    }),
+                    createMessage(inner -> {
+                        inner.addField("key", createMessage(key -> {
+                            key.addField("test", 1);
+                        }));
+                    })
+            ));
+        });
+
+        IMessage correctFilter = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(inner -> {
+                        inner.addField("test", 1);
+                    }),
+                    createMessage(inner -> {
+                        inner.addField("key", createMessage(key -> {
+                            key.addField("test", 1);
+                        }));
+                    })
+            ));
+        });
+
+        IMessage wrongFilter = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(inner -> {
+                        inner.addField("test", 1);
+                    }),
+                    createMessage(inner -> {
+                        inner.addField("key", createMessage(key -> {
+                            key.addField("test", 2);
+                        }));
+                    })
+            ));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+
+        metaContainer.add("collection", new MetaContainer());
+        metaContainer.add("collection", new MetaContainer().setKeyFields(singleton("key")));
+
+        ComparisonResult result = MessageComparator.compare(message, wrongFilter, settings);
+        Assert.assertNull(result);
+
+        result = MessageComparator.compare(message, correctFilter, settings);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("key msg is not a key in 1 result " + result,
+                result.getResult("collection")
+                        .getResult("1")
+                        .getResult("key")
+                        .isKey());
+    }
+
+    @Test
+    public void testSimpleCollectionAsKeyField() {
+        IMessage message = createMessage(root -> {
+            root.addField("collection", asList(1, 2));
+        });
+
+        IMessage correctFilter = createMessage(root -> {
+            root.addField("collection", asList(1, 2));
+        });
+
+        IMessage wrongFilter = createMessage(root -> {
+            root.addField("collection", asList(1, 3));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        MetaContainer metaContainer = settings.getMetaContainer();
+        metaContainer.setKeyFields(singleton("collection"));
+
+        ComparisonResult result = MessageComparator.compare(message, wrongFilter, settings);
+        Assert.assertNull(result);
+
+        result = MessageComparator.compare(message, correctFilter, settings);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        Assert.assertTrue("collection is not a key in 1 result " + result,
+                result.getResult("collection")
+                        .isKey());
     }
 
     private static IMessage createMessage(Consumer<IMessage> initializer) {
