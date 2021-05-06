@@ -246,7 +246,7 @@ public class SOAPVisitorDecode extends DefaultMessageStructureVisitor {
         }
         @SuppressWarnings("unchecked")
         Iterator<Node> elements = rootNode.getChildElements(buildName(xmlns, prefix, fieldName));
-        return (elements == null || !elements.hasNext()) ? null : elements.next().getTextContent();
+        return (elements == null || !elements.hasNext()) ? null : elements.next().getValue();
 
     }
 
@@ -263,7 +263,15 @@ public class SOAPVisitorDecode extends DefaultMessageStructureVisitor {
 
         while (elements.hasNext()) {
             Node element = elements.next();
-            values.add(MultiConverter.convert(element.getTextContent(), targetElementClass));
+            String value = element.getValue();
+            if(value == null) {
+                continue;
+            }
+            values.add(MultiConverter.convert(value, targetElementClass));
+        }
+
+        if(values.size() == 0) {
+            return null;
         }
 
         return values;
