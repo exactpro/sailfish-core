@@ -121,6 +121,14 @@ public class FIXClientSettings extends FIXCommonSettings {
 	@Description("Response To Resend Request By Heartbeats")
 	private boolean fakeResendRequest;
 
+    @Description("Regexp to extract the sequence number from the Reject message. Sequence number must be included in the group named <b>sequence</b>."
+            + " For example regexp <b>Expected Sequence:(?<sequence>[\\d]+) Received:[\\d]+</b> extracts <b>1807</b> from text <b>Expected Sequence:1807 Received:13</b>")
+	private String seqNumberfromRejectRegexp;
+
+    @Description("Regexp to extract the sequence number from the Logout message. Sequence number must be included in the group named <b>sequence</b>."
+            + " For example regexp <b>Expected Sequence:(?<sequence>[\\d]+) Received:[\\d]+</b> extracts <b>1807</b> from text <b>Expected Sequence:1807 Received:13</b>")
+    private String seqNumberfromLogoutRegexp;
+
     public FIXClientSettings() {
         setApplicationClass(FIXApplication.class.getCanonicalName());
     }
@@ -348,4 +356,21 @@ public class FIXClientSettings extends FIXCommonSettings {
 	public void setFakeResendRequest(boolean fakeResendRequest){
     	this.fakeResendRequest = fakeResendRequest;
 	}
+
+    public String getSeqNumberfromRejectRegexp() {
+        return seqNumberfromRejectRegexp;
+    }
+
+    public void setSeqNumberfromRejectRegexp(String seqNumberfromRejectRegexp) {
+        this.seqNumberfromRejectRegexp = seqNumberfromRejectRegexp;
+    }
+
+    public String getSeqNumberfromLogoutRegexp() {
+        return seqNumberfromLogoutRegexp;
+    }
+
+    public void setSeqNumberfromLogoutRegexp(String seqNumberfromLogoutRegexp) {
+        this.seqNumberfromLogoutRegexp = seqNumberfromLogoutRegexp;
+    }
+
 }

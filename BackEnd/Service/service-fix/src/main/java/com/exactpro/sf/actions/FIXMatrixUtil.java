@@ -25,8 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +79,7 @@ public class FIXMatrixUtil extends AbstractCaller {
     private static final DateTimeFormatter FIX_DATE_TIME_FORMATTER = DateTimeUtility.createFormatter(FIX_DATE_TIME_FORMAT);
     private static final DateTimeFormatter FIX_DATE_TIME_FORMATTER_MS = DateTimeUtility.createFormatter(FIX_DATE_TIME_FORMAT_MS);
     private static final DateTimeFormatter FIX_DATE_TIME_FORMATTER_NS = DateTimeUtility.createFormatter(FIX_DATE_TIME_FORMAT_NS);
+    public static final String SEQUENCE = "sequence";
 
     @Description("Transact Time - returns the time in the GMT time zone<br>"
             + DateUtil.MODIFY_HELP
@@ -360,6 +364,21 @@ public class FIXMatrixUtil extends AbstractCaller {
         value = value == null ? StringUtils.substringBetween(text, "expected (", ")") : value;
         value = value == null ? StringUtils.substringAfterLast(text, "less than expected").trim() : value;
         return Integer.parseInt(value);
+    }
+
+    public static String extractSeqNumRegexp(String text, @NotNull Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
+        String value = null;
+        if (matcher.find()) {
+            value = matcher.group(SEQUENCE);
+            if (value == null) {
+                throw new EPSCommonException("Group " + SEQUENCE + " is not in the pattern " + pattern);
+            }
+        }
+        if (value == null) {
+            logger.debug("Text {} does not match the pattern {}", text, pattern);
+        }
+        return value;
     }
 
 	protected static Map<String, List<MetaContainer>> convert(Map<String, List<MetaContainer>> children, IMessage message) {

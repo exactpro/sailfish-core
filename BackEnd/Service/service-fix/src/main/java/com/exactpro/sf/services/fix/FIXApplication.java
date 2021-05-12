@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+
+import static com.exactpro.sf.actions.FIXMatrixUtil.SEQUENCE;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,11 +26,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.crypto.Cipher;
 
 import org.apache.mina.util.Base64;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +41,7 @@ import com.exactpro.sf.actions.FIXMatrixUtil;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.messages.service.ErrorMessage;
@@ -119,6 +126,9 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
     private FIXLatencyCalculator latencyCalculator;
     private FIXClientSettings fixSettings;
 
+    private Pattern seqNumberRejectPattern;
+    private Pattern seqNumberLogoutPattern;
+
     public FIXApplication() {
         this.sessionMap = new HashMap<>();
     }
@@ -154,6 +164,20 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         this.useDefaultApplVerID = fixSettings.isUseDefaultApplVerID();
         this.isPerformance = fixSettings.isPerformanceMode();
         this.latencyCalculator = new FIXLatencyCalculator(messageHelper);
+        this.seqNumberRejectPattern = compilePattern(fixSettings.getSeqNumberfromRejectRegexp());
+        this.seqNumberLogoutPattern = compilePattern(fixSettings.getSeqNumberfromLogoutRegexp());
+    }
+
+    @Nullable
+    private Pattern compilePattern(String regexp) {
+        try {
+            if (regexp != null) {
+                return Pattern.compile(regexp);
+            }
+        } catch (PatternSyntaxException e) {
+            throw new EPSCommonException("Wrong regexp " + regexp + " for setting", e);
+        }
+        return  null;
     }
 
     @Override
@@ -172,19 +196,8 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         if(MsgType.REJECT.equals(msgType)){
             if (message.isSetField(Text.FIELD)) {
                 String rejectText = message.getString(Text.FIELD);
-                if (rejectText.startsWith("Wrong sequence number")) {
-                    if (!StringUtil.containsAll(rejectText, "Received:", "Expected:")) {
-                        logger.info("Trying to change session.setNextSenderMsgSeqNum, but text (58 tag) have unsupported format.");
-                        return;
-                    }
-                    try {
-                        String expectedSeqNum = rejectText.split("Expected:")[1].replaceAll("[\\D]", "");
-                        this.seqNumSender = Integer.parseInt(expectedSeqNum);
-                        session.setNextSenderMsgSeqNum(seqNumSender);
-                        logger.info("Set session.setNextSenderMsgSeqNum = {}", seqNumSender);
-                    } catch (NumberFormatException | IOException e) {
-                        exceptionCaught(iSession, "Update sender sequence number via text '" + rejectText + "' from reject message failure", e);
-                    }
+                if (!extractSeqNumRejectTextRegexp(session, iSession, rejectText)) {
+                    extractSeqNumRejectTextPattern(session, iSession, rejectText);
                 }
             }
         } else if (MsgType.LOGOUT.equals(msgType)) {
@@ -193,48 +206,14 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 			{
 				logger.info("Logout received - {}", message);
 
-				int seqNum = -1;
-				int targSeq = -1;
 				String text = message.getString(Text.FIELD);
                 textMessage = "Received Logout has text (58) tag: " + text;
 
                 try {
-                    if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
-                            || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
-                            || StringUtil.containsAll(text, "Sequence Number", "<", "expected")
-                            || StringUtil.containsAll(text, "MsgSeqNum", "less than expected")) {
-                        incorrectSenderMsgSeqNum = true;
-                        // extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
-                        seqNum = FIXMatrixUtil.extractSeqNum(text);
-
-                        // DG: experimentally checked
-                        // only here set next seq num as seqMum-1.
-                        //seqNum = seqNum-1; // nikolay.antonov : It is seems doesn't works.
-                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
-                    } else if (text.startsWith("Error ! Expecting : ")) {
-                        incorrectTargetMsgSeqNum = true;
-                        // extract 1282 from the text: Error ! Expecting : 1282 but received : 1281
-                        seqNum = Integer.parseInt(text.split(" ")[4]);
-                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
-                    } else if (text.startsWith("Negative gap for the user")) {
-                        incorrectSenderMsgSeqNum = true;
-                        String num = text.substring(
-                                text.lastIndexOf('[') + 1,
-                                text.lastIndexOf(']'));
-                        seqNum = Integer.parseInt(num);
-
-                        //incorrectTargetMsgSeqNum = true; // TODO
-                        targSeq = message.getHeader().getInt(MsgSeqNum.FIELD); // TODO: +1 ?
+                    if (!extractSeqNumLogoutTextRegexp(message, text)) {
+                        extractSeqNumLogoutTextPattern(message, text);
                     }
-
-                    if (seqNum != -1) {
-                        this.seqNumSender = seqNum;
-                    }
-
-                    if (targSeq != -1) {
-                        this.seqNumTarget = targSeq;
-                    }
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException | EPSCommonException e) {
                     exceptionCaught(iSession, "Update sender / target sequence numbers via text '" + text + "' from logout message failure", e);
                 }
 			}
@@ -278,8 +257,112 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 		}
 	}
 
+    private void extractSeqNumLogoutTextPattern(Message message, String text) throws FieldNotFound {
+        int seqNum = -1;
+        int targSeq = -1;
+        if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
+                || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
+                || StringUtil.containsAll(text, "Sequence Number", "<", "expected")
+                || StringUtil.containsAll(text, "MsgSeqNum", "less than expected")) {
+            incorrectSenderMsgSeqNum = true;
+            // extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
+            seqNum = FIXMatrixUtil.extractSeqNum(text);
+            // DG: experimentally checked
+            // only here set next seq num as seqMum-1.
+            //seqNum = seqNum-1; // nikolay.antonov : It is seems doesn't works.
+            targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
+        } else if (text.startsWith("Error ! Expecting : ")) {
+            incorrectTargetMsgSeqNum = true;
+            // extract 1282 from the text: Error ! Expecting : 1282 but received : 1281
+            seqNum = Integer.parseInt(text.split(" ")[4]);
+            targSeq = message.getHeader().getInt(MsgSeqNum.FIELD);
+        } else if (text.startsWith("Negative gap for the user")) {
+            incorrectSenderMsgSeqNum = true;
+            String num = text.substring(
+                    text.lastIndexOf('[') + 1,
+                    text.lastIndexOf(']'));
+            seqNum = Integer.parseInt(num);
 
-	@Override
+            //incorrectTargetMsgSeqNum = true; // TODO
+            targSeq = message.getHeader().getInt(MsgSeqNum.FIELD); // TODO: +1 ?
+        }
+        if (seqNum != -1) {
+            this.seqNumSender = seqNum;
+        }
+
+        if (targSeq != -1) {
+            this.seqNumTarget = targSeq;
+        }
+    }
+
+    private boolean extractSeqNumLogoutTextRegexp(Message message, String text) throws FieldNotFound {
+        String expectedSeqNum = null;
+        if (seqNumberLogoutPattern != null) {
+           expectedSeqNum = FIXMatrixUtil.extractSeqNumRegexp(text, seqNumberLogoutPattern);
+           if (expectedSeqNum == null) {
+               String eventMessage = "Text " + text + " does not match the pattern " + seqNumberLogoutPattern;
+               sendServiceEvent(eventMessage);
+           } else {
+               incorrectTargetMsgSeqNum = true;
+               this.seqNumSender = Integer.parseInt(expectedSeqNum);
+               this.seqNumTarget = message.getHeader().getInt(MsgSeqNum.FIELD);
+           }
+       }
+        return expectedSeqNum != null;
+    }
+
+    private void extractSeqNumRejectTextPattern(Session session, ISession iSession, @NotNull String rejectText) {
+        String expectedSeqNum;
+        if (rejectText.startsWith("Wrong sequence number")) {
+            if (!StringUtil.containsAll(rejectText, "Received:", "Expected:")) {
+                logger.info("Trying to change session.setNextSenderMsgSeqNum, but text (58 tag) have unsupported format.");
+                return;
+            }
+            expectedSeqNum = rejectText.split("Expected:")[1].replaceAll("[\\D]", "");
+            setSenderSeqNum(session, iSession, rejectText, expectedSeqNum);
+        }
+    }
+
+    private boolean extractSeqNumRejectTextRegexp(Session session, ISession iSession, String rejectText) {
+        String expectedSeqNum = null;
+        if (seqNumberRejectPattern != null) {
+            try {
+                expectedSeqNum = FIXMatrixUtil.extractSeqNumRegexp(rejectText, seqNumberRejectPattern);
+                if (expectedSeqNum == null) {
+                    String textMessage = "Text " + rejectText + " does not match the pattern " + seqNumberRejectPattern;
+                    sendServiceEvent(textMessage);
+                } else {
+                    setSenderSeqNum(session, iSession, rejectText, expectedSeqNum);
+                }
+            } catch (EPSCommonException e) {
+                String textMessage = "Failed group " + SEQUENCE + " in pattern " + seqNumberRejectPattern;
+                exceptionCaught(iSession, textMessage, e);
+                sendServiceEvent(textMessage);
+            }
+        }
+        return expectedSeqNum != null;
+    }
+
+    private void sendServiceEvent(String textMessage) {
+        if (serviceMonitor != null) {
+            ServiceEvent event = ServiceEventFactory.createEventInfo(serviceName,
+                    Type.INFO, textMessage, null);
+            serviceMonitor.onEvent(event);
+        }
+    }
+
+    private void setSenderSeqNum(Session session, ISession iSession, String rejectText, String expectedSeqNum) {
+        try {
+            this.seqNumSender = Integer.parseInt(expectedSeqNum);
+            session.setNextSenderMsgSeqNum(seqNumSender);
+            logger.info("Set session.setNextSenderMsgSeqNum = {}", seqNumSender);
+
+        } catch (NumberFormatException | IOException e) {
+            exceptionCaught(iSession, "Update sender sequence number via text '" + rejectText + "' from reject message failure", e);
+        }
+    }
+
+    @Override
     public void fromApp(Message message, SessionID sessionID)
             throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
         logger.debug("fromApp: {}", message);
@@ -511,11 +594,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 					}
 
 				}
-				if (serviceMonitor != null) {
-				    ServiceEvent event = ServiceEventFactory.createEventInfo(serviceName,
-                            Type.INFO, textMessage, null);
-				    serviceMonitor.onEvent(event);
-				}
+                sendServiceEvent(textMessage);
 			}
 		} catch (Exception e) {
             exceptionCaught(iSession, "toAdmin: process the message " + message + " failure", e);
