@@ -128,6 +128,17 @@ public class SOAPVisitorDecode extends DefaultMessageStructureVisitor {
     }
 
     @Override
+    public void visitLongCollection(String fieldName, List<Long> value, IFieldStructure fldStruct, boolean isDefault) {
+        List<Long> values = extractValues(fldStruct, fieldName, Long.class);
+
+        if(markAsRejected(fieldName, fldStruct, values)) {
+            return;
+        }
+
+        message.addField(fieldName, values);
+    }
+
+    @Override
     public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
 
         String val = extractValue(fldStruct, fieldName);
