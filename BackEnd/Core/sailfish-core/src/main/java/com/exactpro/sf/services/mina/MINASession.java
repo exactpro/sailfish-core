@@ -35,6 +35,7 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceException;
 
@@ -119,6 +120,11 @@ public class MINASession implements ISession {
             for (IMessage result : nextFilter.getResults()) {
                 if (filterResultFromSendRaw(result)) {
                     continue;
+                }
+                if (ErrorMessage.MESSAGE_NAME.equals(result.getName())) {
+                    ErrorMessage errorMessage = new ErrorMessage(result);
+                    logger.error("Got error message when decoding the raw message: {}", errorMessage.getCause());
+                    throw new SendMessageFailedException("Got error when decoding the raw message: " + errorMessage.getCause());
                 }
                 removeSessionFields(result);
                 MetadataExtensions.merge(result.getMetaData(), extraMetadata);
