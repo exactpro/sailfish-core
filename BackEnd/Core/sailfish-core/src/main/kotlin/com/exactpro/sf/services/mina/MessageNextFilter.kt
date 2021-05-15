@@ -17,6 +17,7 @@
 package com.exactpro.sf.services.mina
 
 import com.exactpro.sf.common.messages.IMessage
+import com.exactpro.sf.common.util.EvolutionBatch
 import mu.KotlinLogging
 import org.apache.mina.core.filterchain.IoFilter
 import org.apache.mina.core.session.IdleStatus
@@ -37,7 +38,11 @@ class MessageNextFilter : IoFilter.NextFilter {
             LOGGER.error { "Decoded result ${message::class.java} is not ${IMessage::class.java}" }
             return
         }
-        _results += message
+        if (message.name == EvolutionBatch.MESSAGE_NAME) {
+            _results += EvolutionBatch(message).batch
+        } else {
+            _results += message
+        }
     }
 
     override fun exceptionCaught(session: IoSession, cause: Throwable) {
