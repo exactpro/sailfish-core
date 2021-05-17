@@ -25,7 +25,7 @@
 
         <id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredEnvironmentSequence</param>
+				<param name="sequence_name">StoredEnvironmentSequence</param>
 			</generator>
 		</id>
 
@@ -55,7 +55,7 @@
 		<map name="parameters" table="SERVICEPARAMETERS" cascade="all">
 			<key column="id"/>
 			<index column="parameter_name" type="string" length="50"/>
-			<element column="parameter_value" type="string" length="32672"/>
+			<element column="parameter_value" type="text" length="32672"/>
 		</map>
 
         <map name="variables" table="SERVICE_VARIABLES" cascade="all">
@@ -68,13 +68,13 @@
 	<class name="StoredServiceEvent" table="SF_SERVICE_EVENTS">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredServiceEventSequence</param>
+				<param name="sequence_name">StoredServiceEventSequence</param>
 			</generator>
 		</id>
 		<property name="serviceId" column="SERVICEID" />
         <property name="occured" column="OCCURED" type="com.exactpro.sf.storage.TimestampToString"/>
-		<property name="message" column="MESSAGE" length="32672" />
-		<property name="details" column="DETAILS" length="32672" />
+		<property name="message" column="MESSAGE" type="text" length="32672" />
+		<property name="details" column="DETAILS" type="text" length="32672" />
 		<property name="type" column="TYPE" />
 		<property name="level" column="LEVEL" />
 	</class>
@@ -82,7 +82,7 @@
 	<class name="StoredMessage" table="MESSAGES">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredMessageSequence</param>
+				<param name="sequence_name">StoredMessageSequence</param>
 			</generator>
 		</id>
 		<property name="namespace" column="MSG_NAMESPACE" />
@@ -121,7 +121,7 @@
 	<class name="StoredField" table="FIELDS">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredFieldSequence</param>
+				<param name="sequence_name">StoredFieldSequence</param>
 			</generator>
 		</id>
 		<property name="name" column="FLD_NAME" />
@@ -138,7 +138,7 @@
 	<class name="StoredScriptRun" table="STOREDSCRIPTRUNS">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredScriptRunSequence</param>
+				<param name="sequence_name">StoredScriptRunSequence</param>
 			</generator>
 		</id>
 		<property name="start" column="START_TIME" />
@@ -154,7 +154,7 @@
 	<class name="StoredTester" table="TESTER">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredTesterSequence</param>
+				<param name="sequence_name">StoredTesterSequence</param>
 			</generator>
 		</id>
 		<property name="name" column="NAME" />
@@ -169,7 +169,7 @@
 	<class name="StoredMatrix" table="MATRICES">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredMatrixSequence</param>
+				<param name="sequence_name">StoredMatrixSequence</param>
 			</generator>
 		</id>
 		<property name="name" column="NAME" />
@@ -191,7 +191,7 @@
 	<class name="StoredOption" table="OPTIONS">
 		<id name="id" column="ID">
 			<generator class="native">
-				<param name="sequence">StoredOptionSequence</param>
+				<param name="sequence_name">StoredOptionSequence</param>
 			</generator>
 		</id>
 		<property name="optionName" column="OPTION_NAME" unique="true" not-null="true"/>
@@ -207,7 +207,7 @@
         <map name="variables" table="VARIABLE_SET_VARIABLES" cascade="all" lazy="false">
             <key column="id"/>
             <index column="variable_name" type="string" length="100"/>
-            <element column="variable_value" type="string" length="32672"/>
+            <element column="variable_value" type="text" length="32672"/>
         </map>
     </class>
 </hibernate-mapping>

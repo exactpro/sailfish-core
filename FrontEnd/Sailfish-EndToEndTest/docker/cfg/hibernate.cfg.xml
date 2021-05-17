@@ -37,9 +37,9 @@
 		</property>
 		<property name="hibernate.dialect">
 			<!-- org.hibernate.dialect.PostgreSQLDialect -->
-			org.hibernate.dialect.MySQLDialect
+			org.hibernate.dialect.MySQL5Dialect
 			
-			<!-- Use this line if your Derby version is under 10.7 -->
+			<!-- Use this line if your Derby hversion is under 10.7 -->
 			<!-- org.hibernate.dialect.DerbyDialect -->
 			
 			<!-- Use this line if your Derby version is equal or above 10.7 -->
@@ -63,7 +63,9 @@
 		<!-- Show and print nice SQL on stdout -->
 		<property name="show_sql">false</property>
 		<property name="format_sql">false</property>
-		
+
+		<property name="hibernate.query.sql.jdbc_style_params_base">true</property>
+
 		<property name="hibernate.hbm2ddl.auto">update</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
 

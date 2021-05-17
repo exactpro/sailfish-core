@@ -1,0 +1,132 @@
+class DependencyConflictChecker implements Plugin<Project> {
+    @Override
+    void apply(Project project) {
+        project.configurations.compileClasspath.incoming.afterResolve {
+            ResolvedComponentResult resolvedTreeRoot = it.resolutionResult.getRoot()
+            resolvedTreeRoot.getDependencies().each {
+                if (it instanceof ResolvedDependencyResult) {
+                    ResolvedDependencyResult subRoot = it
+                    Set<ResolvedComponentResult> resolvedConflicts = extractResolvedConflictsFromTree(subRoot)
+                    resolvedConflicts.each { dep ->
+                        def id = dep.moduleVersion
+                        def selectionReason = dep.selectionReason.description
+                        if (id != null && !isConflictFromCurrentSubtree(subRoot, dep)) {
+                            List<Version> versions = extractVersionsFromSelectionDescription(selectionReason)
+                            if (!isConflictInPatchVersion(versions)) {
+
+                                throw new GradleException(
+                                        "Not accepted version conflict in: \n" +
+                                                "\t${ga} ${dep.selectionReason.description}\n"
+                                )
+
+                            } else {
+                                project.logger.log(
+                                        LogLevel.WARN,
+                                        "Found conflict in ${id.group}:${id.name} ${selectionReason} in patch part of version."
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    boolean isConflictFromCurrentSubtree(ResolvedDependencyResult root, ResolvedComponentResult search) {
+        boolean result = false
+        traverseNode(root, new HashSet<>(), {
+            if (it.getRequested().matchesStrictly(search.id)) {
+                result = true
+            }
+        } as Closure<Void>)
+        return result
+    }
+
+    /**
+     * Collect all dependencies which versions was changed during dependencies resolution
+     * @param root - resolved dependencies tree
+     * @return collected conflicts
+     */
+    Set<ResolvedComponentResult> extractResolvedConflictsFromTree(ResolvedDependencyResult root) {
+        Set<ResolvedComponentResult> result = new HashSet<>()
+        traverseNode(root, new HashSet<>(), {
+            if(it.selected.selectionReason.isConflictResolution()
+                    && !it.selected.selectionReason.isConstrained()
+                    && !it.requested.matchesStrictly(it.selected.id)) {
+                result.add(it.selected)
+            }
+        } as Closure<Void>)
+        return result
+    }
+
+    /**
+     * recursive tree traversing
+     * @param resolved - current subtree to traverse
+     * @param visited - set of nodes that already visited
+     * @param check - action to perform on current dependency
+     */
+    void traverseNode(ResolvedDependencyResult resolved, Set<ResolvedDependencyResult> visited, Closure<Void> check) {
+        ResolvedComponentResult node = resolved.selected
+        if(!visited.add(resolved)) {
+            return
+        }
+        if(node.getDependencies().size() > 0) {
+            node.getDependencies().each {
+                if(it instanceof ResolvedDependencyResult) {
+                    traverseNode(it, visited, check)
+                }
+            }
+        }
+        check(resolved)
+    }
+
+    boolean isConflictInPatchVersion(List<Version> versions) {
+
+        for (i in 1..<versions.size()) {
+            Version first = versions.get(0)
+            Version cur = versions.get(i)
+            if(first.major != cur.major) {
+                return false
+            }
+            if(first.minor != cur.minor) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private List<Version> extractVersionsFromSelectionDescription(String desc) {
+        List<Version> versions = new LinkedList<>()
+        desc.replace("between versions", "").replace("and", "").trim().split("\\s+").each {
+            versions.add(new Version(it))
+        }
+        versions
+    }
+
+    class Version {
+        String major = ""
+        String minor = ""
+        String patch = ""
+
+        Version(String version) {
+            String[] parts = version.split("\\.")
+            if(parts.size() > 0) {
+                major = parts[0]
+                if(parts.size() > 1) {
+                    minor = parts[1]
+                }
+                if(parts.size() > 2) {
+                    patch = parts[2]
+                }
+            }
+        }
+
+        @Override
+        String toString() {
+            return major + "." + minor + "." + patch
+        }
+    }
+
+}
+
+apply plugin: DependencyConflictChecker

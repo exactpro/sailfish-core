@@ -30,6 +30,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.BigIntegerType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
@@ -350,6 +352,7 @@ public class NativeDbOperations {
         String query = DROP_TAG_GROUP_TEMP_TABLE;
         SQLQuery sqlQuery = session.createSQLQuery(query);
         sqlQuery.executeUpdate();
+		session.flush();
 
         query = CREATE_TAG_GROUP_TEMP_TABLE.replace(":tagIds",
                 tagIds.stream()
@@ -357,6 +360,7 @@ public class NativeDbOperations {
                         .collect(Collectors.joining(",")));
         sqlQuery = session.createSQLQuery(query);
         sqlQuery.executeUpdate();
+		session.flush();
     }
 
     public JoinType recognizeJoinType(Session session) {

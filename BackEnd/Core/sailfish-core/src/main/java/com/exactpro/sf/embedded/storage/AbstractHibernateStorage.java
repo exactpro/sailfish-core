@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.impl.HibernateStorage;
 
+import static org.hibernate.cfg.AvailableSettings.JDBC_TYLE_PARAMS_ZERO_BASE;
+
 public abstract class AbstractHibernateStorage implements IHibernateStorage {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractHibernateStorage.class);
@@ -43,6 +45,8 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
         .setProperty("hibernate.connection.username", settings.getUsername())
         .setProperty("hibernate.connection.password", settings.getPassword())
         .setProperty("hibernate.connection.pool_size", "1")
+        .setProperty("hibernate.id.new_generator_mappings", "false")
+        .setProperty(JDBC_TYLE_PARAMS_ZERO_BASE, "true")
         
         .setProperty("hibernate.hbm2ddl.auto", "none")
         .setProperty("hibernate.globally_quoted_identifiers", "true")

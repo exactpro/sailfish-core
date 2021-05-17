@@ -23,11 +23,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -82,7 +78,7 @@ public class NetDumperService implements IEnvironmentListener {
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
 	private NetDumperOptions options;
-    private volatile File[] recordedFiles;
+    private volatile List<File> recordedFiles;
 
     public NetDumperService(IConnectionManager connectionManager, IWorkspaceDispatcher workspaceDispatcher, IOptionsStorage optionsStorage) {
 
@@ -161,7 +157,7 @@ public class NetDumperService implements IEnvironmentListener {
         }
 	}
 
-	public File[] getRecordedFiles() throws IOException {
+	public List<File> getRecordedFiles() throws IOException {
         if(recordedFiles == null) {
 			updateFiles();
 		}
@@ -169,7 +165,8 @@ public class NetDumperService implements IEnvironmentListener {
 	}
 
 	private void updateFiles() throws IOException {
-        this.recordedFiles = workspaceDispatcher.getFolder(FolderType.TRAFFIC_DUMP).listFiles();
+        File[] files = workspaceDispatcher.getFolder(FolderType.TRAFFIC_DUMP).listFiles();
+        this.recordedFiles = files == null ? null : Arrays.asList(files);
 	}
 
 	public boolean checkAvailability() {

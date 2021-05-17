@@ -24,7 +24,6 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceLayout;
 import com.exactpro.sf.configuration.workspace.ResourceWorkspaceLayout;
 import com.exactpro.sf.configuration.workspace.WorkspaceLayerException;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
-import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -34,6 +33,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class TestDefaultWorkspaceDispatcher {
 
 	@Test
 	public void testCRUD() throws IOException {
-		File tmpDir = Files.createTempDir();
+		File tmpDir = Files.createTempDirectory("tmpDir").toFile();
 		File baseLayer = new File(tmpDir, "base");
 		File topLayer = new File(tmpDir, "top");
 
@@ -293,7 +293,7 @@ public class TestDefaultWorkspaceDispatcher {
 	
     @Test
 	public void testSecurity() throws IOException {
-		File tmpDir = Files.createTempDir();
+		File tmpDir = Files.createTempDirectory("tmpDir").toFile();
 		File baseLayer = new File(tmpDir, "base");
 		File topLayer = new File(tmpDir, "./top"); // test bug with root path normalization
 

@@ -35,14 +35,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
+import com.exactpro.sf.storage.StorageException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.hibernate.CacheMode;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1429,12 +1430,14 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 	public List<TagGroupReportResult> generateTagGroupReport(TagGroupReportParameters params, List<TagGroupDimension> dimensions) {
 
         Session session = null;
+		Transaction tx = null;
 
         NativeDbOperations nativeOps = new NativeDbOperations(settings);
 
         try {
 
             session = sessionFactory.openSession();
+			tx = session.beginTransaction();
 
             AbstractTagGroupQueryBuilder queryBuilder = NativeQueryUtil.isMysql(settings.getDbms())
                     ? new MySqlTagGroupQueryBuilder()
@@ -1450,16 +1453,34 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 params.setLoadForLevel(i);
                 results.add(nativeOps.generateTagGroupReport(session, params, queryBuilder.clone()));
             }
-
+			tx.commit();
             return results;
-        } finally {
+		} catch (ConstraintViolationException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			throw new StorageException(e.getMessage(), e);
+		} catch (JDBCConnectionException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			throw new StorageException("JDBC connection exception", e);
+		} catch (SQLGrammarException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			throw new StorageException("SQL grammar exception", e);
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			throw new StorageException("Unknown exception", e);
+		} finally {
 
-            if(session != null) {
-                session.close();
-            }
-
-        }
-
+			if (session != null) {
+				session.close();
+			}
+		}
     }
 
     @SuppressWarnings("unchecked")

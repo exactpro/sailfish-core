@@ -27,6 +27,7 @@ import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
@@ -76,7 +77,7 @@ public class TimestampToString implements UserType, Serializable{
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet ps, String[] names, SessionImplementor s, Object owner)
+	public Object nullSafeGet(ResultSet ps, String[] names, SharedSessionContractImplementor s, Object owner)
 			throws HibernateException, SQLException {
 		String value = StringType.INSTANCE.nullSafeGet(ps, names[0], s);
 		Date time = null;
@@ -89,7 +90,7 @@ public class TimestampToString implements UserType, Serializable{
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SessionImplementor s)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor s)
 			throws HibernateException, SQLException {
         StringType.INSTANCE.set(ps, value == null ? "" : dateToString((Date)value), index, s);
 	}

@@ -27,7 +27,7 @@ import javax.persistence.UniqueConstraint;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "sttestcases", uniqueConstraints = @UniqueConstraint(columnNames = "testCaseId"))
+@Table(name = "sttestcases", uniqueConstraints = @UniqueConstraint(columnNames = "testcaseid"))
 @SequenceGenerator(name="sttestcases_generator", sequenceName="sttestcases_sequence")
 public class TestCase implements Serializable {
 	

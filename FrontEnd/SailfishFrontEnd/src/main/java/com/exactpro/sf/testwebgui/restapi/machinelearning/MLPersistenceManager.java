@@ -48,7 +48,7 @@ public class MLPersistenceManager {
     static final String ML_SUBMITS_FOR_REPORT = "checked.json";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final TypeReference<?> MESSAGE_DESCRIPTORS_SET_TYPE_REFERENCE = new TypeReference<SubmitMetadataDTO>(){};
+    private static final TypeReference<SubmitMetadataDTO> MESSAGE_DESCRIPTORS_SET_TYPE_REFERENCE = new TypeReference<SubmitMetadataDTO>(){};
 
     private final IWorkspaceDispatcher workspaceDispatcher;
 

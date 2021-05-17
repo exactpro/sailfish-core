@@ -10,4 +10,45 @@ allprojects {
 
 subprojects {
 	version = artifactCoreVersion
+	configurations {
+		coreConstraints {
+			canBeConsumed = false
+			canBeResolved = true
+		}
+	}
+
+	getProject().afterEvaluate {
+		configurations.coreConstraints.dependencies.addAll(configurations.compileClasspath.incoming.dependencies)
+
+		configurations.coreConstraints.dependencyConstraints.addAll(configurations.compileClasspath.incoming.dependencyConstraints)
+
+		configurations.coreConstraints.resolvedConfiguration.rethrowFailure()
+		Set<ModuleVersionIdentifier> ids = new HashSet<>();
+		configurations.coreConstraints.incoming.resolutionResult.allDependencies.each { dep ->
+			if (dep instanceof ResolvedDependencyResult
+					&& dep.selected.moduleVersion instanceof ModuleVersionIdentifier
+					&& !ids.contains(dep.selected.moduleVersion)) {
+				ModuleVersionIdentifier id = dep.selected.moduleVersion as ModuleVersionIdentifier
+				ids.add(id)
+				def patchVersionRange = id.version
+				def parts = id.version.split("\\.")
+				if (parts.size() == 3) {
+					if (parts[1].isInteger() && parts[2].isInteger()) {
+						def left = "[" + parts[0] + "." + parts[1] + ".0, "
+						def right = parts[0] + "." + ((parts[1] as Integer) + 1) + ".0)"
+						patchVersionRange = left + right
+					}
+				}
+				getProject().dependencies.constraints.add(
+						"compile",
+						"${id.group}:${id.name}:${id.version}"
+				) {
+					it.version {
+						it.strictly(patchVersionRange)
+						it.prefer(id.version)
+					}
+				}
+			}
+		}
+	}
 }

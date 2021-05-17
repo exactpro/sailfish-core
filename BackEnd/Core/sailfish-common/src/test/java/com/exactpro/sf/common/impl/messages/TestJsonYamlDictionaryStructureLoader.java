@@ -127,8 +127,7 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
     public void testCreateNoNameDictionary() throws Exception {
         exception.expect(EPSCommonException.class);
         exception.expectMessage("Wrong input format");
-        exception.expectCause(new CauseMatcher(MismatchedInputException.class, "Missing required creator property 'name' (index 0)\n at [Source: (FileInputStream); line: 13, column: 1]"));
-
+        exception.expectCause(new CauseMatcher(MismatchedInputException.class, "Missing required creator property 'name' (index 0)\n at [Source: (FileInputStream); line: 13, column: 1] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"name\"])"));
         loadDictionaryFrom("noNameDictionary.json");
     }
 
@@ -161,8 +160,7 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
         exception.expect(EPSCommonException.class);
         exception.expectMessage("Wrong input format");
         exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate field 'normal'\n"
-                + " at [Source: (FileInputStream); line: 10, column: 9] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"fields\"])"));
-
+                + " at [Source: (FileInputStream); line: 10, column: 17] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"fields\"])"));
         loadDictionaryFrom("sameValuesName.json");
 
     }
@@ -172,7 +170,7 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
         exception.expect(EPSCommonException.class);
         exception.expectMessage("Wrong input format");
         exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate field 'message_name'\n"
-                + " at [Source: (FileInputStream); line: 11, column: 5] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"messages\"])"));
+                + " at [Source: (FileInputStream); line: 11, column: 19] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"messages\"])"));
 
         loadDictionaryFrom("sameNames.json");
     }

@@ -68,8 +68,8 @@ import java.util.zip.ZipInputStream;
 
 public class MLWorker {
 
-    private static final TypeReference<?> SET_TYPE_REFERENCE = new TypeReference<Set<ReportMessageDescriptor>>() {};
-    private static final TypeReference<?> MAP_TYPE_REFERENCE = new TypeReference<Map<String, ?>>() {};
+    private static final TypeReference<Set<ReportMessageDescriptor>> SET_TYPE_REFERENCE = new TypeReference<Set<ReportMessageDescriptor>>() {};
+    private static final TypeReference<Map<String, ?>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, ?>>() {};
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final String TMP_DIR_FOR_EXTRACTING_REPORTS = "unpacked";
 

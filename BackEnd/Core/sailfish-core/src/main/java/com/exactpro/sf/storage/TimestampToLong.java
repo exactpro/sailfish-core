@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LongType;
 import org.hibernate.usertype.UserType;
 
@@ -70,14 +71,14 @@ public class TimestampToLong implements UserType, Serializable{
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet ps, String[] names, SessionImplementor s, Object owner)
+	public Object nullSafeGet(ResultSet ps, String[] names, SharedSessionContractImplementor s, Object owner)
 			throws HibernateException, SQLException {
 		Long value = LongType.INSTANCE.nullSafeGet(ps, names[0], s);
 		return new Timestamp(value);
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SessionImplementor s)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor s)
             throws HibernateException, SQLException {
         LongType.INSTANCE.set(ps, value == null ? 0L : ((Date)value).getTime(), index, s);
 	}

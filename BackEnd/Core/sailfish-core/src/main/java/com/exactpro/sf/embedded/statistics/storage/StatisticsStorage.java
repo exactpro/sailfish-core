@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.DefaultComponentSafeNamingStrategy;
 import org.hibernate.criterion.Criterion;
@@ -83,8 +85,6 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
         .setProperty("hibernate.query.plan_cache_max_size", "64")
         .setProperty("hibernate.query.plan_parameter_metadata_max_size", "32")
 
-        .setNamingStrategy(DefaultComponentSafeNamingStrategy.INSTANCE)
-
 	    .addAnnotatedClass(SfInstance.class)
 	    .addAnnotatedClass(Matrix.class)
 	    .addAnnotatedClass(MatrixRun.class)
@@ -103,6 +103,7 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
         .addAnnotatedClass(KnownBug.class)
         .addAnnotatedClass(TestCaseRunTag.class)
         .addAnnotatedClass(ActionRunKnownBug.class);
+		configuration.setImplicitNamingStrategy(ImplicitNamingStrategyComponentPathOld.INSTANCE);
     }
 
 	@Override

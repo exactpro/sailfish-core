@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.exactpro.sf.common.impl.messages;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
@@ -26,6 +27,8 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
@@ -36,6 +39,8 @@ import com.exactpro.sf.util.DateTimeUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 /**
  * @author nikita.smirnov
@@ -84,8 +89,20 @@ public class TestMapMessage {
         MapMessage subMessage = message.cloneMessage();
         message.addField("message", subMessage);
         message.addField("message_array", Arrays.asList(new MapMessage[] { subMessage, subMessage }));
-        
-        ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping(DefaultTyping.NON_FINAL)
+
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator
+                .builder()
+                .allowIfSubType(IMessage.class)
+                .allowIfSubType(Map.class)
+                .allowIfSubType(Temporal.class)
+                .allowIfSubType(List.class)
+                .allowIfSubType(Character.class)
+                .allowIfBaseType(String.class)
+                .allowIfSubType(Number.class)
+                .allowIfBaseType(MsgMetaData.class)
+                .build();
+        ObjectMapper objectMapper = new ObjectMapper()
+                .activateDefaultTyping(ptv, DefaultTyping.NON_FINAL)
                 .registerModule(new JavaTimeModule());
         ObjectReader reader = objectMapper.reader(IMessage.class);
         ObjectWriter writer = objectMapper.writer();

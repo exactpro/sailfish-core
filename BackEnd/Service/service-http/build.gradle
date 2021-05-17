@@ -5,7 +5,7 @@ ext {
 dependencies {
     compile "io.netty:netty-codec-http:${netty_version}"
     compile "io.netty:netty-handler:${netty_version}" // SslContextBuilder is in here
-    compile 'com.sun.xml.ws:jaxws-ri:2.3.2'
+    compile('com.sun.xml.ws:jaxws-ri:2.3.2')
 }
 
 compileKotlin {

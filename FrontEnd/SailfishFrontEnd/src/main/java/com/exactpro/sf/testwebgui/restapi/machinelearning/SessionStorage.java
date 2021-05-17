@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import com.exactpro.sf.testwebgui.restapi.machinelearning.model.PredictionResult
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMessageDescriptor;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -29,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +38,7 @@ public class SessionStorage {
 
     private final MLPersistenceManager persistenceManager;
 
-    private final File sessionTempDir = Files.createTempDir();
+    private final File sessionTempDir = Files.createTempDirectory("tmpDir").toFile();
 
     private volatile Cache<Integer, List<PredictionResultEntry>> cache = CacheBuilder.newBuilder()
             .concurrencyLevel(4)
@@ -47,7 +47,7 @@ public class SessionStorage {
             .build();
     private final URL reportLink;
 
-    public SessionStorage(URL reportLink, MLPersistenceManager mlPersistenceManager) {
+    public SessionStorage(URL reportLink, MLPersistenceManager mlPersistenceManager) throws IOException {
         this.reportLink = reportLink;
         persistenceManager = mlPersistenceManager;
     }

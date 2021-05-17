@@ -30,7 +30,7 @@ interface IJsonNodeWrapper {
 
 class ObjectNodeWrapper(override val node: ObjectNode) : IJsonNodeWrapper {
     override fun set(fieldName: String, value: JsonNode) {
-        node.set(fieldName, value)
+        node.set<JsonNode>(fieldName, value)
     }
 }
 

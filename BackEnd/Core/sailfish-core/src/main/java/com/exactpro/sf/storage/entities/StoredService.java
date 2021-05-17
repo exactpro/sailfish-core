@@ -28,7 +28,7 @@ public class StoredService extends AbstractPersistentObject {
 	private String name;
 	private String type;
 	private String serviceHandlerClassName;
-	private Map<String, String> parameters = new HashMap<String, String>();
+	private Map<String, String> parameters = new HashMap<>();
     private Map<String, String> variables = new HashMap<>();
 	private StoredEnvironment environment;
 

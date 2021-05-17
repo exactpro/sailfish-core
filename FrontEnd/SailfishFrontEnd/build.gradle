@@ -18,7 +18,7 @@ ext {
             project: "",
             rootPage: ""
     ]
-    tomcatVersion = '9.0.13'
+    tomcatVersion = '9.0.46'
     branch = System.properties['branch'] ?: 'master'
     // NodeMatrixEditor.zip version file
     version_file = 'version_file'
@@ -97,24 +97,24 @@ dependencies {
     tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
     tomcat "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 
-    providedCompile 'org.apache.tomcat:tomcat-annotations-api:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-catalina-ant:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-catalina-ha:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-catalina:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-tribes:9.0.13'
+    providedCompile "org.apache.tomcat:tomcat-annotations-api:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-catalina-ant:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-catalina-ha:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-catalina:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-tribes:${tomcatVersion}"
     providedCompile 'org.eclipse.jdt.core.compiler:ecj:4.6.1'
-    providedCompile 'org.apache.tomcat:tomcat-el-api:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-jasper-el:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-jasper:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-jsp-api:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-servlet-api:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-api:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-coyote:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-dbcp:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-i18n-es:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-i18n-fr:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-i18n-ja:9.0.13'
-    providedCompile 'org.apache.tomcat:tomcat-util:9.0.13'
+    providedCompile "org.apache.tomcat:tomcat-el-api:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-jasper-el:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-jasper:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-servlet-api:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-api:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-coyote:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-i18n-es:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-i18n-fr:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-i18n-ja:${tomcatVersion}"
+    providedCompile "org.apache.tomcat:tomcat-util:${tomcatVersion}"
 
     if (incremental_build) {
         zip_data "com.exactpro.sf:sailfish-core:${artifactCoreVersion}:data@zip"
@@ -143,7 +143,7 @@ dependencies {
 
     compile 'org.apache.commons:commons-text:1.6'
 
-    compile 'org.apache.httpcomponents:httpclient:4.5.6'
+    compile 'org.apache.httpcomponents:httpclient:4.5.13'
 
     compile 'commons-fileupload:commons-fileupload:1.3.3'
 
@@ -151,7 +151,7 @@ dependencies {
 
     compile "org.hibernate:hibernate-core:$version_hibernate"
 
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    compile "com.fasterxml.jackson.core:jackson-databind"
 
     compile 'net.sourceforge.javacsv:javacsv:2.0'
 
@@ -171,22 +171,22 @@ dependencies {
 
     compile 'com.exactpro.mvel:mvel2:2.3.2.Final.3'
 
-    compile 'org.apache.poi:poi:4.0.0'
+    compile 'org.apache.poi:poi:4.1.2'
 
-    compile 'org.primefaces:primefaces:5.0'
-    compile 'org.primefaces.extensions:primefaces-extensions:1.2.1'
+    compile 'org.primefaces:primefaces:6.0'
+    compile 'org.primefaces.extensions:primefaces-extensions:6.0.0'
     compile 'org.omnifaces:omnifaces:1.11';
 
-    compile 'org.reflections:reflections:0.9.11' // has version: 'org.jboss.errai.reflections:reflections:3.0.3.Final'
+    compile 'org.reflections:reflections:0.9.12' // has version: 'org.jboss.errai.reflections:reflections:3.0.3.Final'
 
     compile 'net.sf.textile4j:textile4j:1.2'
 
     //compile 'javax.xml.bind:jaxb-api:2.2.7'
 
-    compile 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    compile 'com.thoughtworks.xstream:xstream:1.4.16'
     compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
 
-    compile 'org.postgresql:postgresql:42.2.5'
+    compile 'org.postgresql:postgresql:42.2.18'
     compile 'org.mariadb.jdbc:mariadb-java-client:2.3.0'
     compile 'org.apache.derby:derby:10.14.2.0'
 
@@ -195,6 +195,18 @@ dependencies {
     compile group: 'com.exactpro.webchannels', name: 'webchannels', version: "2.1.1"
 
     compile 'com.taskadapter:redmine-java-api:3.1.1' //TODO: Exctract to different depend
+    constraints {
+        compile("org.primefaces:primefaces") {
+            version {
+                strictly "6.0"
+            }
+        }
+        compile("org.javassist:javassist:3.24.0-GA") {
+            version {
+                strictly "3.24.0-GA"
+            }
+        }
+    }
 }
 
 

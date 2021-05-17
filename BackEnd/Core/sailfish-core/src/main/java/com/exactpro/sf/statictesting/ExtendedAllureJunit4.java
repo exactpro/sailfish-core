@@ -29,27 +29,27 @@ import io.qameta.allure.junit4.AllureJunit4;
 
 public class ExtendedAllureJunit4 extends AllureJunit4 {
     @Override
-    public void testRunStarted(Description description) throws Exception {
+    public void testRunStarted(Description description) {
         super.testRunStarted(mockDescription(description));
     }
 
     @Override
-    public void testRunFinished(Result result) throws Exception {
+    public void testRunFinished(Result result) {
         super.testRunFinished(mockResult(result));
     }
 
     @Override
-    public void testStarted(Description description) throws Exception {
+    public void testStarted(Description description) {
         super.testStarted(mockDescription(description));
     }
 
     @Override
-    public void testFinished(Description description) throws Exception {
+    public void testFinished(Description description) {
         super.testFinished(mockDescription(description));
     }
 
     @Override
-    public void testFailure(Failure failure) throws Exception {
+    public void testFailure(Failure failure) {
         super.testFailure(mockFailure(failure));
     }
 
@@ -59,7 +59,7 @@ public class ExtendedAllureJunit4 extends AllureJunit4 {
     }
 
     @Override
-    public void testIgnored(Description description) throws Exception {
+    public void testIgnored(Description description) {
         super.testIgnored(mockDescription(description));
     }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,8 +216,9 @@ public class BeanUtil {
     public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) throws MalformedURLException, URISyntaxException {
         SfInstanceInfo reportSfInstance = getReportSfInstanceInfo(row);
         URI baseUri = BeanUtil.getBaseUri(customReportsPath, reportSfInstance, false);
-        return baseUri.resolve(new URIBuilder()
-                .setPath(row.getReportFolder())
+        String reportFolder = row.getReportFolder();
+        return baseUri.resolve(new URIBuilder(reportFolder == null
+                        ? "" : row.getReportFolder().replaceAll(" ", "%20"))
                 .addParameter("action", "simplezip")
                 .build())
         .toString();
@@ -278,7 +279,11 @@ public class BeanUtil {
 
         try {
             URI baseUri = getBaseUri(customReportsPath, reportInstance, useRelativePath);
-            baseUri = baseUri.resolve(new URIBuilder().setPath(FilenameUtils.separatorsToUnix(reportDirectoryPath) + "/").build());
+            baseUri = baseUri.resolve(
+                    new URIBuilder(reportDirectoryPath == null ? ""
+                            : FilenameUtils.separatorsToUnix(reportDirectoryPath)
+                                    .replaceAll(" ", "%20") + "/")
+                            .build());
 
             if (report) {
                 URIBuilder relativeReportFileUriBuilder = new URIBuilder("index.html");
@@ -291,7 +296,10 @@ public class BeanUtil {
                 return baseUri.resolve(relativeReportFileUriBuilder.build());
 
             } else {
-                return baseUri.resolve(new URIBuilder().setPath(matrixName).build());
+                return baseUri.resolve(new URIBuilder(matrixName == null
+                        ? ""
+                        : matrixName.replaceAll(" ", "%20")
+                       ).build());
             }
 
         } catch (URISyntaxException | MalformedURLException e) {
@@ -306,11 +314,14 @@ public class BeanUtil {
                         : (useRelativePath
                             ? (new URI(ReportServlet.REPORT_URL_PREFIX + "/"))
 
-                            : (new URIBuilder()
+                            : (new URIBuilder(
+                                    String.format("%s/%s/", reportInstance.getContextPath(),
+                                            ReportServlet.REPORT_URL_PREFIX).replaceAll(" ", "%20")
+                                 )
                                 .setScheme("http")
                                 .setHost(reportInstance.getHostname())
                                 .setPort(reportInstance.getPort())
-                                .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
+
                                 .build())
                         );
     }
@@ -319,24 +330,27 @@ public class BeanUtil {
 
         try {
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-
-            return new URIBuilder()
+            String requestContext = externalContext.getRequestContextPath();
+            return new URIBuilder(
+                    requestContext == null ? ""
+                            : externalContext.getRequestContextPath().replaceAll(" ", "%20") + "/"
+                     )
                     .setScheme("http")
                     .setHost(externalContext.getRequestServerName())
                     .setPort(externalContext.getRequestServerPort())
-                    .setPath(externalContext.getRequestContextPath() + "/")
                     .build()
                     .resolve("sfapi/machinelearning/v2/")
                     .toURL();
 
         } catch (Exception e) {
             logger.debug("unable to get ml api path with FacesContext - trying to use SfInstanceInfo instead", e);
-
-            return new URIBuilder()
+            String contextPath = thisInstance.getContextPath();
+            return new URIBuilder(contextPath == null ? ""
+                    : thisInstance.getContextPath().replaceAll(" ", "%20") + "/"
+                     )
                     .setScheme("http")
                     .setHost(thisInstance.getHostname())
                     .setPort(thisInstance.getPort())
-                    .setPath(thisInstance.getContextPath() + "/")
                     .build()
                     .resolve("sfapi/machinelearning/v2/")
                     .toURL();

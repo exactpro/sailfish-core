@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.tcpip;
 
+import java.time.temporal.Temporal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,6 +36,8 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.IServiceContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
@@ -53,7 +56,14 @@ public class InternalJsonCodec extends AbstractCodec {
     private IMessageFactory msgFactory;
 
     public InternalJsonCodec() {
-        objectMapper = new ObjectMapper().enableDefaultTyping()
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator
+                .builder()
+                .allowIfSubType(Map.class)
+                .allowIfSubType(IMessage.class)
+                .allowIfSubType(Temporal.class)
+                .build();
+        objectMapper = new ObjectMapper()
+                .activateDefaultTyping(ptv)
                 .registerModule(new JavaTimeModule());
     }
 

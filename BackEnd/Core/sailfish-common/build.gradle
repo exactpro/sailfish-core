@@ -30,19 +30,24 @@ dependencies {
     //compile 'org.jamon:jamon-api:2.3.0'
     compile 'org.jamon:jamon-runtime:2.4.1'
 
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7'
-    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
+    compile "com.fasterxml.jackson.core:jackson-databind"
 
-    compile 'commons-io:commons-io:2.6'
+    compile 'commons-io:commons-io:2.7'
     //compile 'commons-logging:commons-logging-api:1.0.4'
     compile 'net.sourceforge.javacsv:javacsv:2.0'
 
     compileOnly "org.apache.logging.log4j:log4j-core:${version_log4j2}"
+    constraints {
+        compile("org.apache.commons:commons-collections4:4.2") {
+            because("To be consistent with sailfish-core")
+        }
+    }
 
     testCompile 'junit:junit:4.12'
-    testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
-    testCompile 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    testCompile "com.fasterxml.jackson.core:jackson-databind"
+    testCompile 'com.thoughtworks.xstream:xstream:1.4.16'
 }
 
 task templates {

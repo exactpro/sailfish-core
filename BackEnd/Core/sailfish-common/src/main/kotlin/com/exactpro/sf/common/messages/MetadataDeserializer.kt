@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,17 @@
 package com.exactpro.sf.common.messages
 
 import com.exactpro.sf.common.messages.impl.Metadata
+import com.exactpro.sf.common.services.ServiceInfo
+import com.exactpro.sf.common.services.ServiceName
+import com.exactpro.sf.configuration.suri.SailfishURI
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.NON_FINAL
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import java.util.Date
 
 open class MetadataDeserializer : StdDeserializer<IMetadata>(IMetadata::class.java) {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): IMetadata {
@@ -42,7 +47,18 @@ open class MetadataDeserializer : StdDeserializer<IMetadata>(IMetadata::class.ja
     }
 
     companion object {
-        private val TYPED_MAPPER = ObjectMapper().enableDefaultTyping(NON_FINAL)
+        private val PTV = BasicPolymorphicTypeValidator
+            .builder()
+            .allowIfBaseType(Long::class.java)
+            .allowIfBaseType(Date::class.java)
+            .allowIfBaseType(String::class.java)
+            .allowIfBaseType(Boolean::class.java)
+            .allowIfBaseType(ByteArray::class.java)
+            .allowIfBaseType(ServiceInfo::class.java)
+            .allowIfBaseType(ServiceName::class.java)
+            .allowIfBaseType(SailfishURI::class.java)
+            .build()
+        private val TYPED_MAPPER = ObjectMapper().activateDefaultTyping(PTV, NON_FINAL)
         private val UNTYPED_MAPPER = ObjectMapper()
 
         private fun JsonNode.unwrapTyped(): JsonNode {

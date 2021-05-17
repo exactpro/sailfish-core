@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1736,12 +1736,12 @@ public class HtmlReport implements IScriptReport {
 
     // This is a complete copy of BeanUtil.getMlApiPath()
     private static URL getMlApiPath(SfInstanceInfo thisInstance) throws MalformedURLException, URISyntaxException {
-
-        return new URIBuilder()
+        String contextPath = thisInstance.getContextPath();
+        return new URIBuilder(contextPath == null ? ""
+                : thisInstance.getContextPath() + "/")
                 .setScheme("http")
                 .setHost(thisInstance.getHostname())
                 .setPort(thisInstance.getPort())
-                .setPath(thisInstance.getContextPath() + "/")
                 .build()
                 .resolve("sfapi/machinelearning/v2/")
                 .toURL();

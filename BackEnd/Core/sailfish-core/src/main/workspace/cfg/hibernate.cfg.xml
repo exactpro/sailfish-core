@@ -26,7 +26,7 @@
 		</property>
 		<property name="hibernate.connection.url">
 			<!-- jdbc:postgresql://localhost/sailfish?useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000 -->
-			jdbc:mariadb://localhost/sailfish?useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000
+			jdbc:mariadb://db/sailfish?useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000
 			<!-- jdbc:derby:/pathToDatabase;create=true -->
 		</property>
 		<property name="hibernate.connection.username">
@@ -37,7 +37,7 @@
 		</property>
 		<property name="hibernate.dialect">
 			<!-- org.hibernate.dialect.PostgreSQLDialect -->
-			org.hibernate.dialect.MySQLDialect
+			org.hibernate.dialect.MySQL5Dialect
 			
 			<!-- Use this line if your Derby version is under 10.7 -->
 			<!-- org.hibernate.dialect.DerbyDialect -->
@@ -59,6 +59,7 @@
 		<property name="hibernate.c3p0.timeout">300</property>
 		<property name="hibernate.c3p0.max_statements">50</property>
 		<property name="hibernate.c3p0.idle_test_period">60</property>
+		<property name="hibernate.query.sql.jdbc_style_params_base">true</property>
 
 		<!-- Show and print nice SQL on stdout -->
 		<property name="show_sql">false</property>

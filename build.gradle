@@ -15,7 +15,7 @@
  ******************************************************************************/
 buildscript {
     ext {
-        kotlin_version          = '1.3.50'
+        kotlin_version          = '1.4.32'
         sharedDir               = file("${project.rootDir}/shared")
 
         sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
@@ -58,6 +58,7 @@ buildscript {
         mavenCentral()
 
         configurations.all {
+
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
             resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
         }
@@ -148,8 +149,9 @@ allprojects {
         //Lib versions
         version_log4j2 = '2.17.0'
         version_slf4j = '1.7.32'
-        version_hibernate = '4.3.11.Final'
+        version_hibernate = '5.4.24.Final'
         netty_version = '4.1.39.Final'
+        fasterxml_jackson_version = '2.12.3'
     }
 
     eclipse {
@@ -169,7 +171,7 @@ allprojects {
     }
 
 	 wrapper {
-	    gradleVersion = '6.7.1'
+	    gradleVersion = '6.8'
         distributionType = 'all'
 	}
 
@@ -178,6 +180,15 @@ allprojects {
         outputPath = project.properties.dependencyFile
         incrementalBuild = incremental_build
         publishResource = 'build/release'
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.fasterxml.jackson') {
+                details.useVersion fasterxml_jackson_version
+                details.because "To have all jackson libs in same version"
+            }
+        }
     }
 }
 
@@ -191,6 +202,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'jacoco'
     apply plugin: 'signing'
+    apply from: "${getRootDir()}/DependencyConflictChecker.gradle"
 
     group = artifactGroup
     version = artifactCoreVersion
@@ -294,6 +306,7 @@ subprojects {
     }
 
     configurations {
+        testArtifacts
         compile.exclude module: 'avalon-framework-api'
         compile.exclude module: 'guava-jdk5'
         testCompile.extendsFrom(compileOnly) // to fully emulate provided configuration
@@ -301,34 +314,40 @@ subprojects {
         all {
             transitive = true
             resolutionStrategy {
-                // fail eagerly on version conflict (includes transitive dependencies)
-                // e.g. multiple different versions of the same dependency (group and name are equal)
-                failOnVersionConflict()
-
-                force "com.exactpro.sf:sailfish-core:${artifactCoreVersion}",
-                        "com.exactpro.sf:sailfish-common:${artifactCoreVersion}",
-                        "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}",
-                        'com.fasterxml.jackson.core:jackson-annotations:2.9.7', //jackson-databind:2.5.4 - max 2.6.3
-                        'com.fasterxml.jackson.core:jackson-core:2.9.7', //google-http-client-jackson2:1.19.0 - max 2.6.3
-                        'com.fasterxml.jackson.core:jackson-databind:2.9.7', //jackson-datatype-threetenbp:2.5.0 - max 2.9.0
-                        'commons-beanutils:commons-beanutils:1.9.3', //commons-digester:1.8 - max 1.9.2
-                        'commons-lang:commons-lang:2.6', //ezmorph:1.0.6, commons-configuration:1.6 - max 3.4
-                        'org.apache.commons:commons-lang3:3.8.1',
-                        'commons-logging:commons-logging:1.2',
-                        'javax.activation:activation:1.1.1', //transitive tree
-                        'org.javassist:javassist:3.22.0-GA', //hibernate-core:5.2.15.Final, hk2-locator:2.4.0-b31 - max 3.22.0-GA
-                        'org.primefaces:primefaces:5.0', //primefaces-extensions:1.2.1 - max 5.3
-                        "org.slf4j:slf4j-api:${version_slf4j}",
-                        'com.google.guava:guava:27.0.1-jre', //io.qameta.allure:allure-junit4:2.6.0
-                        'commons-io:commons-io:2.6',
-                        'commons-cli:commons-cli:1.4',
-                        'commons-collections:commons-collections:3.2.2',
-                        'org.apache.commons:commons-collections4:4.4',
-                        'org.jetbrains.kotlin:kotlin-reflect:1.3.50'
-
                 // don't cache changing modules at all
                 cacheChangingModulesFor 0, 'seconds'
                 cacheDynamicVersionsFor 0, 'seconds'
+            }
+        }
+    }
+
+    configurations {
+        force
+        force.setCanBeConsumed(false)
+    }
+
+    getProject().afterEvaluate {
+        configurations.force.incoming.resolutionResult.allDependencies { dep ->
+            if (dep instanceof ResolvedDependencyResult && dep.selected.moduleVersion instanceof ModuleVersionIdentifier) {
+                ModuleVersionIdentifier id = dep.selected.moduleVersion as ModuleVersionIdentifier
+                def patchVersionRange = id.version
+                def parts = id.version.split("\\.")
+                if (parts.size() == 3) {
+                    if (parts[1].isInteger() && parts[2].isInteger()) {
+                        def left = "[" + parts[0] + "." + parts[1] + ".0, "
+                        def right = parts[0] + "." + ((parts[1] as Integer) + 1) + ".0)"
+                        patchVersionRange = left + right
+                    }
+                }
+                getProject().dependencies.constraints.add(
+                        "compile",
+                        "${id.group}:${id.name}:${id.version}"
+                ) {
+                    it.version {
+                        it.strictly(patchVersionRange)
+                        it.prefer(id.version)
+                    }
+                }
             }
         }
     }
@@ -392,6 +411,9 @@ subprojects {
     }
 
     test.dependsOn serviceLoaderBuild
+    def testArtifact = artifacts.add('testArtifacts', testsJar) {
+        classifier 'test-artifact'
+    }
 
     publishing {
         publications {
@@ -455,7 +477,15 @@ subprojects {
         compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: "${kotlin_version}"
         compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "${kotlin_version}"
         compile group: 'io.github.microutils', name: 'kotlin-logging', version: '1.7.8'
-        compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.7'
+        compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "${fasterxml_jackson_version}"
+        force group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+        force group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'
+        force group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.1'
+        force group: 'javax.activation', name: 'activation', version: '1.1.1'
+        force group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: "${kotlin_version}"
+        force group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "${kotlin_version}"
+        force group: 'io.github.microutils', name: 'kotlin-logging', version: '1.7.8'
+        force group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "${fasterxml_jackson_version}"
     }
 
     jacoco {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SingleKeyHashMap;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
@@ -44,13 +46,17 @@ public class JsonYamlDictionaryStructureLoader extends AbstractDictionaryStructu
 
     public JsonYamlDictionaryStructureLoader(boolean aggregateAttributes) {
         super(aggregateAttributes);
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator
+                .builder()
+                .allowIfBaseType(JsonYamlDictionary.class)
+                .build();
         objectMapper = new ObjectMapper(
                 new YAMLFactory()
                         .disable(Feature.USE_NATIVE_OBJECT_ID)
                         .disable(Feature.USE_NATIVE_TYPE_ID)
         )
                 .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
-                .enableDefaultTyping();
+                .activateDefaultTyping(ptv);
 
         //For embedded messages
         SimpleModule module = new SimpleModule();
