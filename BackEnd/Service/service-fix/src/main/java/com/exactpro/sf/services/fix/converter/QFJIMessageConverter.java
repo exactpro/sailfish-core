@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -50,7 +49,6 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.FixUtil;
-import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -168,22 +166,13 @@ public class QFJIMessageConverter
     public IMessage convert(@Nullable Message message, @Nullable Boolean verifyTagsOverride, @Nullable Boolean skipTagsOverride,
             boolean ignoreFieldType) throws MessageConvertException {
 
-        if(message == null) {
+        if (message == null) {
             return null;
         }
-
         try {
-            String messageType = message.getHeader().getString(MsgType.FIELD);
+            IMessageStructure messageStructure = getIMessageStructure(message);
 
-            IMessageStructure messageStructure = typeToStructure.get(messageType);
-
-            if(messageStructure == null) {
-                throw new MessageConvertException("Unknown message type: " + messageType);
-            }
-
-            IMessage resultMessage = message instanceof SailfishQuickfixMessage
-                    ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
-                    : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
+            IMessage resultMessage = createIMessage(message, messageStructure);
 
             IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
             IMessage messageTrailer = factory.createMessage(FixMessageHelper.TRAILER, messageStructure.getNamespace());
@@ -200,6 +189,47 @@ public class QFJIMessageConverter
 
 
             // dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
+            resultMessage.getMetaData().setAdmin(message.isAdmin());
+            resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
+
+            if (message.getException() != null) {
+                resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
+            }
+
+            return resultMessage;
+        } catch (FieldNotFound e) {
+            throw new MessageConvertException("Failed to get message type, raw message: " + message, e);
+        }
+    }
+
+    private IMessage createIMessage(@NotNull Message message, IMessageStructure messageStructure) {
+        return message instanceof SailfishQuickfixMessage
+                ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
+                : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
+    }
+
+    @NotNull
+    private IMessageStructure getIMessageStructure(@NotNull Message message) throws FieldNotFound, MessageConvertException {
+        String messageType = message.getHeader().getString(MsgType.FIELD);
+
+        IMessageStructure messageStructure = typeToStructure.get(messageType);
+
+        if (messageStructure == null) {
+            throw new MessageConvertException("Unknown message type: " + messageType);
+        }
+        return messageStructure;
+    }
+
+    @Nullable
+    public IMessage convertEvolution(@Nullable Message message) throws MessageConvertException {
+        try {
+            if (message == null) {
+                return null;
+            }
+
+            IMessageStructure messageStructure = getIMessageStructure(message);
+
+            IMessage resultMessage = createIMessage(message, messageStructure);
             resultMessage.getMetaData().setAdmin(message.isAdmin());
             resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
 

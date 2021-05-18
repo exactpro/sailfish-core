@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMetadata;
-import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -175,16 +174,9 @@ public class FIXSession implements ISession {
             Message message = new Message();
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
-            IMessage converted = converter.convert(message, true, false);
-            converted.removeField(FixMessageHelper.HEADER);
-            converted.removeField(FixMessageHelper.TRAILER);
-            logger.debug("Sending message converted from raw: {} - {}", converted.getName(), converted);
-            MetadataExtensions.merge(converted.getMetaData(), extraMetadata);
-            send(converted);
+            send(message);
         } catch (InvalidMessage ex) {
             throw new SendMessageFailedException("Cannot parse the raw message: " + messageData, ex);
-        } catch (MessageConvertException ex) {
-            throw new SendMessageFailedException("Cannot convert QFJ message to IMessage", ex);
         }
     }
 

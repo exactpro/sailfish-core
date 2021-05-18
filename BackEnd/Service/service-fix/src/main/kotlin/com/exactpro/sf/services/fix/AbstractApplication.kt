@@ -31,11 +31,18 @@ abstract class AbstractApplication {
     lateinit var serviceInfo: ServiceInfo
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var converter: DirtyQFJIMessageConverter
+    private var evolutionSupportEnabled: Boolean = false
 
     open fun init(serviceContext: IServiceContext, applicationContext: ApplicationContext, serviceName: ServiceName) {
         this.applicationContext = applicationContext
         serviceInfo = Objects.requireNonNull(serviceContext.lookupService(serviceName), "serviceInfo cannot be null");
         converter = applicationContext.converter
+
+        applicationContext.serviceSettings.let { settings ->
+            if (settings is FIXCommonSettings) {
+                this.evolutionSupportEnabled = settings.isEvolutionSupportEnabled
+            }
+        }
     }
 
     @JvmOverloads
@@ -43,10 +50,10 @@ abstract class AbstractApplication {
     protected fun convert(message: Message, from: String, to: String, isAdmin: Boolean, verifyTags: Boolean? = null, isRejected: Boolean = false): IMessage {
         val rawMessage: ByteArray = extractRawData(message)
         val msg: IMessage = checkNotNull(converter.run {
-            if (isRejected) {
-                convertDirty(message, verifyTags, false, false, true)
-            } else {
-                convert(message, verifyTags, null)
+            when {
+                isRejected -> convertDirty(message, verifyTags, false, false, true)
+                evolutionSupportEnabled -> convertEvolution(message)
+                else -> convert(message, verifyTags, null)
             }
         }) { "Converted message can't be null, origin message: $message" }
         val meta: MsgMetaData = msg.metaData
