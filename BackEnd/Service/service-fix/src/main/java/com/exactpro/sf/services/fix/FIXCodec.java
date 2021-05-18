@@ -297,7 +297,7 @@ public class FIXCodec extends AbstractCodec {
             IMessage originIMessage = (IMessage)message;
 
             IMetadata metaData = originIMessage.getMetaData();
-            IMessage encoded = originIMessage.cloneMessage();
+            IMessage encoded = settings.isEvolutionSupportEnabled() ? originIMessage : originIMessage.cloneMessage();
             String messageName = getMessageName(encoded);
             byte[] rawMessage = settings.isVerifyMessageStructure() // that is enough to check that settings
                     // because if it is enabled other settings are enabled as well
