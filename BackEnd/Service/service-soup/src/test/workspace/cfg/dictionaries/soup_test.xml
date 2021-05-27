@@ -1,0 +1,1348 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="SOUP" xmlns="http://exactprosystems.com/dictionary">
+	<fields>
+		<field name="N1" id="N1" type="java.lang.Short">
+			<attribute name="Type" type="java.lang.String">UInt8</attribute>
+			<attribute name="Length" type="java.lang.Integer">1</attribute>
+		</field>
+		<field name="N2" id="N2" type="java.lang.Integer">
+			<attribute name="Type" type="java.lang.String">UInt16</attribute>
+			<attribute name="Length" type="java.lang.Integer">2</attribute>
+		</field>
+		<field name="N4" id="N4" type="java.lang.Long">
+			<attribute name="Type" type="java.lang.String">UInt32</attribute>
+			<attribute name="Length" type="java.lang.Integer">4</attribute>
+		</field>
+		<field name="N8" id="N8" type="java.lang.Long">
+		 <!-- NOTE: possible long-overflow: Big-Endian encoded 64 bit _unsigned_ integer.  -->
+			<attribute name="Type" type="java.lang.String">UInt64</attribute>
+			<attribute name="Length" type="java.lang.Integer">8</attribute>
+		</field>
+		<field name="Price" id="Price" type="java.lang.Long">
+			<attribute name="Type" type="java.lang.String">UInt64</attribute>
+			<attribute name="Length" type="java.lang.Integer">8</attribute>
+		</field>
+		<field name="Days" id="Days" type="java.time.LocalDate">
+			<attribute name="Type" type="java.lang.String">Days</attribute>
+			<attribute name="Length" type="java.lang.Integer">2</attribute>
+		</field>
+		<field name="D2_I2" id="D2_I2" type="java.lang.Double">
+			<attribute name="Type" type="java.lang.String">UInt16</attribute>
+			<attribute name="Length" type="java.lang.Integer">2</attribute>
+			<attribute name="ImpliedDecimals" type="java.lang.Integer">2</attribute>
+		</field>
+		<field name="BD4_I6" id="BD4_I6" type="java.math.BigDecimal">
+			<attribute name="Type" type="java.lang.String">Int32</attribute>
+			<attribute name="Length" type="java.lang.Integer">4</attribute>
+			<attribute name="ImpliedDecimals" type="java.lang.Integer">6</attribute>
+		</field>
+		<field name="BDU8_I6" id="BDU8_I6" type="java.math.BigDecimal">
+			<attribute name="Type" type="java.lang.String">UInt64</attribute>
+			<attribute name="Length" type="java.lang.Integer">8</attribute>
+			<attribute name="ImpliedDecimals" type="java.lang.Integer">6</attribute>
+		</field>
+		<field name="BD8_I6" id="BD8_I6" type="java.math.BigDecimal">
+			<attribute name="Type" type="java.lang.String">Int64</attribute>
+			<attribute name="Length" type="java.lang.Integer">8</attribute>
+			<attribute name="ImpliedDecimals" type="java.lang.Integer">6</attribute>
+		</field>
+		<!-- Numeric fields for Admin messages is signed -->
+		<field name="SN1" id="SN1" type="java.lang.Integer">
+			<attribute name="Type" type="java.lang.String">Int8</attribute>
+			<attribute name="Length" type="java.lang.Integer">1</attribute>
+		</field>
+		<field name="SN2" id="SN2" type="java.lang.Integer">
+			<attribute name="Type" type="java.lang.String">Int16</attribute>
+			<attribute name="Length" type="java.lang.Integer">2</attribute>
+		</field>
+		<field name="SN4" id="SN4" type="java.lang.Integer">
+			<attribute name="Type" type="java.lang.String">Int32</attribute>
+			<attribute name="Length" type="java.lang.Integer">4</attribute>
+		</field>
+		<field name="SN8" id="SN8" type="java.lang.Long">
+			<attribute name="Type" type="java.lang.String">Int64</attribute>
+			<attribute name="Length" type="java.lang.Integer">8</attribute>
+		</field>
+		
+
+		<field name="A1" id="A1" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">1</attribute>
+		</field>
+		<field name="A2" id="A2" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">2</attribute>
+		</field>
+		<field name="A3" id="A3" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">3</attribute>
+		</field>
+		<field name="A4" id="A4" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">4</attribute>
+		</field>
+		<field name="A6" id="A6" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">6</attribute>
+		</field>
+		<field name="A10" id="A10" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">10</attribute>
+		</field>
+		<field name="A12" id="A12" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">12</attribute>
+		</field>
+		<field name="A20" id="A20" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">20</attribute>
+		</field>
+		<field name="A32" id="A32" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">32</attribute>
+		</field>
+		<field name="A60" id="A60" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">60</attribute>
+		</field>
+		<field name="A64" id="A64" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">64</attribute>
+		</field>
+		<field name="A100" id="A100" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">100</attribute>
+		</field>
+		<field name="A1000" id="A1000" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">1000</attribute>
+		</field>
+		<field name="A3000" id="A3000" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">Alpha</attribute>
+			<attribute name="Length" type="java.lang.Integer">3000</attribute>
+		</field>
+
+		<field name="StringStub" id="StringStub" type="java.lang.String">
+			<attribute name="Type" type="java.lang.String">STUB</attribute>
+			<attribute name="Length" type="java.lang.Integer">0</attribute>
+		</field>
+		<field name="IntStub" id="IntStub" type="java.lang.Integer">
+			<attribute name="Type" type="java.lang.String">STUB</attribute>
+			<attribute name="Length" type="java.lang.Integer">0</attribute>
+		</field>
+		<field name="LongStub" id="LongStub" type="java.lang.Long">
+			<attribute name="Type" type="java.lang.String">STUB</attribute>
+			<attribute name="Length" type="java.lang.Integer">0</attribute>
+		</field>
+        <field name="ASCII_10" id="ASCII_10" type="java.lang.Long">
+            <attribute name="Type" type="java.lang.String">ASCII</attribute>
+            <attribute name="Length" type="java.lang.Integer">10</attribute>
+        </field>
+        <field name="NullTerminated_10" id="NullTerminated_10" type="java.lang.String">
+            <attribute name="Type" type="java.lang.String">VARIABLE</attribute>
+            <attribute name="Length" type="java.lang.Integer">10</attribute>
+        </field>
+
+		<field name="EventCode" id="EventCode" reference="A1">
+			<value name="BusinessTradeDateHasEnded">C</value>
+		</field>
+		<field name="OptionType" id="OptionType" reference="A1">
+			<value name="Put">P</value>
+			<value name="Call">C</value>
+		</field>
+		<field name="PriceMethod" id="PriceMethod" reference="N1">
+			<value name="NetPrice">0</value>
+			<value name="YieldDifference">2</value>
+			<value name="Individual">3</value>
+			<value name="AveragePrice">4</value>
+		</field>
+		<field name="Side" id="Side" reference="A1">
+			<value name="Buy">B</value>
+			<value name="Sell">S</value>
+			<value name="NotSpecified"> </value>
+		</field>
+		<field name="QuoteSide" id="QuoteSide" reference="A1">
+			<value name="TwoSidedQuote">T</value>
+			<value name="BidQuote">B</value>
+			<value name="OfferQuote">S</value>
+			<value name="Crossing">X</value>
+		</field>
+		<field name="SessionState"   id="SessionState" reference="A1">
+			<value name="PreOpen">P</value>
+			<value name="Opened">O</value>
+			<value name="RegulatoryHalt">R</value>
+			<value name="Halted">H</value>
+			<value name="Closed">C</value>
+			<value name="Maintenance">M</value>
+		</field>
+		<field name="TradeType" id="TradeType" reference="A1">
+		</field>
+
+
+		<field name="MessageType" id="MessageType" reference="A1">
+			<value name="MarketByPrice">6</value>
+			<value name="TimeMessage">T</value>
+			<value name="EndOfBusinessTradeDate">S</value>
+			<!-- State and Symbol Definition Messages -->
+			<value name="EquitySymbolDirectory">R</value> <!-- DELETED in v1.01 -->
+			<value name="FutureSymbolDirectory">f</value>
+			<value name="OptionSymbolDirectory">h</value>
+			<value name="CombinationSymbolDirectory">M</value>
+			<value name="BundlesSymbolDirectory">m</value>
+			<value name="TickSizeTable">L</value> <!-- DELETED in v1.01 -->
+			<value name="OrderBookState">O</value>
+			<!--  Order Book Messages -->
+			<value name="OrderAdded">A</value>
+			<value name="OrderAddedWithParticipantId">F</value>
+			<value name="OrderVolumeCancelled">X</value>
+			<value name="OrderDeleted">D</value>
+			<value name="OrderExecuted">E</value>
+			<value name="AuctionOrderExecuted">C</value>
+			<value name="CombinationExecuted">e</value>
+			<value name="ImpliedOrderAdded">j</value>
+			<value name="ImpliedOrderReplaced">l</value>
+			<value name="ImpliedOrderDeleted">k</value>
+			<!-- Trade Messages -->
+			<value name="TradeExecuted">P</value>
+			<value name="CombinationTradeExecuted">p</value>
+			<value name="TradeReport">Q</value>
+			<value name="TradeCancellation">B</value>
+			<!-- Market Data Messages -->
+			<value name="EquilibriumPrice">Z</value>
+			<value name="OpenHighLowLastTradeAdjustment">t</value>
+			<value name="MarketSettlement">Y</value>
+			<value name="TextMessage">x</value>
+			<value name="RequestForQuote">q</value>
+			<value name="AnomalousOrderThresholdPublish">W</value>
+			<value name="VolumeAndOpenInterest">V</value>
+			<value name="SnapshotComplete">G</value>
+			<!-- Stubs: -->
+			<value name="UnknownMessage">_</value>
+			<value name="TcpTestMessage">1</value>
+			<value name="IncorrectOrderDeleted">7</value>
+		</field>
+		<field name="AdminMessageType" id="AdminMessageType" reference="A1">
+			<value name="LoginRequestPacket">L</value>
+			<value name="LoginAcceptedPacket">A</value>
+			<value name="LoginRejectPacket">J</value>
+			<value name="LogoutPacket">O</value>
+			<value name="PasswordChangeRequestPacket">W</value>
+			<value name="PasswordChangeResponsePacket">Y</value>
+			<value name="SubscriberHeartbeatPackets">R</value>
+			<value name="ServerHeartbeatPackets">H</value>			
+			<value name="SequencedDataPacket">S</value>
+			<value name="UnsequencedDataPacket">U</value>
+			<value name="EndOfSessionPacket">Z</value>
+			<!-- Stubs: -->
+			<value name="UndocumentedErrorMessage">+</value>
+			<value name="UnknownMessage">_</value>
+		</field>
+		<field name="Yes_No" id="Yes_No" reference="A1">
+			<value name="Yes">Y</value>
+			<value name="No">N</value>
+		</field>		
+		<field name="SettlementType" id="SettlementType" reference="A1">
+			<value name="Final">F</value>
+			<value name="Adjustment">A</value>
+		</field>
+
+		<field name="RawMessage" id="RawMessage" reference="A1000"/>
+		<field name="ParseException" id="ParseException" reference="A3000"/>
+		
+		<field name="PHSession" id="PHSession" reference="StringStub"/>
+		<field name="PHSequence" id="PHSequence" reference="LongStub"/>
+		<field name="PHCount" id="PHCount" reference="IntStub"/>
+		<field name="MessageSequenceNumber"    id="MessageSequenceNumber" reference="LongStub"/>
+	</fields>
+
+	<messages>
+
+		<message name="PacketHeader" id="PacketHeader"> <!-- we use MITCH-based codec for this protocol... so we use MITCH name -->
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<field name="PHSession"                 reference="A10"/>
+			<field name="PHSequence"                reference="N8"/>
+			<field name="PHCount"                   reference="N2"/>
+		</message>
+	
+		<message name="UnitHeader" id="UnitHeader"> <!-- we use MITCH-based codec for this protocol... so we use MITCH name -->
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"                 reference="PHSession"/>
+			<field name="PHSequence"                reference="PHSequence"/>
+			<field name="PHCount"                   reference="PHCount"/>
+		</message>
+	
+		<message name="MessageHeader" id="MessageHeader">
+			<field name="Length" reference="N2"/>
+			<field name="MessageType" reference="MessageType"/>
+		</message>
+		
+		<message name="UnknownMessage">
+			<attribute name="MessageType">_</attribute>
+			<field name="PHSession"                reference="PHSession"/>
+			<field name="PHSequence"               reference="PHSequence"/>
+			<field name="PHCount"                  reference="PHCount"/>
+
+			<field name="RawMessage"               reference="RawMessage"/>
+			<field name="ParseException"           reference="ParseException"/>
+		</message>
+		
+		<message name="TimeMessage" id="TimeMessage">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">T</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"                reference="PHSession"/>
+			<field name="PHSequence"               reference="PHSequence"/>
+			<field name="PHCount"                  reference="PHCount"/>
+			<field name="MessageSequenceNumber"    reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+			<field name="MessageType"           reference="MessageType"/>
+			<field name="Second"                   reference="N4"/>
+		</message>
+		
+		<message name="EndOfBusinessDay" id="EndOfBusinessDay">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">S</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/> <!-- unix time -->
+			<field name="EventCode"               reference="EventCode"/>
+		</message>
+		
+		<!-- DELETED in v1.01 -->
+		<message name="EquitySymbolDirectory" id="EquitySymbolDirectory">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">R</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SymbolName"              reference="A32"/>
+			<field name="LongName"                reference="A60"/>
+			<field name="ISIN"                    reference="A12"/>
+			<field name="Exchange"                reference="A6"/>
+			<field name="CFICode"                 reference="A6"/>
+			<field name="PriceDisplayDecimals"    reference="N1"/>
+			<field name="PriceFractionalDenominator" reference="N4"/>
+			<field name="PriceMinimumTick"        reference="N4"/>
+			<field name="PriorDayClose"           reference="Price"/>
+			<field name="Currency"                reference="A3"/>
+			<!-- To be confirmed -->
+			<field name="FaceValueDecimalPosition" reference="N1"/>
+			<field name="BondFaceValue"           reference="N8"/>
+			<field name="BasisOfQuotation"        reference="A10"/>
+		</message>
+		
+		
+		<message name="FutureSymbolDirectory" id="FutureSymbolDirectory">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">f</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SymbolName"              reference="A32"/>
+			<field name="LongName"                reference="A60"/>
+			<field name="ISIN"                    reference="A12"/>
+			<field name="Exchange"                reference="A6"/>
+			<field name="Instrument"              reference="A6"/>
+			<field name="CFICode"                 reference="A6"/>
+			<field name="ExpiryYear"              reference="N2"/>
+			<field name="ExpiryMonth"             reference="N1"/> <!-- FIXME: values -->
+			<field name="PriceDisplayDecimals"    reference="N1"/>
+			<field name="PriceFractionalDenominator" reference="N4"/>
+			<field name="PriceMinimumTick"        reference="N4"/>
+			<field name="LastTradingDate"         reference="N4"/>
+			<field name="PriorDaySettlement"      reference="Price"/>
+			<field name="Currency"                reference="A3"/>
+			<field name="LotSizeOrFaceValue"      reference="N8"/> <!-- BD8_I6 -->
+			<field name="MaturityValue"           reference="N1"/>
+			<field name="CouponRate"              reference="D2_I2"/>
+			<field name="PaymentsperYear"         reference="N1"/>
+			<field name="BlockLotSize"            reference="N4"/>
+			<field name="ExpiryDate"              reference="N4"/>
+		</message>
+		
+		
+		<message name="OptionSymbolDirectory" id="OptionSymbolDirectory">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">h</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SymbolName"              reference="A32"/>
+			<field name="LongName"                reference="A60"/>
+			<field name="ISIN"                    reference="A12"/>
+			<field name="Exchange"                reference="A6"/>
+			<field name="Instrument"              reference="A6"/>
+			<field name="CFICode"                 reference="A6"/>
+			<field name="ExpiryYear"              reference="N2"/>
+			<field name="ExpiryMonth"             reference="N1"/> <!-- FIXME: values -->
+			<field name="OptionType"              reference="OptionType"/>
+			<field name="Strike"                  reference="Price"/>
+			<field name="UnderlyingTradeableInstrumentId" reference="N4"/>
+			<field name="PriceDisplayDecimals"    reference="N1"/>
+			<field name="PriceFractionalDenominator" reference="N4"/>
+			<field name="PriceMinimumTick"        reference="N4"/>
+			<field name="StricePriceDecimalPosition" reference="N1"/>
+			<field name="StrikePriceFractionalDenominator" reference="N4"/>
+			<field name="StrikePriceMinimumTick"  reference="N4"/>
+			<field name="LastTradingDate"         reference="N4"/>
+			<field name="PriorDaySettlement"      reference="Price"/>
+			<field name="Volatility"              reference="BD8_I6"/>
+			<field name="Currency"                reference="A3"/>
+			<field name="LotSizeOrFaceValue"      reference="N8"/> <!-- BD8_I6 -->
+			<field name="MaturityValue"           reference="N1"/>
+			<field name="CouponRate"              reference="D2_I2"/>
+			<field name="PaymentsperYear"         reference="N1"/>
+			<field name="BlockLotSize"            reference="N4"/>
+			<field name="ExpiryDate"              reference="N4"/>
+			<field name="BasisOfQuotation"        reference="A10"/>
+		</message>
+		
+		<message name="CombinationSymbolDirectoryLeg" id="CombinationSymbolDirectoryLeg">
+			<!-- The field values Order Book Id, Ratio and Price will be zeroed and Side will be space filled for the legs not defined -->
+			<field name="TradeableInstrumentId"   reference="N4"         defaultvalue="0"/>
+			<field name="Side"                    reference="Side"       defaultvalue=" "/>
+			<field name="Ratio"                   reference="N4"         defaultvalue="0"/>
+			<field name="Price"                   reference="Price"      defaultvalue="0"/>
+		</message>
+		<message name="CombinationSymbolDirectory" id="CombinationSymbolDirectory">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">M</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SymbolName"              reference="A32"/>
+			<field name="LongName"                reference="A60"/>
+			<field name="CFICode"                 reference="A6"/>
+			<field name="PriceMethod"             reference="PriceMethod"/>
+			<field name="PriceDisplayDecimals"    reference="N1"/>
+			<field name="PriceFractionalDenominator" reference="N4"/>
+			<field name="PriceMinimumTick"        reference="N4"/>
+			<field name="Legs"                    reference="N1">
+				<!-- attribute name="isCounter" type="java.lang.Boolean">true</attribute-->
+			</field>
+			<field name="CombinationSymbolDirectoryLeg" reference="CombinationSymbolDirectoryLeg" isCollection="true">
+				<attribute name="CountField" type="java.lang.Integer">6</attribute>
+			</field>
+		</message>
+
+		<message name="BundlesSymbolDirectory" id="BundlesSymbolDirectory">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">m</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SymbolName"              reference="A32"/>
+			<field name="LongName"                reference="A60"/>
+			<field name="CFICode"                 reference="A6"/>
+			<field name="PriceMethod"             reference="PriceMethod"/>
+			<field name="PriceDisplayDecimals"    reference="N1"/>
+			<field name="PriceFractionalDenominator" reference="N4"/>
+			<field name="PriceMinimumTick"        reference="SN4"/>
+			<field name="Legs"                    reference="N1">
+				<!-- attribute name="isCounter" type="java.lang.Boolean">true</attribute-->
+			</field>
+			<field name="CombinationSymbolDirectoryLeg" reference="CombinationSymbolDirectoryLeg" isCollection="true">
+				<attribute name="CountField" type="java.lang.Integer">20</attribute>
+			</field>
+		</message>
+
+		<!-- DELETED in v1.01 -->
+		<message name="TickSizeTable" id="TickSizeTable">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">L</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="TickSize"                reference="N8"/>
+			<field name="PriceFrom"               reference="Price"/>
+			<field name="PriceTo"                 reference="Price"/>
+		</message>
+		
+		<message name="OrderBookState" id="OrderBookState">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">O</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SessionState"            reference="SessionState"/>
+		</message>
+		
+		<message name="OrderAdded" id="OrderAdded">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">A</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="OrderBookPriority"       reference="N8"/>
+			<field name="Quantity"                reference="N4"/>
+			<field name="Price"                   reference="Price"/>
+		</message>
+		
+		<message name="OrderAddedWithParticipantId" id="OrderAddedWithParticipantId">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">F</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="OrderBookPriority"       reference="N8"/>
+			<field name="Quantity"                reference="N4"/>
+			<field name="Price"                   reference="Price"/>
+			<field name="ParticipantId"           reference="A3"/>
+		</message>
+		
+		<message name="OrderVolumeCancelled" id="OrderVolumeCancelled">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">X</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="Quantity"                reference="N4"/>
+		</message>
+		
+		<message name="OrderDeleted" id="OrderDeleted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">D</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+		</message>
+		
+		<message name="OrderExecuted" id="OrderExecuted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">E</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="QuantityRemaining"       reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="CombinationTradeId"      reference="N8"/>
+			<field name="CounterPartyId"          reference="A3"/>
+		</message>
+		
+		<message name="AuctionOrderExecuted" id="AuctionOrderExecuted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">C</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="QuantityRemaining"       reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="OppositeOrderId"         reference="N8"/>
+		</message>
+		
+		<message name="CombinationOrderExecuted" id="CombinationOrderExecuted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">e</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="QuantityRemaining"       reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="OppositeTradeableInstrumentId" reference="N4"/>
+			<field name="OppositeSide"            reference="Side"/>
+			<field name="OppositeOrderId"         reference="N8"/>
+			<field name="CombinationTradeId"      reference="N8"/>
+		</message>
+		
+		<message name="ImpliedOrderAdded" id="ImpliedOrderAdded">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">j</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="OrderBookPriority"       reference="N8"/>
+			<field name="Quantity"                reference="N4"/>
+			<field name="Price"                   reference="Price"/>
+		</message>
+		
+		<message name="ImpliedOrderReplaced" id="ImpliedOrderReplaced">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">l</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+			<field name="OrderBookPriority"       reference="N8"/>
+			<field name="Quantity"                reference="N4"/>
+			<field name="Price"                   reference="Price"/>
+		</message>
+		
+		<message name="ImpliedOrderDeleted" id="ImpliedOrderDeleted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">k</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="Side"/>
+			<field name="OrderId"                 reference="N8"/>
+		</message>
+
+		<message name="TradeExecuted" id="TradeExecuted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">P</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="CombinationTradeId"      reference="N8"/>
+			<field name="ParticipantIdBuyer"      reference="A3"/>
+			<field name="ParticipantIdSeller"     reference="A3"/>
+		</message>
+		
+		<message name="CombinationTradeExecuted" id="CombinationTradeExecuted">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">p</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="BuyerTraeableInstrumentId" reference="N4"/>
+			<field name="BuyerSide"                reference="Side"/>
+			<field name="BuyerOrderId"             reference="N8"/>
+			<field name="BuyerCombinationTradeId"  reference="N8"/>
+			<field name="BuyerParticipantId"       reference="A3"/>
+			<field name="SellerTraeableInstrumentId" reference="N4"/>
+			<field name="SellerSide"                reference="Side"/>
+			<field name="SellerOrderId"             reference="N8"/>
+			<field name="SellerCombinationTradeId"  reference="N8"/>
+			<field name="SellerParticipantId"       reference="A3"/>
+		</message>
+		
+		<message name="TradeReport" id="TradeReport">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">Q</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="TradeType"               reference="A1"/> <!-- FIXME: values -->
+			<field name="TradeId"                 reference="N8"/>
+			<field name="ExecutedQuantity"        reference="N4"/>
+			<field name="TradePrice"              reference="Price"/>
+			<field name="Printable"               reference="Yes_No"/>
+			<field name="TradeReportCode"         reference="A4"/>
+			<field name="TradeReportDateTime"     reference="N4"/>
+		</message>
+
+		<message name="TradeCancellation" id="TradeCancellation">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">B</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="TradeId"                 reference="N8"/>
+		</message>
+
+		<message name="EquilibriumPrice" id="EquilibriumPrice">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">Z</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="EquilibriumPrice"        reference="Price"/>
+			<field name="MatchedQuantity"         reference="N8"/>
+			<field name="BidQuantity"             reference="N8"/>
+			<field name="AskQuantity"             reference="N8"/>
+		</message>
+		
+		<message name="OpenHighLowLastTradeAdjustment" id="OpenHighLowLastTradeAdjustment">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">t</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="OpeningTrade"            reference="Price"/>
+			<field name="HighestTrade"            reference="Price"/>
+			<field name="LowestTrade"             reference="Price"/>
+			<field name="LastTrade"               reference="Price"/>
+			<field name="LastVolume"              reference="N4"/>
+			<field name="TotalTradeVolume"        reference="N8"/>
+		</message>
+
+		<message name="MarketSettlement" id="MarketSettlement">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">Y</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="SettlementPrice"         reference="Price"/>
+			<field name="Volatility"              reference="BD8_I6"/>
+			<field name="Delta"                   reference="BD4_I6"/>
+			<field name="SettlementType"          reference="SettlementType"/>
+		</message>
+
+		<message name="TextMessage" id="TextMessage">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">x</attribute>
+            <attribute name="Route">Incoming</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="SourceId"                reference="A6"/>
+			<field name="TextMessage"             reference="A100"/>
+		</message>
+
+		<message name="DuplicatedMessage" id="DuplicatedMessage">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">x</attribute>
+			<attribute name="Route">Outgoing</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="SourceId"                reference="A6"/>
+			<field name="TextMessage"             reference="A100"/>
+		</message>
+
+		<message name="RequestForQuote" id="RequestForQuote">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">q</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="Side"                    reference="QuoteSide"/> <!-- FIXME: default if not specified. (Not specified???) -->
+			<field name="Quantity"                reference="N4"/>
+		</message>
+
+		<message name="AnomalousOrderThresholdPublish" id="AnomalousOrderThresholdPublish">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">W</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<!-- Anomalous Order Threshold price (AOT). -->
+			<field name="AOTPrice"                reference="Price"/>
+			<field name="AOTUpperPrice"           reference="Price"/>
+			<field name="AOTLowerPrice"           reference="Price"/>
+			<!-- Extreme Trade Range price (ETR), if zero, then MIR is not enforced. -->
+			<field name="ETRPrice"                reference="Price"/>
+			<field name="ETRUpperPrice"           reference="Price"/>
+			<field name="ETRLowerPrice"           reference="Price"/>
+		</message>
+		
+		<message name="VolumeAndOpenInterest" id="VolumeAndOpenInterest">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">V</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Timestamp"               reference="N4"/>
+			<field name="TradeDate"               reference="N2"/>
+			<field name="TradeableInstrumentId"   reference="N4"/>
+			<field name="CumulativeVolume"        reference="N8"/>
+			<field name="OpenInterest"            reference="N8"/>
+			<field name="VOITradeDate"            reference="N2"/>
+		</message>
+
+		<message name="SnapshotComplete" id="SnapshotComplete">
+			<attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">G</attribute>
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+			<field name="Sequence"                reference="N8"/>
+		</message>
+
+		<!-- Admin messages -->
+		<message name="RequestPacket" id="RequestPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<field name="Session"                 reference="A10" required="true"/>
+			<field name="SequenceNumber"          reference="N8"  required="true"/>
+			<field name="RequestedMessageCount"   reference="N2"  required="true"/>
+		</message>
+
+		<message name="LoginAcceptedPacket" id="LoginAcceptedPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">A</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+			<field name="SessionID"               reference="A10"/>
+			<field name="SequenceNumber"          reference="SN8"/>
+		</message>
+		
+		<message name="LoginRejectPacket" id="LoginRejectPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">J</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+			<field name="RejectReasonCode"        reference="SN4"/> <!-- FIXME: values! -->
+			<field name="ErrorCode"               reference="SN4"/>
+		</message>
+		
+		<message name="PasswordChangeResponsePacket" id="PasswordChangeResponsePacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">Y</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+			<field name="Member"                  reference="A64"/>
+			<field name="UserName"                reference="A64"/>
+			<field name="Status"                  reference="SN4"/> <!-- FIXME: values! -->
+		</message>
+		
+		<message name="ServerHeartbeatPackets" id="ServerHeartbeatPackets">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">H</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+
+		<message name="SequencedDataPacket" id="SequencedDataPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">S</attribute>
+            <attribute name="Type" type="java.lang.String">STUB</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+		
+		<message name="EndOfSessionDataPacket" id="EndOfSessionDataPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">Z</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+
+		<message name="LoginRequestPacket" id="LoginRequestPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">L</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+			<field name="Member"                  reference="A64" required="true"/>
+			<field name="UserName"                reference="A64" required="true"/>
+			<field name="Password"                reference="A64" required="true"/>
+			<field name="Ticket"                  reference="SN8" required="true" defaultvalue="0" />
+			<field name="RequestedSequenceNumber" reference="SN8" required="true"/>
+			<field name="Version"                 reference="A12" required="true"/>
+		</message>
+
+		<message name="LogoutRequestPacket" id="LogoutRequestPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">O</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+
+		<message name="PasswordChangeRequestPacket" id="PasswordChangeRequestPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">W</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+			<field name="Member"                  reference="A64" required="true"/>
+			<field name="UserName"                reference="A64" required="true"/>
+			<field name="OldPassword"             reference="A64" required="true"/>
+			<field name="NewPassword"             reference="A64" required="true"/>
+		</message>
+
+		<message name="SubscriberHeartbeatPackets" id="SubscriberHeartbeatPackets">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">R</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+
+
+		<message name="UnsequencedDataPacket" id="UnsequencedDataPacket">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">U</attribute>
+            <attribute name="Type" type="java.lang.String">STUB</attribute>
+			<field name="PacketLength"            reference="SN2"/>
+			<field name="PacketType"              reference="A1"/>
+		</message>
+
+		<message name="UndocumentedErrorMessage" id="UndocumentedErrorMessage">
+			<attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+			<attribute name="AdminMessageType">+</attribute>
+			<field name="PacketLength"            reference="N2"/>
+			<field name="PacketType"              reference="A1"/>
+			<!-- FIXMEL payload -->
+		</message>
+
+        <message name="TcpTestMessage" id="TcpTestMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute name="MessageType">1</attribute>
+            <!-- PacketHeader STUB -->
+            <field name="PHSession"               reference="PHSession"/>
+            <field name="PHSequence"              reference="PHSequence"/>
+            <field name="PHCount"                 reference="PHCount"/>
+            <field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+            <!-- DataMessageHeader -->
+            <field name="Length"                   reference="IntStub"/>
+
+
+            <!-- Message -->
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+            <field name="String" reference="A10"/>
+            <field name="ASCII"  reference="ASCII_10"/>
+            <field name="VARIABLE_1" reference="NullTerminated_10"/>
+            <field name="SignedInteger" reference="SN4"/>
+            <field name="UnsignedInteger" reference="N4"/>
+            <field name="UnsignedLong" reference="N8"/>
+            <field name="VARIABLE_2" reference="NullTerminated_10"/>
+            <field name="SignedLong" reference="SN8"/>
+            <field name="VARIABLE_3" reference="NullTerminated_10"/>
+            <field name="VARIABLE_4" reference="NullTerminated_10"/>
+        </message>
+
+        <message id="M_MarketByPrice" name="MarketByPrice">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+			<attribute name="MessageType">6</attribute>
+
+			<!-- PacketHeader STUB -->
+			<field name="PHSession"               reference="PHSession"/>
+			<field name="PHSequence"              reference="PHSequence"/>
+			<field name="PHCount"                 reference="PHCount"/>
+			<field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+			<!-- DataMessageHeader -->
+			<field name="Length"                   reference="IntStub"/>
+			<!-- Message -->
+
+			<field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+			<field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+			<field name="MessageType" reference="MessageType"/>
+
+            <field reference="N2" name="Number"/>
+            <field type="java.lang.String" isCollection="true" name="ArrayOfItems">
+                <attribute type="java.lang.String" name="SizeField">Number</attribute>
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+
+        <message name="IncorrectOrderDeleted" id="IncorrectOrderDeleted">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute name="MessageType">7</attribute>
+            <!-- PacketHeader STUB -->
+            <field name="PHSession"               reference="PHSession"/>
+            <field name="PHSequence"              reference="PHSequence"/>
+            <field name="PHCount"                 reference="PHCount"/>
+            <field name="MessageSequenceNumber"   reference="MessageSequenceNumber"/>
+            <!-- DataMessageHeader -->
+            <field name="Length"                   reference="IntStub"/>
+            <!-- Message -->
+
+            <field name="SequencedDataPacketHeader" reference="SequencedDataPacket"/>
+            <field name="UnsequencedDataPacketHeader" reference="UnsequencedDataPacket"/>
+            <field name="MessageType" reference="MessageType"/>
+            <field name="Timestamp"               reference="N4"/>
+            <field name="TradeDate"               reference="N2"/>
+            <field name="TradeableInstrumentId"   reference="N4"/>
+            <field name="Side"                    reference="Side"/>
+            <field name="OrderId"                 reference="N8"/>
+            <field name="IncorrectLengthString"   reference="A10"/>
+        </message>
+ 
+	</messages>
+</dictionary>

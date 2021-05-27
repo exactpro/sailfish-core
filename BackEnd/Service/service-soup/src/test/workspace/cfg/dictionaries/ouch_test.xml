@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="OUCH_TEST">
+    <fields>
+        <field type="java.lang.String" id="F_A1" name="A1">
+            <attribute type="java.lang.String" name="Type">Alpha</attribute>
+            <attribute type="java.lang.Integer" name="Length">1</attribute>
+        </field>
+        <field type="java.lang.String" id="F_A10" name="A10">
+            <attribute type="java.lang.String" name="Type">Alpha</attribute>
+            <attribute type="java.lang.Integer" name="Length">10</attribute>
+        </field>
+        <field type="java.lang.String" id="F_A20" name="A20">
+            <attribute type="java.lang.String" name="Type">Alpha</attribute>
+            <attribute type="java.lang.Integer" name="Length">20</attribute>
+        </field>
+        <field type="java.lang.String" id="F_A6" name="A6">
+            <attribute type="java.lang.String" name="Type">Alpha</attribute>
+            <attribute type="java.lang.Integer" name="Length">6</attribute>
+        </field>
+        <field type="java.lang.Integer" id="F_N2" name="N2">
+            <attribute type="java.lang.String" name="Type">UInt16</attribute>
+            <attribute type="java.lang.Integer" name="Length">2</attribute>
+        </field>
+        <field type="java.lang.Integer" id="F_SN2" name="SN2">
+            <attribute type="java.lang.String" name="Type">Int16</attribute>
+            <attribute type="java.lang.Integer" name="Length">2</attribute>
+        </field>
+        <field id="F_AdminMessageType" reference="F_A1" name="AdminMessageType">
+            <value name="DebugPacket">+</value>
+            <value name="LoginAcceptedPacket">A</value>
+            <value name="LoginRejectPacket">J</value>
+            <value name="LogoutRequestPacket">O</value>
+            <value name="SequencedDataPacket">S</value>
+            <value name="ServerHeartbeatPackets">H</value>
+            <value name="EndOfSessionPacket">Z</value>
+            <value name="LoginRequestPacket">L</value>
+            <value name="UnsequencedDataPacket">U</value>
+            <value name="SubscriberHeartbeatPackets">R</value>
+        </field>
+
+        <field id="F_MessageType" reference="F_A1" name="MessageType">
+            <value name="TestMessage">T</value>
+        </field>
+    </fields>
+
+    <messages>
+        <message id="M_DebugPacket" name="DebugPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">+</attribute>
+            <field reference="F_N2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_LoginAcceptedPacket" name="LoginAcceptedPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">A</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+            <field reference="F_A10" name="Session"/>
+            <field reference="F_A20" name="SequenceNumber"/>
+        </message>
+        <message id="M_LoginRejectPacket" name="LoginRejectPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">J</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+            <field reference="F_A1" name="RejectReasonCode"/>
+        </message>
+        <message id="M_SequencedDataPacket" name="SequencedDataPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">S</attribute>
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_ServerHeartbeatPackets" name="ServerHeartbeatPackets">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">H</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_EndOfSessionPacket" name="EndOfSessionPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">Z</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_LogoutRequestPacket" name="LogoutRequestPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">O</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_LoginRequestPacket" name="LoginRequestPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">L</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+            <field reference="F_A6" name="Username" required="true"/>
+            <field reference="F_A10" name="Password" required="true"/>
+            <field reference="F_A10" name="RequestedSession" required="true"/>
+            <field reference="F_A20" name="RequestedSequenceNumber" required="true"/>
+        </message>
+        <message id="M_UnsequencedDataPacket" name="UnsequencedDataPacket">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">U</attribute>
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+        <message id="M_SubscriberHeartbeatPackets" name="SubscriberHeartbeatPackets">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.String" name="AdminMessageType">R</attribute>
+            <field reference="F_SN2" name="PacketLength"/>
+            <field reference="F_A1" name="PacketType"/>
+        </message>
+
+        <message id="M_TestMessage" name="TestMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.String" name="MessageType">T</attribute>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_A1" name="TestChar"/>
+            <field reference="F_SN2" name="TestNumber"/>
+        </message>
+    </messages>
+</dictionary>

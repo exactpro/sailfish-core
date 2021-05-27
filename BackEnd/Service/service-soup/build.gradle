@@ -1,0 +1,11 @@
+archivesBaseName = 'service-soup'
+
+dependencies {
+    compile "com.exactpro.sf:service-itch:${artifactCoreVersion}"
+    testCompile group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit', version: "${kotlin_version}"
+    testRuntime 'org.apache.derby:derby:10.14.2.0'
+}
+
+serviceLoader {
+    serviceInterface 'com.exactpro.sf.externalapi.codec.IExternalCodecFactory'
+}
