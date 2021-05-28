@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,24 +64,12 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Integer value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
-		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
+		int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+    	int pos1 = buffer.position();
 
-        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
-		int pos1 = buffer.position();
-
-		if (type == ProtocolType.UINT16) {
-			msg.addField(fieldName, buffer.getUnsignedShort());
-		} else if (type == ProtocolType.INT8) {
-			msg.addField(fieldName, (int) buffer.get());
-		} else if (type == ProtocolType.INT16) {
-			msg.addField(fieldName, (int) buffer.getShort());
-		} else if (type == ProtocolType.INT32) {
-			msg.addField(fieldName, buffer.getInt());
-		} else if (type == ProtocolType.STUB) {
-			buffer.skip(length);
-		} else {
-			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
+		Integer val = extractInteger(fldStruct);
+		if(val != null) {
+			msg.addField(fieldName, val);
 		}
 
 		int pos2 = buffer.position();
@@ -93,28 +81,13 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
-		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
-
         int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
-		if (type == ProtocolType.UINT32) {
-			msg.addField(fieldName, buffer.getUnsignedInt());
-		} else if (type == ProtocolType.UINT64) {
-			msg.addField(fieldName, buffer.getLong());
-		} else if (type == ProtocolType.INT16) {
-			msg.addField(fieldName, (long) buffer.getShort());
-		} else if (type == ProtocolType.INT32) {
-			msg.addField(fieldName, (long) buffer.getInt());
-		} else if (type == ProtocolType.INT64) {
-			msg.addField(fieldName, buffer.getLong());
-		} else if (type == ProtocolType.STUB) {
-			buffer.skip(length);
-		} else {
-			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
+		Long val = extractLong(fldStruct);
+		if(val != null) {
+			msg.addField(fieldName, val);
 		}
-
 		int pos2 = buffer.position();
 		int read = pos2 - pos1;
 		if (read != length) {
@@ -181,7 +154,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+		int length = getStringLength(fldStruct);
 		int pos1 = buffer.position();
 		String result = null;
 
@@ -574,5 +547,54 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			data[length - i - 1] = data[i];
 			data[i] = temp;
 		}
+	}
+
+	protected Integer extractInteger(IFieldStructure fldStruct) {
+		ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fldStruct.getName(), type);
+		int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+
+		if (type == ProtocolType.UINT16) {
+			return buffer.getUnsignedShort();
+		} else if (type == ProtocolType.INT8) {
+			return (int) buffer.get();
+		} else if (type == ProtocolType.INT16) {
+			return (int) buffer.getShort();
+		} else if (type == ProtocolType.INT32) {
+			return  buffer.getInt();
+		} else if (type == ProtocolType.STUB) {
+			buffer.skip(length);
+			return null;
+		} else {
+			throw new EPSCommonException("Incorrect type = " + type + " for " + fldStruct.getName() + " field");
+		}
+	}
+
+	protected Long extractLong(IFieldStructure fldStruct) {
+		ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fldStruct.getName(), type);
+		int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+
+		if (type == ProtocolType.UINT32) {
+			return buffer.getUnsignedInt();
+		} else if (type == ProtocolType.UINT64) {
+			return buffer.getLong();
+		} else if (type == ProtocolType.INT16) {
+			return (long) buffer.getShort();
+		} else if (type == ProtocolType.INT32) {
+			return (long) buffer.getInt();
+		} else if (type == ProtocolType.INT64) {
+			return buffer.getLong();
+		} else if (type == ProtocolType.STUB) {
+			buffer.skip(length);
+		} else {
+			throw new EPSCommonException("Incorrect type = " + type + " for " + fldStruct.getName() + " field");
+		}
+
+		return null;
+	}
+
+	protected int getStringLength(IFieldStructure fldStruct) {
+    	return getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 	}
 }
