@@ -20,10 +20,13 @@ import com.exactpro.sf.common.messages.MsgMetaData
 import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.common.services.ServiceName
 import com.exactpro.sf.services.IServiceContext
+import com.exactpro.sf.services.MessageHelper
 import com.exactpro.sf.services.fix.converter.MessageConvertException
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter
+import com.exactpro.sf.storage.IMessageStorage
 import org.quickfixj.CharsetSupport
 import quickfix.Message
+import quickfix.SessionID
 import java.util.Objects
 
 abstract class AbstractApplication {
@@ -72,5 +75,9 @@ abstract class AbstractApplication {
         val rawMessage: ByteArray = messageData?.toByteArray(CharsetSupport.getCharsetInstance())
                 ?: message.toString().toByteArray(CharsetSupport.getCharsetInstance())
         return rawMessage
+    }
+
+    protected fun createFIXSession(sessionName: String, sessionId: SessionID, storage: IMessageStorage, converter: DirtyQFJIMessageConverter, messageHelper: MessageHelper): FIXSession? {
+        return FIXSession(sessionName, sessionId, storage, converter, messageHelper, evolutionSupportEnabled)
     }
 }

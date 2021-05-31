@@ -561,7 +561,7 @@ public class FIXClient implements IInitiatorService {
 
 		while (iter.hasNext())	{
 			SessionID sessionID = iter.next();
-            FIXSession iSession = new FIXSession(serviceName.toString(), sessionID, msgStorage, converter, messageHelper);
+            FIXSession iSession = new FIXSession(serviceName.toString(), sessionID, msgStorage, converter, messageHelper, fixSettings.isEvolutionSupportEnabled());
 			String sessionName = settings.getString(sessionID, SessionName);
 			iSession.setServiceInfo(serviceInfo);
 			logger.info("register session: {}", sessionName);

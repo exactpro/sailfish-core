@@ -38,6 +38,7 @@ import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 import com.exactpro.sf.storage.IMessageStorage;
 
 import quickfix.DataDictionary;
+import quickfix.EvolutionQFJMessage;
 import quickfix.InvalidMessage;
 import quickfix.Message;
 import quickfix.Session;
@@ -62,8 +63,9 @@ public class FIXSession implements ISession {
     private final DataDictionary dataDictionary;
 
 	private volatile ServiceInfo serviceInfo;
+    private final boolean evolutionSupportEnabled;
 
-	public FIXSession(String sessionName, SessionID sessionId, IMessageStorage storage, DirtyQFJIMessageConverter converter, MessageHelper messageHelper) {
+    public FIXSession(String sessionName, SessionID sessionId, IMessageStorage storage, DirtyQFJIMessageConverter converter, MessageHelper messageHelper, boolean evolutionSupportEnabled) {
 		this.name = sessionName;
 		this.sessionId = sessionId;
 		this.storage = storage;
@@ -72,6 +74,11 @@ public class FIXSession implements ISession {
         this.logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
         // it is the simples way to get the data dictionary here
         dataDictionary = new QFJDictionaryAdapter(converter.getDictionary());
+        this.evolutionSupportEnabled = evolutionSupportEnabled;
+    }
+
+    public FIXSession(String sessionName, SessionID sessionId, IMessageStorage storage, DirtyQFJIMessageConverter converter, MessageHelper messageHelper) {
+        this(sessionName, sessionId, storage, converter, messageHelper, false);
     }
 
 	@Override
@@ -167,16 +174,23 @@ public class FIXSession implements ISession {
 
     @Override
     public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
-        // FIX uses this encoding by default
-        String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)).toString();
         try {
+            if (evolutionSupportEnabled) {
+                logger.trace("Processing raw message: {}", rawData);
+                EvolutionQFJMessage message = new EvolutionQFJMessage(rawData);
+                send(message);
+                return;
+            }
+            // FIX uses this encoding by default
+            String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)).toString();
             logger.trace("Processing raw message: {}", messageData);
             Message message = new Message();
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
             send(message);
+
         } catch (InvalidMessage ex) {
-            throw new SendMessageFailedException("Cannot parse the raw message: " + messageData, ex);
+            throw new SendMessageFailedException("Cannot parse the raw message: " + rawData, ex);
         }
     }
 

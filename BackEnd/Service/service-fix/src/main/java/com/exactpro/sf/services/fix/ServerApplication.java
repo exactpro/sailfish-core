@@ -255,7 +255,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
 
     protected ISession getSession(SessionID sessionID) {
         if (!sessionMap.containsKey(sessionID)) {
-            FIXSession session = new FIXSession("ServerApplication", sessionID, messageStorage,
+            FIXSession session = createFIXSession("ServerApplication", sessionID, messageStorage,
                     converter, messageHelper);
             session.setServiceInfo(serviceInfo);
             sessionMap.put(sessionID, session);

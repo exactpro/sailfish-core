@@ -163,7 +163,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 
         this.useDefaultApplVerID = fixSettings.isUseDefaultApplVerID();
         this.isPerformance = fixSettings.isPerformanceMode();
-        this.latencyCalculator = new FIXLatencyCalculator(messageHelper);
+        this.latencyCalculator = fixSettings.isEvolutionSupportEnabled() ? new DummyFIXLatencyCalculator(messageHelper) : new FIXLatencyCalculator(messageHelper);
         this.seqNumberRejectPattern = compilePattern(fixSettings.getSeqNumberfromRejectRegexp());
         this.seqNumberLogoutPattern = compilePattern(fixSettings.getSeqNumberfromLogoutRegexp());
     }
