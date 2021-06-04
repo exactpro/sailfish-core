@@ -35,6 +35,7 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureUtils;
+import com.exactpro.sf.comparison.conversion.MultiConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -161,7 +162,7 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
             return;
         }
         String jsonFieldName = JSONVisitorUtility.getJsonFieldName(fldStruct);
-        JsonNode node = jsonSettings.isTreatSimpleValuesAsStrings() && !(value instanceof IMessage) ? new TextNode(value.toString()) : converter.apply(value);
+        JsonNode node = jsonSettings.isTreatSimpleValuesAsStrings() && !(value instanceof IMessage) ? new TextNode(MultiConverter.convert(value, String.class)) : converter.apply(value);
 
         if (root.isArray()) {
             root.add(node);

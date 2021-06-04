@@ -20,6 +20,7 @@ import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -42,6 +43,7 @@ import com.exactpro.sf.services.http.HTTPMessageHelper;
 import com.exactpro.sf.services.json.JSONDecoder;
 import com.exactpro.sf.services.json.JSONEncoder;
 import com.exactpro.sf.services.json.JSONVisitorUtility;
+import com.exactpro.sf.services.json.JsonSettings;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.exactpro.sf.util.NettyTestUtility;
@@ -218,6 +220,15 @@ public class TestJSONCodec extends AbstractTest {
         Assert.assertEquals(json, encode(actual));
     }
 
+    @Test
+    public void testEncodingDecimalsAsStrings() throws IOException {
+        @Language("JSON")
+        String json = "{\"BigDecimal\":\"100000\"}";
+        IMessage expected = factory.createMessage("TestMessage", "SOAP");
+        expected.addField("BigDecimal", new BigDecimal("1E+5"));
+        Assert.assertEquals(json, encode(expected, true));
+    }
+
     private IMessage decode(String json, String messageName) {
         ByteBuf buffer = Unpooled.wrappedBuffer(json.getBytes(StandardCharsets.UTF_8));
         JSONDecoder decoder = new JSONDecoder(true);
@@ -226,7 +237,11 @@ public class TestJSONCodec extends AbstractTest {
     }
 
     private String encode(IMessage message) throws IOException {
-        JSONEncoder encoder = new JSONEncoder();
+        return encode(message, false);
+    }
+
+    private String encode(IMessage message, boolean treatSimpleValuesAsStrings) throws IOException {
+        JSONEncoder encoder = new JSONEncoder(new JsonSettings().setTreatSimpleValuesAsStrings(treatSimpleValuesAsStrings));
         encoder.init(settings, factory, dictionary, "TestClient");
         ByteBuf buf = NettyTestUtility.encode(message, logger, new IMessageMessageToByteEncoder(), encoder);
         return buf.toString(StandardCharsets.UTF_8);

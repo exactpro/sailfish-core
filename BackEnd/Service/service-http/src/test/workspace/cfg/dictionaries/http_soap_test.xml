@@ -77,6 +77,7 @@
             <field name="Integer" type="java.lang.Integer"/>
             <field name="Boolean" type="java.lang.Boolean"/>
             <field name="String" type="java.lang.String"/>
+            <field name="BigDecimal" type="java.math.BigDecimal"/>
             <field name="Message" reference="TestInnerMessage" />
             <field name="LocalDateTime" type="java.time.LocalDateTime">
                 <attribute type="java.lang.String" name="format">ISO_UTC</attribute>

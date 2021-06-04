@@ -27,16 +27,18 @@ public class JsonSettings implements ICommonSettings {
         return rejectUnexpectedFields;
     }
 
-    public void setRejectUnexpectedFields(boolean rejectUnexpectedFields) {
+    public JsonSettings setRejectUnexpectedFields(boolean rejectUnexpectedFields) {
         this.rejectUnexpectedFields = rejectUnexpectedFields;
+        return this;
     }
 
     public boolean isTreatSimpleValuesAsStrings() {
         return treatSimpleValuesAsStrings;
     }
 
-    public void setTreatSimpleValuesAsStrings(boolean treatSimpleValuesAsStrings) {
+    public JsonSettings setTreatSimpleValuesAsStrings(boolean treatSimpleValuesAsStrings) {
         this.treatSimpleValuesAsStrings = treatSimpleValuesAsStrings;
+        return this;
     }
 
     @Override
