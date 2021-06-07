@@ -418,12 +418,20 @@ public class MapMessage implements IMessage
             }
 
             Object value = getField(fldName);
+
             if(value instanceof IMessage) {
                 toString.append(value);
             } else {
+                Object field = getField(fldName);
+
                 toString.append(fldName);
                 toString.append('=');
-                toString.append(this.<Object>getField(fldName));
+
+                if (field instanceof BigDecimal) {
+                    toString.append(((BigDecimal)field).toPlainString());
+                } else {
+                    toString.append(field);
+                }
             }
         }
 
