@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.comparison.IPostValidation;
 import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.scriptrunner.MessageLevel;
@@ -62,6 +64,7 @@ import com.exactpro.sf.services.ICSHIterator;
 import com.exactpro.sf.services.IInitiatorService;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.util.ServiceUtil;
@@ -88,31 +91,46 @@ public class WaitAction {
         return waitForMessage(actionContext, messageFilter, fromApp, postValidation, Objects.toString(actionContext.getDescription(), ""));
     }
 
+    /**
+     * @deprecated this method does not provide the ability to specify the service to receive the message.
+     *              Will be removed in the future
+     */
+    @Deprecated
     public static final IMessage waitForMessage(IActionContext actionContext, IMessage messageFilter, boolean fromApp,
                                                 SailfishURI dictionary, String storageMessageTypes, boolean invertStoredMessageTypes)
             throws InterruptedException
     {
-        String serviceName = actionContext.getServiceName();
         IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
+        return waitForMessage(actionContext, client, messageFilter, fromApp);
+    }
+
+    /**
+     * This method can be used to await the message from the certain service
+     *
+     * @param service the service to use to receive the expected message
+     */
+    @Nullable
+    public static IMessage waitForMessage(IActionContext actionContext, IInitiatorService service, IMessage messageFilter, boolean fromApp) throws InterruptedException {
+        String serviceName = actionContext.getServiceName();
 
         long waitTime = actionContext.getTimeout();
         boolean addToReport = actionContext.isAddToReport();
 
-        actionContext.getLogger().info("{} client instance [{}] has been obtained.", client.getClass().getSimpleName(), serviceName);
+        actionContext.getLogger().info("{} service instance [{}] has been obtained.", service.getClass().getSimpleName(), serviceName);
         actionContext.getLogger().info("Settings [{}]", actionContext);
 
-        IServiceHandler handler = getServiceHandler(client);
-        ISession session = getSession(client);
+        IServiceHandler handler = getServiceHandler(service);
+        ISession session = getSession(service);
 
         ComparatorSettings settings = createCompareSettings(actionContext, null, messageFilter);
+        IServiceSettings serviceSettings = service.getSettings();
+        SailfishURI dictionaryURI = serviceSettings.getDictionaryName();
 
-        IService service = actionContext.getServiceManager().getService(new ServiceName(serviceName));
-
-        if (dictionary != null) {
-            settings.setDictionaryStructure(actionContext.getDictionary(dictionary));
+        if (dictionaryURI != null) {
+            settings.setDictionaryStructure(actionContext.getDictionary(dictionaryURI));
         }
 
-        Collection<String> storedMessageTypes = getStoredMessageTypes(actionContext);
+        Collection<String> storedMessageTypes = getStoredMessageTypes(actionContext.getDataManager(), service);
 
         Logger logger = actionContext.getLogger();
         List<Pair<IMessage, ComparisonResult>> results = null;
@@ -121,7 +139,7 @@ public class WaitAction {
         CheckPoint checkpoint = actionContext.getCheckPoint();
         try {
             results = waitMessage(handler, session, fromApp ? FROM_APP : FROM_ADMIN, checkpoint,
-                    waitTime, messageFilter, settings, storedMessageTypes, invertStoredMessageTypes);
+                    waitTime, messageFilter, settings, storedMessageTypes, serviceSettings.isInvertStoredMessageTypes());
         } catch (InterruptedException e) {
             logger.error("[{}]  InterruptedException:{}", serviceName, e.getMessage(), e);
             throw e;
@@ -223,16 +241,18 @@ public class WaitAction {
 
     private static Collection<String> getStoredMessageTypes(IActionContext actionContext) {
         IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
-        String rawStoredMessageTypes = client.getSettings().getStoredMessageTypes();
-
-        return getStoredMessageTypes(actionContext, rawStoredMessageTypes);
+        return getStoredMessageTypes(actionContext.getDataManager(), client);
     }
 
-    private static Collection<String> getStoredMessageTypes(IActionContext actionContext, String rawStoredMessageTypes) {
+    private static Collection<String> getStoredMessageTypes(IDataManager dataManager, IService client) {
+        return getStoredMessageTypes(dataManager, client.getSettings().getStoredMessageTypes());
+    }
+
+    private static Collection<String> getStoredMessageTypes(IDataManager dataManager, String rawStoredMessageTypes) {
         Collection<String> storedMessageTypes = Collections.emptySet();
         try {
             if (StringUtils.isNotBlank(rawStoredMessageTypes)) {
-                rawStoredMessageTypes = ServiceUtil.loadStringFromAlias(actionContext.getDataManager(), rawStoredMessageTypes, ",");
+                rawStoredMessageTypes = ServiceUtil.loadStringFromAlias(dataManager, rawStoredMessageTypes, ",");
                 storedMessageTypes = stream(rawStoredMessageTypes.split(","))
                         .map(String::trim)
                         .filter(StringUtils::isNoneEmpty)
