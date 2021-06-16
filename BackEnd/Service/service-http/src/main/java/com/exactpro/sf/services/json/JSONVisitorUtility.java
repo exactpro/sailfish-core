@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +72,9 @@ public class JSONVisitorUtility {
 
     @Nullable
     public static String checkForUnexpectedFields(@NotNull TreeNode node, @NotNull IFieldStructure structure) {
-        Collection<String> expectedFields = structure.getFields().keySet();
+        Collection<String> expectedFields = structure.getFields().values().stream()
+                .map(JSONVisitorUtility::getJsonFieldName)
+                .collect(Collectors.toSet());
         Collection<String> unexpectedFields = new HashSet<>();
 
         node.fieldNames().forEachRemaining(fieldName -> {
