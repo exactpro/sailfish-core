@@ -103,6 +103,9 @@ public class FIXSession implements ISession {
 
 	@Override
 	public IMessage send(Object message) {
+        if (!isLoggedOn()) {
+            throw new SendMessageFailedException("Send message failed. Service is not logged on. Message: " + message);
+        }
         boolean isSendSuccess = false;
 		if (message instanceof Message) {
             isSendSuccess = lookupSession().sendRaw((Message) message);
