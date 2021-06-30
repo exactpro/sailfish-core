@@ -41,6 +41,7 @@ import quickfix.DataDictionary;
 import quickfix.EvolutionQFJMessage;
 import quickfix.InvalidMessage;
 import quickfix.Message;
+import quickfix.OutgoingEvolutionMessage;
 import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionState;
@@ -187,7 +188,13 @@ public class FIXSession implements ISession {
             // FIX uses this encoding by default
             String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(rawData)).toString();
             logger.trace("Processing raw message: {}", messageData);
-            Message message = new Message();
+
+            /*We use the OutgoingEvolutionMessage inherited from the Message class only for sending.
+            The getMessageData() method of OutgoingEvolutionMessage returns null.
+            In this case, the extractRawData() method in the AbstractApplication class will extract the actual data
+            using the toString() method instead of the obsolete data using the getMessageData() method*/
+            OutgoingEvolutionMessage message = new OutgoingEvolutionMessage();
+
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
             send(message);

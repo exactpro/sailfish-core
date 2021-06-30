@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public final class EvolutionQFJMessage extends Message {
     private static final long serialVersionUID = 8055963317288188272L;
 
     private final String body;
-    private final String messageData;
+    public static final int[] MANDATORY_TAGS = new int[] { BeginString.FIELD, BodyLength.FIELD, MsgType.FIELD };
 
     /**
      * Converts the byte representation of the FIX protocol into a lightweight object
@@ -49,7 +50,7 @@ public final class EvolutionQFJMessage extends Message {
      * @throws InvalidMessage - throws an exception when sending an invalid message
      */
     public EvolutionQFJMessage(byte[] array) throws InvalidMessage {
-        messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(array)).toString();
+        String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(array)).toString();
         int indexOf35tag = messageData.indexOf(MsgType.FIELD + KEY_VALUE_DELIMITER);
         if (indexOf35tag == -1) {
             throw new InvalidMessage("Not valid message: " + messageData + ", missing tag " + MsgType.FIELD);
@@ -104,8 +105,7 @@ public final class EvolutionQFJMessage extends Message {
     }
 
     private void checkHeader(String header) throws InvalidMessage {
-        int[] tags = new int[] { BeginString.FIELD, BodyLength.FIELD, MsgType.FIELD };
-        for (int tag : tags) {
+        for (int tag : MANDATORY_TAGS) {
             try {
                 getHeader().getString(tag);
             } catch (FieldNotFound fieldNotFound) {
@@ -142,11 +142,6 @@ public final class EvolutionQFJMessage extends Message {
     @Override
     int calculateChecksum() {
         return MessageUtils.checksum(body);
-    }
-
-    @Override
-    public synchronized String getMessageData() {
-        return messageData;
     }
 
     @Override
