@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.exactpro.sf.services.netty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.common.impl.messages.BaseMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -62,20 +63,25 @@ public class NettySession implements ISession {
     }
 	
 	@Override
-	public IMessage send(Object message, long timeout) throws InterruptedException {
+    public IMessage send(Object message, long timeout) throws InterruptedException {
         checkChannelIsReady();
-        if (!(message instanceof IMessage)) {
-			throw new EPSCommonException("Illegal type of Message");
-		}
         if (timeout < 1) {
             throw new EPSCommonException("Illegal timeout value: " + timeout);
         }
+        if (message instanceof IMessage) {
+            IMessage msg = (IMessage)message;
+            realSend(msg, timeout);
+            return msg;
+        }
+        if (message instanceof BaseMessage) {
+            BaseMessage baseMessage = (BaseMessage)message;
+            IMessage msg = baseMessage.getMessage();
+            realSend(baseMessage, timeout);
+            return msg;
+        }
 
-		IMessage msg = (IMessage) message;
-        realSend(msg, timeout);
-
-        return msg;
-	}
+        throw new EPSCommonException("Illegal type of Message: " + message.getClass().getCanonicalName());
+    }
 
     @Override
     public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
