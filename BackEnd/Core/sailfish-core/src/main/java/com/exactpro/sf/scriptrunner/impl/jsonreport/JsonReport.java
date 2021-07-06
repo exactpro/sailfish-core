@@ -15,6 +15,8 @@
 ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
+import static com.exactpro.sf.util.HelpUtil.getMessageStructure;
+
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
@@ -22,6 +24,7 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
@@ -460,16 +463,20 @@ public class JsonReport implements IScriptReport {
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP, ContextType.TESTCASE);
 
-        try {
-            if (result != null && result.getMetaData() != null) {
-                result = new ComparisonResult(result);
+        if (result != null) {
+            result = new ComparisonResult(result);
 
-                EnumReplacer.replaceEnums(result,
-                        dictionaryManager.getDictionary(result.getMetaData().getDictionaryURI())
-                                .getMessages().get(result.getMetaData().getMsgName()));
+            IMessageStructure messageStructure = getMessageStructure(dictionaryManager, result.getMetaData());
+            if (messageStructure != null) {
+                try {
+
+                    EnumReplacer.replaceEnums(result,
+                            messageStructure);
+
+                } catch (Exception e) {
+                    logger.error("unable to set enum aliases", e);
+                }
             }
-        } catch (Exception e) {
-            logger.error("unable to set enum aliases", e);
         }
 
         Verification curVerification = new Verification();

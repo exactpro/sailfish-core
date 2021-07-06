@@ -21,8 +21,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.configuration.IDictionaryManager;
+import com.exactpro.sf.configuration.suri.SailfishURI;
 
 /**
  * Work only with printable part of {@link IFieldStructure}
@@ -165,6 +170,21 @@ public class HelpUtil {
         }
 
         return true;
+    }
+
+    public static IMessageStructure getMessageStructure(IDictionaryManager dictionaryManager, MsgMetaData metaData) {
+        if (metaData == null) {
+            return null;
+        }
+
+        SailfishURI dictionaryURI = metaData.getDictionaryURI();
+
+        if (dictionaryURI == null) {
+            return null;
+        }
+
+        IDictionaryStructure dictionaryStructure = dictionaryManager.getDictionary(dictionaryURI);
+        return dictionaryStructure == null ? null : dictionaryStructure.getMessages().get(metaData.getMsgName());
     }
 }
 

@@ -21,6 +21,7 @@ import static com.exactpro.sf.scriptrunner.StatusType.CONDITIONALLY_PASSED;
 import static com.exactpro.sf.scriptrunner.StatusType.FAILED;
 import static com.exactpro.sf.scriptrunner.StatusType.PASSED;
 import static com.exactpro.sf.scriptrunner.StatusType.SKIPPED;
+import static com.exactpro.sf.util.HelpUtil.getMessageStructure;
 import static java.util.Comparator.comparingLong;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -1356,7 +1357,7 @@ public class HtmlReport implements IScriptReport {
             return null;
         }
 
-        IMessageStructure messageStructure = getMessageStructure(message.getMetaData());
+        IMessageStructure messageStructure = getMessageStructure(dictionaryManager, message.getMetaData());
 
         if(messageStructure != null) {
             try {
@@ -1389,7 +1390,7 @@ public class HtmlReport implements IScriptReport {
             return Collections.emptyList();
         }
 
-        IMessageStructure structure = getMessageStructure(result.getMetaData());
+        IMessageStructure structure = getMessageStructure(dictionaryManager, result.getMetaData());
 
         if(structure != null) {
             EnumReplacer.replaceEnums(result, structure);
@@ -1398,20 +1399,6 @@ public class HtmlReport implements IScriptReport {
         return convert(result, verificationId, 0, 0);
     }
 
-    private IMessageStructure getMessageStructure(MsgMetaData metaData) {
-        if(metaData == null) {
-            return null;
-        }
-
-        SailfishURI dictionaryURI = metaData.getDictionaryURI();
-
-        if(dictionaryURI == null) {
-            return null;
-        }
-
-        IDictionaryStructure dictionaryStructure = dictionaryManager.getDictionary(dictionaryURI);
-        return dictionaryStructure == null ? null : dictionaryStructure.getMessages().get(metaData.getMsgName());
-    }
 
     private List<VerificationParameter> convert(ComparisonResult result, String parentRaw, int counter, int nestingLevel) {
         List<VerificationParameter> parameters = new ArrayList<>();
