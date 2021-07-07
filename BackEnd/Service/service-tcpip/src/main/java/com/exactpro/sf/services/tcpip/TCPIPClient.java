@@ -71,23 +71,6 @@ public class TCPIPClient extends AbstractMINATCPService implements ITCPIPService
             throw new ServiceException("Could not find codec class: " + codecClassName, e);
         }
 
-        if(getSettings().isUseSSL()) {
-            String format = "UseSSL is enabled, but requred parameter %s are missing";
-
-            if(getSettings().getSslProtocol() == null) {
-                throw new EPSCommonException(String.format(format, "SslProtocol"));
-            }
-
-            if(getSettings().getSslKeyStore() != null || getSettings().getSslKeyStorePassword() != null || getSettings().getKeyStoreType() != null) {
-                if(getSettings().getSslKeyStore() == null) {
-                    throw new EPSCommonException(String.format(format, "SslKeyStore"));
-                } else if(getSettings().getSslKeyStorePassword() == null) {
-                    throw new EPSCommonException(String.format(format, "SslKeyStorePassword"));
-                } else if(getSettings().getKeyStoreType() == null) {
-                    throw new EPSCommonException(String.format(format, "KeyStoreType"));
-                }
-            }
-        }
 	}
 
 	@Override
@@ -99,14 +82,6 @@ public class TCPIPClient extends AbstractMINATCPService implements ITCPIPService
 		}
 	}
 
-    @Override
-    protected void initFilterChain(DefaultIoFilterChainBuilder filterChain) throws Exception {
-        super.initFilterChain(filterChain);
-
-        if(getSettings().isUseSSL()) {
-            filterChain.addFirst("SSLFilter", MINAUtil.createSslFilter(true, getSettings().getSslProtocol(), null, null, null));
-        }
-    }
 
 	@Override
 	public TCPIPSession getSession() {

@@ -30,6 +30,7 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.codecs.CodecFactory;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.AbstractInitiatorService;
 import com.exactpro.sf.services.IdleStatus;
@@ -94,6 +95,27 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
     protected void initFilterChain(DefaultIoFilterChainBuilder filterChain) throws Exception {
         CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getCodecSettings());
         filterChain.addLast(CODEC_FILTER_NAME, new ProtocolCodecFilter(codecFactory));
+
+        if (getSettings().isUseSSL()) {
+            String format = "UseSSL is enabled, but requred parameter %s are missing";
+
+            if (getSettings().getSslProtocol() == null) {
+                throw new EPSCommonException(String.format(format, "SslProtocol"));
+            }
+
+            if (getSettings().getSslKeyStore() != null || getSettings().getKeyStoreType() != null) {
+                if (getSettings().getSslKeyStore() == null) {
+                    throw new EPSCommonException(String.format(format, "SslKeyStore"));
+                } else if (getSettings().getKeyStoreType() == null) {
+                    throw new EPSCommonException(String.format(format, "KeyStoreType"));
+                }
+            }
+            char[] sslKeyStorePassword = getSettings().getSslKeyStorePassword() == null ? null : getSettings().getSslKeyStorePassword().toCharArray();
+
+            filterChain.addFirst("SSLFilter", MINAUtil.createSslFilter(true, getSettings().getSslProtocol(),
+                    getSettings().getKeyStoreType(), getSettings().getSslKeyStore(),
+                    sslKeyStorePassword));
+        }
     }
 
     protected long getConnectTimeout() {

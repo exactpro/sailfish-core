@@ -17,6 +17,7 @@ package com.exactpro.sf.services.mina;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.externalapi.DictionaryProperty;
 import com.exactpro.sf.externalapi.DictionaryType;
@@ -31,6 +32,18 @@ public abstract class AbstractMINASettings extends AbstractServiceSettings {
     @DictionaryProperty(type = DictionaryType.MAIN)
     protected SailfishURI dictionaryName;
 
+    @Description("Enables SSL usage for QFJ acceptor or initiator")
+    private boolean useSSL;
+    @Description("Controls which particular protocols for secure connection are enabled for handshake. Use SSL(older) or TLS")
+    private String sslProtocol;
+
+    @Description("KeyStore to use with SSL")
+    private String sslKeyStore;
+    @Description("KeyStore password to use with SSL")
+    private String sslKeyStorePassword;
+    @Description("Type of specified keystore. Can be JKS, JCEKS, PKCS12, PKCS11")
+    private String keyStoreType;
+
     @Override
     public SailfishURI getDictionaryName() {
         return dictionaryName;
@@ -39,5 +52,45 @@ public abstract class AbstractMINASettings extends AbstractServiceSettings {
     @Override
     public void setDictionaryName(SailfishURI dictionaryName) {
         this.dictionaryName = dictionaryName;
+    }
+
+    public boolean isUseSSL() {
+        return useSSL;
+    }
+
+    public void setUseSSL(boolean useSSL) {
+        this.useSSL = useSSL;
+    }
+
+    public String getSslProtocol() {
+        return sslProtocol;
+    }
+
+    public void setSslProtocol(String sslProtocol) {
+        this.sslProtocol = sslProtocol;
+    }
+
+    public String getSslKeyStore() {
+        return sslKeyStore;
+    }
+
+    public void setSslKeyStore(String sslKeyStore) {
+        this.sslKeyStore = sslKeyStore;
+    }
+
+    public String getSslKeyStorePassword() {
+        return sslKeyStorePassword;
+    }
+
+    public void setSslKeyStorePassword(String sslKeyStorePassword) {
+        this.sslKeyStorePassword = sslKeyStorePassword;
+    }
+
+    public String getKeyStoreType() {
+        return keyStoreType;
+    }
+
+    public void setKeyStoreType(String keyStoreType) {
+        this.keyStoreType = keyStoreType;
     }
 }

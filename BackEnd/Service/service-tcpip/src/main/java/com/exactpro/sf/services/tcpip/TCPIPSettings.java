@@ -77,17 +77,6 @@ public class TCPIPSettings extends AbstractMINASettings
     @Description("Receive limit in bytes to emulate Slow Consumer")
     private int receiveLimit;
 
-    @Description("Enables SSL usage for QFJ acceptor or initiator")
-    private boolean useSSL;
-    @Description("Controls which particular protocols for secure connection are enabled for handshake. Use SSL(older) or TLS")
-    private String sslProtocol;
-
-    @Description("KeyStore to use with SSL")
-    private String sslKeyStore;
-    @Description("KeyStore password to use with SSL")
-    private String sslKeyStorePassword;
-    @Description("Type of specified keystore. Can be JKS, JCEKS, PKCS12, PKCS11")
-    private String keyStoreType;
 	@Description("Forcefully change name of all incoming messages to 'Incoming' and handle them as business(application) message.")
     private boolean depersonalizationIncomingMessages = true;
     @Description("Set of pairs 'tag:values' for which allow receive messages. <br>" +
@@ -211,45 +200,6 @@ public class TCPIPSettings extends AbstractMINASettings
         this.receiveLimit = receiveLimit;
     }
 
-    public boolean isUseSSL() {
-        return useSSL;
-    }
-
-    public void setUseSSL(boolean useSSL) {
-        this.useSSL = useSSL;
-    }
-
-    public String getSslProtocol() {
-        return sslProtocol;
-    }
-
-    public void setSslProtocol(String sslProtocol) {
-        this.sslProtocol = sslProtocol;
-    }
-
-    public String getSslKeyStore() {
-        return sslKeyStore;
-    }
-
-    public void setSslKeyStore(String sslKeyStore) {
-        this.sslKeyStore = sslKeyStore;
-    }
-
-    public String getSslKeyStorePassword() {
-        return sslKeyStorePassword;
-    }
-
-    public void setSslKeyStorePassword(String sslKeyStorePassword) {
-        this.sslKeyStorePassword = sslKeyStorePassword;
-    }
-
-    public String getKeyStoreType() {
-        return keyStoreType;
-    }
-
-    public void setKeyStoreType(String keyStoreType) {
-        this.keyStoreType = keyStoreType;
-    }
 
     public ICommonSettings createCodecSettings() {
         return this;
