@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
-import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
@@ -118,8 +117,11 @@ public class FIXCodec extends AbstractCodec {
         this.fieldConverter = new FixFieldConverter();
         fieldConverter.init(dictionary, dictionary.getNamespace());
         DirtyQFJIMessageConverterSettings dirtySettings = new DirtyQFJIMessageConverterSettings(dictionary, this.msgFactory)
-            .setVerifyTags(this.settings.isVerifyMessageStructure())
-            .setVerifyFields(this.settings.isVerifyMessageStructure());
+                .setVerifyTags(this.settings.isVerifyMessageStructure())
+                .setVerifyFields(this.settings.isVerifyMessageStructure())
+                .setIncludeMilliseconds(this.settings.isIncludeNanoseconds())
+                .setIncludeMicroseconds(this.settings.isIncludeMicroseconds())
+                .setIncludeNanoseconds(this.settings.isIncludeNanoseconds());
         this.qfjConverter = new DirtyQFJIMessageConverter(dirtySettings);
         beginStringByDictionary = QFJDictionaryAdapter.extractFixVersion(dictionary.getNamespace());
 

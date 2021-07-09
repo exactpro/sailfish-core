@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,15 @@ public class TCPIPSettings extends AbstractMINASettings
     private String filterMessages;
     @Description("Value to be used to field separation in the message upon decoding")
     private String fieldSeparator;
+
+	@Description("Determines if milliseconds should be added to date-time / time fields during encoding")
+	private boolean includeMilliseconds;
+
+	@Description("Determines if microseconds should be added to date-time / time fields during encoding")
+	private boolean includeMicroseconds;
+
+	@Description("Determines if nanoseconds should be added to date-time / time fields during encoding")
+	private boolean includeNanoseconds;
 
 	public boolean isStoreMessages() {
 		return storeMessages;
@@ -228,4 +237,28 @@ public class TCPIPSettings extends AbstractMINASettings
     public void setFieldSeparator(String fieldSeparator) {
         this.fieldSeparator = fieldSeparator;
     }
+
+	public boolean isIncludeMilliseconds() {
+		return includeMilliseconds;
+	}
+
+	public void setIncludeMilliseconds(boolean includeMilliseconds) {
+		this.includeMilliseconds = includeMilliseconds;
+	}
+
+	public boolean isIncludeMicroseconds() {
+		return includeMicroseconds;
+	}
+
+	public void setIncludeMicroseconds(boolean includeMicroseconds) {
+		this.includeMicroseconds = includeMicroseconds;
+	}
+
+	public boolean isIncludeNanoseconds() {
+		return includeNanoseconds;
+	}
+
+	public void setIncludeNanoseconds(boolean includeNanoseconds) {
+		this.includeNanoseconds = includeNanoseconds;
+	}
 }
