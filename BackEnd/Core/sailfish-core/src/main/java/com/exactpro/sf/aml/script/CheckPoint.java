@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.script;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageUtil;
 
 public class CheckPoint {
@@ -25,6 +30,7 @@ public class CheckPoint {
     private final long timestamp;
 
     private final long id;
+    private final List<IMessage> messages = new ArrayList<>();
 
     public CheckPoint() {
         this(false, MessageUtil.generateId());
@@ -60,5 +66,11 @@ public class CheckPoint {
         builder.append("timestamp", timestamp);
 
         return builder.toString();
+    }
+    public void addMessage(IMessage message) {
+        messages.add(message);
+    }
+    public List<IMessage> getMessages() {
+        return messages;
     }
 }

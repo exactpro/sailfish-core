@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.messages.IMessage;
+import com.google.common.collect.Iterables;
 
 public class CollectorServiceHandler implements IServiceHandler {
 	private static final Logger logger = LoggerFactory.getLogger(CollectorServiceHandler.class);
@@ -135,6 +136,10 @@ public class CollectorServiceHandler implements IServiceHandler {
         CSHArrayList<IMessage> list = getList(session, route);
 
         synchronized(list) {
+            if (!list.isEmpty()) {
+                IMessage lastMessage = Iterables.getLast(list);
+                checkPoint.addMessage(lastMessage);
+            }
             list.addCheckPoint(checkPoint);
         }
     }
