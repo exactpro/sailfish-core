@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,11 @@ public class MathUtil extends AbstractCaller {
         "<b>CEILING</b> - Rounding mode to round towards positive infinity.<br/>" +
             "If the value is positive, behaves as for UP; if negative, behaves as for DOWN.<br/>" +
         "<b>FLOOR</b> - Rounding mode to round towards negative infinity.<br/>" +
-            "If the value is positive, behave as for DOWN; if negative, behave as for UP.<br/>";
+            "If the value is positive, behave as for DOWN; if negative, behave as for UP.<br/>" +
+        "<b>HALF_EVEN, or \"Banker's rounding\"</b> - Rounding mode to round towards \"nearest neighbor\" unless both neighbors are equidistant,<br/>" +
+            " in which case, round towards the even neighbor.<br/>" +
+        "<b>UNNECESSARY</b> - Rounding mode to assert that the requested operation has an exact result,<br/>" +
+            " hence no rounding is necessary.<br/>";
 
     @Description("Returns the smallest (closest to negative infinity) double value that is greater than or equal to the argument and is equal to a mathematical integer.<br/>"
             + "Special cases:<br/>"
