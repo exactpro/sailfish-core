@@ -481,7 +481,7 @@ public class SOUPCodec extends AbstractCodec {
 
     protected void encodePackageHeader(IoSession session, IoBuffer buffer, IMessage message, IMessageStructure msgStructure, int messageLength) {
         if (hasSoupMessageHeader(msgStructure)) {
-            addUnseqPacketHeader(buffer, message, messageLength);
+            addPacketHeader(buffer, message, messageLength);
         }
     }
 
@@ -608,24 +608,41 @@ public class SOUPCodec extends AbstractCodec {
         return attributeValue;
     }
 
-    protected void addUnseqPacketHeader(IoBuffer buffer, IMessage message, int messageLength) {
+    protected void addPacketHeader(IoBuffer buffer, IMessage message, int messageLength) {
+        boolean isSequenced = message.isFieldSet(SEQUENCED_HEADER_MESSAGE);
+        boolean isUnsequenced = message.isFieldSet(UNSEQUENCED_HEADER_MESSAGE);
+
+        if (isSequenced && isUnsequenced) {
+            throw new EPSCommonException("The message contains " + SEQUENCED_HEADER_MESSAGE + " and " + UNSEQUENCED_HEADER_MESSAGE + ", although it should only contain one of them.");
+        }
+
+        String dataPacketType = unseqDataPacketType;
+        String headerFieldName = UNSEQUENCED_HEADER_MESSAGE;
+        String headerMessageName = UNSEQUENCED_DATA_PACKET;
+
+        if(isSequenced) {
+            dataPacketType = seqDataPacketType;
+            headerFieldName = SEQUENCED_HEADER_MESSAGE;
+            headerMessageName = SEQUENCED_DATA_PACKET;
+        }
+
         int packetLength = messageLength + PACKET_TYPE_SIZE;
         buffer.position(0);
         buffer.putShort((short)packetLength);
-        buffer.putUnsigned(unseqDataPacketType.charAt(0));
-        IMessage unseqPacketHeader = message.getField(UNSEQUENCED_HEADER_MESSAGE);
-        if (unseqPacketHeader == null) {
-            unseqPacketHeader = msgFactory.createMessage(
-                    UNSEQUENCED_DATA_PACKET, dictionaryStructure.getNamespace());
-            unseqPacketHeader.addField(PACKET_LENGTH, packetLength);
-            unseqPacketHeader.addField(PACKET_TYPE, unseqDataPacketType);
-            message.addField(UNSEQUENCED_HEADER_MESSAGE, unseqPacketHeader);
+        buffer.putUnsigned(dataPacketType.charAt(0));
+        IMessage packetHeader = message.getField(headerFieldName);
+        if (packetHeader == null) {
+            packetHeader = msgFactory.createMessage(
+                    headerMessageName, dictionaryStructure.getNamespace());
+            packetHeader.addField(PACKET_LENGTH, packetLength);
+            packetHeader.addField(PACKET_TYPE, dataPacketType);
+            message.addField(headerFieldName, packetHeader);
         } else {
-            if (!unseqPacketHeader.isFieldSet(PACKET_LENGTH)) {
-                unseqPacketHeader.addField(PACKET_LENGTH, packetLength);
+            if (!packetHeader.isFieldSet(PACKET_LENGTH)) {
+                packetHeader.addField(PACKET_LENGTH, packetLength);
             }
-            if (!unseqPacketHeader.isFieldSet(PACKET_TYPE)) {
-                unseqPacketHeader.addField(PACKET_TYPE, unseqDataPacketType);
+            if (!packetHeader.isFieldSet(PACKET_TYPE)) {
+                packetHeader.addField(PACKET_TYPE, dataPacketType);
             }
         }
     }
