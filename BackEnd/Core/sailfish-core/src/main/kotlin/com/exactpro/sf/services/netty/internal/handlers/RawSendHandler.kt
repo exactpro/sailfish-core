@@ -17,6 +17,7 @@
 package com.exactpro.sf.services.netty.internal.handlers
 
 import com.exactpro.sf.common.messages.IMessage
+import com.exactpro.sf.common.messages.merge
 import com.exactpro.sf.services.netty.internal.NettyEmbeddedPipeline
 import com.exactpro.sf.services.netty.internal.RawDataHolder
 import io.netty.channel.ChannelHandlerContext
@@ -37,7 +38,9 @@ class RawSendHandler @JvmOverloads constructor(
         }
         embeddedPipeline.decode(msg).forEach {
             if (acceptMessage(it)) {
-                out += it
+                out += it.apply {
+                    metaData.merge(msg.metadata)
+                }
             }
         }
     }
