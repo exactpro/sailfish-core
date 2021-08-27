@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.exactpro.sf.externalapi.codec.PluginAlias
 import com.exactpro.sf.externalapi.codec.ResourcePath
 import com.google.common.collect.HashBasedTable
 import com.google.common.collect.Table
+import org.apache.commons.beanutils.FluentPropertyBeanIntrospector
 import org.apache.commons.beanutils.PropertyUtilsBean
 import org.apache.commons.lang3.reflect.FieldUtils.getFieldsListWithAnnotation
 import java.beans.PropertyDescriptor
@@ -38,6 +39,12 @@ class ExternalCodecSettings(
     private val settings: ICommonSettings
 ) : IExternalCodecSettings {
     private val properties: Map<String, PropertyDescriptor> = PropertyUtilsBean().run {
+        // to handle the builder pattern in setters. Example:
+        // class A {
+        //    int getValue() { ... }
+        //    A setValue(int value) { ... }
+        // }
+        addBeanIntrospector(FluentPropertyBeanIntrospector())
         getPropertyDescriptors(settings).asSequence()
             .filter { it.readMethod != null && it.writeMethod != null }
             .associateBy { it.name }
