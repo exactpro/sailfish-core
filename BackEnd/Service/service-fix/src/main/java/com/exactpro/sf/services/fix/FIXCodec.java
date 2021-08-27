@@ -119,7 +119,7 @@ public class FIXCodec extends AbstractCodec {
         DirtyQFJIMessageConverterSettings dirtySettings = new DirtyQFJIMessageConverterSettings(dictionary, this.msgFactory)
                 .setVerifyTags(this.settings.isVerifyMessageStructure())
                 .setVerifyFields(this.settings.isVerifyMessageStructure())
-                .setIncludeMilliseconds(this.settings.isIncludeNanoseconds())
+                .setIncludeMilliseconds(this.settings.isIncludeMilliseconds())
                 .setIncludeMicroseconds(this.settings.isIncludeMicroseconds())
                 .setIncludeNanoseconds(this.settings.isIncludeNanoseconds());
         this.qfjConverter = new DirtyQFJIMessageConverter(dirtySettings);
