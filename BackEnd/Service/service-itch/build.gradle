@@ -12,7 +12,7 @@ dependencies {
         provided_data files("${project(':BackEnd:Core:sailfish-core').projectDir}/src/main/workspace/")
 
 		testCompile project(':BackEnd:Service:service-tcpip')
-		testCompile project(path:':BackEnd:Service:service-tcpip', configuration: 'testArtifacts')						
+		testCompile project(':BackEnd:Service:service-tcpip').sourceSets.test.output
 	}
 	compile 'com.jcraft:jzlib:1.1.3'
 	

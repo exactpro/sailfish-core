@@ -4,7 +4,7 @@ dependencies {
         testCompile "com.exactpro.sf:service-tcpip:${artifactVersion}:tests@jar"
 		} else {
 			testCompile project(':BackEnd:Service:service-tcpip')
-			testCompile project(path:':BackEnd:Service:service-tcpip', configuration: 'testArtifacts')						
+			testCompile project(':BackEnd:Service:service-tcpip').sourceSets.test.output
 		}	
 	        
 }

@@ -293,7 +293,6 @@ subprojects {
     }
 
     configurations {
-        testArtifacts
         compile.exclude module: 'avalon-framework-api'
         compile.exclude module: 'guava-jdk5'
         testCompile.extendsFrom(compileOnly) // to fully emulate provided configuration
@@ -389,10 +388,6 @@ subprojects {
         from mainWorkspaceDir
         from genWorkspaceDir
         from externalWorkspaceDir
-    }
-
-    def testArtifact = artifacts.add('testArtifacts', testsJar) {
-        classifier 'test-artifact'
     }
 
     publishing {

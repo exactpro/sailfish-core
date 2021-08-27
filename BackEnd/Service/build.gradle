@@ -9,7 +9,7 @@ subprojects {
             testCompile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}:tests@jar"
 	    } else {
 	        compile project(':BackEnd:Core:sailfish-core')
-	        testCompile project(path:':BackEnd:Core:sailfish-core', configuration: 'testArtifacts')
+	        testCompile project(':BackEnd:Core:sailfish-core').sourceSets.test.output
 	    }
 	    
 	    testRuntime 'org.apache.derby:derby:10.14.2.0'
