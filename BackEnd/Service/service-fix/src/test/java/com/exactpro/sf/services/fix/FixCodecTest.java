@@ -21,10 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -53,6 +56,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.messages.service.ErrorMessage;
+import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.services.tcpip.MessageParseException;
 import com.exactpro.sf.services.tcpip.TCPIPSettings;
@@ -74,13 +78,51 @@ public class FixCodecTest extends AbstractTest {
     private final IoSession session = new DummySession();
 
     private final IDictionaryStructure dictionary;
+    private final IMessageFactory factory = new FixMessageFactory();
+    private final MessageHelper helper = new FixMessageHelper();
 
     {
         try {
-            this.dictionary = loadDictionaryFromResource("dictionary/FIX50.TEST.xml");
+            dictionary = loadDictionaryFromResource("dictionary/FIX50.TEST.xml");
+            factory.init(dictionaryURI, dictionary);
+            helper.init(factory, dictionary);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Test
+    public void testDateTimeFieldAccuracy() throws Exception {
+        IMessage msg = factory.createMessage("NewOrderSingle");
+        //noinspection MagicNumber
+        msg.addField("TransactTime", LocalDateTime.of(2021, 8, 27, 21, 2, 34, 123456789));
+        msg = helper.prepareMessageToEncode(msg, Collections.emptyMap());
+
+        TCPIPSettings settings = new TCPIPSettings();
+        checkEncodeResult(settings, msg, "8=FIXT.1.1\u00019=26\u000135=D\u000160=20210827-21:02:34\u000110=063\u0001");
+
+        settings.setIncludeMilliseconds(true);
+        checkEncodeResult(settings, msg, "8=FIXT.1.1\u00019=30\u000135=D\u000160=20210827-21:02:34.123\u000110=254\u0001");
+
+        settings.setIncludeMicroseconds(true);
+        checkEncodeResult(settings, msg, "8=FIXT.1.1\u00019=33\u000135=D\u000160=20210827-21:02:34.123456\u000110=160\u0001");
+
+        settings.setIncludeNanoseconds(true);
+        checkEncodeResult(settings, msg, "8=FIXT.1.1\u00019=36\u000135=D\u000160=20210827-21:02:34.123456789\u000110=075\u0001");
+    }
+
+    private void checkEncodeResult(TCPIPSettings settings, IMessage msg, String expected) throws Exception {
+        settings.setVerifyMessageStructure(true);
+        settings.setDecodeByDictionary(true);
+        settings.setDepersonalizationIncomingMessages(false);
+
+        FIXCodec codec = createCodec(dictionary, settings);
+        ProtocolEncoderOutput out = Mockito.mock(ProtocolEncoderOutput.class);
+        codec.encode(null, msg, out);
+
+        ArgumentCaptor<IoBuffer> argument = ArgumentCaptor.forClass(IoBuffer.class);
+        Mockito.verify(out).write(argument.capture());
+        Assert.assertEquals(expected, argument.getValue().getString(StandardCharsets.UTF_8.newDecoder()));
     }
 
 	@Test
@@ -464,10 +506,9 @@ public class FixCodecTest extends AbstractTest {
         map.put("9", "001");
         map.put("10", "2");
 
-        IMessageFactory msgFactory = createMessageFactory(dictionary);
-        FIXCodec codec = createCodec(dictionary, msgFactory, new TCPIPSettings());
+        FIXCodec codec = createCodec(dictionary, factory, new TCPIPSettings());
 
-        IMessage iMessage = MessageUtil.convertToIMessage(map, msgFactory, "namespace", "name");
+        IMessage iMessage = MessageUtil.convertToIMessage(map, factory, "namespace", "name");
         ProtocolEncoderOutput out = Mockito.mock(ProtocolEncoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
@@ -493,7 +534,7 @@ public class FixCodecTest extends AbstractTest {
         //TODO: Implement DUPLICATE_TAG for subMessage
         //subMap2.put(DirtyFixUtil.DUPLICATE_TAG, "2711=ABC;2711=DEF");
 
-        iMessage = MessageUtil.convertToIMessage(map, msgFactory, "namespace", "name");
+        iMessage = MessageUtil.convertToIMessage(map, factory, "namespace", "name");
         out = Mockito.mock(ProtocolEncoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
@@ -805,12 +846,6 @@ public class FixCodecTest extends AbstractTest {
                 ((IMessage) decoded).getMetaData().getRawMessage());
     }
 
-    private IMessageFactory createMessageFactory(IDictionaryStructure dictionary) {
-        IMessageFactory messageFactory = new FixMessageFactory();
-        messageFactory.init(dictionaryURI, dictionary);
-        return messageFactory;
-    }
-
     private FIXCodec createCodec(IDictionaryStructure dictionary, IMessageFactory messageFactory, TCPIPSettings settings) {
         FIXCodec codec = new FIXCodec();
         codec.init(serviceContext, settings, messageFactory, dictionary);
@@ -818,8 +853,7 @@ public class FixCodecTest extends AbstractTest {
     }
 
     private FIXCodec createCodec(IDictionaryStructure dictionary, TCPIPSettings settings) {
-        IMessageFactory messageFactory = createMessageFactory(dictionary);
-        return createCodec(dictionary, messageFactory, settings);
+        return createCodec(dictionary, factory, settings);
     }
 
     private IDictionaryStructure loadDictionaryFromResource(String name) throws IOException {
