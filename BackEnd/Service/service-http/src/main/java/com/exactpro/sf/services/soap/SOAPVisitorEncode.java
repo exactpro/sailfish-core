@@ -271,6 +271,16 @@ public class SOAPVisitorEncode extends DefaultMessageStructureVisitor {
         }
     }
 
+    public void visitBooleanCollection(String fieldName, List<Boolean> value, IFieldStructure fldStruct, boolean isDefault) {
+        if (value == null) {
+            return;
+        }
+
+        for (Boolean val : value) {
+            processSimpleNode(val, fieldName, fldStruct, isDefault);
+        }
+    }
+
     private void processSimpleNode(Object value, String fieldName, IFieldStructure fldStruct, boolean isDefault) {
         try {
             SOAPElement node = addSimpleNode(fieldName, fldStruct);
