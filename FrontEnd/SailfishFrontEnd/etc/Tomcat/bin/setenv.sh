@@ -28,6 +28,11 @@
 #                   should be used by Tomcat and also by the stop process,
 #                   the version command etc.
 #                   Most options should go into CATALINA_OPTS.
+
+# Because Tomcat uses JRE_HOME if it is set
+if [ -n "$JAVA_HOME" ] && [ -n "$JRE_HOME" ]; then
+  export JRE_HOME="$JAVA_HOME"
+fi
 #JVM arguments:
 export CATALINA_OPTS="$CATALINA_OPTS -Xms1024m -Xmx1024m" #Specifies the maximum size (in bytes) of the memory allocation pool in bytes.
 export CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSize=512m" #Size of the Permanent Generation.
@@ -39,6 +44,9 @@ export CATALINA_OPTS="$CATALINA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addr
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells that JVM should terminate process if OutOfMemoryError had been thrown
 export CATALINA_OPTS="$CATALINA_OPTS -Duser.dir=$CATALINA_BASE/temp" # Uses to specify directory for relative paths
 export CATALINA_OPTS="$CATALINA_OPTS -Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2" # rem Use TLSv1.2 protocol by default
+
+# Do not specify CATALINA_PID if you are using the deployer. It can stop the Tomcat properly without CATALINA_PID file
+# With CATALINA_PID file the deployer won't be able to stop the Tomcat
 
 #Deployer Jvm arguments:
 export DEPLOYER_JAVA_OPTS=""

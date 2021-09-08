@@ -29,6 +29,9 @@ rem                   should be used by Tomcat and also by the stop process,
 rem                   the version command etc.
 rem                   Most options should go into CATALINA_OPTS.
 
+rem Because Tomcat uses JRE_HOME if it is set
+if ("%JAVA_HOME%" neq "") if ("%JRE_HOME%" neq "") set "JRE_HOME=%JAVA_HOME%"
+
 rem JVM arguments:
 set "CATALINA_OPTS=%CATALINA_OPTS% -Xms1024m -Xmx1024m" rem Specifies the maximum size (in bytes) of the memory allocation pool in bytes.
 set "CATALINA_OPTS=%CATALINA_OPTS% -XX:MaxPermSize=512m" rem Size of the Permanent Generation.
@@ -40,6 +43,8 @@ set "CATALINA_OPTS=%CATALINA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 add
 set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
 set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
 set "CATALINA_OPTS=%CATALINA_OPTS% -Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2" rem Use TLSv1.2 protocol by default
+
+rem Tomcat does not create file with PID on Windows
 
 rem Deployer Jvm arguments:
 set "DEPLOYER_JAVA_OPTS="
