@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 package com.exactpro.sf.services.mina;
 
+import static com.exactpro.sf.common.messages.MetadataExtensions.setFromService;
+import static com.exactpro.sf.common.messages.MetadataExtensions.setRawMessage;
+import static com.exactpro.sf.common.messages.MetadataExtensions.setServiceInfo;
+import static com.exactpro.sf.common.messages.MetadataExtensions.setToService;
+
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -23,8 +28,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.future.WriteFuture;
+import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderException;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +42,9 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext;
+import com.exactpro.sf.externalapi.codec.IExternalCodecContext.Role;
+import com.exactpro.sf.externalapi.codec.impl.ExternalCodecContext;
 import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceException;
@@ -47,6 +57,13 @@ public class MINASession implements ISession {
     protected final long sendMessageTimeout;
 
     protected volatile boolean loggedOn;
+
+    private static final DummySession DECODE_SESSION;
+
+    static {
+        DECODE_SESSION = new DummySession();
+        DECODE_SESSION.setAttribute(IExternalCodecContext.class, new ExternalCodecContext(Role.SENDER));
+    }
 
     public MINASession(ServiceName serviceName, IoSession session, long sendMessageTimeout) {
         this.serviceName = Objects.requireNonNull(serviceName, "serviceName cannot be null");
@@ -68,6 +85,7 @@ public class MINASession implements ISession {
         return message;
     }
 
+    @Nullable
     public IMessage send(Object message, long timeout) throws InterruptedException {
         if(!isConnected()) {
             throw new SendMessageFailedException("Session isn't connected: " + this);
@@ -110,13 +128,13 @@ public class MINASession implements ISession {
         }
         try {
             MessageNextFilter nextFilter = new MessageNextFilter();
-            codecFilter.messageReceived(nextFilter, session, IoBuffer.wrap(rawData));
+            codecFilter.messageReceived(nextFilter, DECODE_SESSION, IoBuffer.wrap(rawData));
             if (!nextFilter.getExceptions().isEmpty()) {
-                SendMessageFailedException exception = new SendMessageFailedException("Exception accurate during decoding");
+                RuntimeException exception = new SendMessageFailedException("Exception accurate during decoding");
                 nextFilter.getExceptions().forEach(exception::addSuppressed);
                 throw exception;
             }
-            boolean sent = false;
+            boolean notSent = true;
             for (IMessage result : nextFilter.getResults()) {
                 if (filterResultFromSendRaw(result)) {
                     continue;
@@ -126,12 +144,13 @@ public class MINASession implements ISession {
                     logger.error("Got error message when decoding the raw message: {}", errorMessage.getCause());
                     throw new SendMessageFailedException("Got error when decoding the raw message: " + errorMessage.getCause());
                 }
+                removeSessionMetadata(result.getMetaData());
                 removeSessionFields(result);
                 MetadataExtensions.merge(result.getMetaData(), extraMetadata);
                 send(result);
-                sent = true;
+                notSent = false;
             }
-            if (!sent) {
+            if (notSent) {
                 throw new SendMessageFailedException("No messages were sent to the system. Result size: "
                         + nextFilter.getResults().size()
                         + ". Messages in the result: " + nextFilter.getResults().stream()
@@ -141,12 +160,18 @@ public class MINASession implements ISession {
             }
         } catch (ProtocolDecoderException e) {
             throw new SendMessageFailedException("Cannot decode raw bytes to messages", e);
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof InterruptedException) {
-                throw (InterruptedException)e;
-            }
             throw new SendMessageFailedException("Cannot send message", e);
         }
+    }
+
+    protected void removeSessionMetadata(IMetadata metaData) {
+        setToService(metaData, null);
+        setFromService(metaData, null);
+        setRawMessage(metaData, null);
+        setServiceInfo(metaData, null);
     }
 
     protected boolean filterResultFromSendRaw(IMessage result) {
@@ -162,9 +187,7 @@ public class MINASession implements ISession {
     public void close() {
         logger.debug("Closing session: {}", this);
 
-        session.close(true).addListener(future -> {
-            logger.debug("Session closed: {}", this);
-        });
+        session.close(true).addListener(future -> logger.debug("Session closed: {}", this));
     }
 
     @Override
