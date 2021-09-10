@@ -281,6 +281,50 @@ public class SOAPVisitorEncode extends DefaultMessageStructureVisitor {
         }
     }
 
+    public void visitLongCollection(String fieldName, List<Long> value, IFieldStructure fldStruct, boolean isDefault)
+    {
+        if (value == null) {
+            return;
+        }
+
+        for (Long val : value) {
+            processSimpleNode(val, fieldName, fldStruct, isDefault);
+        }
+    }
+
+    public void visitByteCollection(String fieldName, List<Byte> value, IFieldStructure fldStruct, boolean isDefault)
+    {
+        if (value == null) {
+            return;
+        }
+
+        for (Byte val : value) {
+            processSimpleNode(val, fieldName, fldStruct, isDefault);
+        }
+    }
+
+    public void visitShortCollection(String fieldName, List<Short> value, IFieldStructure fldStruct, boolean isDefault)
+    {
+        if (value == null) {
+            return;
+        }
+
+        for (Short val : value) {
+            processSimpleNode(val, fieldName, fldStruct, isDefault);
+        }
+    }
+
+    public void visitCharCollection(String fieldName, List<Character> value, IFieldStructure fldStruct, boolean isDefault)
+    {
+        if (value == null) {
+            return;
+        }
+
+        for (Character val : value) {
+            processSimpleNode(val, fieldName, fldStruct, isDefault);
+        }
+    }
+
     private void processSimpleNode(Object value, String fieldName, IFieldStructure fldStruct, boolean isDefault) {
         try {
             SOAPElement node = addSimpleNode(fieldName, fldStruct);
