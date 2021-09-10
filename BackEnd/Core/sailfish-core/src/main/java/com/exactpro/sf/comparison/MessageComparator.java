@@ -284,7 +284,10 @@ public class MessageComparator {
                     continue;
                 }
 
-                for(int actualIndex = 0; actualIndex < maxSize; actualIndex++) {
+                // Do not try to look forward in actual messages.
+                // We need to find the best match for the current index only
+                int actualMaxSize = settings.isKeepResultGroupOrder() ? i + 1 : maxSize;
+                for(int actualIndex = 0; actualIndex < actualMaxSize; actualIndex++) {
                     if(usedActual[actualIndex]) {
                         continue;
                     }

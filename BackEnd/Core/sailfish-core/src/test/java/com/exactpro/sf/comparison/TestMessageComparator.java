@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.apache.mina.filter.codec.ProtocolCodecException;
@@ -51,6 +52,7 @@ import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructure
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.DateTimeUtility;
+import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("deprecation")
 public class TestMessageComparator extends AbstractTest {
@@ -1374,6 +1376,262 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertTrue("collection is not a key in 1 result " + result,
                 result.getResult("collection")
                         .isKey());
+    }
+
+    @Test
+    public void testCollectionOrderInResult() {
+        IMessage message = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 1);
+                        msg.addField("marker2", 1);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 2);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 4);
+                        msg.addField("marker2", 4);
+                        msg.addField("marker3", 4);
+                    })
+            ));
+        });
+
+        IMessage filter = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 42);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    })
+            ));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        settings.setKeepResultGroupOrder(true);
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+        Assert.assertNotNull(result);
+        ComparisonResult collection = result.getResult("collection");
+        Assert.assertNotNull(collection);
+        BiConsumer<Integer, Map<String, StatusType>> check = (index, statuses) -> {
+            ComparisonResult valueResult = collection.getResult(String.valueOf(index));
+            Assert.assertNotNull("no result for index " + index + ". Result: " + result, valueResult);
+            statuses.forEach((field, status) -> {
+                ComparisonResult marker = valueResult.getResult(field);
+                Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
+                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+            });
+        };
+
+        check.accept(0, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.FAILED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(1, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(2, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.PASSED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+
+        check.accept(3, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.NA)
+                .put("marker2", StatusType.NA)
+                .put("marker3", StatusType.NA)
+                .build());
+    }
+
+    @Test
+    public void testCollectionOrderInResultUsesBestMatchRule() {
+        IMessage message = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 1);
+                        msg.addField("marker2", 1);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 2);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 4);
+                        msg.addField("marker2", 4);
+                        msg.addField("marker3", 4);
+                    })
+            ));
+        });
+
+        IMessage filter = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 42);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    })
+            ));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+        Assert.assertNotNull(result);
+        ComparisonResult collection = result.getResult("collection");
+        Assert.assertNotNull(collection);
+        BiConsumer<Integer, Map<String, StatusType>> check = (index, statuses) -> {
+            ComparisonResult valueResult = collection.getResult(String.valueOf(index));
+            Assert.assertNotNull("no result for index " + index + ". Result: " + result, valueResult);
+            statuses.forEach((field, status) -> {
+                ComparisonResult marker = valueResult.getResult(field);
+                Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
+                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+            });
+        };
+
+        check.accept(0, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.PASSED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(1, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(2, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.FAILED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+
+        check.accept(3, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.NA)
+                .put("marker2", StatusType.NA)
+                .put("marker3", StatusType.NA)
+                .build());
+    }
+
+    @Test
+    public void testCollectionOrderInResultIfFilterHasMoreElements() {
+        IMessage message = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 1);
+                        msg.addField("marker2", 1);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 2);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    })
+            ));
+        });
+
+        IMessage filter = createMessage(root -> {
+            root.addField("collection", asList(
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 42);
+                        msg.addField("marker3", 1);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 42);
+                        msg.addField("marker2", 2);
+                        msg.addField("marker3", 2);
+                    }),
+                    createMessage(msg -> {
+                        msg.addField("marker", 3);
+                        msg.addField("marker2", 3);
+                        msg.addField("marker3", 3);
+                    }), createMessage(msg -> {
+                        msg.addField("marker", 4);
+                        msg.addField("marker2", 4);
+                        msg.addField("marker3", 4);
+                    })
+            ));
+        });
+
+        ComparatorSettings settings = new ComparatorSettings();
+        settings.setKeepResultGroupOrder(true);
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+        Assert.assertNotNull(result);
+        ComparisonResult collection = result.getResult("collection");
+        Assert.assertNotNull(collection);
+        BiConsumer<Integer, Map<String, StatusType>> check = (index, statuses) -> {
+            ComparisonResult valueResult = collection.getResult(String.valueOf(index));
+            Assert.assertNotNull("no result for index " + index + ". Result: " + result, valueResult);
+            statuses.forEach((field, status) -> {
+                ComparisonResult marker = valueResult.getResult(field);
+                Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
+                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+            });
+        };
+
+        check.accept(0, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.FAILED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(1, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.FAILED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(2, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.PASSED)
+                .put("marker2", StatusType.PASSED)
+                .put("marker3", StatusType.PASSED)
+                .build());
+        check.accept(3, ImmutableMap.<String, StatusType>builder()
+                .put("marker", StatusType.NA)
+                .put("marker2", StatusType.NA)
+                .put("marker3", StatusType.NA)
+                .build());
+
     }
 
     private static IMessage createMessage(Consumer<IMessage> initializer) {

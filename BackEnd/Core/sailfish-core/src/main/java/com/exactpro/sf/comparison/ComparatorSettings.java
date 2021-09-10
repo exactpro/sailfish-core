@@ -36,6 +36,7 @@ public class ComparatorSettings {
     private IDictionaryStructure dictionaryStructure;
     private Set<String> uncheckedFields = Collections.emptySet();
     private Set<String> ignoredFields = Collections.emptySet();
+    private boolean keepResultGroupOrder;
 
     public IPostValidation getPostValidation() {
         return postValidation;
@@ -74,6 +75,9 @@ public class ComparatorSettings {
     }
 
     public ComparatorSettings setCheckGroupsOrder(boolean checkGroupsOrder) {
+        if (keepResultGroupOrder && checkGroupsOrder) {
+            throw new IllegalArgumentException("'checkGroupsOrder' can only be used if 'keepResultGroupOrder' is false");
+        }
         this.checkGroupsOrder = checkGroupsOrder;
         return this;
     }
@@ -132,5 +136,23 @@ public class ComparatorSettings {
         }
 
         return this;
+    }
+
+    /**
+     * If {@code keepResultGroupOrder} is {@code true} than the {@link ComparisonResult}
+     * will contain verification in order matches the actual message.
+     *
+     * <b>NOTE:</b> works only if {@link #isCheckGroupsOrder} returns {@code false}
+     */
+    public ComparatorSettings setKeepResultGroupOrder(boolean keepResultGroupOrder) {
+        if (keepResultGroupOrder && checkGroupsOrder) {
+            throw new IllegalArgumentException("'keepResultGroupOrder' can only be used if 'checkGroupsOrder' is false");
+        }
+        this.keepResultGroupOrder = keepResultGroupOrder;
+        return this;
+    }
+
+    public boolean isKeepResultGroupOrder() {
+        return keepResultGroupOrder;
     }
 }
