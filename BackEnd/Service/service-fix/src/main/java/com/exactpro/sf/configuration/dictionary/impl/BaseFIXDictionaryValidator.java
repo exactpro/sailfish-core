@@ -47,6 +47,7 @@ import static com.exactpro.sf.services.fix.FixMessageHelper.TZTIMEONLY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.TZTIMESTAMP;
 import static com.exactpro.sf.services.fix.FixMessageHelper.XMLDATA;
 import static com.exactpro.sf.services.fix.QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE;
+import static java.util.Objects.requireNonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -323,8 +324,11 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
 
     private void checkMessageTypes(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
         Set<Object> messageTypes = new HashSet<>();
-        Set<String> knownMessageTypes = dictionary.getFields()
-                .get(MSG_TYPE_FIELD)
+        IFieldStructure messageTypeField = requireNonNull(
+                dictionary.getFields().get(MSG_TYPE_FIELD),
+                () -> "Dictionary " + dictionary.getNamespace() + " does not contain required field " + MSG_TYPE_FIELD
+        );
+        Set<String> knownMessageTypes = messageTypeField
                 .getValues()
                 .values()
                 .stream()
@@ -332,9 +336,9 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
                 .collect(Collectors.toSet());
 
         for(IMessageStructure message : dictionary.getMessages().values()) {
-            String entity_type = getAttributeValue(message, ATTRIBUTE_ENTITY_TYPE);
+            String entityType = getAttributeValue(message, ATTRIBUTE_ENTITY_TYPE);
 
-            if(MESSAGE_ENTITY.equals(entity_type)) {
+            if(MESSAGE_ENTITY.equals(entityType)) {
                 Object messageTypeAttribute = getAttributeValue(message, MESSAGE_TYPE_ATTR_NAME);
 
                 if(messageTypeAttribute != null) {
@@ -361,14 +365,13 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
             }
         }
 
-        IFieldStructure field = dictionary.getFields().get(MSG_TYPE_FIELD);
-        Collection<IAttributeStructure> msgMessageTypes = field.getValues().values();
+        Collection<IAttributeStructure> msgMessageTypes = messageTypeField.getValues().values();
         for (IAttributeStructure msgMessageType : msgMessageTypes) {
             if (messageTypes.contains(msgMessageType.getValue())) {
                 continue;
             }
             errors.add(new DictionaryValidationError(null, MSG_TYPE_FIELD, "Message for value ["
-                    + msgMessageType.getValue() + "] name [" + msgMessageType.getName() + "] in " + MSG_TYPE_FIELD + " is  missing in dictonary",
+                    + msgMessageType.getValue() + "] name [" + msgMessageType.getName() + "] in " + MSG_TYPE_FIELD + " is  missing in dictionary",
                     DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_VALUES));
         }
 
