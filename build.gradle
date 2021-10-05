@@ -48,14 +48,13 @@ buildscript {
         } else {
             maven {
                 name 'Artifactory-snapshot'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+                url 'https://artifactory5.exactpro.com/artifactory/libs-snapshot'
             }
             maven {
                 name 'Artifactory-release'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
+                url 'https://artifactory5.exactpro.com/artifactory/libs-release'
             }
         }
-        jcenter()
 
         configurations.all {
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -227,14 +226,13 @@ subprojects {
             } else {
                 maven { // for gradle fast plugin
                     name 'Artifactory-snapshot'
-                    url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+                    url 'https://artifactory5.exactpro.com/artifactory/libs-snapshot'
                 }
                 maven {
                     name 'Artifactory-release'
-                    url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
+                    url 'https://artifactory5.exactpro.com/artifactory/libs-release'
                 }
             }
-            jcenter()
         }
 
         configurations.all {
@@ -274,11 +272,11 @@ subprojects {
         } else {
             maven { // for gradle fast plugin
                 name 'Artifactory-snapshot'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+                url 'https://artifactory5.exactpro.com/artifactory/libs-snapshot'
             }
             maven {
                 name 'Artifactory-release'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
+                url 'https://artifactory5.exactpro.com/artifactory/libs-release'
             }
             maven {
                 name 'Sonatype_snapshots'
@@ -289,7 +287,6 @@ subprojects {
                 url 'https://s01.oss.sonatype.org/content/repositories/releases/'
             }
         }
-        jcenter()
     }
 
     configurations {
