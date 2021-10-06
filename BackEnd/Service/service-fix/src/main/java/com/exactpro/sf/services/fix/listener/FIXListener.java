@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fix.listener;
 
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.MessageHelper;
 import org.slf4j.Logger;
@@ -24,11 +25,13 @@ import org.slf4j.LoggerFactory;
 public abstract class FIXListener implements IFIXListener {
     protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
+    protected IServiceContext serviceContext;
     protected IServiceSettings settings;
     protected MessageHelper messageHelper;
 
     @Override
-    public void init(IServiceSettings settings, MessageHelper messageHelper) {
+    public void init(IServiceContext serviceContext, IServiceSettings settings, MessageHelper messageHelper) {
+        this.serviceContext = serviceContext;
         this.messageHelper = messageHelper;
         this.settings = settings;
     }

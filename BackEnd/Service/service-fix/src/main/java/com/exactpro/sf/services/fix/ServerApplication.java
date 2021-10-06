@@ -103,7 +103,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
             try {
                 IDataManager dataManager = serviceContext.getDataManager();
                 Set<String> listenersToLoad = loadValuesFromAlias(dataManager, fixServiceSettings.getListenerNames(), ",");
-                loadListeners(listenersToLoad, fixServiceSettings);
+                loadListeners(listenersToLoad, fixServiceSettings, serviceContext);
             } catch (SailfishURIException e) {
                 throw new EPSCommonException(e.getMessage(), e);
             }
@@ -321,12 +321,12 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
         }
     }
 
-    private void loadListeners(Set<String> listenersToLoad, IServiceSettings settings) {
+    private void loadListeners(Set<String> listenersToLoad, IServiceSettings settings, IServiceContext context) {
         ServiceLoader<IFIXListener> serviceLoader = ServiceLoader.load(IFIXListener.class, this.getClass().getClassLoader());
         for (IFIXListener listener : serviceLoader) {
             String listenerClassName = listener.getClass().getSimpleName();
             if(listenersToLoad.remove(listenerClassName)) {
-                listener.init(settings, messageHelper);
+                listener.init(context, settings, messageHelper);
                 registerListenerLogger(listener);
                 listeners.add(listener);
             }

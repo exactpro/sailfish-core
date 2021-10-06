@@ -16,12 +16,13 @@
 package com.exactpro.sf.services.fix.listener;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
 
 public interface IFIXListener {
-    void init(IServiceSettings settings, MessageHelper messageHelper);
+    void init(IServiceContext serviceContext, IServiceSettings settings, MessageHelper messageHelper);
     void fromAdmin(ISession session, IMessage msg);
     void toAdmin(ISession session, IMessage msg);
     void fromApp(ISession session, IMessage msg);
