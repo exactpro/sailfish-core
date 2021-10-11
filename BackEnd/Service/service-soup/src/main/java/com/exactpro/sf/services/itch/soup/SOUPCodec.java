@@ -382,6 +382,7 @@ public class SOUPCodec extends AbstractCodec {
     
     protected void addErrorMessage(IoBuffer in, int startPosition, ProtocolDecoderOutput out, String errorString) {
         ErrorMessage errorMessage = new ErrorMessage(msgFactory);
+        errorMessage.setCause(errorString);
         IMessage msg = errorMessage.getMessage();
         msg.getMetaData().setRejectReason(errorString);
         msg.getMetaData().setRawMessage(rawData(in, startPosition, in.remaining()));
