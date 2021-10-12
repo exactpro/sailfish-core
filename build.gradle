@@ -55,6 +55,7 @@ buildscript {
                 url 'https://artifactory5.exactpro.com/artifactory/libs-release'
             }
         }
+        mavenCentral()
 
         configurations.all {
             resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -233,6 +234,7 @@ subprojects {
                     url 'https://artifactory5.exactpro.com/artifactory/libs-release'
                 }
             }
+            mavenCentral()
         }
 
         configurations.all {
@@ -287,6 +289,7 @@ subprojects {
                 url 'https://s01.oss.sonatype.org/content/repositories/releases/'
             }
         }
+        mavenCentral()
     }
 
     configurations {
