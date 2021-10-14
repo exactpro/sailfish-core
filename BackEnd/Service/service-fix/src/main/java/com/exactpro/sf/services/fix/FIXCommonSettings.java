@@ -206,6 +206,9 @@ public class FIXCommonSettings extends AbstractServiceSettings {
         TargetCompID = targetCompID;
     }
 
+    @Ignore
+    private boolean evolutionOptimize;
+
     @Override
     public SailfishURI getDictionaryName() {
         return dictionaryName;
@@ -477,5 +480,13 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     public Class<?> getApplicationClass() {
         return application;
+    }
+
+    public boolean isEvolutionOptimize() {
+        return evolutionOptimize;
+    }
+
+    public void setEvolutionOptimize(boolean evolutionOptimize) {
+        this.evolutionOptimize = evolutionOptimize;
     }
 }

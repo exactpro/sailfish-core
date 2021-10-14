@@ -26,4 +26,6 @@ public interface IEvolutionSettings extends ICommonSettings {
      * @return true if the component should use logic for evolution.
      */
     boolean isEvolutionSupportEnabled();
+
+    default void setEvolutionSupportEnabled(boolean evolutionSupportEnabled){}
 }

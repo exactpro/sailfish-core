@@ -16,7 +16,10 @@
 
 package com.exactpro.sf.storage.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.time.Instant;
@@ -27,9 +30,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.configuration.IDictionaryManager;
+import com.exactpro.sf.storage.IMessageStorage;
 import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.storage.ScriptRun;
@@ -44,8 +46,8 @@ public class TestBroadcastMessageStorage extends AbstractTest {
     @SuppressWarnings("unchecked")
     @Before
     public void init() {
-        primaryMessageStorage = new FakeMessageStorage(serviceContext.getDictionaryManager(), mock(ArrayList.class), mock(ScriptRun.class));
-        secondaryMessageStorage = new FakeMessageStorage(serviceContext.getDictionaryManager(), mock(ArrayList.class), mock(ScriptRun.class));
+        primaryMessageStorage = new FakeMessageStorage(mock(ArrayList.class), mock(ScriptRun.class));
+        secondaryMessageStorage = new FakeMessageStorage(mock(ArrayList.class), mock(ScriptRun.class));
 
         broadcastMessageStorage = new BroadcastMessageStorage(primaryMessageStorage, secondaryMessageStorage);
     }
@@ -68,7 +70,7 @@ public class TestBroadcastMessageStorage extends AbstractTest {
 
     @Test
     public void testStoreMessage() {
-        broadcastMessageStorage.storeMessage(mock(IMessage.class), mock(IHumanMessage.class), "JSON");
+        broadcastMessageStorage.storeMessage(mock(IMessage.class));
         verifyExecution(FakeMessageStorage::isStoreMessageExecuted);
     }
 
@@ -122,7 +124,7 @@ public class TestBroadcastMessageStorage extends AbstractTest {
     }
 
     @SuppressWarnings("deprecation")
-    private static class FakeMessageStorage extends AbstractMessageStorage {
+    private static class FakeMessageStorage implements IMessageStorage {
 
         private boolean storeMessage;
         private boolean removeMessagesServiceID;
@@ -137,16 +139,16 @@ public class TestBroadcastMessageStorage extends AbstractTest {
         private final Iterable<MessageRow> messages;
         private final ScriptRun scriptRun;
 
-        public FakeMessageStorage(IDictionaryManager dictionaryManager, Iterable<MessageRow> messages, ScriptRun scriptRun) {
-            super(dictionaryManager);
+        public FakeMessageStorage(Iterable<MessageRow> messages, ScriptRun scriptRun) {
             this.messages = messages;
             this.scriptRun = scriptRun;
         }
 
         @Override
-        protected void storeMessage(IMessage message, IHumanMessage humanMessage, String jsonMessage) {
+        public void storeMessage(IMessage message) {
             storeMessage = true;
         }
+
 
         @Override
         public ScriptRun openScriptRun(String name, String description) {

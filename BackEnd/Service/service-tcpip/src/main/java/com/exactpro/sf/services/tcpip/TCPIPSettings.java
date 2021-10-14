@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.tcpip;
 
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.RequiredParam;
 import com.exactpro.sf.services.mina.AbstractMINASettings;
@@ -96,6 +97,9 @@ public class TCPIPSettings extends AbstractMINASettings
 
 	@Description("Determines if nanoseconds should be added to date-time / time fields during encoding")
 	private boolean includeNanoseconds;
+
+	@Ignore
+    private boolean evolutionOptimize;
 
 	public boolean isStoreMessages() {
 		return storeMessages;
@@ -261,4 +265,12 @@ public class TCPIPSettings extends AbstractMINASettings
 	public void setIncludeNanoseconds(boolean includeNanoseconds) {
 		this.includeNanoseconds = includeNanoseconds;
 	}
+
+    public boolean isEvolutionOptimize() {
+        return evolutionOptimize;
+    }
+
+    public void setEvolutionOptimize(boolean evolutionOptimize) {
+        this.evolutionOptimize = evolutionOptimize;
+    }
 }

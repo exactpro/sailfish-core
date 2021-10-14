@@ -27,6 +27,6 @@ public interface IAbstractMessageStorageFactory {
      * Create secondary message storage
      * @param environmentSettings Global settings of Sailfish
      */
-    AbstractMessageStorage createMessageStorage(IWorkspaceDispatcher dispatcher, EnvironmentSettings environmentSettings, IDictionaryManager dictionaryManager);
+    IMessageStorage createMessageStorage(IWorkspaceDispatcher dispatcher, EnvironmentSettings environmentSettings, IDictionaryManager dictionaryManager);
 
 }

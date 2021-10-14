@@ -25,11 +25,16 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MetadataExtensions;
+import com.exactpro.sf.common.messages.MetadataProperty;
+import com.exactpro.sf.common.messages.MsgMetaData;
+import com.google.common.collect.ImmutableSet;
 
 public class EvolutionBatch {
 
     public static final String MESSAGE_NAME = "EvolutionBatch";
     private static final String BATCH_FIELD = "Batch";
+    private static final ImmutableSet<MetadataProperty> MERGE_PROPERTIES = ImmutableSet.of(MetadataProperty.TO_SERVICE, MetadataProperty.SERVICE_INFO);
     private final List<IMessage> batch;
 
     public EvolutionBatch(int size) {
@@ -66,9 +71,26 @@ public class EvolutionBatch {
 
     public IMessage toMessage(IMessageFactory messageFactory) {
         IMessage message = messageFactory.createMessage(MESSAGE_NAME, getNamespace(messageFactory));
+        int subsequence = 1;
+        MsgMetaData metadata = message.getMetaData();
+        for (IMessage mes : batch) {
+            MetadataExtensions.setBatchSequence(mes.getMetaData(), metadata.getSequence());
+            MetadataExtensions.setSubsequence(mes.getMetaData(), subsequence++);
+            mergeMetadata(metadata, mes.getMetaData());
+        }
         message.addField(BATCH_FIELD, batch);
-        message.getMetaData().setAdmin(true); // it is definitely not a business message
+        metadata.setAdmin(true); // it is definitely not a business message
         return message;
+    }
+
+    private static void mergeMetadata(MsgMetaData firstMetadata, MsgMetaData secondMetadata) {
+        for(MetadataProperty property : MERGE_PROPERTIES) {
+            String propertyName = property.getPropertyName();
+            Object value = secondMetadata.get(propertyName);
+            if(firstMetadata.get(propertyName) == null && value != null) {
+                firstMetadata.set(propertyName, value);
+            }
+        }
     }
 
     private static List<IMessage> extractBatch(IMessage message) {

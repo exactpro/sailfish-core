@@ -138,6 +138,7 @@ public class EnvironmentSettings implements ICommonSettings
     private static final String MATRIX_COMPILER_PRIORITY = "MatrixCompilerPriority";
     private static final String EXCLUDED_MESSAGES_FROM_REPORT = "ExcludedMessagesFromReport";
     private static final String COMPARISON_PRECISION = "ComparisonPrecision";
+    private static final String EVOLUTION_SUPPORT = "EvolutionSupport";
 
     private static final String SCRIPT_RUN = "ScriptRun";
     private static final String FAIL_UNEXPECTED_KEY = "FailUnexpected";
@@ -152,6 +153,7 @@ public class EnvironmentSettings implements ICommonSettings
 	private boolean storeAdminMessages;
 	private boolean asyncRunMatrix;
 	private long maxQueueSize;
+    private boolean evolutionSupport;
 
 	private boolean notificationIfServicesNotStarted;
 	private int matrixCompilerPriority;
@@ -191,6 +193,7 @@ public class EnvironmentSettings implements ICommonSettings
         result.relevantMessagesSortingMode = relevantMessagesSortingMode;
         result.comparisonPrecision = comparisonPrecision;
         result.maxQueueSize = maxQueueSize;
+        result.evolutionSupport = evolutionSupport;
         result.verificationLimit = verificationLimit;
 
         return result;
@@ -208,6 +211,7 @@ public class EnvironmentSettings implements ICommonSettings
         this.relevantMessagesSortingMode = other.relevantMessagesSortingMode;
         this.comparisonPrecision = other.comparisonPrecision;
         this.maxQueueSize = other.maxQueueSize;
+        this.evolutionSupport = other.evolutionSupport;
         this.verificationLimit = other.verificationLimit;
 
         update();
@@ -293,6 +297,16 @@ public class EnvironmentSettings implements ICommonSettings
     public void setMaxStorageQueueSize(long size) {
 	    maxQueueSize = size;
 	    update();
+    }
+
+    public boolean isEvolutionSupport() {
+        return evolutionSupport;
+    }
+
+    @ValidateRegex(regex = "^(true|false)$")
+    public void setEvolutionSupport(boolean evolutionSupport) {
+        this.evolutionSupport = evolutionSupport;
+        update();
     }
 
 	public boolean isNotificationIfServicesNotStarted() {
@@ -468,6 +482,8 @@ public class EnvironmentSettings implements ICommonSettings
 		this.storageType = StorageType.parse(config.getString("StorageType", StorageType.DB.getName()));
 
         this.comparisonPrecision = config.getBigDecimal(COMPARISON_PRECISION, MathProcessor.COMPARISON_PRECISION);
+
+        this.evolutionSupport = config.getBoolean(EVOLUTION_SUPPORT, false);
 	}
 
     private void updateGeneralSettings(HierarchicalConfiguration config) {
@@ -477,6 +493,7 @@ public class EnvironmentSettings implements ICommonSettings
         config.setProperty("StorageType", storageType.getName());
         config.setProperty(COMPARISON_PRECISION, comparisonPrecision);
         config.setProperty(MAX_STORAGE_QUEUE_SIZE, maxQueueSize);
+        config.setProperty(EVOLUTION_SUPPORT, evolutionSupport);
 	}
 
     private void loadScriptRunSettings(HierarchicalConfiguration config) {

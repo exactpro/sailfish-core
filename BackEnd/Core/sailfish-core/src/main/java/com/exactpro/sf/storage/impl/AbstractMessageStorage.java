@@ -64,7 +64,7 @@ public abstract class AbstractMessageStorage implements IMessageStorage {
         String jsonMessage = JsonMessageConverter.toJson(message, dictionary);
         storeMessage(message, humanMessage, jsonMessage);
     }
-    
+
     protected abstract void storeMessage(IMessage message, IHumanMessage humanMessage, String jsonMessage);
 
     protected ScriptRun createScriptRun(String name, String description) {

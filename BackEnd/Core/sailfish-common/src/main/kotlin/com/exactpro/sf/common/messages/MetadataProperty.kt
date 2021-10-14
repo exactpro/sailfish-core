@@ -34,7 +34,9 @@ enum class MetadataProperty(val propertyName: String, val propertyClass: Class<*
     RAW_MESSAGE("rawMessage", ByteArray::class.java),
     SERVICE_INFO("serviceInfo", ServiceInfo::class.java),
     DICTIONARY_URI("dictionaryURI", SailfishURI::class.java),
-    PROTOCOL("protocol", String::class.java);
+    PROTOCOL("protocol", String::class.java),
+    SUBSEQUENCE("subsequence", Integer::class.java),
+    BATCH_SEQUENCE("batchsequence", Long::class.java);
 
     operator fun component1(): String = propertyName
     operator fun component2(): Class<*> = propertyClass

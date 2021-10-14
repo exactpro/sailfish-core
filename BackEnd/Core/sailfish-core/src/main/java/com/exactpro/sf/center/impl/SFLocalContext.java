@@ -112,6 +112,7 @@ import com.exactpro.sf.storage.impl.DatabaseServiceStorage;
 import com.exactpro.sf.storage.impl.DatabaseVariableSetStorage;
 import com.exactpro.sf.storage.impl.DefaultTestScriptStorage;
 import com.exactpro.sf.storage.impl.DummyAuthStorage;
+import com.exactpro.sf.storage.impl.EvolutionMessageStorageWrapper;
 import com.exactpro.sf.storage.impl.FileEnvironmentStorage;
 import com.exactpro.sf.storage.impl.FileMatrixStorage;
 import com.exactpro.sf.storage.impl.FileMessageStorage;
@@ -357,7 +358,8 @@ public class SFLocalContext implements ISFContext {
         		serviceStorage,
         		createEnvironmentStorage(envSettings, storage, workspaceDispatcher),
                 createVariableSetStorage(envSettings, storage, workspaceDispatcher),
-                serviceContext);
+                serviceContext,
+                envSettings.isEvolutionSupport());
         disposables.add(connectionManager);
 
         this.serviceMarshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
@@ -416,7 +418,7 @@ public class SFLocalContext implements ISFContext {
         }
     }
 
-    private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, IDictionaryManager dictionaryManager, List<AbstractMessageStorage> secondary) throws WorkspaceStructureException, FileNotFoundException {
+    private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, IDictionaryManager dictionaryManager, List<IMessageStorage> secondary) throws WorkspaceStructureException, FileNotFoundException {
 	    AbstractMessageStorage primaryMessageStorage;
         switch (envSettings.getStorageType()) {
         case DB:
@@ -428,8 +430,7 @@ public class SFLocalContext implements ISFContext {
         default:
             throw new EPSCommonException("Unsupported message storage type. Check your descriptor.xml file.");
         }
-
-        return new BroadcastMessageStorage(primaryMessageStorage, secondary);
+        return new BroadcastMessageStorage(new EvolutionMessageStorageWrapper(primaryMessageStorage), secondary);
     }
 
     private IMatrixStorage createMatrixStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory) {

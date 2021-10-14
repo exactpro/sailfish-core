@@ -24,31 +24,34 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import com.exactpro.sf.common.messages.IHumanMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.storage.IMessageStorage;
 import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.storage.ScriptRun;
 
-public class BroadcastMessageStorage extends AbstractMessageStorage {
+public class BroadcastMessageStorage implements IMessageStorage {
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
 
     private static final String ERROR_MESSAGE_ON_STORE = "Can`t store message to all storage";
     private static final String ERROR_MESSAGE_ON_CLEAR = "Can`t clear message from all storage";
     private static final String ERROR_MESSAGE_ON_DISPOSE = "Can`t dispose all storages";
 
-    private final AbstractMessageStorage primaryStorage;
-    private final List<AbstractMessageStorage> writableStorages;
+    private final IMessageStorage primaryStorage;
+    private final List<IMessageStorage> writableStorages;
 
-    public BroadcastMessageStorage(AbstractMessageStorage primaryStorage, List<AbstractMessageStorage> secondaryStorages) {
-        super(primaryStorage.dictionaryManager);
+    public BroadcastMessageStorage(IMessageStorage primaryStorage, List<IMessageStorage> secondaryStorages) {
         this.primaryStorage = Objects.requireNonNull(primaryStorage, "Primary storage can`t be null");
         writableStorages = new ArrayList<>();
         writableStorages.add(this.primaryStorage);
         writableStorages.addAll(Objects.requireNonNull(secondaryStorages, "Secondary storages can`t be null"));
     }
 
-    public BroadcastMessageStorage(AbstractMessageStorage primaryStorage, AbstractMessageStorage... secondaryStorages) {
+    public BroadcastMessageStorage(IMessageStorage primaryStorage, IMessageStorage... secondaryStorages) {
         this(primaryStorage, secondaryStorages.length > 0 ? Arrays.asList(secondaryStorages) : Collections.emptyList());
     }
 
@@ -63,8 +66,8 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
     }
 
     @Override
-    protected void storeMessage(IMessage message, IHumanMessage humanMessage, String jsonMessage) {
-        execute(messageStorage -> messageStorage.storeMessage(message, humanMessage, jsonMessage), ERROR_MESSAGE_ON_STORE);
+    public void storeMessage(IMessage message) {
+        execute(messageStorage -> messageStorage.storeMessage(message), ERROR_MESSAGE_ON_STORE);
     }
 
     @Override
@@ -89,21 +92,21 @@ public class BroadcastMessageStorage extends AbstractMessageStorage {
 
     @Override
     public void clear() {
-        execute(AbstractMessageStorage::clear, ERROR_MESSAGE_ON_CLEAR);
+        execute(IMessageStorage::clear, ERROR_MESSAGE_ON_CLEAR);
     }
 
     @Override
     public void dispose() {
-        execute(AbstractMessageStorage::dispose, ERROR_MESSAGE_ON_DISPOSE);
+        execute(IMessageStorage::dispose, ERROR_MESSAGE_ON_DISPOSE);
     }
 
-    private void execute(Consumer<AbstractMessageStorage> action, String errorMessage) {
+    private void execute(Consumer<IMessageStorage> action, String errorMessage) {
         EPSCommonException exception = null;
-        for (AbstractMessageStorage storage : writableStorages) {
+        for (IMessageStorage storage : writableStorages) {
             try {
                 action.accept(storage);
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("{} for {}", errorMessage, storage.getClass().getName(), e);
                 if (exception == null) {
                     exception = new EPSCommonException(errorMessage);
                 }

@@ -112,12 +112,23 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     private final Map<String, ServiceDescription> defaultServices;
 
+    private final boolean evolutionSupportEnable;
+
     public DefaultConnectionManager(
             IServiceFactory staticServiceFactory,
             IServiceStorage storage,
             IEnvironmentStorage envStorage,
             IVariableSetStorage variableSetStorage,
             IServiceContext serviceContext) {
+        this(staticServiceFactory, storage, envStorage, variableSetStorage, serviceContext, false);
+    }
+    public DefaultConnectionManager(
+            IServiceFactory staticServiceFactory,
+            IServiceStorage storage,
+            IEnvironmentStorage envStorage,
+            IVariableSetStorage variableSetStorage,
+            IServiceContext serviceContext,
+            boolean evolutionSupportEnable) {
 
 		this.staticServiceFactory = Objects.requireNonNull(staticServiceFactory, "'Static service factory' parameter");
 
@@ -142,6 +153,8 @@ public final class DefaultConnectionManager implements IConnectionManager {
 		this.services = new HashMap<>();
 
         this.defaultServices = new HashMap<>();
+
+        this.evolutionSupportEnable = evolutionSupportEnable;
 
         ServiceName serviceName = null;
 		for (ServiceDescription serviceDescription : this.storage.getServiceDescriptions()) {
@@ -569,7 +582,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
                         settings = description.applyVariableSet(variableSet);
                     }
                 }
-
+                settings.setEvolutionSupportEnabled(evolutionSupportEnable);
                 synchronized (service) {
                     service.init(serviceContext, environmentMonitor, serviceContainer.getHandlerWrapper(), settings, serviceName);
                 }

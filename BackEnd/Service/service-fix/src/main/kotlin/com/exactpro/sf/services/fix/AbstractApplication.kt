@@ -34,7 +34,7 @@ abstract class AbstractApplication {
     lateinit var serviceInfo: ServiceInfo
     protected lateinit var applicationContext: ApplicationContext
     protected lateinit var converter: DirtyQFJIMessageConverter
-    private var evolutionSupportEnabled: Boolean = false
+    private var evolutionOptimize: Boolean = false
 
     open fun init(serviceContext: IServiceContext, applicationContext: ApplicationContext, serviceName: ServiceName) {
         this.applicationContext = applicationContext
@@ -43,7 +43,7 @@ abstract class AbstractApplication {
 
         applicationContext.serviceSettings.let { settings ->
             if (settings is FIXCommonSettings) {
-                this.evolutionSupportEnabled = settings.isEvolutionSupportEnabled
+                this.evolutionOptimize = settings.isEvolutionOptimize
             }
         }
     }
@@ -55,7 +55,7 @@ abstract class AbstractApplication {
         val msg: IMessage = checkNotNull(converter.run {
             when {
                 isRejected -> convertDirty(message, verifyTags, false, false, true)
-                evolutionSupportEnabled -> convertEvolution(message)
+                evolutionOptimize -> convertEvolution(message)
                 else -> convert(message, verifyTags, null)
             }
         }) { "Converted message can't be null, origin message: $message" }
@@ -78,6 +78,6 @@ abstract class AbstractApplication {
     }
 
     protected fun createFIXSession(sessionName: String, sessionId: SessionID, storage: IMessageStorage, converter: DirtyQFJIMessageConverter, messageHelper: MessageHelper): FIXSession? {
-        return FIXSession(sessionName, sessionId, storage, converter, messageHelper, evolutionSupportEnabled)
+        return FIXSession(sessionName, sessionId, storage, converter, messageHelper, evolutionOptimize)
     }
 }

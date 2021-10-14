@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EvolutionBatch;
 import com.google.common.collect.Iterables;
 
 public class CollectorServiceHandler implements IServiceHandler {
@@ -52,7 +53,13 @@ public class CollectorServiceHandler implements IServiceHandler {
 
 	@Override
     public void putMessage(ISession session, ServiceHandlerRoute route, IMessage message) throws ServiceHandlerException {
-
+        if (EvolutionBatch.MESSAGE_NAME.equals(message.getName())) {
+            EvolutionBatch batch = new EvolutionBatch(message);
+            for (IMessage innerMessage : batch.getBatch()) {
+                putMessage(session, route, innerMessage);
+            }
+            return;
+        }
 	    if (message.getMetaData().isRejected()) {
             logger.debug("Message [{}::{}] is rejected", message.getNamespace(), message.getName());
 	        return;

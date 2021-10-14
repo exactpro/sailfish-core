@@ -44,7 +44,7 @@ public class MessageStorageLoader implements ILoadableManager {
         }
     }
 
-    public List<AbstractMessageStorage> getSecondaryMessageStorages(IWorkspaceDispatcher dispatcher, EnvironmentSettings environmentSettings, IDictionaryManager dictionaryManager){
+    public List<IMessageStorage> getSecondaryMessageStorages(IWorkspaceDispatcher dispatcher, EnvironmentSettings environmentSettings, IDictionaryManager dictionaryManager){
         return secondaryMessageStorageFactory
                 .stream()
                 .map(factory -> factory.createMessageStorage(dispatcher, environmentSettings, dictionaryManager))

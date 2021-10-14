@@ -118,3 +118,11 @@ var IMetadata.protocol: String?
 var IMetadata.messageProperties: Map<String, String>?
     get() = getAs(MESSAGE_PROPERTIES_KEY)
     set(value) = setOrRemove(MESSAGE_PROPERTIES_KEY, value)
+
+var IMetadata.subsequence: Int?
+    get() = getAs(SUBSEQUENCE)
+    set(value) = setOrRemove(SUBSEQUENCE, value)
+
+var IMetadata.batchSequence: Long?
+    get() = getAs(BATCH_SEQUENCE)
+    set(value) = setOrRemove(BATCH_SEQUENCE, value)
