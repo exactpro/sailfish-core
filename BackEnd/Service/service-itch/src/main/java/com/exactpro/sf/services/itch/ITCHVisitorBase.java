@@ -22,10 +22,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import com.exactpro.sf.common.messages.DefaultMessageStructureVisitor;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.primitives.UnsignedLong;
 
 public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
@@ -45,6 +47,7 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
     public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100_000_000L);
     public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1_000_000_000L);
     public static final BigDecimal UDT_DEVIDER = new BigDecimal(1_000_000L);
+    public static final DateTimeFormatter DATE_AS_INT = DateTimeUtility.createFormatter("yyyyddMM");
 
     protected static final String charsetName = "ISO-8859-1";
     

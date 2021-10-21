@@ -460,6 +460,12 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
             } catch (CharacterCodingException | DateTimeParseException e) {
                 throw new EPSCommonException(e);
             }
+        } else if (type == ProtocolType.UINT32) {
+            if (length != 4) {
+                throw new EPSCommonException("Cannot read date from " + type + ". Expected length: 4; Actual: " + length);
+            }
+            long dateValue = buffer.getUnsignedInt();
+            msg.addField(fieldName, LocalDate.parse(String.valueOf(dateValue), DATE_AS_INT));
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }
