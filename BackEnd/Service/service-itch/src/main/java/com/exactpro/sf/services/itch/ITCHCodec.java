@@ -42,6 +42,7 @@ import com.exactpro.sf.common.messages.IMessageStructureVisitor;
 import com.exactpro.sf.common.messages.MessageStructureReader;
 import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
 import com.exactpro.sf.common.messages.MessageStructureWriter;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -77,7 +78,6 @@ public class ITCHCodec extends AbstractCodec {
     private long lastDecode;
     private IITCHPreprocessor preprocessor;
     private boolean wrapMessages = true;
-    private boolean evolutionaryOutput;
 
     public ITCHCodec() {
 		this.lastDecode = System.currentTimeMillis();
@@ -98,7 +98,6 @@ public class ITCHCodec extends AbstractCodec {
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
                     getClass().getClassLoader()) : null;
             this.wrapMessages = msettings.isWrapMessages();
-            this.evolutionaryOutput = msettings.isEvolutionaryOutput();
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
@@ -153,7 +152,7 @@ public class ITCHCodec extends AbstractCodec {
 
 			if (i == 0) {
                 messageType = ITCHMessageHelper.UNITHEADERMSGTYPE;
-				messageLength = evolutionaryOutput ? HEADER_SIZE : length;
+				messageLength = HEADER_SIZE;
 			} else {
 				int currentPos = in.position();
 				messageLength = (msgLengthFieldSize == 2) ? in.getUnsignedShort() : in.getUnsigned();
@@ -282,6 +281,28 @@ public class ITCHCodec extends AbstractCodec {
     @Override
     protected IMessage updateBatchMessage(IMessage batchMessage) {
         return wrapToMessageList(super.updateBatchMessage(batchMessage));
+    }
+
+    @Override
+    protected IMessage updateMessage(IMessage batchMessage) {
+        IMessage message = super.updateMessage(batchMessage);
+        MsgMetaData metadata = message.getMetaData();
+        long batchSequence = metadata.getSequence();
+        List<IMessage> subMessages = ITCHMessageHelper.extractSubmessages(message);
+        if (subMessages != null) {
+            int subSequence = 1;
+            int size = subMessages.size();
+            for (IMessage subMessage : subMessages) {
+                MsgMetaData subMessageMetadata = subMessage.getMetaData();
+                MetadataExtensions.setBatchSequence(subMessageMetadata, batchSequence);
+                MetadataExtensions.setSubsequence(subMessageMetadata, subSequence);
+                if (subSequence == size) {
+                    MetadataExtensions.setLastInBatch(subMessageMetadata, true);
+                }
+                subSequence++;
+            }
+        }
+        return message;
     }
 
     @Override

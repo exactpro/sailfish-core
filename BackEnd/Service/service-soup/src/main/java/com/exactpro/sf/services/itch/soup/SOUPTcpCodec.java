@@ -18,6 +18,7 @@ package com.exactpro.sf.services.itch.soup;
 import java.util.Arrays;
 
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.IServiceContext;
@@ -133,7 +134,12 @@ public class SOUPTcpCodec extends SOUPCodec {
                 return message;
             }
         } else {
-            metaData.setRawMessage(rawData);
+            if (UNSEQUENCED_DATA_PACKET.equals(message.getName())
+                    || SEQUENCED_DATA_PACKET.equals(message.getName())) {
+                metaData.setRawMessage(soupHeaderRawData);
+            } else {
+                metaData.setRawMessage(rawData);
+            }
         }
 
         if (!dropMessage) {
@@ -171,6 +177,24 @@ public class SOUPTcpCodec extends SOUPCodec {
         byte[] decodedRawData = decodedLength > 0 ? peakBytes(in, decodedLength) : new byte[0];
         in.position(currentPosition);
         return decodedRawData;
+    }
+
+    @Override
+    protected IMessage updateMessage(IMessage batchMessage) {
+        IMessage message = super.updateMessage(batchMessage);
+        MsgMetaData metadata = message.getMetaData();
+
+        if (metadata.getRawMessage().length == TCP_SOUP_BIN_HEADER_SIZE) { // for messages without body
+            return message;
+        }
+
+        Integer subsequence = MetadataExtensions.getSubsequence(metadata);
+        if (subsequence != null && subsequence == 1) {
+            //parseHeaderAsSeparateMessage = false decode output: sequensedDataPacket(subsequence = 1) -> message(subsequence = 2),
+            //parseHeaderAsSeparateMessage = true decode output: header(subsequence = 1) -> message(subsequence = 2)
+            MetadataExtensions.setSubsequence(metadata, 2);
+        }
+        return message;
     }
 
 }

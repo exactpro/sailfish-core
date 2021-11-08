@@ -24,11 +24,15 @@ import org.apache.mina.filter.codec.AbstractProtocolDecoderOutput;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoder;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.MetadataExtensions;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EvolutionBatch;
 import com.exactpro.sf.common.util.ICommonSettings;
@@ -51,9 +55,6 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
 
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-        if (!evolutionSupport) {
-            return doDecodeInternal(session, in, out);
-        }
 
         AbstractProtocolDecoderOutput mockOutput = new MockProtocolDecoderOutput();
         boolean dataDecoded = doDecodeInternal(session, in, mockOutput);
@@ -62,25 +63,54 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
         }
         Queue<Object> messageQueue = mockOutput.getMessageQueue();
         if (!messageQueue.isEmpty()) {
-            int outputSize = messageQueue.size();
-            EvolutionBatch batchMessage = new EvolutionBatch(outputSize);
-            for (Object obj : messageQueue) {
-                if (obj instanceof IMessage) {
-                    IMessage message = (IMessage)obj;
-                    addToBatch(batchMessage, message);
-                } else {
-                    out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
-                }
-            }
-            int batchSize = batchMessage.size();
-            if (outputSize != batchSize) {
-                logger.warn("Some object from output are not messages. Output objects: {}; Messages: {}", outputSize, batchSize);
-            }
-            if (!batchMessage.isEmpty()) {
-                out.write(updateBatchMessage(batchMessage.toMessage(messageFactory)));
+            if(evolutionSupport) {
+                processingEvolution(out, messageQueue);
+            } else {
+                processingDefault(out, messageQueue);
             }
         }
         return true;
+    }
+
+    private void processingDefault(ProtocolDecoderOutput out, @NotNull Queue<Object> messageQueue) {
+        long batchSequence = MessageUtil.generateSequence();
+        int subSequence = 1;
+        IMessage lastMessage = null;
+        for (Object obj : messageQueue) {
+            if (obj instanceof IMessage) {
+                lastMessage = (IMessage)obj;
+                MsgMetaData metadata = lastMessage.getMetaData();
+                MetadataExtensions.setBatchSequence(metadata, batchSequence);
+                MetadataExtensions.setSubsequence(metadata, subSequence);
+                out.write(updateMessage(lastMessage));
+                subSequence++;
+            } else {
+                out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
+            }
+        }
+        if (lastMessage != null) {
+            MetadataExtensions.setLastInBatch(lastMessage.getMetaData(), true);
+        }
+    }
+
+    private void processingEvolution(ProtocolDecoderOutput out, @NotNull Queue<Object> messageQueue) {
+        int outputSize = messageQueue.size();
+        EvolutionBatch batchMessage = new EvolutionBatch(outputSize);
+        for (Object obj : messageQueue) {
+            if (obj instanceof IMessage) {
+                IMessage message = (IMessage)obj;
+                addToBatch(batchMessage, message);
+            } else {
+                out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
+            }
+        }
+        int batchSize = batchMessage.size();
+        if (outputSize != batchSize) {
+            logger.warn("Some object from output are not messages. Output objects: {}; Messages: {}", outputSize, batchSize);
+        }
+        if (!batchMessage.isEmpty()) {
+            out.write(updateBatchMessage(batchMessage.toMessage(messageFactory)));
+        }
     }
 
     /**
@@ -94,6 +124,19 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
      */
     protected IMessage updateBatchMessage(IMessage batchMessage) {
         return batchMessage;
+    }
+
+    /**
+     * Should be overridden if protocol requires specific structure for messages in output.
+     *
+     * Note: The method will be called only during the decoding and only if evolution support is disabled.
+     *
+     * @param message batch message to be stored
+     * @return the updated view of {@code message} if protocol requires the specific structure of messages in output.
+     *         By default, returns batch message without any change
+     */
+    protected IMessage updateMessage(IMessage message) {
+        return message;
     }
 
     /**

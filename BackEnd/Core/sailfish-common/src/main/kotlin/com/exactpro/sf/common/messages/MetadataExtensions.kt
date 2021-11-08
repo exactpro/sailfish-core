@@ -128,3 +128,7 @@ var IMetadata.subsequence: Int?
 var IMetadata.batchSequence: Long?
     get() = getAs(BATCH_SEQUENCE)
     set(value) = setOrRemove(BATCH_SEQUENCE, value)
+
+var IMetadata.isLastInBatch: Boolean
+    get() = getAs(IS_LAST_IN_BATCH) ?: false
+    set(value) = set(IS_LAST_IN_BATCH.propertyName, value)

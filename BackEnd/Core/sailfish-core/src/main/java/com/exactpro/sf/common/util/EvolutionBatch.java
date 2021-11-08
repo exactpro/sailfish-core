@@ -25,7 +25,6 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.google.common.collect.ImmutableSet;
@@ -71,11 +70,8 @@ public class EvolutionBatch {
 
     public IMessage toMessage(IMessageFactory messageFactory) {
         IMessage message = messageFactory.createMessage(MESSAGE_NAME, getNamespace(messageFactory));
-        int subsequence = 1;
         MsgMetaData metadata = message.getMetaData();
         for (IMessage mes : batch) {
-            MetadataExtensions.setBatchSequence(mes.getMetaData(), metadata.getSequence());
-            MetadataExtensions.setSubsequence(mes.getMetaData(), subsequence++);
             mergeMetadata(metadata, mes.getMetaData());
         }
         message.addField(BATCH_FIELD, batch);

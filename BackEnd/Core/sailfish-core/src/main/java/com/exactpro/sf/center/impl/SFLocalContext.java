@@ -112,7 +112,6 @@ import com.exactpro.sf.storage.impl.DatabaseServiceStorage;
 import com.exactpro.sf.storage.impl.DatabaseVariableSetStorage;
 import com.exactpro.sf.storage.impl.DefaultTestScriptStorage;
 import com.exactpro.sf.storage.impl.DummyAuthStorage;
-import com.exactpro.sf.storage.impl.EvolutionMessageStorageWrapper;
 import com.exactpro.sf.storage.impl.FileEnvironmentStorage;
 import com.exactpro.sf.storage.impl.FileMatrixStorage;
 import com.exactpro.sf.storage.impl.FileMessageStorage;
@@ -358,8 +357,7 @@ public class SFLocalContext implements ISFContext {
         		serviceStorage,
         		createEnvironmentStorage(envSettings, storage, workspaceDispatcher),
                 createVariableSetStorage(envSettings, storage, workspaceDispatcher),
-                serviceContext,
-                envSettings.isEvolutionSupport());
+                serviceContext);
         disposables.add(connectionManager);
 
         this.serviceMarshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
@@ -430,7 +428,8 @@ public class SFLocalContext implements ISFContext {
         default:
             throw new EPSCommonException("Unsupported message storage type. Check your descriptor.xml file.");
         }
-        return new BroadcastMessageStorage(new EvolutionMessageStorageWrapper(primaryMessageStorage), secondary);
+
+        return new BroadcastMessageStorage(primaryMessageStorage, secondary);
     }
 
     private IMatrixStorage createMatrixStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory) {

@@ -27,7 +27,6 @@ import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.ILoadableManagerContext;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
-import com.exactpro.sf.storage.impl.AbstractMessageStorage;
 
 public class MessageStorageLoader implements ILoadableManager {
 

@@ -36,7 +36,8 @@ enum class MetadataProperty(val propertyName: String, val propertyClass: Class<*
     DICTIONARY_URI("dictionaryURI", SailfishURI::class.java),
     PROTOCOL("protocol", String::class.java),
     SUBSEQUENCE("subsequence", Integer::class.java),
-    BATCH_SEQUENCE("batchsequence", Long::class.java);
+    BATCH_SEQUENCE("batchsequence", Long::class.java),
+    IS_LAST_IN_BATCH("isLastInBatch", Boolean::class.java);
 
     operator fun component1(): String = propertyName
     operator fun component2(): Class<*> = propertyClass
