@@ -27,10 +27,10 @@ public class Table
 {
 	private static final String EOL = System.getProperty("line.separator");
 
-	public static final int COLUMN_COUNT = 4;
+	public static final int COLUMN_COUNT = 5;
 
-	private static final Row headerRow = new Row(0, "Tag", "Expected", "Actual", "Result");
-	public static final Row DELIMITER_ROW = new Row(0, null, null, null, null);
+	private static final Row headerRow = new Row(0, "Tag", "Expected", "Actual", "Result", "Comment");
+	public static final Row DELIMITER_ROW = new Row(0, null, null, null, null, null);
 	private Row header;
     private final List<Row> rows;
     private int offset;

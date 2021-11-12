@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1632,6 +1633,51 @@ public class TestMessageComparator extends AbstractTest {
                 .put("marker3", StatusType.NA)
                 .build());
 
+    }
+
+    @Test
+    public void testDifferentTypesInActualAndExpected() {
+        IMessage expected = createMessage(root -> {
+            root.addField("Simple", 5);
+            root.addField("Collection", asList(42, 43));
+            root.addField("SubMessage", createMessage(sub -> {
+                sub.addField("Simple", 6);
+            }));
+            root.addField("SubMessageCollection", asList(
+                    createMessage(sub -> sub.addField("Simple", 7)),
+                    createMessage(sub -> sub.addField("Simple", 8))
+            ));
+        });
+
+        IMessage actual = createMessage(root -> {
+            root.addField("Simple", asList(42, 43));
+            root.addField("SubMessage", 5);
+            root.addField("SubMessageCollection", createMessage(sub -> {
+                sub.addField("Simple", 6);
+            }));
+            root.addField("Collection", asList(
+                    createMessage(sub -> sub.addField("Simple", 7)),
+                    createMessage(sub -> sub.addField("Simple", 8))
+            ));
+        });
+
+        ComparisonResult result = MessageComparator.compare(actual, expected, new ComparatorSettings());
+        Assert.assertNotNull("Result must not be null", result);
+        assertComparisonResult("Simple", result, "Integer", "Collection of Integers");
+        assertComparisonResult("SubMessage", result, "Message", "Integer");
+        assertComparisonResult("SubMessageCollection", result, "Collection of Messages", "Message");
+
+        ComparisonResult collection = result.getResult("Collection");
+        Assert.assertNotNull("Collection result must not be null", result);
+        assertComparisonResult("0", collection, "Integer", "Message");
+        assertComparisonResult("1", collection, "Integer", "Message");
+    }
+
+    private static void assertComparisonResult(String name, ComparisonResult result, Object expected, Object actual) {
+        ComparisonResult field = result.getResult(name);
+        Assert.assertNotNull("Cannot find result for " + name, field);
+        Assert.assertEquals("Expected result does not match expectation", expected, field.getExpected());
+        Assert.assertEquals("Actual result does not match expectation", actual, field.getActual());
     }
 
     private static IMessage createMessage(Consumer<IMessage> initializer) {

@@ -255,8 +255,9 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
 
         expected = appendPrecision(result, expected);
 
-        table.add(new Row(offset, result.getName(), expected, actual, status));
+        table.add(new Row(offset, result.getName(), expected, actual, status, result.getExceptionMessage()));
 
+        int nextOffset = offset + 2;
         for(ComparisonResult subResult : result) {
             if(!subResult.hasResults()) {
                 status = Objects.toString(subResult.getStatus(), "");
@@ -265,9 +266,9 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
 
                 expected = appendPrecision(subResult, expected);
 
-                table.add(new Row(offset, subResult.getName(), expected, actual, status));
+                table.add(new Row(nextOffset, subResult.getName(), expected, actual, status, subResult.getExceptionMessage()));
             } else {
-                Table subTable = toTable(subResult, offset + 2);
+                Table subTable = toTable(subResult, nextOffset);
                 table.add(new Row());
                 table.add(subTable);
             }

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison.table;
 
-
-
 public class Row {
 
     private final Column[] columns;
@@ -25,10 +23,18 @@ public class Row {
 
 	public Row()
 	{
-		this(0, null, null, null, null);
+		this(0, null, null, null, null, null);
 	}
 
-	public Row(int offset, String name, String actual, String expected, String result)
+    /**
+     * @deprecated please use {@link #Row(int, String, String, String, String, String)} instead
+     */
+    @Deprecated
+    public Row(int offset, String name, String actual, String expected, String result) {
+        this(offset, name, actual, expected, result, null);
+    }
+
+	public Row(int offset, String name, String actual, String expected, String result, String comment)
 	{
 		this.offset = offset;
 		columns = new Column[Table.COLUMN_COUNT];
@@ -36,6 +42,7 @@ public class Row {
 		columns[1] = new Column(actual);
 		columns[2] = new Column(expected);
 		columns[3] = new Column(result);
+		columns[4] = new Column(comment);
 	}
 
 	public int getColumnLength(int iColumn) {

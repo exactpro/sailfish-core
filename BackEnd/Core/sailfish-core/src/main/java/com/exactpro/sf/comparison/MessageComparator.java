@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.aml.AMLLangConst;
 import com.exactpro.sf.aml.script.MetaContainer;
@@ -114,10 +115,40 @@ public class MessageComparator {
         }
 
         if (exception == null) {
-            exception = new Exception(String.format("Value type mismatch - actual: %s, expected: %s", actual.getClass().getName(), expected.getClass().getName()));
+            exception = new Exception(String.format("Value type mismatch - actual: %s, expected: %s", getObjectType(actual), getObjectType(expected)));
         }
 
-        return new ComparisonResult(name).setException(exception).setStatus(StatusType.FAILED);
+        return new ComparisonResult(name)
+                .setExpected(getObjectType(expected))
+                .setActual(getObjectType(actual))
+                .setException(exception).setStatus(StatusType.FAILED);
+    }
+
+    @NotNull
+    private static String getObjectType(Object value) {
+        return getObjectType(value, true);
+    }
+
+    @NotNull
+    private static String getObjectType(Object value, boolean addCollectionContent) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof IMessage) {
+            return "Message";
+        }
+
+        if (value instanceof List<?>) {
+            if (!addCollectionContent) {
+                return "Collection";
+            }
+            List<?> list = (List<?>)value;
+            return list.isEmpty()
+                    ? "Empty collection"
+                    : "Collection of " + getObjectType(list.get(0), false) + "s";
+        }
+
+        return value.getClass().getSimpleName();
     }
 
     private static ComparisonResult compareObjects(String name, Object actual, Object expected, boolean unchecked, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
