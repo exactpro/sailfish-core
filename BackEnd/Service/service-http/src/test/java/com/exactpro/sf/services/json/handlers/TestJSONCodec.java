@@ -229,6 +229,40 @@ public class TestJSONCodec extends AbstractTest {
         Assert.assertEquals(json, encode(expected, true));
     }
 
+    //region Decoding simple value. TODO: Make a single parameterized test in JUnit 5
+    @Test
+    public void testDecodingSimpleRootValue() {
+        String json = "42";
+        IMessage result = decode(json, "SimpleRootValue");
+        Assert.assertEquals(42, result.<Object>getField("Simple"));
+    }
+
+    @Test
+    public void testDecodingSimpleRootValueWithStubAndUri() {
+        String json = "42";
+        IMessage result = decode(json, "SimpleRootValueWithStubAndUri");
+        Assert.assertEquals(42, result.<Object>getField("Simple"));
+    }
+    //endregion
+
+    //region Encoding simple value. TODO: Make a single parameterized test in JUnit 5
+    @Test
+    public void testEncodingSimpleRootValue() throws IOException {
+        IMessage message = factory.createMessage("SimpleRootValue", "test");
+        message.addField("Simple", 42);
+        String result = encode(message);
+        Assert.assertEquals("Unexpected encoded result", "42", result);
+    }
+
+    @Test
+    public void testEncodingSimpleRootValueWithStubAndUri() throws IOException {
+        IMessage message = factory.createMessage("SimpleRootValueWithStubAndUri", "test");
+        message.addField("Simple", 42);
+        String result = encode(message);
+        Assert.assertEquals("Unexpected encoded result", "42", result);
+    }
+    //endregion
+
     private IMessage decode(String json, String messageName) {
         ByteBuf buffer = Unpooled.wrappedBuffer(json.getBytes(StandardCharsets.UTF_8));
         JSONDecoder decoder = new JSONDecoder(true);

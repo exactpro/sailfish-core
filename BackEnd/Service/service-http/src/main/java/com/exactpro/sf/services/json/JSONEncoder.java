@@ -38,6 +38,7 @@ import com.exactpro.sf.services.http.AbstractHTTPEncoder;
 import com.exactpro.sf.services.http.HTTPClientSettings;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -90,7 +91,11 @@ public class JSONEncoder extends AbstractHTTPEncoder {
 
             JSONVisitorEncode visitor = createVisitor(root, dictionaryStructure, msg, jsonSettings);
             structureReader.traverse(visitor, messageStructure, msg, MessageStructureReaderHandlerImpl.instance());
-            mapper.writeTree(generator, visitor.getRoot());
+            boolean isSimpleRoot = BooleanUtils.toBoolean(StructureUtils.<Boolean>getAttributeValue(messageStructure, JSONMessageHelper.IS_SIMPLE_ROOT_VALUE_ATTR));
+            JsonNode rootNode = isSimpleRoot
+                    ? JSONVisitorUtility.extractSimpleRoot(visitor.getRoot(), messageStructure)
+                    : visitor.getRoot();
+            mapper.writeTree(generator, rootNode);
         }
 
         byte[] rawMessage = body.toByteArray();

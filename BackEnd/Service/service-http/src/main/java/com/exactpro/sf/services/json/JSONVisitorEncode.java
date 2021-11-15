@@ -237,11 +237,7 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
     }
 
     protected boolean isWriteable(Object value, IFieldStructure fldStruct) {
-        if (value == null || BooleanUtils.toBoolean(StructureUtils.<Boolean>getAttributeValue(fldStruct, "IsURIParam"))
-                || BooleanUtils.toBoolean(StructureUtils.<Boolean>getAttributeValue(fldStruct, "STUB"))) {
-            return false;
-        }
-        return true;
+        return value != null && JSONVisitorUtility.isWritable(fldStruct);
     }
 
     public JsonNode getRoot() {

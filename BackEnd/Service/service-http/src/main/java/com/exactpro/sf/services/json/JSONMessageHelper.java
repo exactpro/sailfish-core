@@ -92,4 +92,30 @@ public class JSONMessageHelper extends MessageHelper {
      * </pre>
      */
     public static final String KEY_VALUE_LIST_ATTR = "keyValueList";
+
+    /**
+     * Transforms the simple root value into an object during decoding and vise-verse during encoding.
+     * <b>Works only for root messages if the original JSON is a value node (not an object or an array).</b>
+     * <p/>
+     * Example:
+     * <p/>
+     * <i>Original JSON:</i>
+     * <pre>
+     * 42
+     * </pre>
+     * <i>Transformed JSON:</i>
+     * <pre>
+     * {
+     *     "value": 42
+     * }
+     * </pre>
+     *
+     * The field name will be taken from the message structure
+     */
+    public static final String IS_SIMPLE_ROOT_VALUE_ATTR = "isSimpleRootValue";
+
+    /**
+     * If structure has this attribute with value {@code true} it should be skipped during encoding
+     */
+    public static final String IS_STUB_FIELD_ATTR = "STUB";
 }

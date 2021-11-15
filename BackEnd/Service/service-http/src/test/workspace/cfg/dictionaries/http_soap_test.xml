@@ -106,5 +106,27 @@
             <attribute name="fromArray" type="java.lang.Boolean">true</attribute>
             <field name="String" type="java.lang.String"/>
         </message>
+
+        <message name="SimpleRootValue">
+            <attribute name="isSimpleRootValue" type="java.lang.Boolean">true</attribute>
+            <field name="Simple" type="java.lang.Integer"/>
+        </message>
+
+        <message id="M_URI" name="URI">
+            <field name="test" type="java.lang.String"/>
+        </message>
+
+        <message name="StubMessage" id="M_StubMessage">
+            <attribute name="STUB" type="java.lang.Boolean">true</attribute>
+        </message>
+
+        <message name="SimpleRootValueWithStubAndUri">
+            <attribute name="isSimpleRootValue" type="java.lang.Boolean">true</attribute>
+            <field name="URI" reference="M_URI">
+                <attribute type="java.lang.Boolean" name="IsURIParam">true</attribute>
+            </field>
+            <field name="StubField" reference="M_StubMessage"/>
+            <field name="Simple" type="java.lang.Integer"/>
+        </message>
     </messages>
 </dictionary>

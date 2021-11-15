@@ -17,6 +17,9 @@ package com.exactpro.sf.services.json;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.json.JSONMessageHelper.FROM_ARRAY_ATTR;
+import static com.exactpro.sf.services.json.JSONMessageHelper.IS_SIMPLE_ROOT_VALUE_ATTR;
+import static com.exactpro.sf.services.json.JSONMessageHelper.IS_URI_PARAM_ATTR;
+import static com.exactpro.sf.services.json.JSONMessageHelper.IS_STUB_FIELD_ATTR;
 import static com.google.common.collect.Iterables.get;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
@@ -29,6 +32,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,9 +106,10 @@ public class JSONVisitorUtility {
     @NotNull
     public static JsonNode preprocessMessageNode(@NotNull JsonNode node, @NotNull IFieldStructure structure) {
         boolean fromArray = toBoolean(StructureUtils.<Boolean>getAttributeValue(structure, FROM_ARRAY_ATTR));
+        boolean simpleRoot = toBoolean(StructureUtils.<Boolean>getAttributeValue(structure, IS_SIMPLE_ROOT_VALUE_ATTR));
 
         if (!fromArray) {
-            return node;
+            return simpleRoot ? transformSimpleRoot(node, structure) : node;
         }
 
         if (!node.isArray()) {
@@ -153,5 +159,33 @@ public class JSONVisitorUtility {
             return null;
         }
         return new TextNode(v.toString());
+    }
+
+    public static boolean isWritable(@NotNull IFieldStructure structure) {
+        return !toBoolean(StructureUtils.<Boolean>getAttributeValue(structure, IS_URI_PARAM_ATTR))
+                && !toBoolean(StructureUtils.<Boolean>getAttributeValue(structure, IS_STUB_FIELD_ATTR));
+    }
+
+    @NotNull
+    public static JsonNode extractSimpleRoot(JsonNode node, IFieldStructure structure) {
+        String valueFieldName = getValueFieldName(structure);
+        return Objects.requireNonNull(node.get(valueFieldName), () -> "Original node " + node.getNodeType() + " does not contain the field " + valueFieldName);
+    }
+
+    @NotNull
+    private static JsonNode transformSimpleRoot(@NotNull JsonNode node, @NotNull IFieldStructure structure) {
+        String valueFieldName = getValueFieldName(structure);
+        return new ObjectNode(JsonNodeFactory.instance, Collections.singletonMap(valueFieldName, node));
+    }
+
+    private static String getValueFieldName(@NotNull IFieldStructure structure) {
+        List<IFieldStructure> valueFields = structure.getFields().values().stream()
+                .filter(JSONVisitorUtility::isWritable)
+                .collect(Collectors.toList());
+        if (valueFields.size() != 1) {
+            throw new IllegalArgumentException(format("Structure %s has %d writable fields instead of 1", structure.getName(), valueFields.size()));
+        }
+        String valueFieldName = valueFields.get(0).getName();
+        return valueFieldName;
     }
 }
