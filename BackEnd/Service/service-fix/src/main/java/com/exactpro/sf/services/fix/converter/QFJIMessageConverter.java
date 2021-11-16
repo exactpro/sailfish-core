@@ -49,6 +49,7 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.FixUtil;
+import com.exactpro.sf.services.fix.ISailfishMessage;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -203,8 +204,8 @@ public class QFJIMessageConverter
     }
 
     private IMessage createIMessage(@NotNull Message message, IMessageStructure messageStructure) {
-        return message instanceof SailfishQuickfixMessage
-                ? factory.createMessage(((SailfishQuickfixMessage)message).getMetadata())
+        return message instanceof ISailfishMessage
+                ? factory.createMessage(((ISailfishMessage)message).getMetadata())
                 : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
     }
 

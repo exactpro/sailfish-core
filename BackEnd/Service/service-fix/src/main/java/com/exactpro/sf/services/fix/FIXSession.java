@@ -17,6 +17,7 @@ package com.exactpro.sf.services.fix;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.quickfixj.CharsetSupport;
@@ -180,8 +181,10 @@ public class FIXSession implements ISession {
     public void sendRaw(byte[] rawData, IMetadata extraMetadata) throws InterruptedException {
         try {
             if (evolutionSupportEnabled) {
-                logger.trace("Processing raw message: {}", rawData);
-                EvolutionQFJMessage message = new EvolutionQFJMessage(rawData);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Processing raw message: {}", Arrays.toString(rawData));
+                }
+                EvolutionQFJMessage message = new EvolutionQFJMessage(rawData, new MsgMetaData(extraMetadata));
                 send(message);
                 return;
             }
@@ -193,14 +196,14 @@ public class FIXSession implements ISession {
             The getMessageData() method of OutgoingEvolutionMessage returns null.
             In this case, the extractRawData() method in the AbstractApplication class will extract the actual data
             using the toString() method instead of the obsolete data using the getMessageData() method*/
-            OutgoingEvolutionMessage message = new OutgoingEvolutionMessage();
+            OutgoingEvolutionMessage message = new OutgoingEvolutionMessage(new MsgMetaData(extraMetadata));
 
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
             send(message);
 
         } catch (InvalidMessage ex) {
-            throw new SendMessageFailedException("Cannot parse the raw message: " + rawData, ex);
+            throw new SendMessageFailedException("Cannot parse the raw message: " + Arrays.toString(rawData), ex);
         }
     }
 

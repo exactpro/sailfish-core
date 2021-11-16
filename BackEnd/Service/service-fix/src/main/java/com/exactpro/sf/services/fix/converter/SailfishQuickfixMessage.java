@@ -17,11 +17,12 @@ package com.exactpro.sf.services.fix.converter;
 
 import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.services.fix.ISailfishMessage;
 
 import quickfix.FieldMap;
 import quickfix.Message;
 
-public final class SailfishQuickfixMessage extends Message {
+public final class SailfishQuickfixMessage extends Message implements ISailfishMessage {
 
     private static final long serialVersionUID = -6836383592612422329L;
 
@@ -56,6 +57,7 @@ public final class SailfishQuickfixMessage extends Message {
         return trailer;
     }
 
+    @Override
     public MsgMetaData getMetadata() {
         return metadata;
     }

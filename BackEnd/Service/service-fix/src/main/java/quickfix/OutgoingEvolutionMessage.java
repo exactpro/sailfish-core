@@ -16,12 +16,29 @@
 
 package quickfix;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.Nullable;
 
-public class OutgoingEvolutionMessage extends Message {
+import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.services.fix.ISailfishMessage;
+
+public class OutgoingEvolutionMessage extends Message implements ISailfishMessage {
+
+    private final MsgMetaData metaData;
+
+    public OutgoingEvolutionMessage(MsgMetaData metaData) {
+        this.metaData = Objects.requireNonNull(metaData, "'Meta data' parameter");
+    }
+
     @Nullable
     @Override
     public synchronized String getMessageData() {
         return null;
+    }
+
+    @Override
+    public MsgMetaData getMetadata() {
+        return metaData;
     }
 }

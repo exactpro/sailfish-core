@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,19 +30,23 @@ import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.services.fix.ISailfishMessage;
+
 import quickfix.field.BeginString;
 import quickfix.field.BodyLength;
 import quickfix.field.CheckSum;
 import quickfix.field.MsgType;
 
-public final class EvolutionQFJMessage extends Message {
+public final class EvolutionQFJMessage extends Message implements ISailfishMessage {
     private static final Logger logger = LoggerFactory.getLogger(EvolutionQFJMessage.class);
     private static final String SOH = "\001";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final long serialVersionUID = 8055963317288188272L;
 
     private final String body;
-    public static final int[] MANDATORY_TAGS = new int[] { BeginString.FIELD, BodyLength.FIELD, MsgType.FIELD };
+    public static final int[] MANDATORY_TAGS = { BeginString.FIELD, BodyLength.FIELD, MsgType.FIELD };
+    private final MsgMetaData metaData;
 
     /**
      * Converts the byte representation of the FIX protocol into a lightweight object
@@ -49,7 +54,7 @@ public final class EvolutionQFJMessage extends Message {
      * @param array property name to convert
      * @throws InvalidMessage - throws an exception when sending an invalid message
      */
-    public EvolutionQFJMessage(byte[] array) throws InvalidMessage {
+    public EvolutionQFJMessage(byte[] array, MsgMetaData metaData) throws InvalidMessage {
         String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(array)).toString();
         int indexOf35tag = messageData.indexOf(MsgType.FIELD + KEY_VALUE_DELIMITER);
         if (indexOf35tag == -1) {
@@ -63,6 +68,7 @@ public final class EvolutionQFJMessage extends Message {
         checkHeader(header);
         parse(trailer, false);
         checkTrailer(trailer);
+        this.metaData = Objects.requireNonNull(metaData, "'Meta data' parameter");
     }
 
     private void parse(@NotNull String fixString, boolean isHeader) throws InvalidMessage {
@@ -531,6 +537,11 @@ public final class EvolutionQFJMessage extends Message {
     @Override
     public void setField(StringField field, boolean duplicateTagsAllowed) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MsgMetaData getMetadata() {
+        return metaData;
     }
 }
 

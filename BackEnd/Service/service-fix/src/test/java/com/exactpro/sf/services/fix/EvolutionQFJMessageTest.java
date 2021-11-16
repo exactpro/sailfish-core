@@ -27,6 +27,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.util.AbstractTest;
 
 import quickfix.EvolutionQFJMessage;
@@ -34,6 +36,7 @@ import quickfix.InvalidMessage;
 
 @RunWith(Enclosed.class)
 public class EvolutionQFJMessageTest {
+    private static final MsgMetaData EMPTY_METADATA = new MsgMetaData(IMetadata.EMPTY);
     @RunWith(Parameterized.class)
     public static class EvolutionQFJMessageNegativeTest extends AbstractTest {
         @Parameters(name = "Name={0}")
@@ -79,7 +82,7 @@ public class EvolutionQFJMessageTest {
             byte[] array = messageFix.getBytes();
             thrown.expect(InvalidMessage.class);
             thrown.expectMessage(error);
-            EvolutionQFJMessage msg = new EvolutionQFJMessage(array);
+            EvolutionQFJMessage msg = new EvolutionQFJMessage(array, EMPTY_METADATA);
         }
     }
 
@@ -89,7 +92,7 @@ public class EvolutionQFJMessageTest {
             String message = "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|"
                     .replace("|", "\001");
             byte[] array = message.getBytes();
-            String msg = new EvolutionQFJMessage(array).toString();
+            String msg = new EvolutionQFJMessage(array, EMPTY_METADATA).toString();
             Assert.assertEquals(msg, message);
         }
 
@@ -100,7 +103,7 @@ public class EvolutionQFJMessageTest {
             String validMessage = "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|"
                     .replace("|", "\001");
             byte[] array = swappedTagsMessage.getBytes();
-            String msg = new EvolutionQFJMessage(array).toString();
+            String msg = new EvolutionQFJMessage(array, EMPTY_METADATA).toString();
             Assert.assertEquals(msg, validMessage);
         }
     }
