@@ -134,6 +134,11 @@ public class MessageComparator {
         if (value == null) {
             return "null";
         }
+
+        if (value instanceof IFilter) {
+            return "Filter";
+        }
+
         if (value instanceof IMessage) {
             return "Message";
         }
@@ -145,10 +150,20 @@ public class MessageComparator {
             List<?> list = (List<?>)value;
             return list.isEmpty()
                     ? "Empty collection"
-                    : "Collection of " + getObjectType(list.get(0), false) + "s";
+                    : getCollectionType(list);
         }
 
         return value.getClass().getSimpleName();
+    }
+
+    @NotNull
+    private static String getCollectionType(List<?> list) {
+        Object value = list.get(0);
+        if (value instanceof IFilter) {
+            // cannot add the type of the collection elements for filters
+            return "Collection";
+        }
+        return "Collection of " + getObjectType(value, false) + "s";
     }
 
     private static ComparisonResult compareObjects(String name, Object actual, Object expected, boolean unchecked, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
