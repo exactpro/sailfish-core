@@ -27,7 +27,11 @@ import org.junit.Test;
 import org.quickfixj.CharsetSupport;
 
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.MetadataExtensions;
+import com.exactpro.sf.common.messages.MetadataProperty;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
@@ -47,12 +51,40 @@ import quickfix.FieldNotFound;
 import quickfix.Group;
 import quickfix.InvalidMessage;
 import quickfix.Message;
+import quickfix.OutgoingEvolutionMessage;
 import quickfix.StringField;
 
 //@Ignore
 public class QFJMessage2IMessageTest extends ConverterTest {
     private final FixMessageFactory messageFactory = new FixMessageFactory();
     private final String sfDictionary = "FIX50.TEST.xml";
+
+    @Test
+    public void testMessageCreationWithMetadata() throws IOException, InvalidMessage, MessageConvertException {
+        String source = "8=FIXT.1.1\u00019=155\u000135=Z\u000149=FIX_CSV_ds1\u000156=FGW\u000134=1152\u000152=20151005-15:47:02.785\u00011166=1444060022986\u0001298=4\u00011461=1\u00011462=FIX_CSV_ds1\u00011463=D\u00011464=76\u0001295=1\u0001299=test\u000148=7219943\u000122=8\u000110=169\u0001";
+
+        Message fixMessageSrc = new OutgoingEvolutionMessage(new MsgMetaData(IMetadata.EMPTY));
+        IDictionaryStructure dictionary = getSfDictionary(sfDictionary);
+
+        DataDictionary dataDict = new QFJDictionaryAdapter(dictionary);
+        fixMessageSrc.fromString(source, dataDict, true);
+        if (fixMessageSrc.getException() != null) {
+            throw fixMessageSrc.getException();
+        }
+
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory)
+                .setVerifyTags(true)
+                .setIncludeMilliseconds(true)
+                .setOrderingFields(true);
+
+        QFJIMessageConverter converter = new QFJIMessageConverter(settings);
+        IMessage iMessage = converter.convert(fixMessageSrc);
+        Assert.assertNotNull("IMessage converted from " + source + " is null", iMessage);
+        IMetadata metaData = iMessage.getMetaData();
+        Assert.assertEquals("QuoteCancel", MetadataExtensions.getName(metaData));
+        Assert.assertEquals("FIX_5_0", MetadataExtensions.getNamespace(metaData));
+        Assert.assertTrue("Timestamp is not set", MetadataExtensions.contains(metaData, MetadataProperty.TIMESTAMP));
+    }
 
     @Test
     public void testRepeatingGroupOrderedFields() throws IOException, InvalidMessage, MessageConvertException {

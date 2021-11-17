@@ -52,6 +52,8 @@ fun IMetadata.merge(other: IMetadata): IMetadata = apply {
     }
 }
 
+fun IMetadata.contains(property: MetadataProperty): Boolean = contains(property.propertyName)
+
 var IMetadata.id: Long
     get() = getRequired(ID)
     set(value) = setOnce(ID, value)

@@ -26,12 +26,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -43,6 +45,10 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.MetadataExtensions;
+import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -52,6 +58,7 @@ import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.ISailfishMessage;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 
 import quickfix.Field;
@@ -72,6 +79,13 @@ import quickfix.field.MsgType;
 public class QFJIMessageConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(QFJIMessageConverter.class);
+    private static final Map<MetadataProperty, BiConsumer<IMetadata, IMessageStructure>> REQUIRED_METADATA_PROPERTIES = ImmutableMap.of(
+            MetadataProperty.NAME, (data, structure) -> MetadataExtensions.setName(data, structure.getName()),
+            MetadataProperty.NAMESPACE, (data, structure) -> MetadataExtensions.setNamespace(data, structure.getNamespace()),
+            MetadataProperty.TIMESTAMP, (data, structure) -> MetadataExtensions.setTimestamp(data, new Date()),
+            MetadataProperty.ID, (data, structure) -> MetadataExtensions.setId(data, MessageUtil.generateId()),
+            MetadataProperty.SEQUENCE, (data, structure) -> MetadataExtensions.setSequence(data, MessageUtil.generateSequence())
+    );
 
 	protected static final String ATTRIBUTE_TAG = "tag";
 	protected static final String ATTRIBUTE_ENTITY_TYPE = "entity_type";
@@ -205,8 +219,23 @@ public class QFJIMessageConverter
 
     private IMessage createIMessage(@NotNull Message message, IMessageStructure messageStructure) {
         return message instanceof ISailfishMessage
-                ? factory.createMessage(((ISailfishMessage)message).getMetadata())
+                ? factory.createMessage(preprocessMetadata((ISailfishMessage)message, messageStructure))
                 : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
+    }
+
+    private MsgMetaData preprocessMetadata(ISailfishMessage message, IMessageStructure messageStructure) {
+        MsgMetaData metadata = message.getMetadata();
+
+        //region Set required properties. They might not be set when we send a raw message with extra metadata
+        REQUIRED_METADATA_PROPERTIES.forEach((property, action) -> {
+            if (!MetadataExtensions.contains(metadata, property)) {
+                logger.trace("The required property {} is not set. Applying action", property);
+                action.accept(metadata, messageStructure);
+            }
+        });
+        //endregion
+
+        return metadata;
     }
 
     @NotNull

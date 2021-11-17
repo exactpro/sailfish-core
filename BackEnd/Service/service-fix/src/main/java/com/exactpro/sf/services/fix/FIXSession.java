@@ -20,12 +20,14 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.jetbrains.annotations.NotNull;
 import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -184,7 +186,7 @@ public class FIXSession implements ISession {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Processing raw message: {}", Arrays.toString(rawData));
                 }
-                EvolutionQFJMessage message = new EvolutionQFJMessage(rawData, new MsgMetaData(extraMetadata));
+                EvolutionQFJMessage message = new EvolutionQFJMessage(rawData, createMsgMetadata(extraMetadata));
                 send(message);
                 return;
             }
@@ -196,7 +198,7 @@ public class FIXSession implements ISession {
             The getMessageData() method of OutgoingEvolutionMessage returns null.
             In this case, the extractRawData() method in the AbstractApplication class will extract the actual data
             using the toString() method instead of the obsolete data using the getMessageData() method*/
-            OutgoingEvolutionMessage message = new OutgoingEvolutionMessage(new MsgMetaData(extraMetadata));
+            OutgoingEvolutionMessage message = new OutgoingEvolutionMessage(createMsgMetadata(extraMetadata));
 
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
@@ -247,6 +249,11 @@ public class FIXSession implements ISession {
         sendRawMessage(msgSeqNum, messageString);
         storeMessage(message, messageString);
 	}
+
+    @NotNull
+    private MsgMetaData createMsgMetadata(IMetadata extraMetadata) {
+        return new MsgMetaData(extraMetadata);
+    }
 
 	private void sendRawMessage(int msgSeqNum, String messageString) throws IOException {
 		Session session = lookupSession();
