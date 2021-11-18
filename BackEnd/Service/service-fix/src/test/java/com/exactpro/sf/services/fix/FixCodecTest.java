@@ -19,6 +19,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -26,11 +27,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
@@ -109,6 +112,28 @@ public class FixCodecTest extends AbstractTest {
 
         settings.setIncludeNanoseconds(true);
         checkEncodeResult(settings, msg, "8=FIXT.1.1\u00019=36\u000135=D\u000160=20210827-21:02:34.123456789\u000110=075\u0001");
+    }
+
+    @Test
+    public void testMessageWithTagThatLooksLikePartOfBeginString() throws MessageParseException, UnsupportedEncodingException {
+        String rawMessage = "8=FIXT.1.1\u00019=204\u000135=D\u000134=376\u000149=B\u000150=FIXOEB01\u000152=20211117-17:09:03.301\u000156=MME\u000111=66FF8BBD89774D9\u000138=2000000\u000140=2\u000144=10\u000154=1\u000155=LCA_2022FEB17\u000159=3\u000160=20211117-20:09:03.000\u0001453=2\u0001448=B\u0001447=D\u0001452=1\u0001448=FIXOEB01\u0001447=D\u0001452=12\u000110=163\u0001";
+        String extractedMessage = FIXCodec.getFixString(IoBuffer.wrap(rawMessage.getBytes(CharsetSupport.getCharset())));
+        Assert.assertEquals("Extracted message does not match", rawMessage, extractedMessage);
+    }
+
+    @Test
+    public void testDecodesSeveralMessages() throws MessageParseException, UnsupportedEncodingException {
+        String rawMessage = "8=FIXT.1.1\u00019=204\u000135=D\u000134=376\u000149=B\u000150=FIXOEB01\u000152=20211117-17:09:03.301\u000156=MME\u000111=66FF8BBD89774D9\u000138=2000000\u000140=2\u000144=10\u000154=1\u000155=LCA_2022FEB17\u000159=3\u000160=20211117-20:09:03.000\u0001453=2\u0001448=B\u0001447=D\u0001452=1\u0001448=FIXOEB01\u0001447=D\u0001452=12\u000110=163\u0001";
+        byte[] bytes = rawMessage.getBytes(CharsetSupport.getCharset());
+        IoBuffer buffer = IoBuffer.wrap(ArrayUtils.addAll(bytes, bytes));
+        String firstMessage = FIXCodec.getFixString(buffer);
+        Assert.assertEquals("First extracted message does not match", rawMessage, firstMessage);
+
+        String secondMessage = FIXCodec.getFixString(buffer);
+        Assert.assertEquals("Second extracted message does not match", rawMessage, secondMessage);
+
+        String last = FIXCodec.getFixString(buffer);
+        Assert.assertNull("Last message is not null", last);
     }
 
     private void checkEncodeResult(TCPIPSettings settings, IMessage msg, String expected) throws Exception {
@@ -643,8 +668,9 @@ public class FixCodecTest extends AbstractTest {
             while((output = FIXCodec.getFixString(buffer)) != null) {
                 messages.add(output);
             }
+            Assert.fail("Should get exception about invalid first message");
         } catch(MessageParseException e) {
-            Assert.assertEquals("CheckSum is absent or invalid", e.getMessage());
+            Assert.assertEquals("CheckSum is absent or does no have SOH at the end. Next message starts at index 161", e.getMessage());
             Assert.assertEquals(message1, e.getRawMessage());
             Assert.assertEquals(input.indexOf("8=FIX", 1), buffer.position());
 

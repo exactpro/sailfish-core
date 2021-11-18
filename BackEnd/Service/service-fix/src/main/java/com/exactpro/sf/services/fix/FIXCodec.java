@@ -180,9 +180,10 @@ public class FIXCodec extends AbstractCodec {
             throw new MessageParseException("BeginString index is higher than 0", out);
         }
 
-        int nextBeginStringIdx = out.indexOf("8=FIX", beginStringIdx + 1);
+        int nextBeginStringIdx = out.indexOf(fieldSeparator + "8=FIX", beginStringIdx + 1);
 
         if(nextBeginStringIdx != -1) {
+            nextBeginStringIdx += 1;  /*left last SOH in the current message*/
             out = out.substring(0, nextBeginStringIdx);
         }
 
@@ -192,7 +193,7 @@ public class FIXCodec extends AbstractCodec {
         if(checkSumIdx == -1 || tagDelimeterIdx == -1) {
             if(nextBeginStringIdx != -1) {
                 in.position(nextBeginStringIdx);
-                throw new MessageParseException("CheckSum is absent or invalid", out);
+                throw new MessageParseException("CheckSum is absent or does no have SOH at the end. Next message starts at index " + nextBeginStringIdx, out);
             }
 
             in.position(offset);
