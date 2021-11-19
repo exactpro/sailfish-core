@@ -17,6 +17,7 @@
 package com.exactpro.sf.services.fix;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -42,24 +43,40 @@ public class EvolutionQFJMessageTest {
         @Parameters(name = "Name={0}")
         public static Iterable<Object[]> parameters() {
             return Arrays.asList(
-                    new Object[][] {
-                            { "testInvalidMessageNo9Tag",
-                                    "8=FIX.4.4|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
-                                    "Not valid header: 8=FIX.4.4\u000135=8, missing 9 tag. Valid tag values: 8, 9, 35." },
-                            { "testInvalidMessageNo35Tag",
-                                    "8=FIX.4.4|9=289|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
-                                    "Not valid message: 8=FIX.4.4\u00019=289\u000134=1090\u000149=TESTSELL1\u000152=20180920-18:23:53.671\u000156=TESTBUY1\u00016=113.35\u000111=636730640278898634\u000114=3500.0000000000\u000115=USD\u000117=20636730646335310000\u000121=2\u000131=113.35\u000132=3500\u000137=20636730646335310000\u000138=7000\u000139=1\u000140=1\u000154=1\u000155=MSFT\u000160=20180920-18:23:53.531\u0001150=F\u0001151=3500\u0001453=1\u0001448=BRK2\u0001447=D\u0001452=1\u000110=151\u0001, missing tag 35" },
-                            { "testInavalidMessageExtraTagHeader",
-                                    "8=FIX.4.4|34=1090|9=289|35=8|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
-                                    "Header contains invalid tag 34. Valid tag values: 8, 9, 35." },
-                            { "testInvalidMessageNotTrailer",
-                                    "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|",
-                                    "Bad tag format:  .For input string: \"\"" },
-                            { "testInvalidMessageNotTrailer2",
-                                    "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=12|",
-                                    "Trailer contains invalid tag 452. Valid tag value: 10." },
-                    }
-            );
+                    createParameters(
+                            "testInvalidMessageNo9Tag",
+                            "8=FIX.4.4|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
+                            msg -> "Not valid header: 8=FIX.4.4\u000135=8, missing 9 tag. Valid tag values: 8, 9, 35."
+                    ),
+                    createParameters("testInvalidMessageNo35Tag",
+                            "8=FIX.4.4|9=289|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
+                            msg -> String.format("Not valid message: %s, missing tag 35", msg)
+                    ),
+                    createParameters("testInavalidMessageExtraTagHeader",
+                            "8=FIX.4.4|34=1090|9=289|35=8|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|10=151|",
+                            msg -> "Header contains invalid tag 34. Valid tag values: 8, 9, 35."
+                    ),
+                    createParameters("testInvalidMessageNotTrailer",
+                            "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=1|",
+                            msg -> String.format("Not a valid message: %s, missing tag 10", msg)
+                    ),
+                    createParameters("testInvalidMessageNotTrailer2",
+                            "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=12|",
+                            msg -> String.format("Not a valid message: %s, missing tag 10", msg)
+                    ),
+                    createParameters("wrongNumberOfDigitsInCheckSum",
+                            "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=12|10=53|",
+                            msg -> "Incorrect CheckSum format: 10=53\u0001; must have 3 digits and SOH in the end"
+                    ),
+                    createParameters("missingSohInTheEndOfCheckSum",
+                            "8=FIX.4.4|9=289|35=8|34=1090|49=TESTSELL1|52=20180920-18:23:53.671|56=TESTBUY1|6=113.35|11=636730640278898634|14=3500.0000000000|15=USD|17=20636730646335310000|21=2|31=113.35|32=3500|37=20636730646335310000|38=7000|39=1|40=1|54=1|55=MSFT|60=20180920-18:23:53.531|150=F|151=3500|453=1|448=BRK2|447=D|452=12|10=053",
+                            msg -> "Incorrect CheckSum format: 10=053; must have 3 digits and SOH in the end"
+                    ));
+        }
+
+        private static Object[] createParameters(String name, String rawMessage, Function<String, String> errorSupplier) {
+            String actualMessage = rawMessage.replace("|", "\001");
+            return new Object[] { name, actualMessage, errorSupplier.apply(actualMessage) };
         }
 
         public static final String EXPECTED_EXCEPTION_INVALID_MESSAGE = "Expected exception InvalidMessage";
@@ -78,8 +95,7 @@ public class EvolutionQFJMessageTest {
 
         @Test
         public void testInvalidMessage() throws InvalidMessage {
-            String messageFix = message.replace("|", "\001");
-            byte[] array = messageFix.getBytes();
+            byte[] array = message.getBytes();
             thrown.expect(InvalidMessage.class);
             thrown.expectMessage(error);
             EvolutionQFJMessage msg = new EvolutionQFJMessage(array, EMPTY_METADATA);

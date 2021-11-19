@@ -42,6 +42,8 @@ public final class EvolutionQFJMessage extends Message implements ISailfishMessa
     private static final Logger logger = LoggerFactory.getLogger(EvolutionQFJMessage.class);
     private static final String SOH = "\001";
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String CHECK_SUM_MARKER = SOH + CheckSum.FIELD + KEY_VALUE_DELIMITER;
+    private static final String MSG_TYPE_MARKER = SOH + MsgType.FIELD + KEY_VALUE_DELIMITER;
     private static final long serialVersionUID = 8055963317288188272L;
 
     private final String body;
@@ -56,14 +58,28 @@ public final class EvolutionQFJMessage extends Message implements ISailfishMessa
      */
     public EvolutionQFJMessage(byte[] array, MsgMetaData metaData) throws InvalidMessage {
         String messageData = CharsetSupport.getCharsetInstance().decode(ByteBuffer.wrap(array)).toString();
-        int indexOf35tag = messageData.indexOf(MsgType.FIELD + KEY_VALUE_DELIMITER);
+        int indexOf35tag = messageData.indexOf(MSG_TYPE_MARKER);
         if (indexOf35tag == -1) {
             throw new InvalidMessage("Not valid message: " + messageData + ", missing tag " + MsgType.FIELD);
         }
-        int indexOfSOHBefore35tag = messageData.indexOf(SOH, indexOf35tag);
-        String header = messageData.substring(0, indexOfSOHBefore35tag);
-        String trailer = messageData.substring(messageData.length() - 7);
-        body = messageData.substring(indexOfSOHBefore35tag + 1, messageData.length() - 7);
+        int sohAfter35TagIndex = messageData.indexOf(SOH, indexOf35tag + 1 /*because of SOH*/);
+        String header = messageData.substring(0, sohAfter35TagIndex);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Header extracted: " + header);
+        }
+        int checkSumIndex = messageData.lastIndexOf(CHECK_SUM_MARKER);
+        if (checkSumIndex < 0) {
+            throw new InvalidMessage("Not a valid message: " + messageData + ", missing tag " + CheckSum.FIELD);
+        }
+        int trailerStart = checkSumIndex + 1;
+        String trailer = messageData.substring(trailerStart);
+        if (trailer.length() != 7) {
+            throw new InvalidMessage("Incorrect CheckSum format: " + trailer + "; must have 3 digits and SOH in the end");
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("Trailer extracted: " + trailer);
+        }
+        body = messageData.substring(sohAfter35TagIndex + 1, trailerStart);
         parse(header, true);
         checkHeader(header);
         parse(trailer, false);
