@@ -262,8 +262,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
             checkLength(dateStr, dateBytes.length, length);
             buffer.put(dateBytes);
         } else if (type == ProtocolType.UINT32) {
-            String formatted = value.format(DATE_AS_INT);
-            buffer.putUnsignedInt(Long.parseLong(formatted));
+            String formatted = value == null ? null : value.format(DATE_AS_INT);
+            buffer.putUnsignedInt(formatted == null ? 0 : Long.parseLong(formatted));
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }

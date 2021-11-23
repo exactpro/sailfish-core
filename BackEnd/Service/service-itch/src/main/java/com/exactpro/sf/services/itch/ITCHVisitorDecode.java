@@ -465,7 +465,9 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
                 throw new EPSCommonException("Cannot read date from " + type + ". Expected length: 4; Actual: " + length);
             }
             long dateValue = buffer.getUnsignedInt();
-            msg.addField(fieldName, LocalDate.parse(String.valueOf(dateValue), DATE_AS_INT));
+            if (dateValue != 0) { /*0 means not value*/
+                msg.addField(fieldName, LocalDate.parse(String.valueOf(dateValue), DATE_AS_INT));
+            }
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }

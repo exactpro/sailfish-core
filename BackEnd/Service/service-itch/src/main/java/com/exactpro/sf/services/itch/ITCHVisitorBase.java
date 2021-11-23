@@ -47,7 +47,7 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
     public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100_000_000L);
     public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1_000_000_000L);
     public static final BigDecimal UDT_DEVIDER = new BigDecimal(1_000_000L);
-    public static final DateTimeFormatter DATE_AS_INT = DateTimeUtility.createFormatter("yyyyddMM");
+    public static final DateTimeFormatter DATE_AS_INT = DateTimeUtility.createFormatter("yyyyMMdd");
 
     protected static final String charsetName = "ISO-8859-1";
     
