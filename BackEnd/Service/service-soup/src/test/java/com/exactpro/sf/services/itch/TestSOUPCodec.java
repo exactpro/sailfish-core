@@ -236,6 +236,7 @@ public class TestSOUPCodec extends AbstractTest {
 
 		// PacketHeader
 		IMessage actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertNotNull("Actual message is null", actual);
         Assert.assertEquals(SOUPMessageHelper.PACKET_HEADER_MESSAGE, actual.getName());
 		Assert.assertEquals("1451342650", actual.getField("PHSession"));
         Assert.assertEquals((Long)91132L, actual.getField("PHSequence"));
@@ -245,4 +246,32 @@ public class TestSOUPCodec extends AbstractTest {
 		Assert.assertTrue(decoderOutput.getMessageQueue().isEmpty());
 	}
 
+    @Test
+    public void testEndOfSession() throws Exception {
+        byte[] raw = {
+                // Packet Header:
+                0x31, 0x34, 0x35, 0x31, 0x33, 0x34, 0x32, 0x36, 0x35, 0x30, // Session = '1451342650'
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x63, (byte) 0xfc, // Sequence = 91132
+                (byte)0xFF, (byte)0xFF, // Count = 65535 (end of session)
+        };
+        SOUPCodec codec = (SOUPCodec) messageHelper.getCodec(serviceContext);
+
+        // Decode
+        IoBuffer toDecode = IoBuffer.wrap(raw);
+        IoSession decodeSession = new DummySession();
+
+        MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
+        codec.decode(decodeSession, toDecode, decoderOutput);
+
+        // PacketHeader
+        IMessage actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertNotNull("Actual message is null", actual);
+        Assert.assertEquals(SOUPMessageHelper.PACKET_HEADER_MESSAGE, actual.getName());
+        Assert.assertEquals("1451342650", actual.getField("PHSession"));
+        Assert.assertEquals((Long)91132L, actual.getField("PHSequence"));
+        Assert.assertEquals((Integer)65535, actual.getField("PHCount"));
+
+        // no more messages
+        Assert.assertTrue(decoderOutput.getMessageQueue().isEmpty());
+    }
 }

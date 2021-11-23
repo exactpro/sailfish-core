@@ -102,6 +102,7 @@ public class SOUPCodec extends AbstractCodec {
 	private static final int SOUP_MESSAGE_HEADER_SIZE = 3;
 	private static final int PACKET_TYPE_SIZE = 1;
 	protected static final int MESSAGE_LENGTH_SIZE = 2;
+    protected static final int END_OF_SESSION_COUNT_MARKER = 0xFFFF;
 
     private static final Set<Role> SENDER_ROLE = ImmutableSet.of(Role.SENDER);
     private static final Set<Role> RECEIVER_ROLE = ImmutableSet.of(Role.RECEIVER);
@@ -584,7 +585,7 @@ public class SOUPCodec extends AbstractCodec {
 	}
 
     protected boolean needToAccumulateContentLength(int messageCount) {
-        return true;
+        return messageCount != END_OF_SESSION_COUNT_MARKER;
     }
 
     protected boolean isDebugPacket(IMessage message) {
