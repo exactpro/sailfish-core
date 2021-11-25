@@ -319,6 +319,7 @@ public class MessageComparator {
 
             boolean[] usedActual = new boolean[maxSize];
             boolean[] usedExpected = new boolean[maxSize];
+            ComparisonResult[] sortedResults = new ComparisonResult[maxSize];
 
             for(int i = 0; i < maxSize; i++) {
                 int maxCount = -1;
@@ -330,10 +331,7 @@ public class MessageComparator {
                     continue;
                 }
 
-                // Do not try to look forward in actual messages.
-                // We need to find the best match for the current index only
-                int actualMaxSize = settings.isKeepResultGroupOrder() ? i + 1 : maxSize;
-                for(int actualIndex = 0; actualIndex < actualMaxSize; actualIndex++) {
+                for(int actualIndex = 0; actualIndex < maxSize; actualIndex++) {
                     if(usedActual[actualIndex]) {
                         continue;
                     }
@@ -367,8 +365,17 @@ public class MessageComparator {
                     subResult = resultMatrix[maxActualIndex][maxExpectedIndex];
                 }
 
-                String subName = Integer.toString(i);
-                result.addResult(subResult.setName(subName));
+                // We need to place the result right to a position that corresponds to the actual element in collection
+                // Otherwise, we can use the total counter that will place the result from best match to worse match
+                int resultIndex = settings.isKeepResultGroupOrder() ? maxActualIndex : i;
+                String subName = Integer.toString(resultIndex);
+                sortedResults[resultIndex] = subResult.setName(subName);
+            }
+
+            for (ComparisonResult subResult : sortedResults) {
+                if (subResult != null) { // because when we compare only key fields some comparison might be skipped
+                    result.addResult(subResult);
+                }
             }
         }
 

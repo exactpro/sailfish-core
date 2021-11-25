@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1671,6 +1670,76 @@ public class TestMessageComparator extends AbstractTest {
         Assert.assertNotNull("Collection result must not be null", result);
         assertComparisonResult("0", collection, "Integer", "Message");
         assertComparisonResult("1", collection, "Integer", "Message");
+    }
+
+    @Test
+    public void testBestMatchAlgorithmWorkWhenKeepResultInOrderEnabled() {
+        IMessage actual = createMessage(root -> {
+            root.addField("transactions", asList(
+                    createMessage(tx1 -> {
+                        tx1.addField("A", "3869a6e7-8401-4674-bb50-3934b873c896");
+                        tx1.addField("B", "pending");
+                        tx1.addField("C", "2021-11-24");
+                        tx1.addField("D", "NPP394");
+                    }),
+                    createMessage(tx2 -> {
+                        tx2.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
+                        tx2.addField("B", "archived");
+                        tx2.addField("C", "2021-11-24");
+                        tx2.addField("D", "TML5049");
+                    }),
+                    createMessage(tx3 -> {
+                        tx3.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
+                        tx3.addField("B", "archived");
+                        tx3.addField("C", "2021-11-24");
+                        tx3.addField("D", "TML227");
+                    }),
+                    createMessage(tx4 -> {
+                        tx4.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
+                        tx4.addField("B", "archived");
+                        tx4.addField("D", "cash");
+                    })
+            ));
+        });
+
+        IMessage expected = createMessage(root -> {
+            root.addField("transactions", asList(
+                    createMessage(tx -> {
+                        tx.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
+                        tx.addField("B", "archived");
+                        tx.addField("C", StaticUtil.nullFilter(0, null));
+                        tx.addField("D", "cash");
+                    }),
+                    createMessage(tx -> {
+                        tx.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
+                        tx.addField("B", "archived");
+                        tx.addField("C", "2021-11-24");
+                        tx.addField("D", "TML227");
+                    }),
+                    createMessage(tx -> {
+                        tx.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
+                        tx.addField("B", "archived");
+                        tx.addField("C", "2021-11-24");
+                        tx.addField("D", "TML5049");
+                    })
+            ));
+        });
+
+        ComparisonResult result = MessageComparator.compare(actual, expected, new ComparatorSettings().setKeepResultGroupOrder(true));
+        Assert.assertNotNull("result must not be null", result);
+        ComparisonResult transactions = result.getResult("transactions");
+        Assert.assertNotNull("transactions must not be null", transactions);
+        Map<String, ComparisonResult> elements = transactions.getResults();
+        Assert.assertEquals("Unexpected elements size: " + elements, 4, elements.size());
+        BiConsumer<String, StatusType> assertStatus = (key, expectedStatus) -> {
+            ComparisonResult first = elements.get(key);
+            Assert.assertNotNull(key + " result must not be null", first);
+            Assert.assertEquals("Unexpected result for " + key + ":" + first, expectedStatus, ComparisonUtil.getStatusType(first));
+        };
+        assertStatus.accept("0", StatusType.NA);
+        assertStatus.accept("1", StatusType.PASSED);
+        assertStatus.accept("2", StatusType.PASSED);
+        assertStatus.accept("3", StatusType.PASSED);
     }
 
     private static void assertComparisonResult(String name, ComparisonResult result, Object expected, Object actual) {
