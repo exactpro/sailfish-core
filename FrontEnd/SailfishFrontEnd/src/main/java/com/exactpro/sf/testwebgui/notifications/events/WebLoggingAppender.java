@@ -19,12 +19,33 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
-public class WebLoggingAppender extends AppenderSkeleton{
+@Plugin(name = "WebLoggingAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
+public class WebLoggingAppender extends AbstractAppender {
 
     private static final List<LogSubscriber> subscribers = new CopyOnWriteArrayList<LogSubscriber>();
+
+    private WebLoggingAppender(String name, Filter filter, Layout layout) {
+        super(name, filter, layout);
+    }
+
+    @PluginFactory
+    public static WebLoggingAppender createAppender(
+            @PluginAttribute("name") String name,
+            @PluginElement("Filter") Filter filter,
+            @PluginElement("Layout") Layout layout) {
+        return new WebLoggingAppender(name,filter , layout);
+    }
 
     public static void registerSubscriber(LogSubscriber subscriber) {
 		subscribers.add(subscriber);
@@ -33,21 +54,12 @@ public class WebLoggingAppender extends AppenderSkeleton{
 	public static void unRegisterSubscriber(LogSubscriber subscriber) {
 		subscribers.remove(subscriber);
 	}
-	
-	@Override
-	public void close() {
-		subscribers.clear();
-	}
 
 	@Override
-	public boolean requiresLayout() {
-		return false;
-	}
-
-	@Override
-	protected void append(LoggingEvent event) {
+    public void append(LogEvent event) {
+        LogEvent immutableEvent = event.toImmutable();
 		for (LogSubscriber subscriber : subscribers) {
-			subscriber.onEvent(event);
+			subscriber.onEvent(immutableEvent);
 		}
 	}
 	

@@ -15,46 +15,61 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration;
 
+import static com.exactpro.sf.util.LogUtils.addAppender;
+import static com.exactpro.sf.util.LogUtils.removeAllAppenders;
+import static com.exactpro.sf.util.LogUtils.removeAppender;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter.Result;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.RolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.TriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.action.Action;
+import org.apache.logging.log4j.core.appender.rolling.action.DeleteAction;
+import org.apache.logging.log4j.core.appender.rolling.action.IfFileName;
+import org.apache.logging.log4j.core.appender.rolling.action.PathCondition;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.jetbrains.annotations.NotNull;
 
-import com.exactpro.sf.common.logging.DailyMaxRollingFileAppender;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.util.LogUtils;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
 public class LoggingConfigurator implements ILoggingConfigurator {
 
-    private static final String DATE_PATTERN = "'.'yyyy-MM-dd";
+    private static final String DATE_PATTERN =  ".%d{MM-dd-yyyy}";
 
     private static final String LAYOUT_PATTERN = "%p %t %d{dd MMM yyyy HH:mm:ss,SSS} %c - %m%n";
 
-    private static final int MAX_BACKUPS = 3;
-
-    private static final Logger logger = Logger.getLogger(LoggingConfigurator.class);
+    private static final Logger logger = LogManager.getLogger(LoggingConfigurator.class);
 
     private static final String SERVICE_LOG_FOLDER = "services";
+    private static final String OLD_FILE_NAME_ENDING = ".*";
 
     private final Object lock = new Object();
 
     private final SetMultimap<ServiceName, String> serviceLoggers = HashMultimap.create();
 
-    private final Map<ServiceName, DailyMaxRollingFileAppender> serviceAppenders = new HashMap<>();
+    private final Map<ServiceName, Appender> serviceAppenders = new HashMap<>();
 
-    private DailyMaxRollingFileAppender mainAppender;
+    private Appender mainAppender;
 
     private final IWorkspaceDispatcher wd;
     private final ILoggingConfiguration loggingConfiguration;
@@ -83,7 +98,7 @@ public class LoggingConfigurator implements ILoggingConfigurator {
             }
 
         } catch (RuntimeException e) {
-            if (logger.isEnabledFor(Level.ERROR)) {
+            if (logger.isEnabled(Level.ERROR)) {
                 logger.error("Failed to create appender for service: " + serviceName, e);
             }
         }
@@ -97,7 +112,7 @@ public class LoggingConfigurator implements ILoggingConfigurator {
         try {
             synchronized (lock) {
 
-                DailyMaxRollingFileAppender serviceAppender = loggingConfiguration.isIndividualAppendersEnabled() ? serviceAppenders.remove(serviceName) : getOrCreateMainAppender();
+                Appender serviceAppender = loggingConfiguration.isIndividualAppendersEnabled() ? serviceAppenders.remove(serviceName) : getOrCreateMainAppender();
 
                 if (serviceAppender == null) {
                     if (logger.isInfoEnabled()) {
@@ -105,20 +120,19 @@ public class LoggingConfigurator implements ILoggingConfigurator {
                     }
                     return;
                 }
-
                 serviceLoggers.removeAll(serviceName).forEach(loggerName -> {
-                    LogManager.getLogger(loggerName).removeAppender(serviceAppender);
+                    removeAllAppenders(LogManager.getLogger(loggerName));
                 });
 
                 if (loggingConfiguration.isIndividualAppendersEnabled()) {
-                    serviceAppender.close();
+                    serviceAppender.stop();
                 } else if (serviceLoggers.isEmpty()) {
-                    mainAppender.close();
+                    mainAppender.stop();
                     mainAppender = null;
                 }
             }
         } catch (RuntimeException e) {
-            if (logger.isEnabledFor(Level.ERROR)) {
+            if (logger.isEnabled(Level.ERROR)) {
                 logger.error("Failed to destroy appender for service: " + serviceName, e);
             }
         }
@@ -128,7 +142,7 @@ public class LoggingConfigurator implements ILoggingConfigurator {
     public void registerLogger(@NotNull Object obj, @NotNull ServiceName serviceName) {
         String loggerName = ILoggingConfigurator.getLoggerName(obj);
 
-        Logger log = LogManager.exists(loggerName);
+        Logger log = LogManager.getLogger(loggerName);
 
         if (log == null) {
             throw new EPSCommonException(String.format("Logger with name '%s' doesn`t exists", loggerName));
@@ -136,18 +150,18 @@ public class LoggingConfigurator implements ILoggingConfigurator {
 
         try {
             synchronized (lock) {
-                DailyMaxRollingFileAppender appender;
+                Appender appender;
                 if (loggingConfiguration.isIndividualAppendersEnabled()) {
                     appender = getOrCreateServiceAppender(serviceName);
                 } else {
                     appender = getOrCreateMainAppender();
                 }
+                addAppender(log, appender);
 
-                log.addAppender(appender);
                 serviceLoggers.put(serviceName, loggerName);
             }
         } catch (RuntimeException e) {
-            if (logger.isEnabledFor(Level.ERROR)) {
+            if (logger.isEnabled(Level.ERROR)) {
                 logger.error(String.format("Failed to register logger '%s' for service: %s", loggerName, serviceName), e);
             }
         }
@@ -159,17 +173,15 @@ public class LoggingConfigurator implements ILoggingConfigurator {
             synchronized (lock) {
                 if (!loggingConfiguration.isIndividualAppendersEnabled()) {
 
-                    DailyMaxRollingFileAppender removingAppender = getOrCreateMainAppender();
+                    Appender removingAppender = getOrCreateMainAppender();
                     serviceLoggers.forEach((serviceName, loggerName) -> {
-                        DailyMaxRollingFileAppender serviceAppender = getOrCreateServiceAppender(serviceName);
-
+                        Appender serviceAppender = getOrCreateServiceAppender(serviceName);
                         Logger log = LogManager.getLogger(loggerName);
-
-                        log.removeAppender(removingAppender);
-                        log.addAppender(serviceAppender);
+                        removeAppender(log, removingAppender);
+                        addAppender(log, serviceAppender);
                     });
 
-                    mainAppender.close();
+                    mainAppender.stop();
                     mainAppender = null;
                     loggingConfiguration.setIndividualAppendersEnabled(true);
                 }
@@ -185,17 +197,16 @@ public class LoggingConfigurator implements ILoggingConfigurator {
             synchronized (lock) {
                 if (loggingConfiguration.isIndividualAppendersEnabled()) {
 
-                    DailyMaxRollingFileAppender addingAppender = getOrCreateMainAppender();
+                    Appender addingAppender = getOrCreateMainAppender();
 
                     serviceLoggers.forEach((serviceName, loggerName) -> {
-                        DailyMaxRollingFileAppender serviceAppender = serviceAppenders.get(serviceName);
-
+                        Appender serviceAppender = serviceAppenders.get(serviceName);
                         Logger log = LogManager.getLogger(loggerName);
-                        log.removeAppender(serviceAppender);
-                        log.addAppender(addingAppender);
+                        removeAppender(log, serviceAppender);
+                        addAppender(log, addingAppender);
                     });
 
-                    serviceAppenders.values().forEach(Appender::close);
+                    serviceAppenders.values().forEach(Appender::stop);
                     serviceAppenders.clear();
 
                     loggingConfiguration.setIndividualAppendersEnabled(false);
@@ -234,19 +245,60 @@ public class LoggingConfigurator implements ILoggingConfigurator {
         return pathBuilder.toString();
     }
 
-    private static DailyMaxRollingFileAppender createAppender(String filename) throws IOException {
-        DailyMaxRollingFileAppender appender = new DailyMaxRollingFileAppender(new PatternLayout(LAYOUT_PATTERN), filename, DATE_PATTERN);
-        appender.setBufferedIO(true);
-        appender.setMaxBackupIndex(MAX_BACKUPS);
+    private Appender createAppender(String filename) {
+
+        PatternLayout layout = PatternLayout.newBuilder()
+                .withPattern(LAYOUT_PATTERN)
+                .build();
+
+        TriggeringPolicy policy = TimeBasedTriggeringPolicy.newBuilder()
+                .withInterval(1)
+                .build();
+
+        IfFileName ifFileName = IfFileName.createNameCondition(FilenameUtils.getName(filename) + OLD_FILE_NAME_ENDING, null);
+
+        DeleteAction deleteAction = getDeleteAction(filename, ifFileName);
+
+        RolloverStrategy strategy = DefaultRolloverStrategy.newBuilder()
+                .withCustomActions(new Action[] { deleteAction })
+                .build();
+
+        String filePattern = getBackupFilePattern(filename);
+
+        RollingFileAppender appender = RollingFileAppender.newBuilder()
+                .setName("Appender_" + filename)
+                .withFileName(filename)
+                .withFilePattern(filePattern)
+                .setFilter(ThresholdFilter.createFilter(Level.toLevel(loggingConfiguration.getIndividualAppendersThereshold(), Level.ALL), Result.ACCEPT, Result.DENY))
+                .setLayout(layout)
+                .withPolicy(policy)
+                .withStrategy(strategy)
+                .build();
         return appender;
     }
 
-    private DailyMaxRollingFileAppender getOrCreateMainAppender() {
+    @NotNull
+    private static DeleteAction getDeleteAction(String filename, IfFileName ifFileName) {
+        return DeleteAction.createDeleteAction(FilenameUtils.getFullPathNoEndSeparator(filename),
+                false, // whether to follow symbolic links. For us - false
+                1, // the maximum number of levels of directories for action. For us - 1
+                false, // test mode for delete files. For us - false
+                null, // PathSorter, if null, the default sorter will be used
+                new PathCondition[] {  ifFileName },
+                null, // Not used, used PathCondition
+                LogUtils.getConfiguration()); // default configuration is used
+    }
+
+    @NotNull
+    private static String getBackupFilePattern(String filename) {
+        return filename + DATE_PATTERN;
+    }
+
+    private Appender getOrCreateMainAppender() {
         if (mainAppender == null) {
             try {
                 File logFile = wd.getOrCreateFile(FolderType.LOGS, "services.log");
                 mainAppender = createAppender(logFile.getCanonicalPath());
-                mainAppender.setThreshold(Level.toLevel(loggingConfiguration.getIndividualAppendersThereshold(), Level.ALL));
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
                 throw new EPSCommonException("Can`t create file service.log for main appender.", e);
@@ -255,13 +307,12 @@ public class LoggingConfigurator implements ILoggingConfigurator {
         return mainAppender;
     }
 
-    private DailyMaxRollingFileAppender getOrCreateServiceAppender(ServiceName serviceName) {
+    private Appender getOrCreateServiceAppender(ServiceName serviceName) {
         return serviceAppenders.computeIfAbsent(serviceName, key -> {
             String filename = toLogPath(key, true);
             try {
                 File logFolder = wd.getOrCreateFile(FolderType.LOGS, filename + ".log");
-                DailyMaxRollingFileAppender appender = createAppender(logFolder.getCanonicalPath());
-                appender.setThreshold(Level.toLevel(loggingConfiguration.getIndividualAppendersThereshold(), Level.ALL));
+                Appender appender = createAppender(logFolder.getCanonicalPath());
                 return appender;
             } catch (IOException e) {
                 throw new EPSCommonException(String.format("Can`t create file %s for service %s", filename, key), e);

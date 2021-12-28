@@ -12,9 +12,9 @@ subprojects {
 
     dependencies {
     	//FIXME: replace all log4j to slf4j logger
-    	compileOnly "org.slf4j:slf4j-log4j12:${version_slf4j}"
+        compileOnly "org.apache.logging.log4j:log4j-slf4j-impl:${version_log4j2}"
 
-    	testCompile "org.slf4j:slf4j-log4j12:${version_slf4j}"
+    	testCompile "org.apache.logging.log4j:log4j-slf4j-impl:${version_log4j2}"
     }
 
     writeBuildInfo.dependsOn.add('assemble')

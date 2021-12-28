@@ -15,16 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.mockito.ArgumentMatchers;
@@ -76,7 +79,6 @@ public class AbstractTest {
 	protected static final File BASE_DIR = new File((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir"));
 	protected static final File SAILFISH_DICTIONARY_PATH = new File("cfg/dictionaries/");
 	protected static final String WORKSPACE_FOLDER = BIN_FOLDER_PATH + File.separator + "workspace" + File.separator;
-    protected static final String LOG_PROPERTIES_PATH = "log4j.properties";
 
     protected static IServiceContext serviceContext;
     protected static IWorkspaceDispatcher workspaceDispatcher;
@@ -118,9 +120,7 @@ public class AbstractTest {
 		synchronized(logger) {
 		    try {
     			if(!isLoggingAlreadyConfigured) {
-                    try (InputStream inputStream = AbstractTest.class.getClassLoader().getResourceAsStream(LOG_PROPERTIES_PATH)) {
-                        PropertyConfigurator.configure(inputStream);
-                    }
+                    setConfigLocation(Objects.requireNonNull(AbstractTest.class.getClassLoader().getResource(LOG4J_PROPERTIES_FILE_NAME)).getFile());
     			}
 		    } finally {
 		        isLoggingAlreadyConfigured = true;

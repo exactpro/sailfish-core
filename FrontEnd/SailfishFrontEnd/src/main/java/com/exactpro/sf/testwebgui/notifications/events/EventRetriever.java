@@ -18,7 +18,8 @@ package com.exactpro.sf.testwebgui.notifications.events;
 import com.exactpro.sf.testwebgui.servlets.PollingServlet;
 import com.exactprosystems.webchannels.IUpdateRequestListener;
 import com.exactprosystems.webchannels.IUpdateRetriever;
-import org.apache.log4j.spi.LoggingEvent;
+
+import org.apache.logging.log4j.core.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class EventRetriever implements IUpdateRetriever, LogSubscriber{
 
 	private final List<IUpdateRequestListener> listeners;
 
-	private final Queue<LoggingEvent> eventQueue;
+	private final Queue<LogEvent> eventQueue;
 
 	public EventRetriever() {
 		listeners = new ArrayList<>();
@@ -70,13 +71,13 @@ public class EventRetriever implements IUpdateRetriever, LogSubscriber{
 	@Override
 	public void synchronizeUpdateRequest(IUpdateRequestListener listener)   {
 
-		Queue<LoggingEvent> copyEvents = null;
+		Queue<LogEvent> copyEvents = null;
 
 		synchronized (eventQueue) {
 			copyEvents = new LinkedList<>(eventQueue);
 		}
 
-		for (LoggingEvent event : copyEvents) {
+		for (LogEvent event : copyEvents) {
 			Event updateEvent = new Event();
 			updateEvent.setEvent(event);
 			notifyListener(listener, updateEvent);
@@ -97,7 +98,7 @@ public class EventRetriever implements IUpdateRetriever, LogSubscriber{
 	}
 
 	@Override
-	public void onEvent(LoggingEvent event) {
+	public void onEvent(LogEvent event) {
 
 		synchronized (eventQueue) {
 			eventQueue.offer(event);

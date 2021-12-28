@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +26,6 @@ import java.nio.file.Files;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,7 @@ public class TCPIPPluginTest {
 	protected static final File BASE_DIR = new File((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir"));
 	protected static final String SAILFISH_DICTIONARY_PATH = "cfg" + File.separator + "dictionaries" + File.separator;
 	protected static final String WORKSPACE_FOLDER = BIN_FOLDER_PATH + File.separator + "plugin" + File.separator;
-	protected static final String LOG_PROPERTIES_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "log4j.properties";
+	protected static final String LOG_PROPERTIES_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + LOG4J_PROPERTIES_FILE_NAME;
 
 	private static boolean isLoggingAlreadyConfigured;
 	private static boolean isAlreadyConfigured;
@@ -88,7 +90,7 @@ public class TCPIPPluginTest {
 		synchronized (logger) {
 			try {
 				if (!isLoggingAlreadyConfigured) {
-					PropertyConfigurator.configure(LOG_PROPERTIES_PATH);
+                    setConfigLocation(LOG_PROPERTIES_PATH);
 				}
 			} finally {
 				isLoggingAlreadyConfigured = true;

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +26,6 @@ import java.nio.file.Files;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class AML3PluginTest {
 	protected static final File BASE_DIR = new File((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir"));
 	protected static final File SAILFISH_DICTIONARY_PATH = new File(BASE_DIR, "src/main/plugin/cfg/dictionaries/");
 	protected static final String WORKSPACE_FOLDER = BIN_FOLDER_PATH + File.separator + "plugin" + File.separator;
-	protected static final String LOG_PROPERTIES_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "log4j.properties";
+	protected static final String LOG_PROPERTIES_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + LOG4J_PROPERTIES_FILE_NAME;
 
 	protected static ISFContext context;
 
@@ -104,7 +106,7 @@ public class AML3PluginTest {
 		synchronized (logger) {
 			try {
 				if (!isLoggingAlreadyConfigured) {
-					PropertyConfigurator.configure(LOG_PROPERTIES_PATH);
+                    setConfigLocation(LOG_PROPERTIES_PATH);
 				}
 			} finally {
 				isLoggingAlreadyConfigured = true;

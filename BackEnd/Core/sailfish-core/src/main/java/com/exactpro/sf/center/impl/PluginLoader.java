@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.center.impl;
 
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,8 +36,6 @@ import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +58,7 @@ import com.exactpro.sf.scriptrunner.PreprocessorLoader;
 import com.exactpro.sf.scriptrunner.ValidatorLoader;
 import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.util.DirectoryFilter;
+import com.exactpro.sf.util.LogUtils;
 
 // This is public class and used in other tools
 public class PluginLoader {
@@ -65,7 +66,7 @@ public class PluginLoader {
 	private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
 	private final Logger userEventsLogger = CommonLoggers.USER_EVENTS_LOGGER;
 
-	public static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
+	public static final String LOG4J_PROPERTIES_FILE_NAME = LogUtils.LOG4J_PROPERTIES_FILE_NAME;
 	public static final String CUSTOM_DICTIONARIES_XML = "custom_dictionaries.xml";
 	public static final String VERSION_FILE_NAME = "VERSION";
 
@@ -309,13 +310,13 @@ public class PluginLoader {
         String root = new File(DefaultWorkspaceLayout.getInstance().getPath(new File("."), folderType), pluginPath).getPath();
 
 		//
-		// Load log.properties
+		// Load log4j2.properties
 		//
 		try {
 		    File file = wd.getFile(folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    logger.info("Loading logger configuration: {{}}/{}/{}", folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    try {
-                new PropertyConfigurator().doConfigure(file.getPath(), LogManager.getLoggerRepository());
+                setConfigLocation(file);
 		    } catch (Exception e) {
 		        throw new EPSCommonException("Failed to configure logger. {" + folderType + "}/" + pluginPath + "/" + LOG4J_PROPERTIES_FILE_NAME, e);
 		    }

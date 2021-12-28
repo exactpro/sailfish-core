@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -34,7 +36,6 @@ import com.exactpro.sf.bigbutton.library.Executor;
 import com.exactpro.sf.bigbutton.library.Library;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 import com.exactpro.sf.bigbutton.library.Tag;
-import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -356,7 +357,7 @@ public class RegressionRunner implements AutoCloseable {
 
                 String dbSettings = RegressionRunnerUtils.getStatisticsDBSettings();
 
-                File loggingConfiguration = workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.LOG4J_PROPERTIES_FILE_NAME);
+                File loggingConfiguration = workspaceDispatcher.getFile(FolderType.CFG, LOG4J_PROPERTIES_FILE_NAME);
 
                 List<ExecutorClient> preparedClients = new ArrayList<>();
 

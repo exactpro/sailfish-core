@@ -16,19 +16,19 @@
 package com.exactpro.sf.testwebgui.notifications.events;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.LogEvent;
 
 import com.exactprosystems.webchannels.AbstractUpdateEvent;
 
 public class Event implements AbstractUpdateEvent {
 	
-	LoggingEvent event;
+	LogEvent event;
 
-	public LoggingEvent getEvent() {
+	public LogEvent getEvent() {
 		return event;
 	}
 
-	public void setEvent(LoggingEvent event) {
+	public void setEvent(LogEvent event) {
 		this.event = event;
 	}
 	

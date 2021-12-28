@@ -15,11 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.apache.log4j.PropertyConfigurator;
 
 public class EPSTestCase
 {
@@ -34,9 +35,8 @@ public class EPSTestCase
 		{
 			if ( isLoggingAlreadyConfigured == false )
 			{
-				String configFile = getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "log.properties";
-
-				PropertyConfigurator.configure(configFile);
+				String configFile = getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + LOG4J_PROPERTIES_FILE_NAME;
+                setConfigLocation(configFile);
 				isLoggingAlreadyConfigured = true;
 			}
 

@@ -335,7 +335,7 @@ public class SFContextServlet implements Servlet {
     		IWorkspaceDispatcher wd = createWorkspaceDispatcher(workspacePath);
 
             // ----------- log4j init
-            // allow to use ${sf.log.dir} in log.properties
+            // allow to use ${sf.log.dir} in log4j2.properties
             File sfLogDir = wd.createFolder(FolderType.LOGS,  "");
             System.setProperty("sf.log.dir", sfLogDir.getAbsolutePath());
 

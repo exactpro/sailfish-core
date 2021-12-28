@@ -15,10 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
@@ -192,67 +188,6 @@ public final class NTGUtility {
 			randomString.append( (char)( 65 + RND.nextInt(90 - 65)));
 		}
 		return randomString.toString();
-	}
-
-	public static String setupLoggerConfiguration()
-	{
-
-        String defaultSettings =
-			"log4j.rootLogger=ALL,A,C" + EOL +
-			"#,SOCK" + EOL +
-			"log4j.appender.A=org.apache.log4j.RollingFileAppender" + EOL +
-			"log4j.appender.A.File=${basedir}/temp/unit_test_log.txt" + EOL +
-			"log4j.appender.A.MaxFileSize=100MB" + EOL +
-			"# Keep one backup file" + EOL +
-			"log4j.appender.A.MaxBackupIndex=1" + EOL +
-			"# Truncate 'test' if it already exists." + EOL +
-			"log4j.appender.A.Append=true" + EOL +
-			"log4j.appender.A.layout=org.apache.log4j.PatternLayout" + EOL +
-			"log4j.appender.A.layout.ConversionPattern=%p %t %d{dd MMM yyyy HH:mm:ss,SSS} %c - %m%n" + EOL +
-			"log4j.appender.C=org.apache.log4j.ConsoleAppender" + EOL +
-			"log4j.appender.C.layout=org.apache.log4j.PatternLayout" + EOL +
-			"log4j.appender.C.layout.ConversionPattern=%p %t %d{dd MMM yyyy HH:mm:ss,SSS} %c - %m%n" + EOL +
-			"#log4j.appender.SOCK=org.apache.log4j.net.SocketAppender" + EOL +
-			"#log4j.appender.SOCK.RemoteHost=localhost" + EOL +
-			"#log4j.appender.SOCK.Port=5000" + EOL +
-			"#log4j.appender.SOCK.LocationInfo=true";
-
-		String tempConfigFileName = null;
-
-		try
-		{
-			tempConfigFileName = new File(".").getCanonicalPath() +
-			File.separator + "testdata" + File.separator + "log.properties";
-
-			File configFile = new File(tempConfigFileName);
-
-			File directory = new File( new File(".").getCanonicalPath() +
-					File.separator + "testdata" );
-
-			if(!directory.exists())
-			{
-				directory.mkdirs();
-			}
-
-			if(!configFile.exists())
-			{
-				BufferedWriter output = new BufferedWriter(new FileWriter( configFile ));
-				output.write( defaultSettings );
-				output.flush();
-				output.close();
-                return tempConfigFileName;
-			}
-			else
-			{
-                return tempConfigFileName;
-			}
-		}
-		catch( IOException e )
-		{
-			logger.error(e.getMessage(), e);
-		}
-
-        return null;
 	}
 
 	/**

@@ -60,6 +60,10 @@ public class AppenderAdapter  implements Serializable {
             pairs.add(new MutablePair<>(entry.getKey(), entry.getValue()));
         }
     }
+    public void setParam(String key, String value) {
+            params.put(key, value);
+            pairs.add(new MutablePair<>(key, value));
+    }
 
     public List<Pair<String, String>> getPairs() {
         return pairs;

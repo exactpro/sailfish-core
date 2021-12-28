@@ -15,15 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.servlets;
 
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.helpers.FileWatchdog;
-import org.apache.log4j.helpers.LogLog;
+import org.apache.logging.log4j.status.StatusLogger;
 
-import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
@@ -31,8 +30,9 @@ import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 /**
  * PropertyConfigurator is able to stopWatch to clean up its threads
  */
-public class CustomPropertyConfigurator extends PropertyConfigurator {
+public class CustomPropertyConfigurator {
 
+    private static final StatusLogger logger = StatusLogger.getLogger();
     private static CustomPropertyWatchdog pdog;
 
     public static void configureAndWatch(IWorkspaceDispatcher workspaceDispatcher) {
@@ -47,11 +47,8 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
     private static class CustomPropertyWatchdog extends Thread {
 
         private final IWorkspaceDispatcher workspaceDispatcher;
-        /**
-         * The delay to observe between every check. By default set @
-         * {@link FileWatchdog#DEFAULT_DELAY}.
-         */
-        protected volatile long delay = 1000;//FileWatchdog.DEFAULT_DELAY;
+
+        protected volatile long delay = 1000;
 
         private long lastModif = 0;
         private boolean warnedAlready = false;
@@ -79,7 +76,7 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
         
         protected void checkAndConfigure() {
             try {
-                File file = workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.LOG4J_PROPERTIES_FILE_NAME);
+                File file = workspaceDispatcher.getFile(FolderType.CFG, LOG4J_PROPERTIES_FILE_NAME);
                 long l = file.lastModified();
                 if (l > lastModif) {
                     lastModif = l;
@@ -87,12 +84,12 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
                     warnedAlready = false;
                 }
             } catch (SecurityException | WorkspaceSecurityException e) {
-                LogLog.warn("Was not allowed to read check file existance, file:[" +
-                        PluginLoader.LOG4J_PROPERTIES_FILE_NAME + "].", e);
+                logger.warn("Was not allowed to read check file existance, file:[" +
+                        LOG4J_PROPERTIES_FILE_NAME + "].", e);
                 interrupted = true;
             } catch (FileNotFoundException e) {
                 if (!warnedAlready) {
-                    LogLog.debug("[" + PluginLoader.LOG4J_PROPERTIES_FILE_NAME + "] does not exist.", e);
+                    logger.debug("[" + LOG4J_PROPERTIES_FILE_NAME + "] does not exist.", e);
                     warnedAlready = true;
                 }
             }
@@ -101,8 +98,6 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
     }
 
     public static void doOnChange(File file) {
-        new PropertyConfigurator().doConfigure(file.getAbsolutePath(),
-                LogManager.getLoggerRepository());
-
+        setConfigLocation(file);
     }
 }

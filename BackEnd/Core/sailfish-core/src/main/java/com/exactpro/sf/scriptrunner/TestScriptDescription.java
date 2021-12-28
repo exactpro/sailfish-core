@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
+import static com.exactpro.sf.util.LogUtils.removeAllAppenders;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +29,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
 import com.exactpro.sf.SerializeUtil;
@@ -855,7 +858,7 @@ public class TestScriptDescription implements Closeable
 
             // stop script logger
             if(scriptLogger != null) {
-                org.apache.log4j.Logger.getLogger(scriptLogger.getName()).removeAllAppenders();
+                removeAllAppenders(LogManager.getLogger(scriptLogger.getName()));
             }
             this.scriptLogger = null;
         } finally {

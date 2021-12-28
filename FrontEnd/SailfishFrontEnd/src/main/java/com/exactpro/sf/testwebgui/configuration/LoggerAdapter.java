@@ -15,16 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.configuration;
 
+import static com.exactpro.sf.testwebgui.configuration.SFLogConfigurationVisualizer.DEFAULT_LEVEL;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Level;
-
 @SuppressWarnings("serial")
 public class LoggerAdapter implements Serializable {
 
-    private String level = Level.INFO.toString();
+    private String level = DEFAULT_LEVEL;
     private String name = "";
     private List<String> appenders = new ArrayList<>();
 

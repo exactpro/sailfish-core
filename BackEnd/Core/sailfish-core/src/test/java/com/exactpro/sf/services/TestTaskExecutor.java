@@ -15,14 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import java.io.OutputStreamWriter;
+import static com.exactpro.sf.util.LogUtils.addRootLoggerAppender;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,10 +37,17 @@ public class TestTaskExecutor {
 
 	@BeforeClass
 	public static void init() {
-		ConsoleAppender ca = new ConsoleAppender();
-		ca.setWriter(new OutputStreamWriter(System.out));
-		ca.setLayout(new PatternLayout("%-5p [%t]: %m%n"));
-		BasicConfigurator.configure(ca);
+        PatternLayout layout = PatternLayout.newBuilder()
+                .withPattern("%-5p [%t]: %m%n")
+                .build();
+
+        ConsoleAppender ca = ConsoleAppender.newBuilder()
+                .setName("ConsoleAppender")
+                .setLayout(layout)
+                .setTarget(Target.SYSTEM_OUT)
+                .build();
+
+        addRootLoggerAppender(ca);
 	}
 	
 	@Test

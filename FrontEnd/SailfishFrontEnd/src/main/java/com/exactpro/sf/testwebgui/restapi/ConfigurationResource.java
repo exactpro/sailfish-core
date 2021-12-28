@@ -16,7 +16,8 @@
 
 package com.exactpro.sf.testwebgui.restapi;
 
-import static com.exactpro.sf.center.impl.PluginLoader.LOG4J_PROPERTIES_FILE_NAME;
+
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
 
 import java.io.File;
 import java.io.FileNotFoundException;

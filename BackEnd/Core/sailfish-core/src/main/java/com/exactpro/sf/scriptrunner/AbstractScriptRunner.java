@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
+import static com.exactpro.sf.util.LogUtils.addAppender;
+import static com.exactpro.sf.util.LogUtils.removeAllAppenders;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,11 +39,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.HTMLLayout;
-import org.apache.log4j.Level;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Filter.Result;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
+import org.apache.logging.log4j.core.layout.HtmlLayout;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -861,36 +867,42 @@ public abstract class AbstractScriptRunner implements IDisposable {
     }
 
     private Logger createScriptLogger(ScriptSettings scriptSettings, String reportFolder) throws IOException, WorkspaceStructureException {
-        org.apache.log4j.Logger scriptLogger = org.apache.log4j.Logger.getLogger("TestScript_" + RandomStringUtils.randomAlphanumeric(10));
-        scriptLogger.removeAllAppenders();
+        org.apache.logging.log4j.Logger scriptLogger = LogManager.getLogger("TestScript_" + RandomStringUtils.randomAlphanumeric(10));
+        removeAllAppenders(scriptLogger);
 
-        PatternLayout layout = new PatternLayout(scriptSettings.getFileLayout());
+        PatternLayout layout = PatternLayout.newBuilder()
+                .withPattern(scriptSettings.getFileLayout())
+                .build();
 
-        RollingFileAppender fileAppender = new RollingFileAppender(layout, workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "script.log").getPath());
+        FileAppender fileAppender = FileAppender.newBuilder()
+                .setName("TESTSCRIPTFILEAPPENDER")
+                .withFileName(workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "script.log").getPath())
+                .setFilter(ThresholdFilter.createFilter(Level.toLevel(scriptSettings.getFileLoggerLevel()), Result.ACCEPT, Result.DENY))
+                .setLayout(layout)
+                .build();
 
-        fileAppender.setName("TESTSCRIPTFILEAPPENDER");
+        HtmlLayout htmlLayout = HtmlLayout.createDefaultLayout();
 
-        fileAppender.setThreshold(Level.toLevel(scriptSettings.getFileLoggerLevel()));
+        FileAppender htmlFileAppender = FileAppender.newBuilder()
+                .setName("HTMLTESTSCRIPTFILEAPPENDER")
+                .withFileName(workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "scriptlog.html").getPath())
+                .setFilter(ThresholdFilter.createFilter(Level.toLevel(scriptSettings.getFileLoggerLevel()), Result.ACCEPT, Result.DENY))
+                .setLayout(htmlLayout)
+                .build();
 
-        fileAppender.activateOptions();
+        PatternLayout conLayout = PatternLayout.newBuilder()
+                .withPattern(scriptSettings.getConsoleLayout())
+                .build();
 
-        HTMLLayout htmlLayout = new HTMLLayout();
+        ConsoleAppender conAppender = ConsoleAppender.newBuilder()
+                .setName("TESTSCRIPTCONSOLEAPPENDER")
+                .setFilter(ThresholdFilter.createFilter(Level.toLevel(scriptSettings.getConsoleLoggerLevel()), Result.ACCEPT, Result.DENY))
+                .setLayout(conLayout)
+                .build();
 
-        RollingFileAppender htmlFileAppender = new RollingFileAppender(htmlLayout, workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "scriptlog.html").getPath());
-
-        htmlFileAppender.setName("HTMLTESTSCRIPTFILEAPPENDER");
-
-        htmlFileAppender.setThreshold(Level.toLevel(scriptSettings.getFileLoggerLevel()));
-
-        PatternLayout conLayout = new PatternLayout(scriptSettings.getConsoleLayout());
-
-        ConsoleAppender conAppender = new ConsoleAppender(conLayout);
-        conAppender.setThreshold(Level.toLevel(scriptSettings.getConsoleLoggerLevel()));
-        conAppender.activateOptions();
-
-        scriptLogger.addAppender(fileAppender);
-        scriptLogger.addAppender(conAppender);
-        scriptLogger.addAppender(htmlFileAppender);
+        addAppender(scriptLogger, fileAppender);
+        addAppender(scriptLogger, conAppender);
+        addAppender(scriptLogger, htmlFileAppender);
 
         return LoggerFactory.getLogger(scriptLogger.getName());
     }

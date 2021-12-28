@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.notifications.events;
 
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.LogEvent;
 
 public interface LogSubscriber {
 
-	void onEvent(LoggingEvent event);
+	void onEvent(LogEvent event);
 	
 }

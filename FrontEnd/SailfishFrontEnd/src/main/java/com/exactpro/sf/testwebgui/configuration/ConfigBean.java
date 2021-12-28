@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.configuration;
 
+
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -104,8 +107,6 @@ public class ConfigBean implements Serializable {
 	private static final String DEFAULT_SECTION = "database";
 
 	private static final String HIBERNATE_CFG_FILE = "hibernate.cfg.xml";
-
-    private static final String LOG_PROPERTIES_FILE = "log.properties";
 
     private String logConfigText;
 
@@ -406,7 +407,7 @@ public class ConfigBean implements Serializable {
 		logger.info("readConfig: begin");
 		StringBuilder text = new StringBuilder();
 		try {
-			File file = BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, LOG_PROPERTIES_FILE);
+			File file = BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, LOG4J_PROPERTIES_FILE_NAME);
             try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 				String str;
 				while ((str = br.readLine()) != null) {
@@ -598,7 +599,7 @@ public class ConfigBean implements Serializable {
 
 		File config = null;
 		try {
-			 config = BeanUtil.getSfContext().getWorkspaceDispatcher().createFile(FolderType.CFG, true, LOG_PROPERTIES_FILE);
+			 config = BeanUtil.getSfContext().getWorkspaceDispatcher().createFile(FolderType.CFG, true, LOG4J_PROPERTIES_FILE_NAME);
 		} catch(WorkspaceStructureException ex) {
 			logger.error(ex.getMessage(), ex);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "Could not save log config - " + ex.getMessage());

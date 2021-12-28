@@ -146,7 +146,8 @@ allprojects {
         }
 
         //Lib versions
-        version_slf4j = '1.7.26'
+        version_log4j2 = '2.17.0'
+        version_slf4j = '1.7.32'
         version_hibernate = '4.3.11.Final'
         netty_version = '4.1.39.Final'
     }
@@ -317,7 +318,7 @@ subprojects {
                         'javax.activation:activation:1.1.1', //transitive tree
                         'org.javassist:javassist:3.22.0-GA', //hibernate-core:5.2.15.Final, hk2-locator:2.4.0-b31 - max 3.22.0-GA
                         'org.primefaces:primefaces:5.0', //primefaces-extensions:1.2.1 - max 5.3
-                        'org.slf4j:slf4j-api:1.7.25', //redmine-java-api:2.1.0 - max 1.7.13
+                        "org.slf4j:slf4j-api:${version_slf4j}",
                         'com.google.guava:guava:27.0.1-jre', //io.qameta.allure:allure-junit4:2.6.0
                         'commons-io:commons-io:2.6',
                         'commons-cli:commons-cli:1.4',

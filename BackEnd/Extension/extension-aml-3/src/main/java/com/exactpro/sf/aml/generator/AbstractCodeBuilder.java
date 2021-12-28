@@ -34,7 +34,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
@@ -196,9 +197,10 @@ public abstract class AbstractCodeBuilder {
 
     public void writeLogger(TextOutputStream stream, String loggerName, boolean isStatic) throws IOException {
         String loggerClass = Logger.class.getCanonicalName();
+        String loggerFactoryClass = LoggerFactory.class.getCanonicalName();
         String varPrefix = isStatic ? "static " : "";
 
-        stream.writeLine(1, "%s%s %s = %2$s.getLogger(\"TimeStamps\");", varPrefix, loggerClass, loggerName);
+        stream.writeLine(1, "%s%s %s = %s.getLogger(\"TimeStamps\");", varPrefix, loggerClass, loggerName, loggerFactoryClass);
         stream.writeLine();
     }
 

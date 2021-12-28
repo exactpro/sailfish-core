@@ -16,6 +16,8 @@
 package com.exactpro.sf.statictesting;
 
 import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
+import static com.exactpro.sf.util.LogUtils.setConfigLocation;
 import static com.google.common.collect.Lists.reverse;
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -61,7 +63,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
@@ -217,7 +218,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             if(loggerConfigFile == null) {
                 for(File workspacePath : reverse(workspacePaths)) {
-                    File layerConfigFile = new File(workspacePath, concat("cfg", "log.properties"));
+                    File layerConfigFile = new File(workspacePath, concat("cfg", LOG4J_PROPERTIES_FILE_NAME));
 
                     if(layerConfigFile.exists() && layerConfigFile.isFile()) {
                         loggerConfigFile = layerConfigFile;
@@ -253,7 +254,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             logsFolder.mkdirs();
             System.setProperty("sf.log.dir", logsFolder.getAbsolutePath());
-            PropertyConfigurator.configure(loggerConfigFile.toURI().toURL());
+            setConfigLocation(loggerConfigFile);
             workspacePaths.add(lastWorkspaceLayer);
 
             LOGGER.info("Initializing SF context with following workspace layers: {}", workspacePaths);

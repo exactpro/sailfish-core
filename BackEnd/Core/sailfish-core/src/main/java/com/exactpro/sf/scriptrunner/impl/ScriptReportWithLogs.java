@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl;
 
+import static com.exactpro.sf.util.LogUtils.addAppender;
+import static com.exactpro.sf.util.LogUtils.removeAppender;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
 import com.exactpro.sf.aml.AMLBlockType;
@@ -37,7 +41,6 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.IEnvironmentManager;
@@ -105,8 +108,8 @@ public class ScriptReportWithLogs implements IScriptReport {
         this.lastTestCaseName = ReportUtils.generateTestCaseName(reference, matrixOrder, type);
 
 		// Add report appender:
-		reportAppender = new ReportAppender();
-		org.apache.log4j.Logger.getLogger("com.exactpro.sf").addAppender(reportAppender);
+		reportAppender = ReportAppender.createAppender();
+		addAppender(LogManager.getLogger("com.exactpro.sf"), reportAppender);
 
 		startTime = System.currentTimeMillis();
 
@@ -118,7 +121,7 @@ public class ScriptReportWithLogs implements IScriptReport {
 	@Override
 	public void closeTestCase(StatusDescription status) {
 		// removing report appender
-		org.apache.log4j.Logger.getLogger("com.exactpro.sf").removeAppender(reportAppender);
+        removeAppender(LogManager.getLogger("com.exactpro.sf"), reportAppender);
 
 		StatusDescription descr;
 		switch (status.getStatus()) {
