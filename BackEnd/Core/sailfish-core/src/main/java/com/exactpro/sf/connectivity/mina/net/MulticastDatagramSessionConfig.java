@@ -200,17 +200,12 @@ public class MulticastDatagramSessionConfig extends AbstractDatagramSessionConfi
             throw new RuntimeIoException(e);
         }
 	}
-	
-	
-	@Override
-	protected void doSetAll(IoSessionConfig config) 
-	{
-        if(config instanceof DefaultMulticastDatagramSessionConfig) {
+
+    @Override
+    public void setAll(IoSessionConfig config) {
+        super.setAll(config);
+        if (config instanceof DefaultMulticastDatagramSessionConfig) {
             setSoTimeout(((DefaultMulticastDatagramSessionConfig)config).getSoTimeout());
         }
-		
-		super.doSetAll(config);
-	}
-	
-    
+    }
 }

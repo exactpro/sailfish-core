@@ -1,6 +1,6 @@
 dependencies {
 
-    compile 'com.exactpro.quickfixj:quickfixj-core:1.6.0.12'
+    compile 'com.exactpro.quickfixj:quickfixj-core:1.6.0.14'
 
     if (incremental_build) {
         compile "com.exactpro.sf:service-tcpip:${artifactVersion}"

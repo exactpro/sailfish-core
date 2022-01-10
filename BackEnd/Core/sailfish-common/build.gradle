@@ -25,7 +25,7 @@ dependencies {
         compile project(':FrontEnd:sailfish-rest-api-client')
     }
 
-    compile 'com.exactpro.mina:apache-mina-core:2.0.9.1'
+    compile 'com.exactpro.mina:apache-mina-core:2.0.21.2'
 
     compile 'org.codehaus.castor:castor-xml-schema:1.4.1'
 
