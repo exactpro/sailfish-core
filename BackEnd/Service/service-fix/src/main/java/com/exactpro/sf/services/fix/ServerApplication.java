@@ -285,7 +285,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
 
         for (IFIXListener listener : listeners) {
             try {
-                listener.toApp(iSession, iMsg);
+                listener.toAdmin(iSession, iMsg);
             } catch (Exception e) {
                 logger.error("Cannot process 'toAdmin' message {} by listener {}", iMsg.getName(), listener.getClass(), e);
             }
@@ -299,7 +299,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
 
         for (IFIXListener listener : listeners) {
             try {
-                listener.toAdmin(iSession, iMsg);
+                listener.toApp(iSession, iMsg);
             } catch (Exception e) {
                 logger.error("Cannot process 'toApp' message {} by listener {}", iMsg.getName(), listener.getClass(), e);
             }
