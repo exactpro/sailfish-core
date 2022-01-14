@@ -36,6 +36,7 @@ import com.exactpro.sf.common.messages.MessageStructureWriter;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
+import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.util.DateTimeUtility;
 
 final class NTGVisitorDecode extends NTGVisitorBase {
@@ -142,14 +143,13 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 
         String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
-        double divisor = "Price4".equals(type) ? 10_000 : 100_000_000;
+        long divisor = "Price4".equals(type) ? 10_000L : 100_000_000L;
 
 		validateLength(fieldName, lengthLong, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
         long longValue = buffer.getLong();
-		Double decodedValue = longValue / divisor;
-
+        Double decodedValue = ServiceUtil.divide(longValue, divisor);
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting Double field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
@@ -170,7 +170,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 
         int intValue = buffer.getInt();
-        Float decodedValue = intValue / 10_000.0f;
+        Float decodedValue = ServiceUtil.divide(intValue, 10_000);
 
 		if( logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting Float field [{}], decoded value [{}].", fieldName, decodedValue);

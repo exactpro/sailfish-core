@@ -172,11 +172,10 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateLength(fieldName, lengthDouble, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
-		BigDecimal baseValue = new BigDecimal( value );
-		BigDecimal baseScaled  = baseValue.setScale( precision, BigDecimal.ROUND_HALF_UP );
-		BigDecimal multiplied = baseScaled.multiply( new BigDecimal(Math.pow(10, precision))) ;
+        BigDecimal baseValue = BigDecimal.valueOf(value);
+        BigDecimal multiplied = baseValue.scaleByPowerOfTen(precision);
 
-		buffer.putLong(multiplied.longValue());
+		buffer.putLong(multiplied.longValueExact());
 
 		accumulatedLength += length;
 	}
@@ -206,11 +205,10 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateLength(fieldName, lengthFloat, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
-		BigDecimal baseValue = new BigDecimal( value );
-		BigDecimal baseScaled  = baseValue.setScale( 4, BigDecimal.ROUND_HALF_UP );
-        BigDecimal multiplied = baseScaled.multiply(new BigDecimal(10_000));
+        BigDecimal baseValue = new BigDecimal(value.toString());
+        BigDecimal multiplied = baseValue.multiply(new BigDecimal(10_000));
 
-		buffer.putInt(multiplied.intValue());
+		buffer.putInt(multiplied.intValueExact());
 
 		accumulatedLength += length;
 	}

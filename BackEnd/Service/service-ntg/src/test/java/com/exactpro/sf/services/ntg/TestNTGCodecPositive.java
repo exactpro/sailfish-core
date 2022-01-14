@@ -256,7 +256,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 		messageHeader.addField("MessageLength", 5);
 		messageHeader.addField("MessageType", "5");
 		message.addField("MessageHeader", messageHeader);
-		message.addField("testFloat", 3.14f);
+		message.addField("testFloat", 9.223f);
 		try{
             testRoundTrip(message, TestNTGHelper.getDictionaryWithDifferentTypesMessages());
 		}catch(Exception e){
@@ -277,7 +277,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 		messageHeader.addField("MessageLength", 5);
 		messageHeader.addField("MessageType", "6");
 		message.addField("MessageHeader", messageHeader);
-        message.addField("testDouble", 3.14);
+        message.addField("testDouble", 922337203.68547);
 		try{
             testRoundTrip(message, TestNTGHelper.getDictionaryWithDifferentTypesMessages());
 		}catch(Exception e){

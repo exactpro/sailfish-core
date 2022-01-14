@@ -136,6 +136,14 @@ public class ServiceUtil {
         return result + div;
     }
 
+    public static float divide(int dividend, int divider) {
+        int div = dividend / divider;
+        int mod = dividend % divider;
+
+        float result = (float)mod / divider;
+        return result + div;
+    }
+
     public static byte[] normalisate(byte[] array, int size) {
         if(array == null) {
             throw new EPSCommonException("Array is null");
