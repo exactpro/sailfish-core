@@ -390,6 +390,8 @@ subprojects {
         from externalWorkspaceDir
     }
 
+    test.dependsOn serviceLoaderBuild
+
     publishing {
         publications {
             MavenJava(MavenPublication) {
