@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.util.FastConverterTest;
+
+import static com.exactpro.sf.aml.scriptutil.LegReorderTest.EMPTY_RAW_MESSAGE_APPENDIX;
 
 public class TestFastConverterNegative extends FastConverterTest {
 	
@@ -97,8 +99,10 @@ public class TestFastConverterNegative extends FastConverterTest {
 			backConverter.convert(iMessage);
 			Assert.fail("Convert can not be done");
 		}catch(Exception e){
-			Assert.assertEquals("Failed to get fast field name for field :stringx message=stringx=str", e.getMessage());			
+			Assert.assertEquals(
+					"Failed to get fast field name for field :stringx message=stringx=str" + EMPTY_RAW_MESSAGE_APPENDIX,
+					e.getMessage()
+			);
 		}
 	}
-			
 }

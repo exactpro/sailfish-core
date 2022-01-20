@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.FieldMetaData;
 import com.exactpro.sf.common.messages.IFieldInfo;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -435,6 +437,13 @@ public class MapMessage implements IMessage
             }
         }
 
+        if (toString.length() > 0) {
+            toString.append('|');
+        }
+        byte[] rawMessage = msgMetaData.getRawMessage();
+        toString.append(MetadataProperty.RAW_MESSAGE.getPropertyName())
+                .append('=')
+                .append(rawMessage == null ? "" : Hex.encodeHexString(rawMessage));
         return toString.toString();
     }
 

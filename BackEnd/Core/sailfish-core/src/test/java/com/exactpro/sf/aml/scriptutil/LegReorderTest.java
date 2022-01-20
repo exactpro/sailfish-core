@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ import org.junit.Test;
 
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MetadataProperty;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.util.AbstractTest;
 import com.google.common.collect.ImmutableList;
 
 public class LegReorderTest extends AbstractTest {
-
+    public static final String EMPTY_RAW_MESSAGE_APPENDIX = "|" + MetadataProperty.RAW_MESSAGE.getPropertyName() + "=";
     private static final String NS = "namespace";
 
 	@SuppressWarnings("unchecked")
@@ -91,11 +92,16 @@ public class LegReorderTest extends AbstractTest {
 		List<IMessage> result_legs = (List<IMessage>) result.getField("LEGS");
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_1"), result_legs.get(0).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_2"), result_legs.get(0).<Object>getField("FLD_2"));
-		Assert.assertEquals("FLD_3=50|FLD_4=60", result_legs.get(0).getField("NESTED").toString());
+        Assert.assertEquals(
+                "FLD_3=50|FLD_4=60" + EMPTY_RAW_MESSAGE_APPENDIX,
+                result_legs.get(0).getField("NESTED").toString()
+        );
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_1"), result_legs.get(1).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_2"), result_legs.get(1).<Object>getField("FLD_2"));
-		Assert.assertEquals("FLD_3=70|FLD_4=80", result_legs.get(1).getField("NESTED").toString());
-
+        Assert.assertEquals(
+                "FLD_3=70|FLD_4=80" + EMPTY_RAW_MESSAGE_APPENDIX,
+                result_legs.get(1).getField("NESTED").toString()
+        );
 		// Filter with swapped legs
 		IMessage filter_swap = fromString("name", null, "LEGS", asList(filter_leg2, filter_leg1));
 
@@ -103,10 +109,16 @@ public class LegReorderTest extends AbstractTest {
 		List<IMessage> result_legs_swapped = (List<IMessage>) result_swap.getField("LEGS");
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_1"), result_legs_swapped.get(0).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_2"), result_legs_swapped.get(0).<Object>getField("FLD_2"));
-		Assert.assertEquals("FLD_3=70|FLD_4=80", result_legs_swapped.get(0).getField("NESTED").toString());
+        Assert.assertEquals(
+                "FLD_3=70|FLD_4=80" + EMPTY_RAW_MESSAGE_APPENDIX,
+                result_legs_swapped.get(0).getField("NESTED").toString()
+        );
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_1"), result_legs_swapped.get(1).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_2"), result_legs_swapped.get(1).<Object>getField("FLD_2"));
-		Assert.assertEquals("FLD_3=50|FLD_4=60", result_legs_swapped.get(1).getField("NESTED").toString());
+        Assert.assertEquals(
+                "FLD_3=50|FLD_4=60" + EMPTY_RAW_MESSAGE_APPENDIX,
+                result_legs_swapped.get(1).getField("NESTED").toString()
+        );
 	}
 
 	@SuppressWarnings("unchecked")
@@ -128,11 +140,16 @@ public class LegReorderTest extends AbstractTest {
 		List<IMessage> result_legs = (List<IMessage>) result.getField("LEGS");
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_1"), result_legs.get(0).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_2"), result_legs.get(0).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=90|FLD_4=100, FLD_3=110|FLD_4=120]", result_legs.get(0).getField("NESTED").toString());
+        Assert.assertEquals(
+                "[FLD_3=90|FLD_4=100" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_3=110|FLD_4=120" + EMPTY_RAW_MESSAGE_APPENDIX + "]",
+                result_legs.get(0).getField("NESTED").toString()
+        );
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_1"), result_legs.get(1).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_2"), result_legs.get(1).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=70|FLD_4=80, FLD_3=50|FLD_4=60]", result_legs.get(1).getField("NESTED").toString());
-
+        Assert.assertEquals(
+                "[FLD_3=70|FLD_4=80" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_3=50|FLD_4=60" + EMPTY_RAW_MESSAGE_APPENDIX + "]",
+                result_legs.get(1).getField("NESTED").toString()
+        );
 	}
 
 	@SuppressWarnings("unchecked")
@@ -154,11 +171,17 @@ public class LegReorderTest extends AbstractTest {
 		List<IMessage> result_legs = (List<IMessage>) result.getField("LEGS");
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_1"), result_legs.get(0).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_2"), result_legs.get(0).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=110|FLD_4=120, FLD_4=100]", result_legs.get(0).getField("NESTED").toString());
+        Assert.assertEquals(
+                "[FLD_3=110|FLD_4=120" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_4=100" + EMPTY_RAW_MESSAGE_APPENDIX + "]",
+                result_legs.get(0).getField("NESTED").toString()
+        );
 
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_1"), result_legs.get(1).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_2"), result_legs.get(1).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=50|FLD_4=60, FLD_3=70|FLD_4=80]", result_legs.get(1).getField("NESTED").toString());
+		Assert.assertEquals(
+                "[FLD_3=50|FLD_4=60" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_3=70|FLD_4=80" + EMPTY_RAW_MESSAGE_APPENDIX + "]", 
+                result_legs.get(1).getField("NESTED").toString()
+        );
 
 		// change order of legs:
 		message = fromString("name", "FIELD=value|", "LEGS", asList(msg_leg2, msg_leg1));
@@ -166,11 +189,17 @@ public class LegReorderTest extends AbstractTest {
 		result_legs = (List<IMessage>) result.getField("LEGS");
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_1"), result_legs.get(0).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg2.<Object>getField("FLD_2"), result_legs.get(0).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=110|FLD_4=120, FLD_4=100]", result_legs.get(0).getField("NESTED").toString());
+        Assert.assertEquals(
+                "[FLD_3=110|FLD_4=120" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_4=100" + EMPTY_RAW_MESSAGE_APPENDIX + "]",
+                result_legs.get(0).getField("NESTED").toString()
+        );
 
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_1"), result_legs.get(1).<Object>getField("FLD_1"));
         Assert.assertEquals(msg_leg1.<Object>getField("FLD_2"), result_legs.get(1).<Object>getField("FLD_2"));
-		Assert.assertEquals("[FLD_3=50|FLD_4=60, FLD_3=70|FLD_4=80]", result_legs.get(1).getField("NESTED").toString());
+        Assert.assertEquals(
+                "[FLD_3=50|FLD_4=60" + EMPTY_RAW_MESSAGE_APPENDIX + ", FLD_3=70|FLD_4=80" + EMPTY_RAW_MESSAGE_APPENDIX + "]",
+                result_legs.get(1).getField("NESTED").toString()
+        );
 	}
 
 	// 'FIELDS=some field|FLD_1=10|FLD_2=20|' -> IMessage
