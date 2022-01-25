@@ -155,6 +155,11 @@ public class ITCHCodec extends AbstractCodec {
 				messageLength = HEADER_SIZE;
 			} else {
 				int currentPos = in.position();
+                //For length with msgLengthFieldSize == 2 we need 2 bytes, otherwise 1 byte, for message type 1 more byte.
+                if (in.remaining() < ((msgLengthFieldSize == 2) ? 3 : 2)) {
+                    logger.debug("Not enough data to decode:  remaining:{}", in.remaining());
+                    return false;
+                }
 				messageLength = (msgLengthFieldSize == 2) ? in.getUnsignedShort() : in.getUnsigned();
 				messageType = in.getUnsigned();
 				in.position(currentPos);
