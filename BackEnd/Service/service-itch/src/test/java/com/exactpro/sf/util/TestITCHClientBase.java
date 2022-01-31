@@ -68,7 +68,7 @@ public abstract class TestITCHClientBase extends TestClientBase {
         client.start();
         waitThread = null;
         if (doReplyLogin) {
-            ITCHWaitResponse wait = new ITCHWaitResponse(10000, getMessageList(getLogonResponse()), "LoginRequest", server);
+            ITCHWaitResponse wait = new ITCHWaitResponse(15000, getMessageList(getLogonResponse()), "LoginRequest", server);
             waitThread = new Thread(wait);
             waitThread.start();
         }
@@ -90,6 +90,7 @@ public abstract class TestITCHClientBase extends TestClientBase {
         settingsClient.setDisposeWhenSessionClosed(true);
         settingsClient.setReconnecting(reconnect);
         settingsClient.setReconnectingTimeout(timeoutReconnect);
+        settingsClient.setMsgLength(2);
 
         client = new ITCHTcpClient();
         handlerClient = new CollectorServiceHandler();

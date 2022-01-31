@@ -86,6 +86,7 @@ public class TestSOUPServer extends AbstractTest {
     private static final int                SERVICE_SEND_HEARTBEATS_TIMEOUT_IN_SECONDS = 1;
 
     private static final int                WAIT_LOGIN_TIMEOUT_IN_MILLISECONDS = 1000;
+    private static final int                WAIT_LOGOUT_TIMEOUT = 1000;
 
     private static final boolean            SERVER_SEND_HEARTBEATS = true;
     private static final boolean            CLIENT_SEND_HEARTBEATS = true;
@@ -206,7 +207,7 @@ public class TestSOUPServer extends AbstractTest {
     @Test
     public void testLogoutMessage() throws InterruptedException {
         client.sendMessage(createMessage("LogoutRequestPacket", Collections.emptyMap()));
-        Thread.sleep(100);
+        Thread.sleep(WAIT_LOGOUT_TIMEOUT);
         assertFalse(client.isConnected());
     }
 

@@ -34,7 +34,7 @@ import com.exactpro.sf.util.TestNTGClientBase;
 
 public class TestNTGClientNegative extends TestNTGClientBase {
 
-    private static final int TIMEOUT = 500;
+    private static final int TIMEOUT = 1000;
 
     private static final Logger logger = LoggerFactory.getLogger(TestNTGClientNegative.class);
 

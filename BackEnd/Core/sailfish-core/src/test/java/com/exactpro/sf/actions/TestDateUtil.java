@@ -76,7 +76,7 @@ public class TestDateUtil {
 
     @Test
     public void testGetDateByZoneId() {
-        LocalDate calculatedDate = dateUtil.getDateByZoneId("Y=2019:M=3:D=13:h+0:m+0:s+0:ns+0", "+03:01");
+        LocalDate calculatedDate = dateUtil.getDateByZoneId("Y=2019:M=3:D=13:h=3:m=1:s+0:ns+0", "+03:01");
         LocalDate awaitingDate = LocalDate.of(2019, 3, 13);
         assertEquals(awaitingDate, calculatedDate);
     }

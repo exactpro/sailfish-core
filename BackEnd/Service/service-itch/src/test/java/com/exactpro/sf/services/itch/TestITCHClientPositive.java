@@ -110,7 +110,6 @@ public class TestITCHClientPositive extends TestITCHClientBase {
     }
 
 
-
     @Test
     public void testHeartbeatTimeout() throws InterruptedException {
         logger.info("Start testHeartbeatTimeout()");
@@ -160,18 +159,12 @@ public class TestITCHClientPositive extends TestITCHClientBase {
                 logger.error(e.getMessage(),e);
                 throw e;
             }
-            long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-            while (System.currentTimeMillis() < time && client.isConnected()) {
-                Thread.sleep(LOOP_TIMEOUT);
-            }
+            Thread.sleep(DISCONNECT_WAITING_TIMEOUT);
 
             Assert.assertFalse("Client is connected after disconnect()",client.isConnected());
             Thread.sleep(LOOP_TIMEOUT);
             client.connect(DISCONNECT_WAITING_TIMEOUT);
-            time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-            while (System.currentTimeMillis() < time && !client.isConnected()) {
-                Thread.sleep(LOOP_TIMEOUT);
-            }
+            Thread.sleep(DISCONNECT_WAITING_TIMEOUT);
             Assert.assertTrue("Client isn't connected after connectChannel()", client.isConnected());
             Assert.assertEquals(ServiceStatus.STARTED, client.getStatus());
             client.sendLogin();
