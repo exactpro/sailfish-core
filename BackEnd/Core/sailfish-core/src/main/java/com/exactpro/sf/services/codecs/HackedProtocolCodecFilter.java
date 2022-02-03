@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * ProtocolDecoderOutput instance will be shared between all of them.
  * Hacked filter does not store ProtocolDecoderOutput instance in session
  */
+@Deprecated
 public class HackedProtocolCodecFilter extends IoFilterAdapter {
     /** A logger for this class */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolCodecFilter.class);

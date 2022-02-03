@@ -20,8 +20,11 @@ import java.util.Arrays;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolDecoderException;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,26 +53,38 @@ public class ITCHDeflateCodec extends AbstractCodec {
     private final byte[] uncompressed = new byte[65536];
 
 	private byte[] delimiter;
+    private final AbstractCodec codec;
 
     public ITCHDeflateCodec() {
-
-		logger.debug("Instance created");
-
+        this(null);
+    }
+    public ITCHDeflateCodec(@Nullable AbstractCodec codec) {
+        this.codec = codec;
+        logger.debug("Instance created");
     }
 
 	@Override
 	public void encode(IoSession session, Object message,
 			ProtocolEncoderOutput out) throws Exception {
-
-		// Compression is not required for send messages
-		out.write(message);
-
+        if (isCodecExist()) {
+            codec.encode(session, message, out);
+        } else {
+            // Compression is not required for send messages
+            out.write(message);
+        }
 	}
 
-	@Override
+    private boolean isCodecExist() {
+        return codec != null;
+    }
+
+    @Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings,
 			IMessageFactory msgFactory, IDictionaryStructure dictionary) {
         super.init(serviceContext, settings, msgFactory, dictionary);
+        if (isCodecExist()) {
+            codec.init(serviceContext, settings, msgFactory, dictionary);
+        }
 
         this.delimiter = ((ITCHCodecSettings) settings).getChunkDelimiter();
 
@@ -143,17 +158,33 @@ public class ITCHDeflateCodec extends AbstractCodec {
 			logger.error("Lengs of the decompressed data {} is not equals to expected length {}",decompressed.length, expectedDecompressedLength);
 		}
 
-		IoBuffer buffer = IoBuffer.allocate(decompressed.length, false);
+        IoBuffer buffer = IoBuffer.wrap(decompressed);
 
-		buffer.put(decompressed);
-
-		buffer.flip();
-
-		out.write(buffer);
+        if (isCodecExist()) {
+            decodeDecomressed(session, buffer, out);
+        } else {
+            out.write(buffer);
+        }
 
 		return true;
 
 	}
+
+    private void decodeDecomressed(IoSession session, @NotNull IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+        while (in.hasRemaining()) {
+            int oldPos = in.position();
+            boolean isDecoded = doDecodeInternal(codec, session, in, out);
+            if (!isDecoded) {
+                ProtocolDecoderException pde = new ProtocolDecoderException("Error decode data");
+                // Generate a message hex dump
+                int curPos = in.position();
+                in.position(oldPos);
+                pde.setHexdump(in.getHexDump());
+                in.position(curPos);
+                throw pde;
+            }
+        }
+    }
 
 	private byte[] decompress(byte[] compressed){
 
@@ -186,7 +217,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 	}
 
-	private void CHECK_ERR(ZStream z, int err, String msg) {
+	private static void CHECK_ERR(ZStream z, int err, String msg) {
 		if (err != JZlib.Z_OK) {
             if(z.msg != null) {
                 logger.error(z.msg);

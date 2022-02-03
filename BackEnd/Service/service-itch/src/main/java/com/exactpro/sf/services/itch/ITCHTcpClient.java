@@ -22,12 +22,10 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
-import com.exactpro.sf.common.codecs.CodecFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -36,7 +34,6 @@ import com.exactpro.sf.common.util.SendMessageFailedException;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceStatus;
-import com.exactpro.sf.services.codecs.HackedProtocolCodecFilter;
 import com.exactpro.sf.services.mina.AbstractMINATCPService;
 import com.exactpro.sf.services.mina.MINASession;
 import com.exactpro.sf.services.util.ServiceUtil;
@@ -91,6 +88,9 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
         codecSettings.setFilterValues(ServiceUtil.loadStringFromAlias(serviceContext.getDataManager(), getSettings().getFilterValues(), ","));
         codecSettings.setDictionaryURI(getSettings().getDictionaryName());
         codecSettings.setEvolutionSupportEnabled(getSettings().isEvolutionSupportEnabled());
+        if (getSettings().isCompressionUsed()) {
+            codecSettings.setChunkDelimiter(ByteBuffer.allocate(2).putShort((short)getSettings().getCompressedChunkDelimeter()).array());
+        }
 
         namespace = dictionary.getNamespace();
         reconecting = getSettings().isReconnecting();
@@ -108,23 +108,6 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 	@Override
     protected int getWriterIdleTimeout() {
         return getSettings().getHeartbeatTimeout();
-    }
-
-    @Override
-    protected void initFilterChain(DefaultIoFilterChainBuilder filterChain) throws Exception {
-        super.initFilterChain(filterChain);
-
-        if(getSettings().isCompressionUsed()) {
-            getCodecSettings().setChunkDelimiter(ByteBuffer.allocate(2).putShort((short)getSettings().getCompressedChunkDelimeter()).array());
-
-            // ProtocolCodecFilter stores ProtocolDecoderOutput in session. So if we use more then one ProtocolCodecFilter
-            // ProtocolDecoderOutput instance will be shared between all of them.
-            // Hacked filter does not store ProtocolDecoderOutput instance in session
-            CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, null, ITCHDeflateCodec.class, getCodecSettings());
-            HackedProtocolCodecFilter decompressorFilter = new HackedProtocolCodecFilter(codecFactory);
-
-            filterChain.addBefore("codec", "decompressor", decompressorFilter);
-        }
     }
 
 	@Override
@@ -383,5 +366,9 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
     @Override
     protected int getPort() {
         return getSettings().getPort();
+    }
+    @Override
+    protected AbstractCodec getUpdateCodec(AbstractCodec codec) {
+        return getSettings().isCompressionUsed() ? new ITCHDeflateCodec(codec) : codec;
     }
 }

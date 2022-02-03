@@ -53,6 +53,10 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
         }
     }
 
+    protected static boolean doDecodeInternal(@NotNull AbstractCodec codec, IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+        return codec.doDecodeInternal(session, in, out);
+    }
+
     @Override
     protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
 

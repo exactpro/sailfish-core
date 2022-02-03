@@ -26,6 +26,7 @@ import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.jetbrains.annotations.NotNull;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.codecs.CodecFactory;
@@ -93,7 +94,7 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
     }
 
     protected void initFilterChain(DefaultIoFilterChainBuilder filterChain) throws Exception {
-        CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getCodecSettings());
+        CodecFactory codecFactory = new CodecFactory(serviceContext, messageFactory, dictionary, getCodecClass(), getCodecSettings(), this::getUpdateCodec);
         filterChain.addLast(CODEC_FILTER_NAME, new ProtocolCodecFilter(codecFactory));
 
         if (getSettings().isUseSSL()) {
@@ -116,6 +117,11 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
                     getSettings().getKeyStoreType(), getSettings().getSslKeyStore(),
                     sslKeyStorePassword));
         }
+    }
+
+    @NotNull
+    protected AbstractCodec getUpdateCodec(AbstractCodec codec) {
+        return codec;
     }
 
     protected long getConnectTimeout() {

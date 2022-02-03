@@ -18,6 +18,7 @@ package com.exactpro.sf.common.codecs;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
@@ -37,8 +38,9 @@ public class CodecFactory implements ProtocolCodecFactory {
 	private final Class<? extends AbstractCodec> codecClass;
 	private final ICommonSettings codecSettings;
 	private final ConcurrentMap<IoSession, AbstractCodec> codecs = new ConcurrentHashMap<>();
+    private final Function<AbstractCodec, AbstractCodec> updateCodecFunction;
 
-    public CodecFactory(IServiceContext serviceContext, IMessageFactory msgFactory, IDictionaryStructure dictionary, Class<? extends AbstractCodec> codecClass, ICommonSettings codecSettings) {
+    public CodecFactory(IServiceContext serviceContext, IMessageFactory msgFactory, IDictionaryStructure dictionary, Class<? extends AbstractCodec> codecClass, ICommonSettings codecSettings, Function<AbstractCodec, AbstractCodec> updateCodecFunction) {
 	    
 	    this.serviceContext = Objects.requireNonNull(serviceContext, "Service context is not specified");
 
@@ -49,38 +51,35 @@ public class CodecFactory implements ProtocolCodecFactory {
 		this.codecClass = Objects.requireNonNull(codecClass, "Codec class is not specified");
 
 		this.codecSettings = codecSettings;
-	}
 
-	@Override
-	public ProtocolDecoder getDecoder(IoSession session) throws Exception	{
-		
-		AbstractCodec codec = codecs.get(session); 
-		
-		if (codec != null) {
-			return codec; 
-		}
-		
-		codec = codecClass.newInstance();
-        codec.init(serviceContext, codecSettings, msgFactory, msgDictionary);
-		codecs.putIfAbsent(session, codec);
-		return codecs.get(session);
-			
-	}
+        this.updateCodecFunction = Objects.requireNonNull(updateCodecFunction, "Update codec function is not specified");
+    }
 
-	@Override
-	public ProtocolEncoder getEncoder(IoSession session) throws Exception	{
-		
-		AbstractCodec codec = codecs.get(session);
-		
-		if (codec != null) {
-			return codec;
-		}
-		
-		codec = codecClass.newInstance();
+    public CodecFactory(IServiceContext serviceContext, IMessageFactory msgFactory, IDictionaryStructure dictionary, Class<? extends AbstractCodec> codecClass, ICommonSettings codecSettings) {
+        this(serviceContext, msgFactory, dictionary, codecClass, codecSettings, Function.identity());
+    }
+
+    @Override
+    public ProtocolDecoder getDecoder(IoSession session) throws Exception {
+        return getCodec(session);
+    }
+
+    @Override
+    public ProtocolEncoder getEncoder(IoSession session) throws Exception {
+        return getCodec(session);
+    }
+
+    private AbstractCodec getCodec(IoSession session) throws InstantiationException, IllegalAccessException {
+        AbstractCodec codec = codecs.get(session);
+
+        if (codec != null) {
+            return codec;
+        }
+
+        codec = updateCodecFunction.apply(codecClass.newInstance());
         codec.init(serviceContext, codecSettings, msgFactory, msgDictionary);
-		codecs.putIfAbsent(session, codec);
-		return codecs.get(session);
-			
-	}
+        codecs.putIfAbsent(session, codec);
+        return codecs.get(session);
+    }
 
 }
