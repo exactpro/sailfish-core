@@ -48,7 +48,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.9.0",
     "jest-enzyme": "^7.1.2",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "postcss-loader": "^3.0.0",
     "redux-devtools-extension": "^2.13.8",
     "redux-mock-store": "^1.5.3",
