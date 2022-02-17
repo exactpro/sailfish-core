@@ -1,3 +1,19 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
@@ -166,8 +182,13 @@
 	    				<p:column headerText="Test Case">
 	    					<h:outputText value="#{row.testCaseId}" />
 	    				</p:column>
-	    				
-	    				<p:column headerText="Matrix" styleClass="eps-f-set-column" 
+
+                        <p:column headerText="Matrix" style="line-height:0px;font-size:0px;width:0px;height:0px;padding:0px;border:0px"
+                                  rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
+                            <h:outputText value="#{row.firstMatrixName}"/>
+                        </p:column>
+
+	    				<p:column headerText="Matrix" styleClass="eps-f-set-column" exportable="false"
 	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
                             <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix')  and row.firstSet.testCaseId ne null}">
                             <a href="#{taggedSetsBean.getReportRequest(row.firstSet)}" target="_blank"
@@ -230,8 +251,13 @@
 	    					rendered="#{taggedSetsBean.isColumnSelected('Hash')}">
 	    					<h:outputText value="#{row.firstRawHash}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Hash')}"/>
 	    				</p:column>
-	    				
-	    				<p:column headerText="Matrix" styleClass="eps-s-set-column"
+
+                        <p:column headerText="Matrix" style="line-height:0px;font-size:0px;width:0px;height:0px;padding:0px;border:0px"
+                                  rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
+                            <h:outputText value="#{row.secondMatrixName}"/>
+                        </p:column>
+
+	    				<p:column headerText="Matrix" styleClass="eps-s-set-column" exportable="false"
 	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
                             <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix') and row.secondSet.testCaseId ne null}">
                                 <a href="#{taggedSetsBean.getReportRequest(row.secondSet)}" target="_blank"
