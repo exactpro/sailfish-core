@@ -42,6 +42,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 import quickfix.DataDictionary;
 import quickfix.EvolutionQFJMessage;
+import quickfix.FieldException;
 import quickfix.InvalidMessage;
 import quickfix.Message;
 import quickfix.OutgoingEvolutionMessage;
@@ -202,6 +203,10 @@ public class FIXSession implements ISession {
 
             // do not validate anything. it will be checked during the regular send action
             message.fromString(messageData, dataDictionary, true);
+            FieldException qfjException = message.getException();
+            if (qfjException != null) {
+                throw new SendMessageFailedException("Error parse the message data: " + messageData, qfjException);
+            }
             send(message);
 
         } catch (InvalidMessage ex) {
