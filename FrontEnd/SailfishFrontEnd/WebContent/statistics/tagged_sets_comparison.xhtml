@@ -183,7 +183,7 @@
 	    					<h:outputText value="#{row.testCaseId}" />
 	    				</p:column>
 
-                        <p:column headerText="Matrix" style="line-height:0px;font-size:0px;width:0px;height:0px;padding:0px;border:0px"
+                        <p:column headerText="Matrix" visible="false"
                                   rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
                             <h:outputText value="#{row.firstMatrixName}"/>
                         </p:column>
@@ -252,7 +252,7 @@
 	    					<h:outputText value="#{row.firstRawHash}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Hash')}"/>
 	    				</p:column>
 
-                        <p:column headerText="Matrix" style="line-height:0px;font-size:0px;width:0px;height:0px;padding:0px;border:0px"
+                        <p:column headerText="Matrix" visible="false"
                                   rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
                             <h:outputText value="#{row.secondMatrixName}"/>
                         </p:column>
