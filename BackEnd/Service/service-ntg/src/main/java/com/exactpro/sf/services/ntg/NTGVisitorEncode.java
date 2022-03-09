@@ -16,8 +16,11 @@
 package com.exactpro.sf.services.ntg;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.PRECISION_4;
+import static com.exactpro.sf.services.ntg.NTGMessageHelper.PRECISION_8;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -163,7 +166,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
         String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
-		int precision = "Price4".equals(type) ? 4 : 8;
+		int precision = "Price4".equals(type) ? PRECISION_4 : PRECISION_8;
 
 		if (writeFiller(value, length, fieldName)) {
             return;
@@ -173,7 +176,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 
         BigDecimal baseValue = BigDecimal.valueOf(value);
-        BigDecimal multiplied = baseValue.scaleByPowerOfTen(precision);
+        BigDecimal baseScaled = baseValue.setScale(precision, RoundingMode.HALF_UP);
+        if (baseValue.scale() > precision) {
+            logger.warn("The number {} cannot be sent with that precision, rounded up to {}.", baseValue, baseScaled);
+        }
+        BigDecimal multiplied = baseScaled.scaleByPowerOfTen(precision);
 
 		buffer.putLong(multiplied.longValueExact());
 
@@ -206,7 +213,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 
         BigDecimal baseValue = new BigDecimal(value.toString());
-        BigDecimal multiplied = baseValue.multiply(new BigDecimal(10_000));
+        BigDecimal baseScaled = baseValue.setScale(PRECISION_4, RoundingMode.HALF_UP);
+        if (baseValue.scale() > PRECISION_4) {
+            logger.warn("The number {} cannot be sent with that precision, rounded up to {}.", baseValue, baseScaled);
+        }
+        BigDecimal multiplied = baseScaled.scaleByPowerOfTen(PRECISION_4);
 
 		buffer.putInt(multiplied.intValueExact());
 

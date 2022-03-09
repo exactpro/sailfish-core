@@ -58,6 +58,9 @@ public class NTGMessageHelper extends MessageHelper {
 	public static final String MESSAGE_HEARTBEAT = "Heartbeat";
 	public static final String MESSAGE_REJECT = "Reject";
 	public static final String ATTRIBUTE_MESSAGE_TYPE = "MessageType";
+
+    public static final int PRECISION_4 = 4;
+    public static final int PRECISION_8 = 8;
     
 	private AbstractCodec codec;
     private Map<String, NTGMessageMetadata> metadata;
