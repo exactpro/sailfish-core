@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,11 +177,8 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 
         BigDecimal baseValue = BigDecimal.valueOf(value);
-        BigDecimal baseScaled = baseValue.setScale(precision, RoundingMode.HALF_UP);
-        if (baseValue.scale() > precision) {
-            logger.warn("The number {} cannot be sent with that precision, rounded up to {}.", baseValue, baseScaled);
-        }
-        BigDecimal multiplied = baseScaled.scaleByPowerOfTen(precision);
+        checkScale(baseValue, precision);
+        BigDecimal multiplied = baseValue.scaleByPowerOfTen(precision);
 
 		buffer.putLong(multiplied.longValueExact());
 
@@ -212,17 +210,22 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateLength(fieldName, lengthFloat, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
+        int precision = PRECISION_4;
         BigDecimal baseValue = new BigDecimal(value.toString());
-        BigDecimal baseScaled = baseValue.setScale(PRECISION_4, RoundingMode.HALF_UP);
-        if (baseValue.scale() > PRECISION_4) {
-            logger.warn("The number {} cannot be sent with that precision, rounded up to {}.", baseValue, baseScaled);
-        }
-        BigDecimal multiplied = baseScaled.scaleByPowerOfTen(PRECISION_4);
+        checkScale(baseValue, precision);
+        BigDecimal multiplied = baseValue.scaleByPowerOfTen(precision);
 
 		buffer.putInt(multiplied.intValueExact());
 
 		accumulatedLength += length;
 	}
+
+    private static void checkScale(@NotNull BigDecimal value, int precision) {
+        int scale = value.scale();
+        if (scale > precision) {
+            throw new IllegalArgumentException(String.format("The number %." + scale + "f has a scale of %d. Scale cannot be greater than %d.", value, scale, precision));
+        }
+    }
 
 	@Override
 	public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault)
