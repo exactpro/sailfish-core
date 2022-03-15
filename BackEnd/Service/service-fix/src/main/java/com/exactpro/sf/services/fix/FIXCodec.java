@@ -50,6 +50,8 @@ import org.jetbrains.annotations.Nullable;
 import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import quickfix.FieldException;
 import quickfix.FieldMap;
 import quickfix.FieldNotFound;
 import quickfix.Group;
@@ -93,6 +95,7 @@ public class FIXCodec extends AbstractCodec {
     private String separatorReplacePattern;
     private String fieldSeparator = SOH;
     private FIXBeginString beginStringByDictionary;
+    private boolean preValidationMessage;
 
     @Override
     public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
@@ -124,6 +127,8 @@ public class FIXCodec extends AbstractCodec {
                 .setIncludeNanoseconds(this.settings.isIncludeNanoseconds());
         this.qfjConverter = new DirtyQFJIMessageConverter(dirtySettings);
         beginStringByDictionary = QFJDictionaryAdapter.extractFixVersion(dictionary.getNamespace());
+
+        preValidationMessage = this.settings.isPreValidationMessage();
 
         this.msgStructures = new HashMap<>();
 
@@ -328,6 +333,13 @@ public class FIXCodec extends AbstractCodec {
     protected IMessage convertToIMessageByIDictionaryStructure(String fixMessage) throws Exception {
         Message fixMessageSrc = new Message();
         fixMessageSrc.fromString(fixMessage, dataDict, true);
+
+        if (preValidationMessage) {
+            FieldException qfjException = fixMessageSrc.getException();
+            if (qfjException != null) {
+                throw new MessageParseException("Error parse the message data. " + qfjException.getMessage(), fixMessage);
+            }
+        }
 
         IMessage iMessage = settings.isDepersonalizationIncomingMessages() ?
                                 convertMessageToIMessage(fixMessageSrc, dictionary.getNamespace()) :

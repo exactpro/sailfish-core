@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -922,5 +921,22 @@ public class FixCodecTest extends AbstractTest {
         expectedMessage.addField("QuoteMsgID", "1444060022986");
         expectedMessage.addField("QuotCxlEntriesGrp", ImmutableList.of(quotCxlEntriesGrp));
         return expectedMessage;
+    }
+
+    @Test
+    public void testDecodeInvalidGroup() throws Exception {
+        TCPIPSettings settings = new TCPIPSettings();
+        settings.setVerifyMessageStructure(true);
+        settings.setDecodeByDictionary(true);
+        settings.setDepersonalizationIncomingMessages(false);
+        FIXCodec codec = createCodec(dictionary, settings);
+
+        IoBuffer buffer = IoBuffer.wrap("8=FIXT.1.1\u00019=198\u000135=D\u000134=376\u000149=B\u000150=FIXOEB01\u000152=20211117-17:09:03.301\u000156=MME\u000111=66FF8BBD89774D9\u000138=2000000\u000140=2\u000144=10\u000154=1\u000155=LCA_2022FEB17\u000159=3\u000160=20211117-20:09:03.000\u0001453=2\u0001447=D\u0001452=1\u0001448=FIXOEB01\u0001447=D\u0001452=12\u000110=163\u0001".getBytes());
+        AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
+        codec.decode(session, buffer, outputDec);
+
+        IMessage message = (IMessage)outputDec.getMessageQueue().poll();
+        Assert.assertEquals("ErrorMessage", message.getName());
+        Assert.assertEquals("Error parse the message data. Out of order repeating group members, field=447", new ErrorMessage(message).getCause());
     }
 }

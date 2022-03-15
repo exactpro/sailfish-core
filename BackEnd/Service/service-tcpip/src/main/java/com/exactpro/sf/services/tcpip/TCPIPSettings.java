@@ -72,6 +72,9 @@ public class TCPIPSettings extends AbstractMINASettings
             + "The verification feature requires the `decode by dictionary` to be enabled and the `depersonalization incoming messages` to be disabled.")
 	private boolean verifyMessageStructure;
 
+    @Description("Enable prevalidation of incoming messages. For example, for the fix protocol, prevalidation at the qfj level will be enabled.")
+    private boolean preValidationMessage = true;
+
 	@Description("If TRUE, then the trailing zeros of decimal values<br> will be removed by dictionary during decoding.<br>This option will be enable only if <br>'decode by dictionary' is TRUE.")
 	private boolean removeTrailingZeros;
 
@@ -272,5 +275,13 @@ public class TCPIPSettings extends AbstractMINASettings
 
     public void setEvolutionOptimize(boolean evolutionOptimize) {
         this.evolutionOptimize = evolutionOptimize;
+    }
+
+    public boolean isPreValidationMessage() {
+        return preValidationMessage;
+    }
+
+    public void setPreValidationMessage(boolean preValidationMessage) {
+        this.preValidationMessage = preValidationMessage;
     }
 }
