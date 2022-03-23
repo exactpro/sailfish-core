@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,11 +280,20 @@ public class SOUPCodec extends AbstractCodec {
         Role role = session.containsAttribute(IExternalCodecContext.class) ? ((IExternalCodecContext)session.getAttribute(IExternalCodecContext.class)).getRole() : Role.RECEIVER;
         IMessageStructure msgStructure = msgTypeToMsgStruct.get(messageType, role);
 
+        int declaredLimit = in.limit();
+        int limit = 0;
+        if (length != 0) {
+            declaredLimit = startPosition + length;
+            if (hasDataPacketHeader()) {
+                declaredLimit += MESSAGE_LENGTH_SIZE;
+            }
+            limit = in.limit();
+            in.limit(declaredLimit);
+        }
         if (msgStructure == null) {
             String errStr = "Unknown messageType = [" + messageType + ']';
             addErrorMessage(in, startPosition, out, errStr);
-
-            in.position(length == 0 ? in.limit() : startPosition + length); // consider that all left bytes are incorrect
+            in.position(declaredLimit); // consider that all left bytes are incorrect
             return;
         }
 
@@ -297,6 +306,7 @@ public class SOUPCodec extends AbstractCodec {
                 in.position(), in.remaining());
 
 
+
         try {
             IMessageStructureVisitor msgStructVisitor = new SOUPVisitorDecode(in, byteOrder, message, msgFactory);
             MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
@@ -306,11 +316,24 @@ public class SOUPCodec extends AbstractCodec {
             // because we won't be able to decode the rest of the payload anyway
             // so we skip the whole payload to be able to continue the decoding
             // the limit was set in SOUPCodec#readHeader method
-            int lengthRaw = length == 0 ? in.limit() - startPosition : length;
+
+            int lengthRaw = declaredLimit - startPosition;
             message.getMetaData().setRawMessage(rawData(in, startPosition, lengthRaw));
-            in.position(in.limit());
+            in.position(declaredLimit);
         }
 
+        if (length != 0) {
+            if (in.hasRemaining()) {
+                int realLength = in.position() - startPosition;
+                if (hasDataPacketHeader()) {
+                    realLength -= MESSAGE_LENGTH_SIZE;
+                }
+                message.getMetaData().setRejectReason(
+                        String.format("Declared message length {%s} isn't equal to real one {%s}", length, realLength));
+                in.position(declaredLimit);
+            }
+            in.limit(limit);
+        }
         if (hasSoupMessageHeader(msgStructure) && header != null
                 && SEQUENCED_DATA_PACKET.equalsIgnoreCase(header.getName())) {
             message.addField(SEQUENCED_HEADER_MESSAGE, header);

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,5 +273,163 @@ public class TestSOUPCodec extends AbstractTest {
 
         // no more messages
         Assert.assertTrue(decoderOutput.getMessageQueue().isEmpty());
+    }
+
+    @Test
+    public void testDecodeMessageBatch() throws Exception {
+        byte[] raw = {
+                // Packet Header:
+                0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x42, // Session = 'AAAAAAAAAB'
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, // Sequence = 1
+                0x00, 0x02, // Count = 2
+                // Data Message Header:
+                0x00, 0x14, // Length: 20
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, // OrderID = 6
+                // Data Message Header:
+                0x00, 0x14, // Length: 20
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06 // OrderID = 6
+
+        };
+        SOUPCodec codec = (SOUPCodec)messageHelper.getCodec(serviceContext);
+
+        // Decode
+        IoBuffer toDecode = IoBuffer.wrap(raw);
+        IoSession decodeSession = new DummySession();
+
+        MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
+        codec.decode(decodeSession, toDecode, decoderOutput);
+        // PacketHeader
+        IMessage actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals((Integer)2, actual.getField("PHCount"));
+
+        // OrderDeleted
+        actual = (IMessage) decoderOutput.getMessageQueue().poll();
+
+        Assert.assertFalse(decoderOutput.getMessageQueue().isEmpty());
+
+        IMessage secondMsg = (IMessage)decoderOutput.getMessageQueue().poll();
+        Assert.assertNotEquals(actual.getField("MessageSequenceNumber"), secondMsg.getField("MessageSequenceNumber"));
+    }
+    @Test
+    public void testDecodeMessageBatchWithLengthLack() throws Exception {
+        byte[] raw = {
+                // Packet Header:
+                0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x42, // Session = 'AAAAAAAAAB'
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, // Sequence = 1
+                0x00, 0x02, // Count = 2
+                // Data Message Header:
+                0x00, 0x15, // Length: 21
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, // OrderID = 6
+                0x00,
+                // Data Message Header:
+                0x00, 0x14, // Length: 20
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06 // OrderID = 6
+
+        };
+        SOUPCodec codec = (SOUPCodec)messageHelper.getCodec(serviceContext);
+
+        // Decode
+        IoBuffer toDecode = IoBuffer.wrap(raw);
+        IoSession decodeSession = new DummySession();
+
+        MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
+        codec.decode(decodeSession, toDecode, decoderOutput);
+        // PacketHeader
+        IMessage actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals((Integer)2, actual.getField("PHCount"));
+
+        // OrderDeleted
+        actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals("Declared message length {21} isn't equal to real one {20}", actual.getMetaData().getRejectReason());
+
+        Assert.assertFalse(decoderOutput.getMessageQueue().isEmpty());
+
+        IMessage secondMsg = (IMessage)decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals("OrderDeleted", secondMsg.getName());
+        Assert.assertEquals("AAAAAAAAAB", secondMsg.getField("PHSession"));
+        Assert.assertEquals((Long)1L, secondMsg.getField("PHSequence"));
+        Assert.assertEquals((Integer)2, secondMsg.getField("PHCount"));
+
+        Assert.assertEquals("D", secondMsg.getField(MESSAGE_TYPE_FIELD));
+        Assert.assertEquals((Long)3L, secondMsg.getField("Timestamp"));
+        Assert.assertEquals((Integer)4, secondMsg.getField("TradeDate"));
+        Assert.assertEquals((Long)5L, secondMsg.getField("TradeableInstrumentId"));
+        Assert.assertEquals("S", secondMsg.getField("Side"));
+        Assert.assertEquals((Long)6L, secondMsg.getField("OrderId"));
+        Assert.assertNotEquals(actual.getField("MessageSequenceNumber"), secondMsg.getField("MessageSequenceNumber"));
+    }
+
+    @Test
+    public void testDecodeMessageBatchWithOverLength() throws Exception {
+        byte[] raw = {
+                // Packet Header:
+                0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x42, // Session = 'AAAAAAAAAB'
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, // Sequence = 1
+                0x00, 0x02, // Count = 2
+                // Data Message Header:
+                0x00, 0x13, // Length: 19
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, // OrderID = 6
+                // Data Message Header:
+                0x00, 0x14, // Length: 20
+                0x44, // MessageType = 'D' - OrderDeleted
+                // Message Payload
+                0x00, 0x00, 0x00, 0x03, // Timestamp = 3
+                0x00, 0x04, // TradeDate = 4
+                0x00, 0x00, 0x00, 0x05, // TradeableInstrumentId = 5
+                0x53, // Side = 'S' = Sell
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06 // OrderID = 6
+
+        };
+        SOUPCodec codec = (SOUPCodec)messageHelper.getCodec(serviceContext);
+
+        // Decode
+        IoBuffer toDecode = IoBuffer.wrap(raw);
+        IoSession decodeSession = new DummySession();
+
+        MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
+        codec.decode(decodeSession, toDecode, decoderOutput);
+        // PacketHeader
+        IMessage actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals((Integer)2, actual.getField("PHCount"));
+
+        // OrderDeleted
+        actual = (IMessage) decoderOutput.getMessageQueue().poll();
+        Assert.assertEquals(". in field name = [OrderId]. in MessageStructure Name = [OrderDeleted]: BufferUnderflowException: ", actual.getMetaData().getRejectReason());
+        Assert.assertFalse(decoderOutput.getMessageQueue().isEmpty());
+        IMessage secondMsg = (IMessage)decoderOutput.getMessageQueue().poll();
+
+        Assert.assertEquals("D", secondMsg.getField(MESSAGE_TYPE_FIELD));
+        Assert.assertEquals((Long)3L, secondMsg.getField("Timestamp"));
+        Assert.assertEquals((Integer)4, secondMsg.getField("TradeDate"));
     }
 }
