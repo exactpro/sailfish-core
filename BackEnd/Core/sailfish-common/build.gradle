@@ -27,8 +27,6 @@ dependencies {
 
     compile 'com.exactpro.mina:apache-mina-core:2.0.21.2'
 
-    compile 'org.codehaus.castor:castor-xml-schema:1.4.1'
-
     //compile 'org.jamon:jamon-api:2.3.0'
     compile 'org.jamon:jamon-runtime:2.4.1'
 

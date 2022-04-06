@@ -17,22 +17,18 @@ package com.exactpro.sf.services.tcpip;
 
 import java.net.InetSocketAddress;
 
-import com.exactpro.sf.services.fix.converter.QFJIMessageConverter;
-import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.support.SimpleTriggerContext;
 
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
-import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ITaskExecutor;
-import com.exactpro.sf.services.ServiceException;
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.handler.ClientSideIoHandler;
 import com.exactpro.sf.storage.IMessageStorage;
