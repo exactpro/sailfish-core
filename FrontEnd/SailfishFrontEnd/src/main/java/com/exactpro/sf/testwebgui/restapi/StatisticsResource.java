@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -81,13 +83,17 @@ public class StatisticsResource {
 	private static final ThreadLocal<SimpleDateFormat> parseFormat = new ThreadLocal<SimpleDateFormat>() {
 	    @Override
 	    protected SimpleDateFormat initialValue() {
-	        return new SimpleDateFormat("ddMMyyyy-HH:mm:ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy-HH:mm:ss");
+            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+	        return formatter;
 	    }
     };
     private static final ThreadLocal<SimpleDateFormat> xmlFormat = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
+            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return formatter;
         }
     };
 	
@@ -225,10 +231,10 @@ public class StatisticsResource {
 	    
 	    XmlResponse xmlResponse = new XmlResponse();
 	    Status status = Status.OK;
-	    
+
 	    if (!getStatisticsService().isConnected()) {
 	        xmlResponse.setMessage("Statistics service is not available.");
-	        return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
+	        return Response.status(Status.BAD_REQUEST).entity(xmlResponse.toString()).build();
 	    }
 	    
 	    try {
@@ -254,7 +260,7 @@ public class StatisticsResource {
 
 	    return Response.
                 status(status).
-                entity(xmlResponse).
+                entity(xmlResponse.toString()).
                 build();
 	}
 

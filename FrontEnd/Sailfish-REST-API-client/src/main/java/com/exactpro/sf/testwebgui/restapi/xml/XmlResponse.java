@@ -54,5 +54,10 @@ public class XmlResponse {
 	public void setRootCause(String rootCause) {
 		this.rootCause = rootCause;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("Message: %s\nRoot cause: %s", getMessage(), getRootCause());
+	}
 	
 }
