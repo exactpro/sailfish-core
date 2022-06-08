@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import groovy.transform.CompileStatic
 buildscript {
     ext {
         kotlin_version          = '1.4.32'
@@ -350,6 +351,17 @@ subprojects {
                 }
             }
         }
+
+        project.configurations
+            .detachedConfiguration(project
+                .configurations
+                .compileClasspath
+                .incoming
+                .dependencies
+                .toArray() as Dependency[]
+            )
+            .resolvedConfiguration
+            .rethrowFailure()
     }
 
     generateVersionClass {
@@ -486,6 +498,7 @@ subprojects {
         force group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: "${kotlin_version}"
         force group: 'io.github.microutils', name: 'kotlin-logging', version: '1.7.8'
         force group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "${fasterxml_jackson_version}"
+        components.all(SailfishCapabilities)
     }
 
     jacoco {
@@ -497,4 +510,26 @@ def getDate(String format) {
     def date = new Date()
     def formattedDate = date.format(format)
     return formattedDate
+}
+
+@CompileStatic
+class SailfishCapabilities implements ComponentMetadataRule {
+    final static Map<String, List<String>> SAILFISH_MODULES = [
+            "quickfixj-core": ["com.exactpro.quickfixj:quickfixj-core","org.quickfixj:quickfixj-core"],
+            "mina-core": ["com.exactpro.mina:apache-mina-core", "org.apache.mina:mina-core"]
+    ]
+
+    void execute(ComponentMetadataContext context) {
+        SAILFISH_MODULES.each { key, val ->
+            context.details.with {
+                if(val.contains("${id.group}:${id.name}" as String)) {
+                    allVariants {
+                        it.withCapabilities {
+                            it.addCapability(key,key, id.version)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

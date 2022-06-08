@@ -16,7 +16,7 @@ class DependencyConflictChecker implements Plugin<Project> {
 
                                 throw new GradleException(
                                         "Not accepted version conflict in: \n" +
-                                                "\t${ga} ${dep.selectionReason.description}\n"
+                                                "\t${id.group}:${id.name} ${selectionReason}\n"
                                 )
 
                             } else {
