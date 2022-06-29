@@ -145,7 +145,7 @@ public class MLWorker {
     }
 
     private Stream<PredictionResultEntry> getPredictionResultEntries(Integer actionId, Map<?, ?> map) {
-        logger.info("mlplugin returns prediction {}", map);
+        logger.debug("mlplugin returns prediction {}", map);
         return map.entrySet().stream().map(entry -> convertOldFormatPrediction(actionId, entry));
     }
 
