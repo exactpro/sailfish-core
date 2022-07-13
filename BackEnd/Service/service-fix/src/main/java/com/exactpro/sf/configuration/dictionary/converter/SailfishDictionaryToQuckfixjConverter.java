@@ -16,6 +16,7 @@
 package com.exactpro.sf.configuration.dictionary.converter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.MessageHelper.ATTRIBUTE_MESSAGE_TYPE;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,6 +47,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -80,15 +82,20 @@ public class SailfishDictionaryToQuckfixjConverter {
     private final String NAME = "name";
     private final String ENUM = "enum";
     private final String NUMBER = "number";
+    private static final String REPLACE_DESCRIPTION_ARG = "-r";
+    private static final String MSG_TYPE_TAG = "35";
 
     // variable
     private final Set<String> componentNames;
     private final Set<String> fieldNames;
     private IDictionaryStructure sailfishDictionary;
+    private final Map<String, String> msgTypeToMsgName = new HashMap<>();
     private final List<Element> accumulateList;
     private final List<Element> accumulateValueList;
     private int minor;
     private int major;
+    //Replaces the description in the enum MsgType(35 tag) with real message names
+    private boolean replace35tagEnumDescription;
 
     public SailfishDictionaryToQuckfixjConverter()
             throws ParserConfigurationException, TransformerConfigurationException {
@@ -106,11 +113,18 @@ public class SailfishDictionaryToQuckfixjConverter {
 
     public void convertToQuickFixJ(InputStream sailfishXML, String outputDir)
             throws IOException, DOMException, MessageNotFoundException, TransformerException {
+        convertToQuickFixJ(sailfishXML, outputDir, false);
+    }
+
+    public void convertToQuickFixJ(InputStream sailfishXML, String outputDir, boolean replace35tagEnumDescription)
+            throws IOException, DOMException, MessageNotFoundException, TransformerException {
         Map<String, Document> outputXMLs = new HashMap<>();
         sailfishDictionary = loader.load(sailfishXML);
+        calculateMsgTypeToMsgName(sailfishDictionary);
         String[] versionFix = sailfishDictionary.getNamespace().split("_");
         minor = Integer.parseInt(versionFix[versionFix.length - 1]);
         major = Integer.parseInt(versionFix[versionFix.length - 2]);
+        this.replace35tagEnumDescription = replace35tagEnumDescription;
 
         if (major < 5) {
             outputXMLs.put("FIX" + major + minor + ".xml",
@@ -128,6 +142,15 @@ public class SailfishDictionaryToQuckfixjConverter {
                 transformer.transform(new DOMSource(outputXMLs.get(fileName)), outputResult);
             }
         }
+    }
+
+    private void calculateMsgTypeToMsgName(@NotNull IDictionaryStructure dictionary) {
+        dictionary.getMessages().forEach((name, messageStructure) -> {
+            String msgType = getAttributeValue(messageStructure, ATTRIBUTE_MESSAGE_TYPE);
+            if (msgType != null) {
+                msgTypeToMsgName.put(msgType, messageStructure.getName());
+            }
+        });
     }
 
     /**
@@ -197,20 +220,26 @@ public class SailfishDictionaryToQuckfixjConverter {
         System.out.println(output);
         
         SailfishDictionaryToQuckfixjConverter converter = new SailfishDictionaryToQuckfixjConverter();
+
+        int length = args.length;
+        boolean replace35tagEnumDescription = false;
+        if (REPLACE_DESCRIPTION_ARG.equals(args[length - 1])) {
+            length = length - 1;
+            replace35tagEnumDescription = true;
+        }
         
-        for (int i = 2; i < args.length; i++) {
+        for (int i = 2; i < length; i++) {
             Path input = Paths.get(args[i]).toAbsolutePath();
             System.out.println(input);
             try (InputStream sailfishXML = Files.newInputStream(input)) {
-                converter.convertToQuickFixJ(sailfishXML, output);
+                converter.convertToQuickFixJ(sailfishXML, output, replace35tagEnumDescription);
             }
         }
     }
 
     /**
      * @param converter
-     * @param args
-     * @param index TODO
+     * @param quickFIXJDictionary
      * @throws SAXException
      * @throws IOException
      * @throws TransformerException
@@ -359,13 +388,14 @@ public class SailfishDictionaryToQuckfixjConverter {
      */
     private Node createField(IFieldStructure fieldStructure, Document doc) {
         Element field = doc.createElement("field");
-        field.setAttribute(NUMBER, fieldStructure.getAttributes().get(FixMessageHelper.ATTRIBUTE_TAG).getValue());
+        String number = fieldStructure.getAttributes().get(FixMessageHelper.ATTRIBUTE_TAG).getValue();
+        field.setAttribute(NUMBER, number);
         field.setAttribute(NAME, fieldStructure.getName());
         field.setAttribute("type", fieldStructure.getAttributes().get("fixtype").getValue());
         if (fieldStructure.isEnum()) {
             accumulateValueList.clear();
             for (IAttributeStructure value : fieldStructure.getValues().values()) {
-                accumulateValueList.add((Element) createValue(value, doc));
+                accumulateValueList.add((Element) createValue(value, doc, number));
             }
             Collections.sort(accumulateValueList, Comparators.ENUM.getComparator());
             for (Element value : accumulateValueList) {
@@ -382,11 +412,33 @@ public class SailfishDictionaryToQuckfixjConverter {
      * @param doc
      * @return
      */
-    private Node createValue(IAttributeStructure valueStructure, Document doc) {
+    private Node createValue(IAttributeStructure valueStructure, Document doc, String numberValue) {
         Element value = doc.createElement("value");
         value.setAttribute(ENUM, valueStructure.getValue());
-        value.setAttribute("description", valueStructure.getName());
+        String description;
+        if (MSG_TYPE_TAG.equals(numberValue) && replace35tagEnumDescription) {
+            description = getDescriptionAsMessageName(valueStructure.getValue(), valueStructure.getName());
+        } else {
+            description = valueStructure.getName();
+        }
+        value.setAttribute("description", description);
         return value;
+    }
+
+    /**
+     * Return enum description for 35 tag as message name
+     *
+     * @param enumValue
+     * @param descriptionValue
+     * @return
+     */
+
+    private String getDescriptionAsMessageName(String enumValue, String descriptionValue) {
+        String messageName = msgTypeToMsgName.get(enumValue);
+        if (messageName != null) {
+            return messageName;
+        }
+        return descriptionValue;
     }
 
     /**
