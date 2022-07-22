@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jetbrains.annotations.NotNull;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MsgMetaData;
@@ -145,13 +146,15 @@ public class BaseHTTPMatcherHandlerDecode extends MessageToMessageDecoder<FullHt
         }
 
         decodeResult.addField(HTTPMessageHelper.HTTPHEADER, MatcherHandlerUtil.extractHTTPHeader(msg.headers(), msgFactory, dictionary.getNamespace()));
+        setCookie(msg);
+        out.add(decodeResult);
+    }
 
+    protected void setCookie(@NotNull FullHttpResponse msg) {
         String gettingCookie = msg.headers().get(HttpHeaderNames.SET_COOKIE);
         if (gettingCookie != null) {
-            this.cookie.set(gettingCookie);
+            cookie.set(gettingCookie);
         }
-
-        out.add(decodeResult);
     }
 
 }

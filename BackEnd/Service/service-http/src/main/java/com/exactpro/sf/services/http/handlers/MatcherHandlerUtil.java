@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.http.handlers;
 
-import java.util.Map.Entry;
+import java.util.List;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -33,9 +33,11 @@ public class MatcherHandlerUtil {
     public static IMessage extractHTTPHeader(HttpHeaders headers, IMessageFactory msgFactory, String dictionaryNamespace) {
 
         IMessage httpHeader = msgFactory.createMessage(HTTPMessageHelper.HTTPHEADER, dictionaryNamespace);
-
-        for (Entry<String, String> header : headers.entries()) {
-            httpHeader.addField(header.getKey(), header.getValue());
+        for (String headerName : headers.names()) {
+            List<String> headerValues = headers.getAll(headerName);
+            if (!headerValues.isEmpty()) {
+                httpHeader.addField(headerName, String.join(", ", headerValues));
+            }
         }
 
         return httpHeader;

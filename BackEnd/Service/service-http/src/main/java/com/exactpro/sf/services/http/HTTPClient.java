@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,12 +86,12 @@ public abstract class HTTPClient extends NettyClientService {
     protected URI uri;
     protected final Semaphore channelBusy = new Semaphore(1);
     private IMessageFactory messageFactory;
+    protected final AtomicReference<String> cookie = new AtomicReference<>();
 
     @Override
     protected void initChannelHandlers(IServiceContext serviceContext) {
 
         Queue<ResponseInformation> queue = new ArrayDeque<>();
-        AtomicReference<String> cookie = new AtomicReference<>();
 
         handlers.clear();
 
