@@ -544,7 +544,12 @@ public class WaitAction {
         countMessages(messageFilter, messagesIterator, settings, allResults);
 
         int messageCount = allResults.size();
-        addResultToReport(report, expectedMessageCount, description, allResults, messageCount, true);
+
+        try {
+            addResultToReport(report, expectedMessageCount, description, allResults, messageCount, true);
+        } catch (KnownBugException e) {
+            throw new MessageKnownBugException(e.getMessage(), countResult(messageCount));
+        }
 
         return messageCount;
     }

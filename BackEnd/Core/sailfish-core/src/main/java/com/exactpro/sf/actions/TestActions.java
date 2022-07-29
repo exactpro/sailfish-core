@@ -88,6 +88,8 @@ import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.storage.util.JsonMessageConverter;
 import com.exactpro.sf.util.DateTimeUtility;
+import com.exactpro.sf.util.KnownBugException;
+import com.exactpro.sf.util.MessageKnownBugException;
 import com.google.common.collect.ImmutableSet;
 
 @MatrixActions
@@ -209,9 +211,15 @@ public class TestActions extends AbstractCaller {
         WaitAction.countMessages(message, iterator, compSettings, allResults);
 
         int actualCount = allResults.size();
-        WaitAction.addResultToReport(report, expectedMessageCount, "", allResults, actualCount, true);
 
-        return WaitAction.countResult(actualCount);
+        HashMap<String, Integer> result = WaitAction.countResult(actualCount);
+        try {
+            WaitAction.addResultToReport(report, expectedMessageCount, "", allResults, actualCount, true);
+        } catch (KnownBugException e) {
+            throw new MessageKnownBugException(e.getMessage(), result);
+        }
+
+        return result;
 	}
 
 	@MessageDirection(direction=Direction.RECEIVE)
