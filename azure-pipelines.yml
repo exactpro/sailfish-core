@@ -11,7 +11,7 @@ strategy:
     linux:
       imageName: 'ubuntu-20.04'
     mac:
-      imageName: 'macos-12'
+      imageName: 'macos-11'
     windows:
       imageName: 'windows-2022'
 
