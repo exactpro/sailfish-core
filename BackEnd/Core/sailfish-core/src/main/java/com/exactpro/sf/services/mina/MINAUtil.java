@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.mina;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,6 +38,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.filter.ssl.SslFilter;
 
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.HexDumper;
 import com.exactpro.sf.common.util.StringUtil;
 
@@ -95,22 +95,21 @@ public class MINAUtil {
         } };
 
         KeyManager[] keyManagers = null;
-
-        if (!clientMode) {
+        if (keyStore != null) {
             KeyStore ks = getKeyStore(keyStoreType, keyStore, keyStorePassword);
-            KeyManagerFactory kmf = KeyManagerFactory
-                    .getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(ks, keyStorePassword);
             keyManagers = kmf.getKeyManagers();
-        } else {
-            if (keyStore != null) {
-                KeyStore ks = getKeyStore(keyStoreType, keyStore, keyStorePassword);
+            if (clientMode) {
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(ks);
                 trustAllCerts = tmf.getTrustManagers();
             }
+        } else {
+            if (!clientMode) {
+                throw new EPSCommonException("When ssl is enabled, a certificate for the server is required.");
+            }
         }
-
         sslContext.init(keyManagers, trustAllCerts, new SecureRandom());
         SslFilter sslFilter = new SslFilter(sslContext, true);
         sslFilter.setUseClientMode(clientMode);
@@ -119,10 +118,10 @@ public class MINAUtil {
     }
 
 
-    private static KeyStore getKeyStore(String keyStoreType, String keyStore, char[] keyStorePassword) throws FileNotFoundException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    private static KeyStore getKeyStore(String keyStoreType, String keyStore, char[] keyStorePassword) throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
         KeyStore ks = KeyStore.getInstance(keyStoreType);
-        try (InputStream is = new FileInputStream(new File(keyStore))) {
+        try (InputStream is = new FileInputStream(keyStore)) {
             ks.load(is, keyStorePassword);
             return ks;
         }
