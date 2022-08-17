@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1740,6 +1740,46 @@ public class TestMessageComparator extends AbstractTest {
         assertStatus.accept("1", StatusType.PASSED);
         assertStatus.accept("2", StatusType.PASSED);
         assertStatus.accept("3", StatusType.PASSED);
+    }
+
+    @Test
+    public void compareListOfSimpleElements() {
+        String messageName = "MessageWithNoComplexList";
+        String namespace = "namespace";
+        IMessage msg1 = new MapMessage(namespace, messageName);
+        IMessage msg2 = new MapMessage(namespace, messageName);
+
+        List<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        list.add("5");
+        String fieldName = "List";
+        msg1.addField(fieldName, list);
+
+        List<String> list2 = new ArrayList<>();
+        list2.add("2");
+        list2.add("3");
+        list2.add("5");
+        list2.add("4");
+        list2.add("1");
+        msg2.addField(fieldName, list2);
+
+
+        ComparatorSettings compSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
+        validateResult(comparisonResult, 1, 4, 0);
+
+        compSettings.setCheckSimpleCollectionsOrder(false);
+        comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
+        validateResult(comparisonResult, 5, 0, 0);
+
+        compSettings.setCheckGroupsOrder(true);
+        comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
+        validateResult(comparisonResult, 5, 0, 0);
+
     }
 
     private static void assertComparisonResult(String name, ComparisonResult result, Object expected, Object actual) {

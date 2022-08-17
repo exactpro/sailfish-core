@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class ComparatorSettings {
     private Set<String> uncheckedFields = Collections.emptySet();
     private Set<String> ignoredFields = Collections.emptySet();
     private boolean keepResultGroupOrder;
+    private boolean checkSimpleCollectionsOrder = true;
 
     public IPostValidation getPostValidation() {
         return postValidation;
@@ -154,5 +155,13 @@ public class ComparatorSettings {
 
     public boolean isKeepResultGroupOrder() {
         return keepResultGroupOrder;
+    }
+
+    public boolean isCheckSimpleCollectionsOrder() {
+        return checkSimpleCollectionsOrder;
+    }
+
+    public void setCheckSimpleCollectionsOrder(boolean checkSimpleCollectionsOrder) {
+        this.checkSimpleCollectionsOrder = checkSimpleCollectionsOrder;
     }
 }

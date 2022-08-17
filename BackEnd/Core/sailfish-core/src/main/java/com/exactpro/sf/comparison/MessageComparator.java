@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ public class MessageComparator {
 
         int maxSize = Math.max(actualList.size(), expectedList.size());
         boolean complex = structure != null && structure.isComplex() || !actualList.isEmpty() && !isObject(actualList.get(0));
-        boolean checkOrder = settings.isCheckGroupsOrder() || !complex;
+        boolean checkOrder = complex && settings.isCheckGroupsOrder() || !complex && settings.isCheckSimpleCollectionsOrder();
 
         if(checkOrder) {
             for(int i = 0; i < maxSize; i++) {
