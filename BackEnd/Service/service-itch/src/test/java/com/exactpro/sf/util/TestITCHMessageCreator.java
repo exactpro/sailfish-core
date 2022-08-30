@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,7 @@ public class TestITCHMessageCreator {
 		message.addField("Price4", 3.3);
 		message.addField("Size4", 3.4);
 		message.addField("UInt16", 3.5);
+        message.addField("PriceLength4", 9984.4444);
 		return messageHelper.prepareMessageToEncode(message, null);
 	}
 	
@@ -205,6 +206,7 @@ public class TestITCHMessageCreator {
 		message.addField("Int32", new BigDecimal(11));
 		message.addField("UInt32", new BigDecimal(12));
 		message.addField("Price", new BigDecimal(13));
+        message.addField("PriceLength4", BigDecimal.valueOf(9984.4444));
 		message.addField("Size", new BigDecimal(14));
 		message.addField("UDT", new BigDecimal(0));
 		return messageHelper.prepareMessageToEncode(message, null);

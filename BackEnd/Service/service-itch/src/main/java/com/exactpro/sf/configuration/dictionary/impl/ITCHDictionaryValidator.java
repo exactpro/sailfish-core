@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,8 +239,8 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                             }
                         } else if(javaType == JavaType.JAVA_LANG_DOUBLE
                                 || javaType == JavaType.JAVA_MATH_BIG_DECIMAL) {
-                            if (length != 8) {
-                                addProtocolTypeError(errors, message, field, type, 8, length);
+                            if (!(length == 8 || length == 4)) {
+                                addProtocolTypeError(errors, message, field, type, "4 or 8", length.toString());
                             }
                         }
 

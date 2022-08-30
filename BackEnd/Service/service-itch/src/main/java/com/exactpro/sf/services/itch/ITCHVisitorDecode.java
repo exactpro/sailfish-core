@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.itch;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.util.ServiceUtil.divide;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -217,6 +218,9 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			double result = ServiceUtil.convertFromUint64(rawArray, divider);
 
 			msg.addField(fieldName, result);
+        } else if (type == ProtocolType.PRICE && length == 4) {
+            int val = buffer.getInt();
+            msg.addField(fieldName, divide(val, 10000L));
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.PRICE4) {
 			long val = buffer.getLong();
 
@@ -230,7 +234,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 				val = val * -1L;
 			}
 
-            double valDouble = ServiceUtil.divide(val, type == ProtocolType.PRICE ? 100_000_000L : 10_000L);
+            double valDouble = divide(val, type == ProtocolType.PRICE ? 100_000_000L : 10_000L);
 
             msg.addField(fieldName, valDouble);
 		} else if (type == ProtocolType.UINT16) {
@@ -348,19 +352,26 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 			msg.addField(fieldName, bigDec.divide(BD_SIZE_DEVIDER));
 		} else if (type == ProtocolType.PRICE) {
-			long val = buffer.getLong();
+            BigDecimal valBD;
+            if (length == 4) {
+                int intVal = buffer.getInt();
+                valBD = BigDecimal.valueOf(intVal);
+                msg.addField(fieldName, valBD.divide(BD_PRICE4_DEVIDER));
+            } else {
+                long longVal = buffer.getLong();
 
-			boolean positive = (byte) (val >> 63) == 0;
+                boolean positive = (byte)(longVal >> 63) == 0;
 
-			if (!positive) {
-				long mask = 0x7FFFFFFFFFFFFFFFL;
-				val = val & mask;
-				val = val * -1L;
-			}
+                if (!positive) {
+                    long mask = 0x7FFFFFFFFFFFFFFFL;
+                    longVal = longVal & mask;
+                    longVal = longVal * -1L;
+                }
 
-			BigDecimal valBD = new BigDecimal(val);
+                valBD = new BigDecimal(longVal);
 
-			msg.addField(fieldName, valBD.divide(BD_PRICE_DEVIDER));
+                msg.addField(fieldName, valBD.divide(BD_PRICE_DEVIDER));
+            }
 		} else if (type == ProtocolType.UDT) {
             byte[] longArray = new byte[length];
 

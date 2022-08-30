@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,6 +253,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 		    compareFieldsValues(result.get(1),original.get(1),"Price4",Double.class);
 		    compareFieldsValues(result.get(1),original.get(1),"Size4",Double.class);
 		    compareFieldsValues(result.get(1),original.get(1),"UInt16",Double.class);
+            compareFieldsValues(result.get(1),original.get(1),"PriceLength4",Double.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -313,6 +314,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 		    compareFieldsValues(result.get(1),original.get(1),"Price",BigDecimal.class);
 		    compareFieldsValues(result.get(1),original.get(1),"Size",BigDecimal.class);
 		    compareFieldsValues(result.get(1),original.get(1),"UDT",BigDecimal.class);
+            compareFieldsValues(result.get(1),original.get(1),"PriceLength4",BigDecimal.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
 
     public static final BigDecimal BD_SIZE_DEVIDER = new BigDecimal(100_000_000L);
     public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100_000_000L);
+    public static final BigDecimal BD_PRICE4_DEVIDER = new BigDecimal(10_000L);
     public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1_000_000_000L);
     public static final BigDecimal UDT_DEVIDER = new BigDecimal(1_000_000L);
     public static final DateTimeFormatter DATE_AS_INT = DateTimeUtility.createFormatter("yyyyMMdd");

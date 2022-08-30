@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,8 +201,10 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
             writeDefaultValue(length, fieldName);
 		    return;
         }
-
-		if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
+        if (type == ProtocolType.PRICE && length == 4) {
+            int val = (int)(value.doubleValue() * 10_000);
+            buffer.putInt(val);
+        } else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
             long val = (long)(value.doubleValue() * 100_000_000);
 			buffer.putLong(val);
 		} else if (type == ProtocolType.PRICE4 || type == ProtocolType.SIZE4) {
@@ -309,6 +311,9 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 				}
 			}
 			buffer.putLong(val);
+        } else if (type == ProtocolType.PRICE && length == 4) {
+            int val = (int)(value.doubleValue() * 10_000);
+            buffer.putInt(val);
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
             long val = (long)(value.doubleValue() * 100_000_000);
 			buffer.putLong(val);
