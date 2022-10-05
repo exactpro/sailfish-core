@@ -41,7 +41,9 @@ import com.exactpro.sf.util.DateTimeUtility;
 public class ITCHVisitorEncode extends ITCHVisitorBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorEncode.class);
-	private final IoBuffer buffer;
+    public static final int INT_MASK = 0x800000;
+    public static final long LONG_MASK = 0x8000000000000000L;
+    private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 
     private static final Byte DEFAULT_BYTE = 0x0;
@@ -185,14 +187,14 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         }
 
 		if (type == ProtocolType.PRICE) {
-            int val = (int)(value.floatValue() * 10_000);
-			buffer.putInt(val);
+            int intVal = convertSignedFloatToInt(value, 10_000);
+            buffer.putInt(intVal);
 		} else {
 			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
 		}
 	}
 
-	@Override
+    @Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
         Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
@@ -202,14 +204,11 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		    return;
         }
         if (type == ProtocolType.PRICE && length == 4) {
-            int val = (int)(value.doubleValue() * 10_000);
-            buffer.putInt(val);
+            buffer.putInt(convertSignedDoubleToInt(value.doubleValue(), 10_000));
         } else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
-            long val = (long)(value.doubleValue() * 100_000_000);
-			buffer.putLong(val);
+			buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), 100_000_000));
 		} else if (type == ProtocolType.PRICE4 || type == ProtocolType.SIZE4) {
-            long val = (long)(value.doubleValue() * 10_000);
-			buffer.putLong(val);
+            buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), 10_000));
 		} else if (type == ProtocolType.UINT16) {
 			double val = value.doubleValue();
             Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
@@ -228,7 +227,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
     public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
         Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
-        
+
 		tryToFillDefaultBytes(type, value, fieldName, length);
 
         if (type == ProtocolType.STUB) {
@@ -277,7 +276,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		tryToFillDefaultBytes(type, value, fieldName, length);
-    
+
         if (type == ProtocolType.TIME) {
             String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
             DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
@@ -290,7 +289,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }
     }
-	
+
 	@Override
 	public void visit(String fieldName, BigDecimal value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
@@ -354,19 +353,37 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
             MessageStructureReader.READER.traverse(visitorEncode, fldType.getFields(), msg, MessageStructureReaderHandlerImpl.instance());
 		}
 	}
-	
-	
+
+
 	@Override
 	public void visit(String fieldName, IMessage message, IFieldStructure fldType, boolean isDefault) {
 		if (message == null) {
 			throw new NullPointerException("Message is null. Field name = " + fieldName);
 		}
-		
+
 		logger.trace("Encode - field: {}, from: List<IMessage>, value: {}", fieldName, message);
 
         ITCHVisitorEncode visitorEncode = new ITCHVisitorEncode(buffer, byteOrder);
         MessageStructureReader.READER.traverse(visitorEncode, fldType.getFields(), message, MessageStructureReaderHandlerImpl.instance());
 	}
+
+    private static long convertSignedDoubleToLong(double value, int multiplier) {
+        double dbVal = value < 0 ? -value : value;
+        long val = (long)(dbVal * multiplier);
+        return value < 0 ? val | LONG_MASK : val;
+    }
+
+    private static int convertSignedDoubleToInt(double value, int multiplier) {
+        double dbVal = value < 0 ? -value : value;
+        int val = (int)(dbVal * multiplier);
+        return value < 0 ? val | INT_MASK : val;
+    }
+
+    private static int convertSignedFloatToInt(float value, int multiplier) {
+        float flVal = value < 0 ? -value : value;
+        int val = (int)(flVal * multiplier);
+        return value < 0 ? val | INT_MASK : val;
+    }
 
     private void writeDefaultValue(int length, String fieldName) {
         for (int i = 0; i < length; i++) {

@@ -269,7 +269,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 	@Test
 	public void testDoubleTypeWithNegativeValue(){
 		try{
-			double neg=-3.1;
+			Double neg = -3.1;
 			IMessage message = getMessageHelper().getMessageFactory().createMessage("testDouble", "ITCH");
 			message.addField("Price", neg);
             message.addField("Size", 0d);
@@ -280,10 +280,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			IMessage decodedMessage=decode(encode(message,codec),codec);
 
             List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            //noinspection UnnecessaryParentheses
-            Assert.assertEquals((Double)(-9.223372036544775E10), result.get(1).getField("Price"));
-            //noinspection UnnecessaryParentheses
-            Assert.assertEquals((Double)(-9.223372036854745E14), result.get(1).getField("Price4"));
+            Assert.assertEquals(neg, result.get(1).getField("Price"));
+            Assert.assertEquals(neg, result.get(1).getField("Price4"));
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
