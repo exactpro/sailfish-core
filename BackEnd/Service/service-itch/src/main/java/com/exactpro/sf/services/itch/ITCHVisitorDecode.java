@@ -48,8 +48,9 @@ import com.google.common.primitives.UnsignedLong;
 public class ITCHVisitorDecode extends ITCHVisitorBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorDecode.class);
-
-	private final IoBuffer buffer;
+    private static final int INT_MASK = 0x7FFFFFFF;
+    private static final long LONG_MASK = 0x7FFFFFFFFFFFFFFFL;
+    private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 	private final IMessage msg;
 	private final IMessageFactory msgFactory;
@@ -219,7 +220,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 			msg.addField(fieldName, result);
         } else if (type == ProtocolType.PRICE && length == 4) {
-            int val = buffer.getInt();
+            int val = correctIfNegative(buffer.getInt());
             msg.addField(fieldName, divide(val, 10000L));
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.PRICE4) {
 			long val = buffer.getLong();
@@ -227,11 +228,8 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			boolean positive = (byte) (val >> 63) == 0;
 			
 			if (!positive) {
-				long mask = 0x7FFFFFFFFFFFFFFFL;
-
-				val = val & mask;
-
-				val = val * -1L;
+                val &= LONG_MASK;
+                val *= -1L;
 			}
 
             double valDouble = divide(val, type == ProtocolType.PRICE ? 100_000_000L : 10_000L);
@@ -258,7 +256,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		}
 	}
 
-	@Override
+    @Override
 	public void visit(String fieldName, Float value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
@@ -267,7 +265,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.PRICE) {
-			int val = buffer.getInt();
+			int val = correctIfNegative(buffer.getInt());
 			msg.addField(fieldName, (float) (val / 10000.0));
 		} else {
 			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
@@ -310,11 +308,11 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 					bigDec = bigDec.divide(BigDecimal.TEN);
 				}
 			}
-			
+
 			msg.addField(fieldName, bigDec);
 		} else  if (type == ProtocolType.INT32 || type == ProtocolType.UINT32) {
 			long val = 0;
-			
+
 			switch (type) {
 			case INT32:
 				val = buffer.getInt();
@@ -325,7 +323,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			default:
 				throw new IllegalStateException("Type is " + type);
 			}
-			
+
 			BigDecimal bigDec = new BigDecimal(val);
 
 			if (impliedDecimals != null) {
@@ -334,7 +332,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 				}
 			}
 			msg.addField(fieldName, bigDec);
-		
+
 		} else if (type == ProtocolType.SIZE) {
 			byte[] rawArray = new byte[length + 1];
 
@@ -363,7 +361,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
                 boolean positive = (byte)(longVal >> 63) == 0;
 
                 if (!positive) {
-                    long mask = 0x7FFFFFFFFFFFFFFFL;
+                    long mask = LONG_MASK;
                     longVal = longVal & mask;
                     longVal = longVal * -1L;
                 }
@@ -405,7 +403,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
         int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
-		
+
 		if (type == ProtocolType.STUB) {
             buffer.skip(length);
 		} else if (type == ProtocolType.UDT) {
@@ -414,19 +412,19 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
             BigDecimal pvalue = new BigDecimal(ByteBuffer.wrap(longArray).order(byteOrder).getLong());
 
             long ldt = pvalue.divide(UDT_DEVIDER).longValue();
-            
+
             msg.addField(fieldName, DateTimeUtility.toLocalDateTime(ldt));
 		} else if (type == ProtocolType.DATE_TIME) {
             String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
             DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
-            
+
             byte[] array = new byte[length];
             buffer.get(array);
             try {
                 String asciiDate = decoder.get().decode(ByteBuffer.wrap(array)).toString().trim();
-    
+
                 TemporalAccessor dateTime = dateTimeFormatter.parse(asciiDate);
-                
+
                 msg.addField(fieldName, DateTimeUtility.toLocalDateTime(dateTime));
             } catch (CharacterCodingException | DateTimeParseException e) {
                 throw new EPSCommonException(e);
@@ -459,14 +457,14 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
         } else if (type == ProtocolType.DATE) {
             String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
             DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
-    
+
             byte[] array = new byte[length];
             buffer.get(array);
             try {
                 String asciiDate = decoder.get().decode(ByteBuffer.wrap(array)).toString().trim();
-    
+
                 TemporalAccessor date = dateTimeFormatter.parse(asciiDate);
-        
+
                 msg.addField(fieldName, DateTimeUtility.toLocalDate(date));
             } catch (CharacterCodingException | DateTimeParseException e) {
                 throw new EPSCommonException(e);
@@ -494,21 +492,21 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
     public void visit(String fieldName, LocalTime value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
         logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
-    
+
         int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
         int pos1 = buffer.position();
-    
+
         if (type == ProtocolType.TIME) {
             String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
             DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
-        
+
             byte[] array = new byte[length];
             buffer.get(array);
             try {
                 String asciiDate = decoder.get().decode(ByteBuffer.wrap(array)).toString().trim();
-    
+
                 TemporalAccessor time = dateTimeFormatter.parse(asciiDate);
-            
+
                 msg.addField(fieldName, DateTimeUtility.toLocalTime(time));
             } catch (CharacterCodingException | DateTimeParseException e) {
                 throw new EPSCommonException(e);
@@ -535,7 +533,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			// reference to field
 			legsCount = Integer.parseInt(msg.getField((String) countField).toString());
 		}
-		
+
 		logger.trace("Decode - field: {}, count: {}", fieldName, legsCount);
 
 		List<IMessage> list = new LinkedList<IMessage>();
@@ -558,6 +556,15 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
         MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
         msg.addField(fieldName, subMessage);
 	}
+
+    private static int correctIfNegative(int val) {
+        boolean isNegative = (byte)(val >> 31) != 0;
+        if (isNegative) {
+            val &= INT_MASK;
+            val *= -1;
+        }
+        return val;
+    }
 
 	private final void reverseBytes(byte[] data) {
 		int length = data.length;
