@@ -16,7 +16,7 @@
 import groovy.transform.CompileStatic
 buildscript {
     ext {
-        kotlin_version          = '1.4.32'
+        kotlin_version          = '1.5.30'
         sharedDir               = file("${project.rootDir}/shared")
 
         sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
@@ -83,6 +83,7 @@ buildscript {
 }
 plugins {
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
+    id "org.owasp.dependencycheck" version "6.5.3"
 }
 
 if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
@@ -148,11 +149,11 @@ allprojects {
         }
 
         //Lib versions
-        version_log4j2 = '2.17.0'
+        version_log4j2 = '2.19.0'
         version_slf4j = '1.7.32'
         version_hibernate = '5.4.24.Final'
-        netty_version = '4.1.39.Final'
-        fasterxml_jackson_version = '2.12.3'
+        netty_version = '4.1.82.Final'
+        fasterxml_jackson_version = '2.13.4'
     }
 
     eclipse {
@@ -504,6 +505,8 @@ subprojects {
     jacoco {
         toolVersion = '0.8.5'
     }
+
+    task allDeps(type: DependencyReportTask) {}
 }
 
 def getDate(String format) {
@@ -532,4 +535,9 @@ class SailfishCapabilities implements ComponentMetadataRule {
             }
         }
     }
+}
+dependencyCheck {
+    scanProjects = [':BackEnd:Core:sailfish-common', ':BackEnd:Core:sailfish-core', ':BackEnd:Service:service-fix', ':BackEnd:Service:service-itch', ':BackEnd:Service:service-ntg', ':BackEnd:Service:service-fast', ':BackEnd:Service:service-tcpip', ':BackEnd:Service:service-http', ':BackEnd:Service:service-soup']
+    format='ALL'
+    failBuildOnCVSS=5
 }

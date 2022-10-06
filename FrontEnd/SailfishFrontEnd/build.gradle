@@ -137,7 +137,7 @@ dependencies {
 
     compile 'commons-configuration:commons-configuration:1.10'
 
-    compile 'commons-io:commons-io:2.6'
+    compile 'commons-io:commons-io:2.11.0'
 
     compile 'org.apache.commons:commons-lang3:3.8.1'
 
@@ -171,7 +171,7 @@ dependencies {
 
     compile 'com.exactpro.mvel:mvel2:2.3.2.Final.3'
 
-    compile 'org.apache.poi:poi:4.1.2'
+    compile 'org.apache.poi:poi:5.2.3'
 
     compile 'org.primefaces:primefaces:6.0'
     compile 'org.primefaces.extensions:primefaces-extensions:6.0.0'

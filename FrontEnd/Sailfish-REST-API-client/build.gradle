@@ -11,7 +11,7 @@ dependencies {
     constraints {
         compile("commons-codec:commons-codec") {
             version {
-                strictly "1.13"
+                strictly "1.15"
             }
             because("To be compatible with sailfish-core: overriding transitive from apache.poi.")
         }
