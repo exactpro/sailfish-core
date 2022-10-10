@@ -93,6 +93,6 @@ public class LogUtils {
     }
 
     public static void setConfigLocation(String path) {
-        setConfigLocation(URI.create(path));
+        setConfigLocation(new File(path));
     }
 }
