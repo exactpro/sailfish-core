@@ -138,11 +138,11 @@
 }
 
 .eps-selected-environment {
-	margin-top: 6px;
+	margin-top: 0px;
 }
 
 .eps-selected-variable-set {
-    margin-top: 6px;
+    margin-top: 0px;
 }
 
 .eps-environment-table th.eps-service-action-column {
@@ -349,12 +349,14 @@ a.eps-link-button:focus {
 }
 
 #selectedEnvironment {
-    max-width: 100px;
+    min-width: 70px !important;
+    max-width: 70px;
     overflow: hidden;
 }
 
 #selectedVariableSet {
-    max-width: 100px;
+    min-width: 70px !important;
+    max-width: 70px;
     overflow: hidden;
 }
 
