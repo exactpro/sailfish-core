@@ -1,0 +1,4 @@
+#id,#service_name,#reference,#action,#message_type
+1,,,Test case start,
+,TestService,ref,SendDirty,SimpleMessage
+,,,Test case end,

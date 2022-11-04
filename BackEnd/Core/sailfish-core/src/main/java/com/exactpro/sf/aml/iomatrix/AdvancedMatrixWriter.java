@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,9 @@ public class AdvancedMatrixWriter implements AutoCloseable {
             return new ExcelMatrixWriter(matrixPath.getAbsolutePath(), true);
         case CSV:
             return new CSVMatrixWriter(matrixPath.getAbsolutePath());
+        case JSON:
+        case YAML:
+            return new JSONMatrixWriter(matrixPath, matrixType);
         default:
             throw new IllegalStateException("Unknown matrix type: " + matrixType);
         }

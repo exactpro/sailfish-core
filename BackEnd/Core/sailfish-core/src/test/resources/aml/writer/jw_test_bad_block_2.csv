@@ -1,0 +1,13 @@
+#id,#description,#service_name,#action,#message_type
+,,,,
+1,Not Bad Block,,Test case start,
+,,TestService,SendDirty,SimpleMessage
+,,,Test case end,
+,,,,
+2,Not Bad Block,,Test case start,
+,,TestService,SendDirty,SimpleMessage
+,,,,
+,,,,
+3,Not Bad Block,,Test case start,
+,,TestService,SendDirty,SimpleMessage
+,,,Test case end,

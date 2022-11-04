@@ -35,6 +35,7 @@
     <h:outputStylesheet library="sf" name="css/sf.css"/>
     <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
     <h:outputStylesheet library="sf" name="css/custom.css"/>
+    <h:outputStylesheet library="sf" name="css/tools.css"/>
 
     <script>
 
@@ -59,6 +60,9 @@
             }
 		}
 
+		function reload() {
+		    window.location.reload();
+		}
     </script>
 
 
@@ -80,7 +84,10 @@
             <div class="eps-config-navigation">
                 <ul>
                     <div onclick="changeSection('matrixMerger');" class="eps-dot">
-                        <li id="matrixMergerNavItem">Matix merger</li>
+                        <li id="matrixMergerNavItem">Matrix Merger</li>
+                    </div>
+                    <div onclick="changeSection('matrixConverter');" class="eps-dot">
+                        <li id="matrixConverterNavItem">Matrix Converter</li>
                     </div>
                     <!--div onclick="changeSection('test');" class="eps-dot">
                         <li id="testNavItem">test</li>
@@ -115,6 +122,145 @@
                         </h:form>
 
                     </div>
+
+                    <div id="matrixConverterConfig" class="eps-config-container">
+                        <h:form id="convertMenuSelectForm">
+                            <p:menubar id="convertMenuSelectMenu">
+                                <p:menuitem id="convertMenuSelectButton"
+                                        value="Upload"
+                                        icon="ui-icon-arrowrefresh-1-n"
+                                        update="readyToUploadFilesForm uploadTemporaryFilesForm"
+                                        onclick="PF('uploadMatrixDialog').show()" />
+                                <p:menuitem id="convertMenuConvertButton"
+                                        value="Convert Matrices"
+                                        icon="ui-icon-play"
+                                        disabled="#{convertMatrixBean.selectedFilesEmpty}"
+                                        ajax="false"
+                                        immediate="true">
+                                    <p:fileDownload value="#{convertMatrixBean.convertToZip()}" />
+                                </p:menuitem>
+                                <p:menuitem id="convertMenuDeleteButton"
+                                        value="Delete Matrices"
+                                        icon="ui-icon-trash"
+                                        onclick="PF('convertMenuSelectFormDialog').show()"
+                                        disabled="#{convertMatrixBean.selectedFilesEmpty}" />
+                            </p:menubar>                            
+
+                            <p:tooltip value="Select Matrices to Upload" for="convertMenuSelectButton"/>
+                            <p:tooltip value="Convert Selected Matrices" for="convertMenuConvertButton"/>
+                            <p:tooltip value="Delete Selected Matrices" for="convertMenuDeleteButton"/>
+                        </h:form>
+
+                        <h:form>
+                            <p:confirmDialog widgetVar="convertMenuSelectFormDialog"
+                                        severity="alert"
+                                        header="Confirm Deletion"
+                                        message="Do you want to delete selected matrices?">
+                                <p:commandButton value="Yes" icon="ui-icon-check"
+                                            action="#{convertMatrixBean.deleteSelectedFiles}"
+                                            oncomplete="PF('convertMenuSelectFormDialog').hide(); reload()" />
+                                <p:commandButton value="No" icon="ui-icon-close"
+                                            update="matrixConvertMainTableForm"
+                                            oncomplete="PF('convertMenuSelectFormDialog').hide()" />
+                            </p:confirmDialog>
+                        </h:form>
+
+                        <h:form id="matrixConvertMainTableForm">
+                            <p:dataTable id="matrixConvertMainTable"
+                                        widgetVar="matrixConvertMainTable"
+                                        styleClass="borderless"
+                                        var="file"
+                                        rowKey="#{file.index}"
+                                        selection="#{convertMatrixBean.selectedFiles}"
+                                        value="#{convertMatrixBean.uploadedFiles}">
+                                <p:ajax event="rowSelect" update="convertMenuSelectForm" />
+                                <p:ajax event="rowUnselect" update="convertMenuSelectForm" />
+                                <p:ajax event="rowSelectCheckbox" update="convertMenuSelectForm" />
+                                <p:ajax event="rowUnselectCheckbox" update="convertMenuSelectForm" />
+                                <p:ajax event="toggleSelect" update="convertMenuSelectForm" />
+
+                                <p:column selectionMode="multiple" style="width:20px; text-align:center;"/>
+                                <p:column headerText="Source File Name">
+                                    <h:outputText value="#{file.sourceFileName}" />
+                                </p:column>
+                                <p:column headerText="File Name to Convert">
+                                    <p:inputText value="#{file.newFileName}" style="width: 90%;">
+                                        <p:ajax event="keyup" execute="@this" />
+                                    </p:inputText>
+                                </p:column>
+                                <p:column headerText="File Type to Convert" style="width: 120px;">
+                                    <p:selectOneMenu value="#{file.newFileType}" style="width: 80px;">
+                                        <p:ajax event="change" />
+                                        <f:selectItems value="#{file.possibleFileTypes}"
+                                                    var="ft"
+                                                    itemValue="#{ft}"
+                                                    itemLabel="#{ft.extension}" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                                <p:column style="width: 40px;">
+                                    <p:commandButton icon="ui-icon-play"
+                                                    title="Convert the matrix and download the result"
+                                                    ajax="false"
+                                                    immediate="true"
+                                                    style="float: center;">
+                                        <p:fileDownload value="#{file.convertWithDownload()}" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    </div>
+
+                    <p:dialog id="temporaryFilesUploadDialog"
+                            header="Add matrices"
+                            widgetVar="uploadMatrixDialog"
+                            modal="true" resizable="false" width="1000">
+                        <h:form id="uploadFewLocalButtonForm">
+                            <h:panelGrid columns="2">
+                                <p:tooltip value="Add one or more matrix files for upload" for="temporaryFilesUploadButton"/>
+                                <p:tooltip value="Clear all matrices" for="temporaryFilesClearAllButton"/>
+
+                                <p:fileUpload id="temporaryFilesUploadButton"
+                                        fileUploadListener="#{convertMatrixBean.handleTemporaryFileUpload}"
+                                        allowTypes="#{convertMatrixBean.allowedTypesRegex}"
+                                        invalidFileMessage="#{convertMatrixBean.allowedTypesMessage}"
+                                        mode="advanced"
+                                        multiple="true"
+                                        update="readyToUploadFilesForm uploadTemporaryFilesForm"
+                                        auto="true"/>
+                                <p:commandButton id="temporaryFilesClearAllButton"
+                                        value="Clear"
+                                        icon="ui-icon-trash"
+                                        immediate="true"
+                                        update="readyToUploadFilesForm uploadTemporaryFilesForm"
+                                        action="#{convertMatrixBean.clearTemporaryFiles}" />
+                            </h:panelGrid>
+                        </h:form>
+
+                        <h:form id="readyToUploadFilesForm">
+                            <p:dataTable var="file"
+                                    value="#{convertMatrixBean.temporaryFiles}">
+                                <p:column headerText="Files to Upload">
+                                    <h:outputText value="#{file.sourceFileName}" />
+                                </p:column>
+                                <p:column style="width: 35px">
+                                    <p:commandButton icon="ui-icon-trash"
+                                                    immediate="true"
+                                                    update="readyToUploadFilesForm uploadTemporaryFilesForm"
+                                                    action="#{convertMatrixBean.removeTemporaryFile(file)}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+
+                        <h:form id="uploadTemporaryFilesForm">
+                            <div style="text-align: center;">
+                                <p:commandButton value="Upload" icon="ui-icon-arrowrefresh-1-n"
+                                                disabled="#{convertMatrixBean.temporaryFilesEmpty}"
+                                                action="#{convertMatrixBean.uploadTemporaryFiles}"
+                                                update="matrixConvertMainTableForm:matrixConvertMainTable"
+                                                oncomplete="if (!args.errorFound) PF('uploadMatrixDialog').hide(); reload()" />
+                            </div>
+                        </h:form>
+                    </p:dialog>
 
                     <!--div id="testConfig" class="eps-config-container">
 

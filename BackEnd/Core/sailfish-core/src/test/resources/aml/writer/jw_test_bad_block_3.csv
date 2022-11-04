@@ -1,0 +1,5 @@
+#service_name,#action,#message_type
+,,
+TestService,SendDirty,SimpleMessage
+TestService,SendDirty,SimpleMessage
+,,
