@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,7 +217,7 @@ public class TestSOUPServer extends AbstractTest {
         Thread.sleep(WAIT_LOGIN_TIMEOUT_IN_MILLISECONDS + ADD_FOR_THREAD_SLEEP_ON_WAIT_IN_MILLISECONDS);
         assertFalse(client.isConnected());
     }
-
+    @Ignore("Unstable test. For manual test")
     @Test
     public void testServerSendMessage() throws InterruptedException {
         sendLogin(USERNAME, PASSWORD);
