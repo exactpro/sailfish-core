@@ -289,7 +289,7 @@
 
         <h:panelGrid id="display" columns="1">
 
-            <p:treeTable id="params" value="#{environmentBean.lazyModel.paramRoot}" var="paramNode" style="table-layout: auto; width: 50vw" styleClass="eps-service-param-list eps-main-table"
+            <p:treeTable id="params" value="#{environmentBean.lazyModel.paramRoot}" var="paramNode" style="table-layout: auto;" styleClass="eps-service-param-list eps-main-table"
                     scrollable="true" scrollHeight="514">
 
                 <p:column headerText="Name" style="width: 215px; white-space: nowrap">
@@ -300,7 +300,7 @@
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'handlerClassNameSelect'}">
                         <p:selectOneMenu id="handlerClassNameSelect" value="#{paramNode.value}" filter="true" filterMatchMode="contains"
-                                         style="width: 100%" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
+                                         style="width: 92%" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
                             <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
                             			  itemValue="#{null}" itemDisabled="true" />
                             <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
@@ -310,7 +310,7 @@
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'dictionaryNameSelect'}">
                         <p:autoComplete id="advanced" dropdown="true" value="#{paramNode.value}"
-                                        style="width: 92%" styleClass="eps-input eps-autocomplete"
+                                        style="width: 93%" styleClass="eps-input eps-autocomplete"
                                         completeMethod="#{enumSetContainer.completeDictURI}">
                             <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
                             <p:ajax event="itemSelect" process="@this" update="@(.eps-environment-calculated-value)"/>
@@ -343,7 +343,7 @@
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'defaultTextbox'}">
                         <p:autoComplete id="parValueAutocomplete" value="#{paramNode.value}"
-                                        style="width: 92%" styleClass="eps-input eps-autocomplete" dropdown="true"
+                                        style="width: 93%" styleClass="eps-input eps-autocomplete" dropdown="true"
                                         placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{paramNode.hasEnumeratedValues() and (empty paramNode.inputMask)}"
                                         completeMethod="#{paramNode.completeEnumeratedValues}">
                             <p:ajax event="change" process=":serviceParametersForm:display" update="@(.eps-environment-calculated-value)"/>

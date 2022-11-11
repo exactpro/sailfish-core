@@ -256,6 +256,10 @@ table.eps-main-table {
 	width: 723px;
 }
 
+.eps-service-param-list table {
+    table-layout: auto !important;
+}
+
 .eps-service-param-list td {
     word-break: break-word;
 }
@@ -334,18 +338,22 @@ a.eps-link-button:focus {
 
 .eps-autocomplete > input {
     width: 100%;
+    padding-right: 0 !important;
 }
 
 .eps-autocomplete > button {
     border-radius: 0 4px 4px 0 !important;
+    right: -35px !important;
 }
 
 .variable-autocomplete > input {
     width: 100%;
+    padding-right: 0 !important;
 }
 
 .variable-autocomplete > button {
     border-radius: 0 4px 4px 0 !important;
+    right: -35px !important;
 }
 
 #selectedEnvironment {
