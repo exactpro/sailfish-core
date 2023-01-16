@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,8 @@ public class FIXClientSettings extends FIXCommonSettings {
     @Description("Regexp to extract the sequence number from the Logout message. Sequence number must be included in the group named <b>sequence</b>."
             + " For example regexp <b>Expected Sequence:(?<sequence>[\\d]+) Received:[\\d]+</b> extracts <b>1807</b> from text <b>Expected Sequence:1807 Received:13</b>")
     private String seqNumberfromLogoutRegexp;
+    @Description("Value for encryptMethod(98) field. Please note the value of this option doesn't trigger a logic related to encrypted / encrypted message")
+    private String encryptMethod;
 
     public FIXClientSettings() {
         setApplicationClass(FIXApplication.class.getCanonicalName());
@@ -371,6 +373,14 @@ public class FIXClientSettings extends FIXCommonSettings {
 
     public void setSeqNumberfromLogoutRegexp(String seqNumberfromLogoutRegexp) {
         this.seqNumberfromLogoutRegexp = seqNumberfromLogoutRegexp;
+    }
+
+    public String getEncryptMethod() {
+        return encryptMethod;
+    }
+
+    public void setEncryptMethod(String encryptMethod) {
+        this.encryptMethod = encryptMethod;
     }
 
 }

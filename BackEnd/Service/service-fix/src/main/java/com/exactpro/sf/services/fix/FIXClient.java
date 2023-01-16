@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,9 +29,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 
+import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.quickfixj.CharsetSupport;
 import org.quickfixj.QFJException;
 import org.slf4j.Logger;
@@ -40,6 +44,7 @@ import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
@@ -105,6 +110,7 @@ public class FIXClient implements IInitiatorService {
 	public static final String ResetSeqNumFlag = "ResetSeqNumFlag_custom";
     public static final String SUPPORTS_MICROSECOND_TIMESTAMPS = "SupportsMicrosecondTimestamps";
     public static final Integer SUPPORTS_MICROSECOND_TIMESTAMPS_TAG = 8820;
+    public static final Integer ENCRYPT_PASSWORD_TAG = 98;
 
 	protected /*final*/ FIXClientApplication application;
 	protected volatile DirtyQFJIMessageConverter converter;
@@ -253,8 +259,17 @@ public class FIXClient implements IInitiatorService {
             sessionSettings.setString(sessionID, "NewPassword", fixSettings.getNewPassword());
         }
 
-        if(fixSettings.getEncryptionKeyFilePath() != null && !"".equals(fixSettings.getEncryptionKeyFilePath())) {
-            sessionSettings.setString(sessionID, "EncryptionKeyFilePath", fixSettings.getEncryptionKeyFilePath());
+        String encryptionKeyFilePath = fixSettings.getEncryptionKeyFilePath();
+        if(Strings.isNotBlank(encryptionKeyFilePath)) {
+            File f = new File(encryptionKeyFilePath);
+            if(!f.exists() || !f.isFile()) {
+                throw new ServiceException(encryptionKeyFilePath + " encryption key file path doesn't exist");
+            }
+            sessionSettings.setString(sessionID, "EncryptionKeyFilePath", encryptionKeyFilePath);
+        } else {
+            if (fixSettings.isEncryptPassword()) {
+                throw new ServiceException("encryptionKeyFilePath setting must be set when EncryptPassword is on");
+            }
         }
 
         if(fixSettings.getDefaultCstmApplVerID() != null && !"".equals(fixSettings.getDefaultCstmApplVerID())) {
@@ -312,6 +327,37 @@ public class FIXClient implements IInitiatorService {
                 .anyMatch(SUPPORTS_MICROSECOND_TIMESTAMPS_TAG::equals);
         
         sessionSettings.setBool( sessionID, SUPPORTS_MICROSECOND_TIMESTAMPS, sendSupportsMicros);
+        setEncryptMethod(sessionID, sessionSettings, logonStructure);
+    }
+
+    private void setEncryptMethod(SessionID sessionID, SessionSettings sessionSettings, @NotNull IMessageStructure logonStructure) {
+        IFieldStructure encryptMethodStructure = logonStructure.getFields().values().stream()
+                .filter(structure -> ENCRYPT_PASSWORD_TAG.equals(getAttributeValue(structure, FixMessageHelper.ATTRIBUTE_TAG)))
+                .findFirst()
+                .orElse(null);
+
+        if (encryptMethodStructure != null) {
+            String encryptMethod = fixSettings.getEncryptMethod();
+            Integer encryptMethodNumber = null;
+            if (!StringUtils.isEmpty(encryptMethod)) {
+                if (!encryptMethodStructure.isEnum()) {
+                    throw new ServiceException(encryptMethodStructure.getName() + " field in dictionary must be enum and this enum must declare value for the " + encryptMethod + " alias.");
+                }
+
+                IAttributeStructure encryptMethodValue = encryptMethodStructure.getValues().get(encryptMethod);
+                if(encryptMethodValue != null) {
+                    encryptMethodNumber = encryptMethodValue.getCastValue();
+                }
+
+                if (encryptMethodNumber == null) {
+                    throw new ServiceException("Value for " + encryptMethodStructure.getName() + " field for alias " + encryptMethod + "not found in dictionary");
+                }
+            }
+
+            if (encryptMethodNumber != null) {
+                sessionSettings.setLong(sessionID, FIXApplication.ENCRYPT_METHOD, encryptMethodNumber);
+            }
+        }
     }
 
     protected void configureCommonSettings(FIXCommonSettings commonSettings, SessionID sessionID,

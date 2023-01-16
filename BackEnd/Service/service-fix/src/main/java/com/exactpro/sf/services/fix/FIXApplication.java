@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package com.exactpro.sf.services.fix;
 
 import static com.exactpro.sf.actions.FIXMatrixUtil.SEQUENCE;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.security.PublicKey;
+import java.nio.charset.Charset;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.crypto.Cipher;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.mina.util.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,9 +86,13 @@ import quickfix.field.Text;
 
 public class FIXApplication extends AbstractApplication implements FIXClientApplication {
 
+    private static final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
+    private static final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
+    public static final String KEY_ENCODE_ALGORITHM = "RSA";
     private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	public static final String ENCRYPT_PASSWORD = "EncryptPassword";
+    public static final String ENCRYPT_METHOD = "EncryptMethod";
 	public static final String ADD_NEXT_EXPECTED_SEQ_NUM = "AddNextExpectedMsgSeqNum";
 	public static final String DefaultCstmApplVerID = "DefaultCstmApplVerID";
 	public static final String REQUIRED_TAGS = "RequiredTags";
@@ -465,24 +472,18 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 				String keyFile = (String) settings.getSessionProperties(sessionID).get(ENCRYPTION_KEY_FILE_PATH);
 				String settingsPassword = (String) settings.getSessionProperties(sessionID).get(Password);
 				String settingsNewPassword = (String) settings.getSessionProperties(sessionID).get(NewPassword);
-				String encryptStr = settings.getSessionProperties(sessionID).get(ENCRYPT_PASSWORD).toString();
+				boolean encrypt = "Y".equalsIgnoreCase(settings.getSessionProperties(sessionID).get(ENCRYPT_PASSWORD).toString());
 				String password = null;
 				String newPassword = null;
-                if("Y".equalsIgnoreCase(encryptStr)) {
-				    PublicKey publicKey = null;
-				    ObjectInputStream inputStream = null;
-				    try {
-				        inputStream = new ObjectInputStream(new FileInputStream(keyFile));
-				        publicKey = (PublicKey) inputStream.readObject();
-				    } finally {
-				        if (inputStream != null) {
-				            inputStream.close();
-				        }
-				    }
-					Cipher cipher = Cipher.getInstance("RSA");
-					cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-                    byte[] encryptedPasswordBytes = cipher.doFinal(settingsPassword.getBytes());
-					password = new String(Base64.encodeBase64(encryptedPasswordBytes));
+                if(encrypt) {
+                    Cipher cipher = Cipher.getInstance(KEY_ENCODE_ALGORITHM);
+                    cipher.init(Cipher.ENCRYPT_MODE, readPublicKey(keyFile));
+
+                    if(settingsPassword != null) {
+                        byte[] encryptedPasswordBytes = cipher.doFinal(settingsPassword.getBytes());
+                        password = new String(Base64.encodeBase64(encryptedPasswordBytes));
+                    }
+
 					if(settingsNewPassword != null) {
                         byte[] encryptedNewPasswordBytes = cipher.doFinal(settingsNewPassword.getBytes());
 						newPassword = new String(Base64.encodeBase64(encryptedNewPasswordBytes));
@@ -512,11 +513,17 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                     message.setString(quickfix.field.Username.FIELD, userName);
                 }
                 if(password != null) {
-                    message.setString(quickfix.field.Password.FIELD, password);
+                    message.setString(encrypt ? quickfix.field.EncryptedPassword.FIELD : quickfix.field.Password.FIELD, password);
                 }
                 if(newPassword != null) {
-                    message.setString(quickfix.field.NewPassword.FIELD, newPassword);
+                    message.setString(encrypt ? quickfix.field.EncryptedNewPassword.FIELD : quickfix.field.NewPassword.FIELD, newPassword);
                 }
+
+                Integer encryptMethod = (Integer)settings.getSessionProperties(sessionID).get(ENCRYPT_METHOD);
+                if (encryptMethod != null) {
+                    message.setInt(quickfix.field.EncryptMethod.FIELD, encryptMethod);
+                }
+
                 if(defaultCstmApplVerID != null) {
                     message.setString(1408, defaultCstmApplVerID);
                 }
@@ -757,5 +764,20 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         RuntimeException cause = new RuntimeException(message, e);
         handler.exceptionCaught(iSession, cause);
         logger.error(cause.getMessage(), cause);
+    }
+    private static RSAPublicKey readPublicKey(String filePath) throws Exception {
+        File file = new File(filePath);
+        String key = FileUtils.readFileToString(file, Charset.defaultCharset());
+
+        String publicKeyPEM = key
+                .replace(BEGIN_PUBLIC_KEY, "")
+                .replaceAll(System.lineSeparator(), "")
+                .replace(END_PUBLIC_KEY, "");
+
+        byte[] encoded = org.apache.commons.codec.binary.Base64.decodeBase64(publicKeyPEM);
+
+        KeyFactory keyFactory = KeyFactory.getInstance(KEY_ENCODE_ALGORITHM);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
     }
 }
