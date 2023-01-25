@@ -153,7 +153,7 @@ allprojects {
         version_slf4j = '1.7.32'
         version_hibernate = '5.4.24.Final'
         netty_version = '4.1.82.Final'
-        fasterxml_jackson_version = '2.13.4'
+        fasterxml_jackson_version = '2.14.1'
     }
 
     eclipse {
