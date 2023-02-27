@@ -74,7 +74,7 @@ dependencies {
     //FIXME: replace all log4j to slf4j logger
     compileOnly "org.apache.logging.log4j:log4j-slf4j-impl:${version_log4j2}"
     compileOnly "org.apache.logging.log4j:log4j-core:${version_log4j2}"
-    compile 'junit:junit:4.12'
+    compileOnly 'junit:junit:4.12'
     compile 'io.qameta.allure:allure-junit4:2.20.1'
 
     compile 'com.google.guava:guava:30.1-jre'
