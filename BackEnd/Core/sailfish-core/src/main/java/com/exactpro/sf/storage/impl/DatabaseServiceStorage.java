@@ -725,21 +725,14 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		}
 
         if(sorting != null && !sorting.isEmpty()) {
-
-            queryBld.append(" order by ");
-
-			for ( int i = 0; i < sorting.size(); ++i ) {
-
-                if(i != 0 && i != (sorting.size() - 1)) {
-                    queryBld.append(" , ");
-                }
-
-				SortCriterion entry = sorting.get(i);
-
-                queryBld.append("msg." + entry.getName());
-                queryBld.append(entry.isSortAscending() ? " asc " : " desc ");
-			}
-		}
+            queryBld.append(" order by ")
+                    .append(sorting.stream()
+                            .map(sortCriterion -> new StringBuilder("msg.")
+                                    .append(sortCriterion.getName())
+                                    .append(sortCriterion.isSortAscending() ? " asc" : " desc")
+                            )
+                            .collect(Collectors.joining(", ")));
+        }
 
 		Query query = session.createQuery(queryBld.toString());
 
