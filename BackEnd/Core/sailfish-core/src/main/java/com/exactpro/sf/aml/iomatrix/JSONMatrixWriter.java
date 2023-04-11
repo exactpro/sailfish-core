@@ -72,7 +72,7 @@ public class JSONMatrixWriter implements IMatrixWriter {
         if(type == MatrixFileTypes.JSON) {
             factory = new JsonFactory();
         } else if(type == MatrixFileTypes.YAML) {
-            factory = new YAMLFactory().disable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+            factory = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
         } else {
             throw new EPSCommonException(EXCEPTION_UNSUPPORTED_TYPE_FMT + type);
         }
