@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,14 @@ public class ExcelMatrixWriter implements IMatrixWriter {
     private final OutputStream fileStream;
     private int row;
     private int column;
+    private boolean closeOutputStream = false;
 
     private final Map<CellStyle, CellStyle> stylesCashe = new HashMap<>();
 
     public ExcelMatrixWriter(String fileName, boolean useXlsx) throws IOException {
 
         this(new FileOutputStream(fileName), useXlsx, "Matrix");
+        closeOutputStream = true;
     }
 
     public ExcelMatrixWriter(OutputStream outputStream, boolean useXlsx) throws IOException {
@@ -52,6 +54,7 @@ public class ExcelMatrixWriter implements IMatrixWriter {
     public ExcelMatrixWriter(String fileName, boolean useXlsx, String sheetName) throws IOException {
 
         this(new FileOutputStream(fileName), useXlsx, sheetName);
+        closeOutputStream = true;
     }
 
     public ExcelMatrixWriter(OutputStream outputStream, boolean useXlsx, String sheetName) throws IOException {
@@ -118,8 +121,10 @@ public class ExcelMatrixWriter implements IMatrixWriter {
     @Override
     public void close() throws Exception {
         workbook.write(fileStream);
-        // fileStream.close();
         workbook.close();
+        if(closeOutputStream) {
+            fileStream.close();
+        }
     }
 
     @Override

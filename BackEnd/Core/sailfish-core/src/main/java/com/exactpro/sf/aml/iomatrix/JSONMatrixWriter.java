@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.base.Strings;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,7 +72,7 @@ public class JSONMatrixWriter implements IMatrixWriter {
         if(type == MatrixFileTypes.JSON) {
             factory = new JsonFactory();
         } else if(type == MatrixFileTypes.YAML) {
-            factory = new YAMLFactory();
+            factory = new YAMLFactory().disable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
         } else {
             throw new EPSCommonException(EXCEPTION_UNSUPPORTED_TYPE_FMT + type);
         }
@@ -176,6 +177,7 @@ public class JSONMatrixWriter implements IMatrixWriter {
             AMLElement element = currentBlockLines.get(i);
             String referenceString = null;
             String descriptionString = null;
+            boolean isStartBlockBrace = false;
 
             Map<String, SimpleCell> cells = element.getCells();
             for(String key : cells.keySet()) {
@@ -185,6 +187,9 @@ public class JSONMatrixWriter implements IMatrixWriter {
                 Column column = Column.value(key);
                 if(column == Column.Action) {
                     AMLBlockBrace blockBrace = AMLBlockBrace.value(value);
+                    if(blockBrace != null && blockBrace.isStart()) {
+                        isStartBlockBrace = true;
+                    }
                     if(i == 0 || (blockBrace != null && !blockBrace.isStart())) {
                         doAppend = false;
                     }
@@ -206,6 +211,10 @@ public class JSONMatrixWriter implements IMatrixWriter {
                         subEntity.addEntry(key, references.get(deRefValue));
                         doAppend = false;
                     }
+                }
+
+                if(isStartBlockBrace && referenceString != null && !subEntity.containsKey(Column.Reference.getName())) {
+                    subEntity.addEntry(Column.Reference.getName(), referenceString);
                 }
 
                 if(doAppend) {
@@ -300,6 +309,10 @@ public class JSONMatrixWriter implements IMatrixWriter {
 
         public int size() {
             return keyValues.size();
+        }
+
+        public boolean containsKey(String key) {
+            return keyValues.containsKey(key);
         }
 
         @JsonAnyGetter
