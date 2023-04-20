@@ -1,5 +1,5 @@
 <!--/******************************************************************************-->
-<!--        * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)-->
+<!--        * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)-->
 <!--        *-->
 <!--        * Licensed under the Apache License, Version 2.0 (the "License");-->
 <!--        * you may not use this file except in compliance with the License.-->
@@ -80,8 +80,8 @@
                     </p:menubar>
                 </div>
 
-                <p:tooltip value="Go to folder" for="goButton"/>
-                <p:tooltip value="Folder path" for="curDirP"/>
+                <p:tooltip value="Go to folder" for="goButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Folder path" for="curDirP" hideEvent="mouseleave click" />
 
                 <p:menubar id="mainMenuBar" styleClass="eps-download-toolbar">
 
@@ -101,13 +101,13 @@
 
                 </p:menubar>
 
-                <p:tooltip value="Get folder size" for="getSizeButton"/>
-                <p:tooltip value="Go to parent folder" for="upButton"/>
-                <p:tooltip value="Open folder" for="inButton"/>
-                <p:tooltip value="Download selected folders and files" for="downloadButton"/>
-                <p:tooltip value="Download selected as ZIP" for="downloadZipButton"/>
-                <p:tooltip value="Show file content" for="showTextButton"/>
-                <p:tooltip value="Delete file(s)" for="deleteButton"/>
+                <p:tooltip value="Get folder size" for="getSizeButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Go to parent folder" for="upButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Open folder" for="inButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Download selected folders and files" for="downloadButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Download selected as ZIP" for="downloadZipButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Show file content" for="showTextButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Delete file(s)" for="deleteButton" hideEvent="mouseleave click" />
 
             </p:outputPanel>
 

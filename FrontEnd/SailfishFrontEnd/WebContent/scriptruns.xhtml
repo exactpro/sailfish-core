@@ -144,11 +144,11 @@
                     </p:menuitem>
                 </p:menubar>
 
-                <p:tooltip value="Select and upload matrices" for="uploadMatrixButton"/>
-                <p:tooltip value="Delete selected matrices" for="deleteButton" />
-                <p:tooltip value="Download selected matrices" for="downloadButton" />
-                <p:tooltip value="Add empty matrix" for="createButton" />
-                <p:tooltip value="Run selected matrices" for="runButton" />
+                <p:tooltip value="Select and upload matrices" for="uploadMatrixButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Delete selected matrices" for="deleteButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Download selected matrices" for="downloadButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Add empty matrix" for="createButton" hideEvent="mouseleave click" />
+                <p:tooltip value="Run selected matrices" for="runButton" hideEvent="mouseleave click" />
             </div>
 
             <p:dataTable id="table" value="#{testScriptsBean.matrixAdapterList}" var="matrixAdapter"
@@ -411,16 +411,16 @@
                 </div>
             </div>
 
-            <p:tooltip value="Results will restore after reload" for="clearAllSafe" />
-            <p:tooltip value="Results will be lost" for="clearAllHard" />
-            <p:tooltip value="Sort test scripts result" for="sort-by" />
-            <p:tooltip value="Remove results from list below" for="clearAllTestScriptsDropdown" />
-            <p:tooltip value="Restore results from local directory" for="reloadAllTestScriptButton" />
-            <p:tooltip value="Filter results to show" for="filterTestScriptButton" />
-            <p:tooltip value="Stop all matrix" for="stopAllTestScriptButton" />
-            <p:tooltip value="Pause all matrix" for="pauseAllTestScriptButton" />
-            <p:tooltip value="Resume all matrix" for="resumeAllTestScriptButton" />
-            <p:tooltip value="Select all matrix results" for="selectAllTestScriptButton" />
+            <p:tooltip value="Results will restore after reload" for="clearAllSafe" hideEvent="mouseleave click" />
+            <p:tooltip value="Results will be lost" for="clearAllHard" hideEvent="mouseleave click" />
+            <p:tooltip value="Sort test scripts result" for="sort-by" hideEvent="mouseleave click" />
+            <p:tooltip value="Remove results from list below" for="clearAllTestScriptsDropdown" hideEvent="mouseleave click" />
+            <p:tooltip value="Restore results from local directory" for="reloadAllTestScriptButton" hideEvent="mouseleave click" />
+            <p:tooltip value="Filter results to show" for="filterTestScriptButton" hideEvent="mouseleave click" />
+            <p:tooltip value="Stop all matrix" for="stopAllTestScriptButton" hideEvent="mouseleave click" />
+            <p:tooltip value="Pause all matrix" for="pauseAllTestScriptButton" hideEvent="mouseleave click" />
+            <p:tooltip value="Resume all matrix" for="resumeAllTestScriptButton" hideEvent="mouseleave click" />
+            <p:tooltip value="Select all matrix results" for="selectAllTestScriptButton" hideEvent="mouseleave click" />
 
             <p:outputPanel id="test-script-results-wrapper" class="eps-test-script-results-wrapper">
                 <h:outputText value="#{testScriptsBean.currentRunsSnapshot}" escape="false"/>

@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,11 +112,11 @@
             <p:menuitem id="importButton" icon="eps-custom-icon eps-custom-icon-download" value="Import"   onclick="PF('uploadDialog').show()"/>
         </p:menubar>
 
-        <p:tooltip value="Add new service" for="addButton"/>
-        <p:tooltip value="Start selected services" for="startButton"/>
-        <p:tooltip value="Stop selected services" for="stopButton"/>
-        <p:tooltip value="Save selected services as XML" for="exportButton"/>
-        <p:tooltip value="Load services from XML" for="importButton"/>
+        <p:tooltip value="Add new service" for="addButton" hideEvent="mouseleave click" />
+        <p:tooltip value="Start selected services" for="startButton" hideEvent="mouseleave click" />
+        <p:tooltip value="Stop selected services" for="stopButton" hideEvent="mouseleave click" />
+        <p:tooltip value="Save selected services as XML" for="exportButton" hideEvent="mouseleave click" />
+        <p:tooltip value="Load services from XML" for="importButton" hideEvent="mouseleave click" />
 
         <p:outputPanel id="rightMenus">
 	        <p:menubar styleClass="eps-right-toolbar" id="rightMenuBar">
@@ -155,13 +155,13 @@
         <p:commandButton id="reset-button" icon="ui-icon-trash" action="#{environmentBean.removeFilters}"
                          styleClass="eps-service-clear-filters-btn" oncomplete="removeFilters();loadSort()"/>
 
-        <p:tooltip value="Reset table" for="reset-button" />
-        <p:tooltip value="Copy service" for="copyButton"/>
-        <p:tooltip value="Delete selected services" for="deleteButton"/>
-        <p:tooltip value="Environment" for="selectedEnvironment"/>
-        <p:tooltip value="Environment options" for="environmentOptionsBtn"/>
-        <p:tooltip value="Variable set" for="selectedVariableSet"/>
-        <p:tooltip value="Variable set options" for="variableSetOptionsButton"/>
+        <p:tooltip value="Reset table" for="reset-button" hideEvent="mouseleave click" />
+        <p:tooltip value="Copy service" for="copyButton" hideEvent="mouseleave click"/>
+        <p:tooltip value="Delete selected services" for="deleteButton" hideEvent="mouseleave click"/>
+        <p:tooltip value="Environment" for="selectedEnvironment" hideEvent="mouseleave click"/>
+        <p:tooltip value="Environment options" for="environmentOptionsBtn" hideEvent="mouseleave click"/>
+        <p:tooltip value="Variable set" for="selectedVariableSet" hideEvent="mouseleave click"/>
+        <p:tooltip value="Variable set options" for="variableSetOptionsButton" hideEvent="mouseleave click"/>
     </div>
 
     <div style="clear:both; height: 1px;">
