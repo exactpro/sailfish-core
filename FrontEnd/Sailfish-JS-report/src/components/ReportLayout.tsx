@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+* Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -147,6 +147,17 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                     <a className="report-header__old-report-link" href={OLD_REPORT_PATH}>
                         <p>Old Version Report</p>
                     </a>
+                    {(() => {
+                        const zipReportLink = new URLSearchParams(window.location.search).get("zip_report_link");
+                        if(zipReportLink) {
+                            return (
+                                <a className="report-header__download-report-link" href={zipReportLink}>
+                                    <p>Download Report</p>
+                                </a>
+                            )
+                        }
+                        return null;
+                    })()}
                 </div>
                 <div className="report__summary-title   report__title">
                     <p>Report Summary</p>

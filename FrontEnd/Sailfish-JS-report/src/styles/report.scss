@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,17 +139,24 @@
         font-weight: bold;
     }
 
-    &__old-report-link {
+    &__old-report-link, &__download-report-link {
         position: absolute;
         height: 100%;
         display: flex;
         align-items: center;
-        left: 20px;
         top: 0;
         color: $primaryTextColor;
         font-size: 14px;
         font-weight: bold;
         text-decoration: none;
+    }
+
+    &__old-report-link {
+        left: 20px;
+    }
+
+    &__download-report-link {
+        right: 20px;
     }
 
     &__live-loader {

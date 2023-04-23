@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,14 @@ package com.exactpro.sf.testwebgui.notifications.scriptrunner;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,11 +182,23 @@ public class ScriptrunEventHTMLBuilder {
                     ? folderName + "/" + folderName
                     : folderName;
 
-            return "<div title='View report' class='eps-result-report-link'> "
-                    + "<a class='eps-outer-link eps-event-link' href=\"" + getReportHref(reportDirectoryPath, context)
+			String reportHref = getReportHref(reportDirectoryPath, context);
+			try {
+				reportHref = new URIBuilder(reportHref)
+						.addParameter("zip_report_link", buildUriToZipReport(descr, context))
+						.build().toString();
+			} catch (URISyntaxException ignored) {}
+			return "<div title='View report' class='eps-result-report-link'> "
+                    + "<a class='eps-outer-link eps-event-link' href=\"" + reportHref
                     + "\" class=\"text-link\" target=\"_blank\"> Report </a></div>";
 		}
 		return "";
+	}
+
+	private static String buildUriToZipReport(TestScriptDescription descr, ISFContext context) {
+		SfInstanceInfo instanceInfo = SFLocalContext.getDefault().getSfInstanceInfo();
+		String contextPath = instanceInfo.getContextPath();
+		return (contextPath == null? "": contextPath) + "/" + buildZipReportLink(descr, context);
 	}
 
     private static String formatZipRequestLink(TestScriptDescription descr, ISFContext context ) {
@@ -197,24 +213,28 @@ public class ScriptrunEventHTMLBuilder {
 
 	private static Object formatZipLink(TestScriptDescription descr, ISFContext context) {
 		if(!descr.isLocked()) {
-			String folderName = descr.getWorkFolder();
-            // FIXME do this lookup in the ReportTask class
-            String targetFolderName = findReportFile(context.getWorkspaceDispatcher(),
-                    folderName,
-                    folderName + ZipReport.ZIP,
-                    folderName + "/" + folderName + ZipReport.ZIP);
-            if (targetFolderName == null) {
-                logger.error("Neither report folder nor report zip exists");
-                targetFolderName = folderName;
-            }
-            String link = String.format("%s/%s?action=zip&script_id=%s",
-                    ReportServlet.REPORT_URL_PREFIX,
-                    StringUtil.escapeURL(targetFolderName),
-                    descr.getId());
+            String link = buildZipReportLink(descr, context);
             return "<div title='Download zip' class='eps-result-zip-link-ready'> " + "<a class='eps-outer-link' href=\"" + link
                     + "\" class=\"text-link\">Get Zip<span class='ui-icon ui-icon-arrowthickstop-1-s' style='display:  inline-block; vertical-align: bottom;'></span></a></div>";
 		}
 		return "";
+	}
+
+	private static String buildZipReportLink(TestScriptDescription descr, ISFContext context) {
+		String folderName = descr.getWorkFolder();
+		// FIXME do this lookup in the ReportTask class
+		String targetFolderName = findReportFile(context.getWorkspaceDispatcher(),
+				folderName,
+				folderName + ZipReport.ZIP,
+				folderName + "/" + folderName + ZipReport.ZIP);
+		if (targetFolderName == null) {
+			logger.error("Neither report folder nor report zip exists");
+			targetFolderName = folderName;
+		}
+		return String.format("%s/%s?action=zip&script_id=%s",
+				ReportServlet.REPORT_URL_PREFIX,
+				StringUtil.escapeURL(targetFolderName),
+				descr.getId());
 	}
 
     private static String findReportFile(IWorkspaceDispatcher workspaceDispatcher, String... possibleFileNames) {
