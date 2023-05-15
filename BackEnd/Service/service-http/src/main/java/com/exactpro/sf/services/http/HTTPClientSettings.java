@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,9 @@ public class HTTPClientSettings extends NettyClientSettings {
     @Description("The key phrase for client's private key")
     private String keyPhrase;
 
+    @Description("Endpoint for PING_IDP access token (example: http://example.com/token)")
+    private String tokenRequestUrl;
+
     public String getURI() {
         return uri;
     }
@@ -135,4 +138,13 @@ public class HTTPClientSettings extends NettyClientSettings {
     public void setKeyPhrase(String keyPhrase) {
         this.keyPhrase = keyPhrase;
     }
+
+    public String getTokenRequestUrl() {
+        return tokenRequestUrl;
+    }
+
+    public void setTokenRequestUrl(String tokenRequestUrl) {
+        this.tokenRequestUrl = tokenRequestUrl;
+    }
+
 }

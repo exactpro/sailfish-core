@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.http;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.net.ssl.SSLException;
@@ -26,11 +27,36 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
+import com.exactpro.sf.services.http.dictionary.OAuthDictionaryValidatorFactory;
+import com.exactpro.sf.services.http.oauth.*;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.HttpResponseDecoder;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,15 +80,8 @@ import com.exactpro.sf.services.netty.handlers.NettyServiceHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -87,6 +106,7 @@ public abstract class HTTPClient extends NettyClientService {
     protected final Semaphore channelBusy = new Semaphore(1);
     private IMessageFactory messageFactory;
     protected final AtomicReference<String> cookie = new AtomicReference<>();
+    protected AccessToken accessToken = null;
 
     @Override
     protected void initChannelHandlers(IServiceContext serviceContext) {
@@ -94,6 +114,15 @@ public abstract class HTTPClient extends NettyClientService {
         Queue<ResponseInformation> queue = new ArrayDeque<>();
 
         handlers.clear();
+
+        if(isTokenAuthenticationEnabled()) {
+            try {
+                accessToken = requestOAuthToken();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+        }
 
         if ("https".equalsIgnoreCase(uri.getScheme())) {
             try {
@@ -121,6 +150,18 @@ public abstract class HTTPClient extends NettyClientService {
         handlers.put("message-persister", new MessagePersisterHandler(storage, serviceInfo));
         handlers.put("handler", new NettyServiceHandler(serviceHandler, getSession(), messageFactory, getSettings().isEvolutionSupportEnabled()));
         handlers.put("matcher-encoder", getEncodeMatcherHandler(queue, cookie));
+        if(isTokenAuthenticationEnabled()) {
+            handlers.put("token-authorization", new ChannelInboundHandlerAdapter() {
+                @Override
+                public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object msg) throws Exception {
+                    if (accessToken != null && msg instanceof HttpRequest) {
+                        HttpRequest request = (HttpRequest) msg;
+                        request.headers().set("Authorization", "Bearer " + accessToken.getAccessToken());
+                    }
+                    super.channelRead(context, msg);
+                }
+            });
+        }
         fillEncodeLayer(handlers);
     }
 
@@ -152,6 +193,88 @@ public abstract class HTTPClient extends NettyClientService {
         return IOUtils.toInputStream(aliasOrValue, StandardCharsets.UTF_8);
     }
 
+    protected AccessToken requestOAuthToken() {
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            URI uri = new URI(settings.getTokenRequestUrl().trim());
+
+            Bootstrap b = new Bootstrap();
+            b.group(workerGroup);
+            b.channel(NioSocketChannel.class);
+            b.option(ChannelOption.SO_KEEPALIVE, true);
+            b.handler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                public void initChannel(@NotNull SocketChannel ch) throws Exception {
+                    if("https".equalsIgnoreCase(uri.getScheme())) {
+                        try {
+                            SslContextBuilder sslContextBuilder = SslContextBuilder.forClient()
+                                    .trustManager(InsecureTrustManagerFactory.INSTANCE);
+                            setupClientCertificate(sslContextBuilder);
+
+                            SslContext sslContext = sslContextBuilder.build();
+                            ch.pipeline().addLast(sslContext.newHandler(PooledByteBufAllocator.DEFAULT));
+                        } catch (SSLException e) {
+                            throw new EPSCommonException("Filed to create ssl handler", e);
+                        }
+                    }
+                    ch.pipeline().addLast(
+                            new HttpResponseDecoder(),
+                            new HttpRequestEncoder(),
+                            new HttpObjectAggregator(settings.getMaxHTTPMessageSize())
+                    );
+                }
+            });
+
+            logger.info("Connecting to access token endpoint ({}, {})", uri.getHost(), uri.getPort());
+
+            OAuthHttpMessageConverter messageConverter = new OAuthHttpMessageConverter(messageFactory);
+            TokenResponseChannelHandler tokenResponseHandler = new TokenResponseChannelHandler(messageConverter);
+
+            Channel channel = b.connect(uri.getHost(), uri.getPort()).sync().channel();
+            channel.pipeline().addLast(
+                    new OAuthHttpMessageConverterHandler(messageConverter),
+                    new MessagePersisterHandler(storage, serviceInfo),
+                    new NettyServiceHandler(
+                            serviceHandler, getSession(), messageFactory, getSettings().isEvolutionSupportEnabled()
+                    ),
+                    tokenResponseHandler
+            );
+
+            logger.info("Sending request to the endpoint");
+            FullHttpRequest request = OAuthHttpRequestBuilder.clientCredentialsRequest(
+                    uri, settings.getUserName(), settings.getPassword(), true
+            );
+            channel.writeAndFlush(request);
+            channel.closeFuture().sync();
+
+            logger.info("Request is sent successfully");
+
+            AccessTokenError accessTokenError = tokenResponseHandler.getAccessTokenError();
+            if(accessTokenError != null) {
+                String errorMessage = "Access Token error: " + accessTokenError.getError();
+                logger.error(errorMessage);
+                throw new ServiceException(errorMessage);
+            }
+            Throwable tokenHandlerException = tokenResponseHandler.getException();
+            if(tokenHandlerException != null) {
+                logger.error(tokenHandlerException.getMessage(), tokenHandlerException);
+                throw new ServiceException(tokenHandlerException);
+            }
+            AccessToken accessToken = tokenResponseHandler.getAccessToken();
+            if(accessToken == null) {
+                String errorMessage = "Can't request access token";
+                logger.error(errorMessage);
+                throw new ServiceException(errorMessage);
+            }
+            return accessToken;
+        } catch (URISyntaxException | InterruptedException e) {
+            logger.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        } finally {
+            workerGroup.shutdownGracefully();
+        }
+    }
+
     @Override
     protected LinkedHashMap<String, ChannelHandler> getChannelHandlers() {
         return handlers;
@@ -172,9 +295,34 @@ public abstract class HTTPClient extends NettyClientService {
             if (uri.getPort() == -1) {
                 throw new ServiceException("Specified URI don't contains port");
             }
+            if(isTokenAuthenticationEnabled()) {
+                if(isBlank(this.settings.getUserName())) {
+                    throw new ServiceException("Username is not specified");
+                }
+                if(isBlank(this.settings.getPassword())) {
+                    throw new ServiceException("Password is not specified");
+                }
+            }
         } catch (URISyntaxException e) {
             throw new ServiceException(e.getMessage(), e);
         }
+
+        if(isTokenAuthenticationEnabled()) {
+            List<DictionaryValidationError> errors = OAuthDictionaryValidatorFactory.INSTANCE
+                    .validate(dictionary, true, null);
+            if (!errors.isEmpty()) {
+                String listOfMessages = errors.stream()
+                        .map(DictionaryValidationError::getMessage)
+                        .collect(Collectors.joining(", "));
+                String errorMessage = "These required messages are not in the dictionary: " + listOfMessages;
+                logger.error(errorMessage);
+                throw new ServiceException(errorMessage);
+            }
+        }
+    }
+
+    private boolean isTokenAuthenticationEnabled() {
+        return isNotBlank(settings.getTokenRequestUrl());
     }
 
         @Override
