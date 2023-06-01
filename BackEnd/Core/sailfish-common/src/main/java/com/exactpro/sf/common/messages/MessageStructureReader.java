@@ -313,6 +313,7 @@ public class MessageStructureReader {
     }
 
     private <T> T castByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz, boolean isDefault) {
+        if(value == null) return null;
         T convertedValue = MultiConverter.convert(value, clazz);
         if (isDefault) {
             return convertedValue;
@@ -322,6 +323,7 @@ public class MessageStructureReader {
     }
     
     private <T> List<T> castCollectionByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz, boolean isDefault) {
+        if(value == null) return null;
         List<T> convertedCollection = MultiConverter.convert((Collection<?>)value, clazz, ArrayList::new);
         if (isDefault) {
             return convertedCollection;

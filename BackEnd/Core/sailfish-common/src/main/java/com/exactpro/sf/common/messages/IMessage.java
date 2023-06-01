@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Set;
 
 
@@ -37,7 +39,12 @@ public interface IMessage
 
 	MsgMetaData getMetaData();
 
-	void addField(String name, Object value);
+	/**
+	 * Adds field and value to this message. Null values aren't added
+	 * @param name - name of the field.
+	 * @param value - value to be linked with the name.
+	 */
+	void addField(String name, @Nullable Object value);
 
 	Object removeField(String name);
 
@@ -45,6 +52,11 @@ public interface IMessage
 
 	FieldMetaData getFieldMetaData(String name);
 
+	/**
+	 * Checks if field is present in message and not equal to null. IMessage#getFieldNames() can be used to find out if null value for field is set.
+	 * @param name - field name.
+	 * @return whenever field is present in this message and it is not null.
+	 */
 	boolean isFieldSet(String name);
 
 	Set<String> getFieldNames();
@@ -56,5 +68,4 @@ public interface IMessage
 	IMessage cloneMessage();
 
 	boolean compare(IMessage message);
-
 }

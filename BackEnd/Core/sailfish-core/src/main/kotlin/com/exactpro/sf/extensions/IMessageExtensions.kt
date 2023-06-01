@@ -19,3 +19,10 @@ import com.exactpro.sf.common.messages.IMessage
 
 operator fun IMessage.set(fieldName: String, fieldValue: Any?) = addField(fieldName, fieldValue)
 operator fun <T> IMessage.get(fieldName: String): T = getField(fieldName)
+
+/**
+ * Checks if field is present in message: null or not null. IMessage has isFieldSet but it only checks if message has not null field
+ * fieldName - field name to check
+ * @return whenever message has null/not null field in message.
+ */
+fun IMessage.isFieldPresent(fieldName: String): Boolean = fieldNames.contains(fieldName)

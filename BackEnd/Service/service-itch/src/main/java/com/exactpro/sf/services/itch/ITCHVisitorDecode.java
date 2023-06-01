@@ -149,7 +149,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
-    	msg.addField(fieldName,decodeString(fieldName,fldStruct));
+		String decodedString = decodeString(fieldName,fldStruct);
+		if(decodedString != null) {
+			msg.addField(fieldName, decodedString);
+		}
 	}
 
 	protected String decodeString(String fieldName, IFieldStructure fldStruct) {

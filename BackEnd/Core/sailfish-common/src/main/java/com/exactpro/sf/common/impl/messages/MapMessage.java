@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
@@ -85,7 +85,6 @@ public class MapMessage implements IMessage
 		return getField(name) != null;
 	}
 
-
 	@Override
 	public void addField(String name, Object value)
 	{
@@ -94,9 +93,7 @@ public class MapMessage implements IMessage
 			throw new IllegalArgumentException("[name] could not be null");
 		}
 
-        if (value != null) {
-            fieldsMap.put(name, value);
-        }
+		fieldsMap.put(name, value);
 	}
 
 	public Map<String, Object> getFieldsMap(){

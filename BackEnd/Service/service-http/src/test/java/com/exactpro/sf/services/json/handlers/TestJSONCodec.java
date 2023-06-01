@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.json.handlers;
 
+import static com.exactpro.sf.extensions.IMessageExtensionsKt.isFieldPresent;
 import static java.lang.String.join;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
@@ -24,6 +25,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.intellij.lang.annotations.Language;
@@ -229,6 +232,30 @@ public class TestJSONCodec extends AbstractTest {
         Assert.assertEquals(json, encode(expected, true));
     }
 
+    @Test
+    public void testEncodingNullAsNulls() throws IOException {
+        String expected = "{\"BigDecimal\":null,\"Message\":null,\"IntegerArray\":[\"1\",null,\"2\"],\"MessageArray\":null}";
+        IMessage message = factory.createMessage("TestMessage", "SOAP");
+
+        message.addField("BigDecimal", null);
+        message.addField("Message", null);
+        message.addField("MessageArray", null);
+        message.addField("IntegerArray", Arrays.asList(1, null, 2));
+        Assert.assertEquals(expected, encode(message, true));
+    }
+
+
+    @Test
+    public void testDecodingNullAsNulls() throws IOException {
+        String message = "{\"BigDecimal\":null,\"Message\":null,\"IntegerArray\":[\"1\",null,\"2\"],\"MessageArray\":null}";
+        IMessage actual = decode(message, "TestMessage");
+        Assert.assertTrue(isFieldPresent(actual, "BigDecimal"));
+        Assert.assertTrue(isFieldPresent(actual, "Message"));
+        Assert.assertTrue(isFieldPresent(actual, "MessageArray"));
+        List<Integer> intgerArray = actual.getField("IntegerArray");
+        Assert.assertArrayEquals(new Integer[] {1, null, 2}, intgerArray.toArray());
+    }
+
     //region Decoding simple value. TODO: Make a single parameterized test in JUnit 5
     @Test
     public void testDecodingSimpleRootValue() {
@@ -265,7 +292,7 @@ public class TestJSONCodec extends AbstractTest {
 
     private IMessage decode(String json, String messageName) {
         ByteBuf buffer = Unpooled.wrappedBuffer(json.getBytes(StandardCharsets.UTF_8));
-        JSONDecoder decoder = new JSONDecoder(true);
+        JSONDecoder decoder = new JSONDecoder(new JsonSettings().setRejectUnexpectedFields(true));
         decoder.init(settings, factory, dictionary, "TestClient");
         return NettyTestUtility.decode(buffer, logger, new ByteToMessageHandler(messageName), decoder);
     }
@@ -334,6 +361,8 @@ public class TestJSONCodec extends AbstractTest {
             Assert.fail(e.getMessage());
         }
     }
+
+
 
     private static class IMessageMessageToByteEncoder extends MessageToByteEncoder<IMessage> {
         @Override

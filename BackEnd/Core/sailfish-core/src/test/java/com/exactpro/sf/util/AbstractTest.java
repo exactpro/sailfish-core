@@ -233,14 +233,17 @@ public class AbstractTest {
         int all = 0;
         for (String fieldName : message.getFieldNames()) {
             Object field = message.getField(fieldName);
+            if(field == null) continue;
 
             if (field instanceof IMessage) {
+                if(field == null) continue;
                 all += getFieldCount((IMessage) field);
                 continue;
             }
 
             if (field instanceof List<?>) {
                 for (Object nested : (List<?>)field) {
+                    if(nested == null) continue;
                     if (nested instanceof IMessage) {
                         all += getFieldCount((IMessage) nested);
                     } else {

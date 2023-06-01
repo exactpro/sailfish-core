@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class JSONEncoder extends AbstractHTTPEncoder {
     }
 
     protected JSONVisitorEncode createVisitor(IJsonNodeWrapper root, IDictionaryStructure dictionaryStructure, IMessage msg, JsonSettings jsonSettings) {
-        return new JSONVisitorEncode(root, dictionaryStructure, () -> createMessageStructureReader(msg), dynamicStructures, jsonSettings);
+        return new JSONVisitorEncode(root, dictionaryStructure, () -> createMessageStructureReader(msg), dynamicStructures, jsonSettings, msg);
     }
 
     protected MessageStructureReader createMessageStructureReader(IMessage msg) {

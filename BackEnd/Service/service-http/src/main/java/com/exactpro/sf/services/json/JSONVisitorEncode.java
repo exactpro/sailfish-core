@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.json;
 
+import static com.exactpro.sf.extensions.IMessageExtensionsKt.isFieldPresent;
 import static com.fasterxml.jackson.databind.node.JsonNodeFactory.instance;
 
 import java.math.BigDecimal;
@@ -24,7 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.BooleanUtils;
 
 import com.exactpro.sf.common.messages.DefaultMessageStructureVisitor;
@@ -37,12 +44,6 @@ import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.comparison.conversion.MultiConverter;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.LongNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
 public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
 
@@ -50,29 +51,32 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
     protected final IDictionaryStructure dictionary;
     protected final Supplier<MessageStructureReader> structureReaderSupplier;
 
+    private final IMessage message;
+
     private final Map<String, IFieldStructure> dynamicStructures;
     private final JsonSettings jsonSettings;
 
-    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary) {
-        this(root, dictionary, Collections.emptyMap());
+    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, IMessage message) {
+        this(root, dictionary, Collections.emptyMap(), message);
     }
 
-    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Map<String, IFieldStructure> dynamicStructures) {
-        this(root, dictionary, dynamicStructures, new JsonSettings());
+    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Map<String, IFieldStructure> dynamicStructures, IMessage message) {
+        this(root, dictionary, dynamicStructures, new JsonSettings(), message);
     }
-    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Map<String, IFieldStructure> dynamicStructures, JsonSettings jsonSettings) {
-        this(root, dictionary, () -> MessageStructureReader.READER, dynamicStructures, jsonSettings);
+    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Map<String, IFieldStructure> dynamicStructures, JsonSettings jsonSettings, IMessage message) {
+        this(root, dictionary, () -> MessageStructureReader.READER, dynamicStructures, jsonSettings, message);
     }
 
-    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Supplier<MessageStructureReader> structureReaderSupplier, Map<String, IFieldStructure> dynamicStructures, JsonSettings jsonSettings) {
+    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Supplier<MessageStructureReader> structureReaderSupplier, Map<String, IFieldStructure> dynamicStructures, JsonSettings jsonSettings, IMessage message) {
         this.root = root;
         this.dictionary = dictionary;
         this.structureReaderSupplier = structureReaderSupplier;
         this.dynamicStructures = dynamicStructures;
         this.jsonSettings = jsonSettings;
+        this.message = message;
     }
-    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Supplier<MessageStructureReader> structureReaderSupplier, Map<String, IFieldStructure> dynamicStructures) {
-        this(root,dictionary,structureReaderSupplier, dynamicStructures, new JsonSettings());
+    public JSONVisitorEncode(IJsonNodeWrapper root, IDictionaryStructure dictionary, Supplier<MessageStructureReader> structureReaderSupplier, Map<String, IFieldStructure> dynamicStructures, IMessage message) {
+        this(root,dictionary,structureReaderSupplier, dynamicStructures, new JsonSettings(), message);
     }
 
     @Override
@@ -152,16 +156,28 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
 
     @Override
     public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
-        if (value != null) {
-            visitSimple(JSONVisitorUtility.FORMATTER.format(value), fldStruct, TextNode::new);
-        }
+        String formatted = null;
+        if(value != null) formatted = JSONVisitorUtility.FORMATTER.format(value);
+        visitSimple(formatted, fldStruct, TextNode::new);
     }
 
     protected <T> void visitSimple(T value, IFieldStructure fldStruct, Function<T, JsonNode> converter) {
         if (!isWriteable(value, fldStruct)) {
             return;
         }
+
         String jsonFieldName = JSONVisitorUtility.getJsonFieldName(fldStruct);
+
+
+        if(value == null && isFieldPresent(message, fldStruct.getName())) {
+            if(root.isArray()) {
+                root.add(NullNode.instance);
+            } else {
+                root.set(jsonFieldName, NullNode.instance);
+            }
+            return;
+        }
+
         JsonNode node = jsonSettings.isTreatSimpleValuesAsStrings() && !(value instanceof IMessage) ? new TextNode(MultiConverter.convert(value, String.class)) : converter.apply(value);
 
         if (root.isArray()) {
@@ -178,9 +194,24 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
 
         String jsonFieldName = JSONVisitorUtility.getJsonFieldName(fldStruct);
         boolean isNoName = BooleanUtils.toBoolean(StructureUtils.<Boolean>getAttributeValue(fldStruct, JSONMessageHelper.IS_NO_NAME_ATTR));
+
+        if(value == null && isFieldPresent(message, fldStruct.getName())) {
+            if(isNoName) return;
+            if(root.isArray()) {
+                root.add(NullNode.instance);
+            } else {
+                root.set(jsonFieldName, NullNode.instance);
+            }
+            return;
+        }
+
         ArrayNode array = instance.arrayNode(value.size());
 
         for (T item : value) {
+            if(item == null) {
+                array.add(NullNode.instance);
+                continue;
+            }
             array.add(jsonSettings.isTreatSimpleValuesAsStrings() && !(item instanceof IMessage) ? new TextNode(item.toString()) : converter.apply(item));
         }
 
@@ -205,7 +236,7 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
             node = new ObjectNodeWrapper(instance.objectNode());
         }
 
-        JSONVisitorEncode visitor = createVisitor(node);
+        JSONVisitorEncode visitor = createVisitor(node, message);
         MessageStructureReader structureReader = structureReaderSupplier.get();
 
         structureReader.traverse(visitor, messageStructure, message, MessageStructureReaderHandlerImpl.instance());
@@ -224,7 +255,7 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
             node = new ObjectNodeWrapper(instance.objectNode());
         }
 
-        JSONVisitorEncode visitor = createVisitor(node);
+        JSONVisitorEncode visitor = createVisitor(node, message);
         MessageStructureReader structureReader = structureReaderSupplier.get();
 
         structureReader.traverse(visitor, messageStructure, message, MessageStructureReaderHandlerImpl.instance());
@@ -232,12 +263,12 @@ public class JSONVisitorEncode extends DefaultMessageStructureVisitor {
         return visitor.getRoot();
     }
 
-    protected JSONVisitorEncode createVisitor(IJsonNodeWrapper root) {
-        return new JSONVisitorEncode(root, dictionary, dynamicStructures, jsonSettings);
+    protected JSONVisitorEncode createVisitor(IJsonNodeWrapper root, IMessage message) {
+        return new JSONVisitorEncode(root, dictionary, dynamicStructures, jsonSettings, message);
     }
 
     protected boolean isWriteable(Object value, IFieldStructure fldStruct) {
-        return value != null && JSONVisitorUtility.isWritable(fldStruct);
+        return (value != null || isFieldPresent(message, fldStruct.getName())) && JSONVisitorUtility.isWritable(fldStruct);
     }
 
     public JsonNode getRoot() {
