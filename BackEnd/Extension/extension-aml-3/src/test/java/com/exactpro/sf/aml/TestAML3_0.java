@@ -54,7 +54,7 @@ public class TestAML3_0 extends TestAML3Base {
 		AML aml = executeTest(VALID_TEST_PATH + "validTests.csv");
 
 		Assert.assertEquals(0, aml.getAlertCollector().getCount(AlertType.ERROR));
-        Assert.assertEquals(35, aml.getTestCases().size());
+        Assert.assertEquals(36, aml.getTestCases().size());
 		int n = 0;
 		Assert.assertEquals(3, aml.getTestCases().get(n++).getActions().size());
 		Assert.assertEquals(3, aml.getTestCases().get(n++).getActions().size());
@@ -91,6 +91,7 @@ public class TestAML3_0 extends TestAML3Base {
         Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
+        Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(n, aml.getTestCases().size());
 
 		Collection<Alert> source = aml.getAlertCollector().getAlerts();

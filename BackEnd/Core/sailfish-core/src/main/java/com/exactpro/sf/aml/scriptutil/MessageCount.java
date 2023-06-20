@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ public class MessageCount {
     static {
         String operationRegex = "(>|<|>=|<=|=|\\!=)";
         String arithmeticOperationRegex = "(\\+|\\-|\\*|\\/)";
+        String staticReferenceRegex = "(\\%\\{\\w+\\})";
         String referenceRegex = "(\\$\\{\\w+([.:]\\w+(\\[\\d+\\])?)+\\})";
-        String valueOrReference = "(\\d+|" + referenceRegex + ")";
-        String arithmeticReferenceRegex = "\\(?" + referenceRegex + "(" + arithmeticOperationRegex + valueOrReference +")*\\)?";
+        String staticOrReferenceRegex = "(" + staticReferenceRegex + "|" + referenceRegex + ")";
+        String valueOrReference = "(\\d+|" + staticOrReferenceRegex + ")";
+        String arithmeticReferenceRegex = "\\(?" + staticOrReferenceRegex + "(" + arithmeticOperationRegex + valueOrReference +")*\\)?";
         String valueOrReferenceRegex = "(\\d+|" + arithmeticReferenceRegex + ")";
         String functionRegex = "(#\\{(Expected(Any|Empty)?)\\(.*?\\)(\\.(Bug(Any|Empty)?|Actual|validate)\\(.*?\\))*\\})";
         EXPRESSION_PATTERN = Pattern.compile("^("

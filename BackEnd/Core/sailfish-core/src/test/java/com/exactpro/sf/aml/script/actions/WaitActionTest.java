@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,8 +75,6 @@ import com.exactpro.sf.storage.IMessageStorage;
 import com.exactpro.sf.storage.IServiceStorage;
 import com.exactpro.sf.storage.impl.FakeMessageStorage;
 import com.exactpro.sf.util.AbstractTest;
-
-import junit.framework.Assert;
 
 public class WaitActionTest extends AbstractTest {
 

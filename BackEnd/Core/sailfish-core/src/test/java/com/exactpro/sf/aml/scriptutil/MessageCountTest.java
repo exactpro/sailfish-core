@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,16 +99,34 @@ public class MessageCountTest {
         checkIsValidExpression("${ref.field1} + ${ref.field2} + 100");
         checkIsValidExpression("${ref.field1} + ${ref.field2} + ${ref.field3}");
 
+        checkIsValidExpression("%{ref}");
+        checkIsValidExpression("%{ref_a}");
+        checkIsValidExpression("%{ref_1}");
+        checkIsValidExpression("%{abc} + %{def}");
+        checkIsValidExpression("%{abc} + 1");
+        checkIsValidExpression("%{abc} - 2");
+        checkIsValidExpression("%{abc} * 3 - %{def}");
+
+        checkIsValidExpression("%{ref} - ${ref.field1} + %{ref_a} + ${ref.field3[0]} + %{ref_b} + 100");
+
         for (Operation operation : Operation.values()) {
             checkIsValidExpression(operation.getValue() + " ${ref.field}");
+            checkIsValidExpression(operation.getValue() + " %{ref}");
         }
-        
+
         checkIntervalExpression("${ref.field}",
                                 "${ref.field} + 123", 
                                 "${ref.field} - 123",
                                 "${ref.field} * 123", 
                                 "${ref.field} / 123",
                                 "(${ref.field} + 123)",
+                                "123");
+        checkIntervalExpression("%{ref}",
+                                "%{ref_1} + 123",
+                                "%{ref_a} - 123",
+                                "%{a_b} * 123",
+                                "%{c_d} / 123",
+                                "(%{efg} + 123)",
                                 "123");
     }
     
