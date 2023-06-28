@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.comparison;
 
 import static java.lang.Math.pow;
@@ -28,14 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.exactpro.sf.aml.script.MetaContainer;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import com.exactpro.sf.aml.AMLLangConst;
-import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.ExpressionResult;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -135,7 +133,7 @@ public class MessageComparator {
             return "null";
         }
 
-        if (value instanceof IFilter) {
+        if (value instanceof IComparisonFilter) {
             return "Filter";
         }
 
@@ -159,7 +157,7 @@ public class MessageComparator {
     @NotNull
     private static String getCollectionType(List<?> list) {
         Object value = list.get(0);
-        if (value instanceof IFilter) {
+        if (value instanceof IComparisonFilter) {
             // cannot add the type of the collection elements for filters
             return "Collection";
         }
@@ -218,8 +216,8 @@ public class MessageComparator {
         if(expected instanceof String && actual instanceof String) {
             String expectedValue = (String)expected;
 
-            if(expectedValue.startsWith(AMLLangConst.REGEX_FIELD_START) && expectedValue.endsWith(AMLLangConst.REGEX_FIELD_END)) {
-                String regex = StringUtils.substringBetween(expectedValue, AMLLangConst.REGEX_FIELD_START, AMLLangConst.REGEX_FIELD_END);
+            if(expectedValue.startsWith(ComparatorConst.REGEX_FIELD_START) && expectedValue.endsWith(ComparatorConst.REGEX_FIELD_END)) {
+                String regex = StringUtils.substringBetween(expectedValue, ComparatorConst.REGEX_FIELD_START, ComparatorConst.REGEX_FIELD_END);
                 boolean matches = Pattern.matches(regex, (String)actual);
                 return result.setStatus(matches ? StatusType.PASSED : StatusType.FAILED);
             }
@@ -353,7 +351,7 @@ public class MessageComparator {
 
                 usedActual[maxActualIndex] = true;
                 usedExpected[maxExpectedIndex] = true;
-                ComparisonResult subResult = null;
+                ComparisonResult subResult;
 
                 if(maxActualIndex >= actualSize) {
                     List<MetaContainer> subMetaContainers = metaContainersCache.get(maxExpectedIndex);
@@ -391,7 +389,7 @@ public class MessageComparator {
 
         IMessage actualMessage = (IMessage)actual;
         IMessage expectedMessage = (IMessage)expected;
-        Collection<String> fieldNames = null;
+        Collection<String> fieldNames;
         Map<String, Boolean> keyFields = keyFieldsOnly ? metaContainers.get(0).getKeyFields() : Collections.emptyMap();
 
         if (keyFieldsOnly) {
@@ -439,23 +437,23 @@ public class MessageComparator {
 
         if (settings.getIgnoredFields().contains(name)) {
             //TODO NA status must be set for nested structures
-            return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true);
+            return addToResult(actual, result, StatusType.NA, structure, metaContainers, true);
         }
 
-        if(expected instanceof IFilter) {
-            IFilter filter = (IFilter)expected;
+        if(expected instanceof IComparisonFilter) {
+            IComparisonFilter filter = (IComparisonFilter)expected;
 
             try {
                 ExpressionResult expressionResult = filter.validate(actual);
 
                 if (expressionResult.getEmbeddedListFilter() == null) {
-                    addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true);
+                    addToResult(actual, result, StatusType.NA, structure, metaContainers, true);
                 }
 
                 return result.setExpressionResult(expressionResult)
                         .setStatus(expressionResult.getResult() ? StatusType.PASSED : StatusType.FAILED);
             } catch(RuntimeException e) {
-                return addToResult(actual, result, StatusType.FAILED, structure, metaContainers, settings, true)
+                return addToResult(actual, result, StatusType.FAILED, structure, metaContainers, true)
                         .setException(e);
             }
         }
@@ -463,32 +461,32 @@ public class MessageComparator {
         if(expected == null && actual != null) {
             if (!unchecked && !settings.getUncheckedFields().contains(name)) {
                 String failUnexpected = StringUtils.lowerCase(metaContainers.get(0).getFailUnexpected());
-                Set<String> allowedValues = Sets.newHashSet(AMLLangConst.ALL);
+                Set<String> allowedValues = Sets.newHashSet(ComparatorConst.ALL);
 
                 if(isObject(actual) && !StringUtils.isNumeric(name)) {
-                    allowedValues.add(AMLLangConst.YES);
+                    allowedValues.add(ComparatorConst.YES);
                 }
 
                 if(allowedValues.contains(failUnexpected)) {
-                    return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true).setStatus(StatusType.FAILED);
+                    return addToResult(actual, result, StatusType.NA, structure, metaContainers, true).setStatus(StatusType.FAILED);
                 }
             }
 
-            return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true);
+            return addToResult(actual, result, StatusType.NA, structure, metaContainers, true);
         }
 
         if(expected != null && actual == null) {
             // isConventionedValueMissedOrNestedMissed is the hot fix for RM 50554
             StatusType status = Convention.isConventionedValueMissedOrNestedMissed(expected) ? StatusType.PASSED : StatusType.FAILED;
-            return addToResult(expected, result, StatusType.NA, structure, metaContainers, settings, false).setStatus(status);
+            return addToResult(expected, result, StatusType.NA, structure, metaContainers, false).setStatus(status);
         }
 
         if(Convention.isConventionedValuePresent(expected)) {
-            return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true).setStatus(StatusType.PASSED);
+            return addToResult(actual, result, StatusType.NA, structure, metaContainers, true).setStatus(StatusType.PASSED);
         }
 
         if(Convention.isConventionedValueMissed(expected)) {
-            return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true).setStatus(StatusType.FAILED);
+            return addToResult(actual, result, StatusType.NA, structure, metaContainers, true).setStatus(StatusType.FAILED);
         }
 
         return result;
@@ -498,7 +496,7 @@ public class MessageComparator {
         return BooleanUtils.isFalse(metaContainer.getKeyFields().get(name));
     }
 
-    private static ComparisonResult addToResult(Object object, ComparisonResult result, StatusType status, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings, boolean actual) {
+    private static ComparisonResult addToResult(Object object, ComparisonResult result, StatusType status, IFieldStructure structure, List<MetaContainer> metaContainers, boolean actual) {
         result.setStatus(status);
 
         if(actual) {
@@ -527,7 +525,7 @@ public class MessageComparator {
                 ComparisonResult subResult = new ComparisonResult(name);
                 List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, i, false);
 
-                result.addResult(addToResult(value, subResult, status, structure, subMetaContainers, settings, actual));
+                result.addResult(addToResult(value, subResult, status, structure, subMetaContainers, actual));
             }
         } else if(object instanceof IMessage) {
             Exception e = checkStructureType(IMessage.class, structure);
@@ -550,7 +548,7 @@ public class MessageComparator {
                 List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName, false);
                 ComparisonResult subResult = new ComparisonResult(fieldName);
 
-                result.addResult(addToResult(value, subResult, status, subStructure, subMetaContainers, settings, actual));
+                result.addResult(addToResult(value, subResult, status, subStructure, subMetaContainers, actual));
             }
         } else if(isObject(object)) {
             Exception e = checkStructureType(Object.class, structure);
@@ -632,7 +630,7 @@ public class MessageComparator {
             }
         }
 
-        return (actualType || actual == null) && (expectedType || expected == null || expected instanceof IFilter);
+        return (actualType || actual == null) && (expectedType || expected == null || expected instanceof IComparisonFilter);
     }
 
     private static Exception checkStructureType(Class<?> clazz, IFieldStructure structure) {
@@ -656,7 +654,7 @@ public class MessageComparator {
     }
 
     private static boolean isObject(Object value) {
-        return !(value == null || value instanceof List<?> || value instanceof IMessage || value instanceof IFilter);
+        return !(value == null || value instanceof List<?> || value instanceof IMessage || value instanceof IComparisonFilter);
     }
 
     private static boolean isCollection(IFieldStructure structure) {
@@ -668,7 +666,7 @@ public class MessageComparator {
     }
 
     private static List<?> getExpectedList(Object expected, List<?> embeddedListFilter) {
-        return expected instanceof IFilter && embeddedListFilter != null ? embeddedListFilter : (List<?>)expected;
+        return expected instanceof IComparisonFilter && embeddedListFilter != null ? embeddedListFilter : (List<?>)expected;
     }
     
     private static Object getValue(Object wrapper) {

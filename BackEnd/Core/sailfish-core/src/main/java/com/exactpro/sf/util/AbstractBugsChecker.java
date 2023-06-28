@@ -17,7 +17,6 @@ package com.exactpro.sf.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IKnownBug;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.KnownBugFilter;

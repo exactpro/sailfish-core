@@ -30,6 +30,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.exactpro.sf.comparison.ComparisonNotNullFilter;
+import com.exactpro.sf.comparison.ComparisonNullFilter;
+import com.exactpro.sf.comparison.IComparisonFilter;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.mvel2.MVEL;
@@ -238,13 +241,7 @@ public class StaticUtil {
         IFilter toFilter();
     }
 
-    public interface IFilter {
-        ExpressionResult validate(Object value) throws RuntimeException;
-		String getCondition();
-        String getCondition(Object value);
-		Object getValue() throws MvelException;
-        boolean hasValue();
-	}
+    public interface IFilter extends IComparisonFilter { }
 
     private static class MvelFilter implements IFilter {
 		private static final Pattern NOT_VARIABLE_REGEX = Pattern.compile(AMLLangConst.REGEX_MVEL_NOT_VARIABLE);
@@ -361,7 +358,7 @@ public class StaticUtil {
         }
 	}
 
-	private static class NullFilter implements IFilter {
+	private static class NullFilter extends ComparisonNullFilter implements IFilter {
 	    private final long line;
 	    private final String column;
 
@@ -370,38 +367,14 @@ public class StaticUtil {
 	        this.column = column;
 	    }
 
-		@Override
-		public ExpressionResult validate(Object value) {
-            return create(value == null);
-		}
-
-		@Override
-		public String getCondition() {
-			return "#";
-		}
-
         @Override
-        public String getCondition(Object value) {
-            return getCondition();
-        }
-
-		@Override
         public Object getValue() {
             throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
 
-        @Override
-        public boolean hasValue() {
-            return false;
-        }
+    }
 
-		@Override
-		public String toString() {
-		    return getCondition();
-		}
-	}
-
-	private static class NotNullFilter implements IFilter {
+	private static class NotNullFilter extends ComparisonNotNullFilter implements IFilter {
 	    private final long line;
         private final String column;
 
@@ -410,36 +383,11 @@ public class StaticUtil {
             this.column = column;
         }
 
-		@Override
-		public ExpressionResult validate(Object value) {
-            return create(value != null);
-		}
-
-		@Override
-		public String getCondition() {
-			return "*";
-		}
-
-        @Override
-        public String getCondition(Object value) {
-            return getCondition();
-        }
-
         @Override
         public Object getValue() {
             throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
-
-		@Override
-		public String toString() {
-		    return getCondition();
-		}
-
-        @Override
-        public boolean hasValue() {
-            return false;
-        }
-	}
+    }
 
     public static class KnownBugFilter implements IFilter {
 

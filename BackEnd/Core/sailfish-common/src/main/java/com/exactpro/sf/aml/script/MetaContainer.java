@@ -34,125 +34,125 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 public class MetaContainer {
 
-	private final Map<String, Double> doublePrecision = new HashMap<>();
-	private final Map<String, Double> systemPrecision = new HashMap<>();
+    private final Map<String, Double> doublePrecision = new HashMap<>();
+    private final Map<String, Double> systemPrecision = new HashMap<>();
     private final Map<String, Object> systemColumns = new HashMap<>();
-	private String alternateValue;
+    private String alternateValue;
     private String failUnexpected;
     private Map<String, Boolean> keyFields = Collections.emptyMap();
 
     private final Map<String, List<MetaContainer>> children;
 
-	private void propogateParentValues(MetaContainer parentMetaContainer)
-	{
-		Map<String, Double> parentDoublePrecision = parentMetaContainer.getDoublePrecision();
-		Map<String, Double> parentSystemPrecision = parentMetaContainer.getSystemPrecision();
+    private void propogateParentValues(MetaContainer parentMetaContainer)
+    {
+        Map<String, Double> parentDoublePrecision = parentMetaContainer.getDoublePrecision();
+        Map<String, Double> parentSystemPrecision = parentMetaContainer.getSystemPrecision();
 
-		for(Entry<String, Double> entry: parentDoublePrecision.entrySet()) {
-			if (!doublePrecision.containsKey(entry.getKey())) {
-				doublePrecision.put(entry.getKey(), entry.getValue());
-			}
-		}
-		for(Entry<String, Double> entry: parentSystemPrecision.entrySet()) {
-			if (!systemPrecision.containsKey(entry.getKey())) {
-				systemPrecision.put(entry.getKey(), entry.getValue());
-			}
-		}
+        for(Entry<String, Double> entry: parentDoublePrecision.entrySet()) {
+            if (!doublePrecision.containsKey(entry.getKey())) {
+                doublePrecision.put(entry.getKey(), entry.getValue());
+            }
+        }
+        for(Entry<String, Double> entry: parentSystemPrecision.entrySet()) {
+            if (!systemPrecision.containsKey(entry.getKey())) {
+                systemPrecision.put(entry.getKey(), entry.getValue());
+            }
+        }
 
         if(failUnexpected == null) {
             failUnexpected = parentMetaContainer.getFailUnexpected();
         }
 
-		for (Entry<String, List<MetaContainer>> fldChl : children.entrySet()) {
-			for (MetaContainer child: fldChl.getValue()) {
-				child.propogateParentValues(this);
-			}
-		}
-	}
+        for (Entry<String, List<MetaContainer>> fldChl : children.entrySet()) {
+            for (MetaContainer child: fldChl.getValue()) {
+                child.propogateParentValues(this);
+            }
+        }
+    }
 
-	public MetaContainer() {
-		this.children = new HashMap<>();
-	}
+    public MetaContainer() {
+        this.children = new HashMap<>();
+    }
 
-	private Map<String, Double> getDoublePrecision() {
+    private Map<String, Double> getDoublePrecision() {
         return doublePrecision;
-	}
-	public Double getDoublePrecision(String field) {
+    }
+    public Double getDoublePrecision(String field) {
         return doublePrecision != null ? doublePrecision.get(field) : null;
     }
 
-	public void addDoublePrecision(String doublePrecision) {
-		this.doublePrecision.putAll(parsePrecision(doublePrecision));
-	}
+    public void addDoublePrecision(String doublePrecision) {
+        this.doublePrecision.putAll(parsePrecision(doublePrecision));
+    }
 
-	private Map<String, Double> getSystemPrecision() {
+    private Map<String, Double> getSystemPrecision() {
         return systemPrecision;
-	}
-	public Double getSystemPrecision(String field) {
+    }
+    public Double getSystemPrecision(String field) {
         return systemPrecision != null ? systemPrecision.get(field) : null;
     }
 
-	public void addSystemPrecision(String systemPrecision) {
-		this.systemPrecision.putAll(parsePrecision(systemPrecision));
-	}
+    public void addSystemPrecision(String systemPrecision) {
+        this.systemPrecision.putAll(parsePrecision(systemPrecision));
+    }
 
-	public String getAlternateValue() {
-		return alternateValue;
-	}
+    public String getAlternateValue() {
+        return alternateValue;
+    }
 
-	public void setAlternateValue(String alternateValue) {
-		this.alternateValue = alternateValue;
-	}
+    public void setAlternateValue(String alternateValue) {
+        this.alternateValue = alternateValue;
+    }
 
-	public Map<String, List<MetaContainer>> getChildren() {
-		return children;
-	}
+    public Map<String, List<MetaContainer>> getChildren() {
+        return children;
+    }
 
-	public void add(String name, MetaContainer mc) {
+    public void add(String name, MetaContainer mc) {
         List<MetaContainer> obj = children.computeIfAbsent(name, it -> new ArrayList<>());
         mc.propogateParentValues(this);
-		obj.add(mc);
-	}
+        obj.add(mc);
+    }
 
-	public List<MetaContainer> get(String name) {
-		return children.get(name);
-	}
+    public List<MetaContainer> get(String name) {
+        return children.get(name);
+    }
 
-	private Map<String, Double> parsePrecision(String precision)
-	{
+    private Map<String, Double> parsePrecision(String precision)
+    {
         if(StringUtils.isEmpty(precision)) {
-			return Collections.emptyMap();
-		}
-		Map<String, Double> fieldVal = new HashMap<>();
-		String[] precs = precision.split(";");
-		for (String prec : precs)
-		{
-			String[] arr = prec.trim().split("=");
-			String field = arr[0].trim();
+            return Collections.emptyMap();
+        }
+        Map<String, Double> fieldVal = new HashMap<>();
+        String[] precs = precision.split(";");
+        for (String prec : precs)
+        {
+            String[] arr = prec.trim().split("=");
+            String field = arr[0].trim();
             if(field.isEmpty()) {
-				throw new EPSCommonException("Parameter name not specified: "+precision);
-			}
-			if (arr.length == 1) {
-				throw new EPSCommonException("Precision for parameter not specified: "+field);
-			}
-			try {
-				Double value = Double.parseDouble(arr[1].trim());
-				fieldVal.put(field, value);
-			} catch (NumberFormatException e) {
-				throw new EPSCommonException("Precision is not in double format: "+arr[1].trim());
-			}
-		}
-		return fieldVal;
-	}
+                throw new EPSCommonException("Parameter name not specified: "+precision);
+            }
+            if (arr.length == 1) {
+                throw new EPSCommonException("Precision for parameter not specified: "+field);
+            }
+            try {
+                Double value = Double.parseDouble(arr[1].trim());
+                fieldVal.put(field, value);
+            } catch (NumberFormatException e) {
+                throw new EPSCommonException("Precision is not in double format: "+arr[1].trim());
+            }
+        }
+        return fieldVal;
+    }
 
 
-	public String getFailUnexpected() {
-		return failUnexpected;
-	}
+    public String getFailUnexpected() {
+        return failUnexpected;
+    }
 
-	public void setFailUnexpected(String failUnexpected) {
-		this.failUnexpected = failUnexpected;
-	}
+    public void setFailUnexpected(String failUnexpected) {
+        this.failUnexpected = failUnexpected;
+    }
 
     @SuppressWarnings("unchecked")
     public <T> T getSystemColumn(String name) {
@@ -274,10 +274,10 @@ public class MetaContainer {
         return builder.toHashCode();
     }
 
-	/**
-	 * Create clone without children
-	 */
-	@Override
+    /**
+     * Create clone without children
+     */
+    @Override
     public MetaContainer clone() {
         return clone(false);
     }
@@ -303,13 +303,13 @@ public class MetaContainer {
         return result;
     }
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-		.append("failUnexpected", failUnexpected)
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("failUnexpected", failUnexpected)
                 .append("alternateValue", alternateValue)
                 .append("doublePrecision", doublePrecision)
                 .append("keyFields", keyFields)
                 .append("children", children).toString();
-	}
+    }
 }

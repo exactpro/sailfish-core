@@ -18,18 +18,20 @@ package com.exactpro.sf.comparison;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.util.DateTimeUtility;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.storage.util.JsonMessageConverter;
 
 /**
  *
@@ -38,10 +40,23 @@ import com.exactpro.sf.storage.util.JsonMessageConverter;
  */
 public class ComparisonUtil {
 
+    private static final Map<Class<?>, DateTimeFormatter> CLASS_TO_FORMATTER = new HashMap<>();
+
 	private ComparisonUtil()
 	{
 		// hide constructor
 	}
+
+    static {
+        CLASS_TO_FORMATTER.put(LocalDate.class, DateTimeFormatter.ISO_DATE);
+        CLASS_TO_FORMATTER.put(LocalTime.class, DateTimeFormatter.ISO_TIME);
+        CLASS_TO_FORMATTER.put(LocalDateTime.class, DateTimeFormatter.ISO_DATE_TIME);
+    }
+
+    public static String formatTemporal(TemporalAccessor accessor) {
+        ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(accessor);
+        return CLASS_TO_FORMATTER.get(accessor.getClass()).format(zonedDateTime);
+    }
 
     public static int getResultCount(ComparisonResult result, StatusType status)
 	{
@@ -97,7 +112,7 @@ public class ComparisonUtil {
 
         setTypeAndValue(map, value);
 
-        if(value instanceof IFilter || !result.hasResults()) {
+        if(value instanceof IComparisonFilter || !result.hasResults()) {
             return map;
         }
 
@@ -142,8 +157,8 @@ public class ComparisonUtil {
     private static void setTypeAndValue(Map<String, Object> map, Object value) {
         map.put("type", ClassUtils.getSimpleName(value, null));
 
-        if(value instanceof IFilter) {
-            IFilter filter = (IFilter)value;
+        if(value instanceof IComparisonFilter) {
+            IComparisonFilter filter = (IComparisonFilter)value;
 
             if(filter.hasValue()) {
                 map.put("type", ClassUtils.getSimpleName(value = filter.getValue(), null));
@@ -151,7 +166,7 @@ public class ComparisonUtil {
                 value = filter.getCondition();
             }
         } else if(value instanceof LocalDate || value instanceof LocalTime || value instanceof LocalDateTime) {
-            value = JsonMessageConverter.formatTemporal((TemporalAccessor)value);
+            value = formatTemporal((TemporalAccessor)value);
         }
 
         map.put("value", value);

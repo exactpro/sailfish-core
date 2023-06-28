@@ -15,24 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.util;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
@@ -41,11 +23,24 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.configuration.IDictionaryManager;
-import com.exactpro.sf.util.DateTimeUtility;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAccessor;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class JsonMessageConverter {
 
@@ -60,17 +55,8 @@ public class JsonMessageConverter {
     public static final String JSON_MESSAGE_RR = "rejectReason";
     public static final String JSON_MESSAGE_ADMIN = "admin";
 
-    private static final Map<Class<?>, DateTimeFormatter> CLASS_TO_FORMATTER = new HashMap<>();
-
-    static {
-        CLASS_TO_FORMATTER.put(LocalDate.class, DateTimeFormatter.ISO_DATE);
-        CLASS_TO_FORMATTER.put(LocalTime.class, DateTimeFormatter.ISO_TIME);
-        CLASS_TO_FORMATTER.put(LocalDateTime.class, DateTimeFormatter.ISO_DATE_TIME);
-    }
-
     public static String formatTemporal(TemporalAccessor accessor) {
-        ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(accessor);
-        return CLASS_TO_FORMATTER.get(accessor.getClass()).format(zonedDateTime);
+        return ComparisonUtil.formatTemporal(accessor);
     }
 
     public static String toJson(IMessage message) {

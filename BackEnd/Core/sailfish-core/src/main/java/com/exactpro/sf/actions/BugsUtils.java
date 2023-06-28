@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-import java.util.List;
-
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.comparison.Convention;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
-import com.exactpro.sf.util.AbstractBugsChecker;
 import com.exactpro.sf.util.BugsCheckerBuilder;
 import com.exactpro.sf.util.BugsListCheckerBuilder;
 

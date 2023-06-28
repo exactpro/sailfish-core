@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.aml;
 
+import com.exactpro.sf.comparison.ComparatorConst;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
 public class AMLLangConst {
@@ -24,8 +25,8 @@ public class AMLLangConst {
     public static final String REGEX_MVEL_DELIMETER = "(\\+|\\-|\\*|/| |\\(|\\)|=|>|<|!|&|\\||~|%|,|\\?|:)+";
     public static final String REGEX_MVEL_NOT_VARIABLE = "(" + REGEX_MVEL_STRING + "|" + REGEX_MVEL_DELIMETER + "|$)+";
 
-    public static final String REGEX_FIELD_START = "Regexp[";
-    public static final String REGEX_FIELD_END = "]";
+    public static final String REGEX_FIELD_START = ComparatorConst.REGEX_FIELD_START;
+    public static final String REGEX_FIELD_END = ComparatorConst.REGEX_FIELD_END;
 
     public static final String TAG_INTERPRET_AS_JAVA = "java:";
     public static final String BEGIN_REFERENCE = "${";
@@ -45,9 +46,9 @@ public class AMLLangConst {
     public static final SailfishURI INIT_BLOCK_PARAMETERS_MAP_URI = SailfishURI.unsafeParse("initBlockParametersMap");
     public static final SailfishURI INIT_BLOCK_RESULTS_MAP_URI = SailfishURI.unsafeParse("initBlockResultsMap");
 
-    public static final String YES = "y";
-    public static final String NO = "n";
-    public static final String ALL = "a";
+    public static final String YES = ComparatorConst.YES;
+    public static final String NO = ComparatorConst.NO;
+    public static final String ALL = ComparatorConst.ALL;
     public static final String OPTIONAL = "o";
 
     public static final String SMART_CHECKPOINT_PREFIX = "!";

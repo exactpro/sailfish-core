@@ -15,13 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
+import com.exactpro.sf.aml.script.MetaContainer;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.util.DateTimeUtility;
+import com.google.common.collect.ImmutableMap;
+import org.apache.mina.filter.codec.ProtocolCodecException;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,30 +40,11 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.apache.mina.filter.codec.ProtocolCodecException;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.exactpro.sf.aml.script.ActionContext;
-import com.exactpro.sf.aml.script.MetaContainer;
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.impl.messages.MapMessage;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
-import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.util.AbstractTest;
-import com.exactpro.sf.util.DateTimeUtility;
-import com.google.common.collect.ImmutableMap;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 
 @SuppressWarnings("deprecation")
-public class TestMessageComparator extends AbstractTest {
+public class TestMessageComparator {
 
     private static final Set<String> uncheckedFields = new HashSet<>();
 
@@ -81,32 +70,22 @@ public class TestMessageComparator extends AbstractTest {
         IMessage message = messageFactory.createMessage("name", "namespace");
         IMessage filter = messageFactory.createMessage("name", "namespace");
 
-        IFilter nullFilter = StaticUtil.nullFilter(0, null);
-        IFilter notNullFilter = StaticUtil.notNullFilter(0, null);
-        IFilter missedFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_MISSED_OBJECT");
-        IFilter presentFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_PRESENT_OBJECT");
+        IComparisonFilter nullFilter = ComparisonNullFilter.INSTANCE;
+        IComparisonFilter notNullFilter = ComparisonNotNullFilter.INSTANCE;
 
         message.addField("ExplicitNull_NullFilter", null);
         filter.addField("ExplicitNull_NullFilter", nullFilter);
         filter.addField("HiddenNull_NullFilter", nullFilter);
 
-        message.addField("ExplicitNull_EmptyValue", null);
-        filter.addField("ExplicitNull_EmptyValue", missedFilter);
-        filter.addField("HiddenNull_EmptyValue", missedFilter);
-
         message.addField("ExplicitNull_NotNullFilter", null);
         filter.addField("ExplicitNull_NotNullFilter", notNullFilter);
         filter.addField("HiddenNull_NotNullFilter", notNullFilter);
-
-        message.addField("ExplicitNull_AnyValue", null);
-        filter.addField("ExplicitNull_AnyValue", presentFilter);
-        filter.addField("HiddenNull_AnyValue", presentFilter);
 
         ComparatorSettings compareSettings = new ComparatorSettings();
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
 
-        validateResult(comparisonResult, 4, 4, 0);
+        validateResult(comparisonResult, 2, 2, 0);
     }
 
 	@Test
@@ -145,7 +124,7 @@ public class TestMessageComparator extends AbstractTest {
 		message.addField("bigDecimalSys" + passed, new BigDecimal("1.001"));
 		filter.addField("bigDecimalSys" + passed, new BigDecimal("1.001"));
 
-		MetaContainer metaContainer = new MetaContainer();
+        MetaContainer metaContainer = new MetaContainer();
 		metaContainer.addDoublePrecision("floatDou" + passed + "=0.01");
 		metaContainer.addSystemPrecision("floatSys" + failed + "=0.00025");
 		metaContainer.addDoublePrecision("doubleDou" + passed + "=0.01");
@@ -336,10 +315,10 @@ public class TestMessageComparator extends AbstractTest {
             filter.addField("group_NoPartyIDs", group);
             break;
         case NOT_EMPTY:
-            filter.addField("group_NoPartyIDs", StaticUtil.notNullFilter(0, null));
+            filter.addField("group_NoPartyIDs", ComparisonNotNullFilter.INSTANCE);
             break;
         case EMPTY:
-            filter.addField("group_NoPartyIDs", StaticUtil.nullFilter(0, null));
+            filter.addField("group_NoPartyIDs", ComparisonNullFilter.INSTANCE);
             break;
         default:
             throw new IllegalArgumentException("No action for filter type " + filterType);
@@ -733,7 +712,6 @@ public class TestMessageComparator extends AbstractTest {
 		System.out.println(result);
 	}
 
-
 	@Test
 	public void testDoublePre()
 	{
@@ -749,12 +727,6 @@ public class TestMessageComparator extends AbstractTest {
 
         MetaContainer metaContainer = new MetaContainer();
 		metaContainer.addDoublePrecision("CurrentGross=10");
-
-        ActionContext settings = new ActionContext(getScriptContext(), true);
-		settings.setMetaContainer(metaContainer);
-		settings.setFailUnexpected("N");
-		settings.setDescription("check CGC in database");
-		settings.setAddToReport(true);
 
         ComparatorSettings compSettings = new ComparatorSettings();
 		compSettings.setMetaContainer(metaContainer);
@@ -781,7 +753,7 @@ public class TestMessageComparator extends AbstractTest {
         list.add(group);
 
         message.addField("Group", list);
-        filter.addField("Group", StaticUtil.notNullFilter(0, null));
+        filter.addField("Group", ComparisonNotNullFilter.INSTANCE);
 
         ComparatorSettings compSettings = new ComparatorSettings();
         MetaContainer metaContainer = new MetaContainer();
@@ -963,28 +935,6 @@ public class TestMessageComparator extends AbstractTest {
         ComparisonResult comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
         System.out.printf("diff %d\n", System.currentTimeMillis() - startTime);
         Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-    }
-
-    @Test
-    public void testFilters() throws FileNotFoundException, IOException {
-        IDictionaryStructure dictionary = null;
-
-        try(InputStream stream = new FileInputStream("src/test/workspace/cfg/dictionaries/test_aml.xml")) {
-            IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
-            dictionary = loader.load(stream);
-        }
-
-        Assert.assertNotNull("dictionary cannot be null", dictionary);
-
-        ComparatorSettings settings = new ComparatorSettings().setDictionaryStructure(dictionary);
-        IMessage message = new MapMessage(dictionary.getNamespace(), "ArrayMessage");
-        IMessage filter = message.cloneMessage();
-
-        filter.addField("MessageArray", StaticUtil.nullFilter(0, null));
-        ComparisonResult result = MessageComparator.compare(message, filter, settings);
-
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
     }
 
     @Test
@@ -1707,7 +1657,7 @@ public class TestMessageComparator extends AbstractTest {
                     createMessage(tx -> {
                         tx.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
                         tx.addField("B", "archived");
-                        tx.addField("C", StaticUtil.nullFilter(0, null));
+                        tx.addField("C", ComparisonNullFilter.INSTANCE);
                         tx.addField("D", "cash");
                     }),
                     createMessage(tx -> {

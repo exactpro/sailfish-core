@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -36,7 +35,7 @@ import com.exactpro.sf.util.DateTimeUtility;
 public class Convention {
 
 
-    public static final Object CONV_PRESENT_OBJECT = StaticUtil.notNullFilter(0, "Unknown");
+    public static final Object CONV_PRESENT_OBJECT = ComparisonNotNullFilter.INSTANCE;
 	public static final String CONV_PRESENT_STRING = "*";
 	public static final byte CONV_PRESENT_BYTE = Byte.MAX_VALUE;
 	public static final int CONV_PRESENT_INTEGER = -999;
@@ -55,7 +54,7 @@ public class Convention {
 	public static final short CONV_PRESENT_SHORT = Short.MAX_VALUE;
 	public static final String CONV_PRESENT_ENUM = "Present";
 
-	public static final Object CONV_MISSED_OBJECT = StaticUtil.nullFilter(0, "Unknown");
+	public static final Object CONV_MISSED_OBJECT = ComparisonNullFilter.INSTANCE;
 	public static final String CONV_MISSED_STRING = "#";
 	public static final byte CONV_MISSED_BYTE = Byte.MIN_VALUE;
 	public static final int CONV_MISSED_INTEGER = -998;

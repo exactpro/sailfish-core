@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.util.LocalDateTimeConst;
 
 /**
@@ -184,9 +183,9 @@ public class Formatter {
 		}
 		if (isExpected)
 		{
-			if (o instanceof IFilter) {
-				IFilter fltr = (IFilter) o;
-				return fltr.getCondition();
+			if (o instanceof IComparisonFilter) {
+                IComparisonFilter filter = (IComparisonFilter) o;
+				return filter.getCondition();
 			}
 			if (o instanceof String) {
 				// DG: dirty hack for FIX protocol for DateTime fields comparison
@@ -309,9 +308,9 @@ public class Formatter {
 			}
 		}
 
-		if (o instanceof IFilter) {
-			IFilter fltr = (IFilter) o;
-			return fltr.getCondition();
+		if (o instanceof IComparisonFilter) {
+            IComparisonFilter filter = (IComparisonFilter) o;
+			return filter.getCondition();
 		}
 
 		if (o instanceof Double) {
@@ -333,8 +332,8 @@ public class Formatter {
     public static String formatExpected(ComparisonResult result) {
         Object expected = result.getExpected();
 
-        if(expected instanceof IFilter) {
-            return ((IFilter)expected).getCondition(result.getActual());
+        if(expected instanceof IComparisonFilter) {
+            return ((IComparisonFilter)expected).getCondition(result.getActual());
         }
 
         return formatForHtml(expected, true);

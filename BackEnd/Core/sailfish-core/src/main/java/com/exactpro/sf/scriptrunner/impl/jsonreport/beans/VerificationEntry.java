@@ -23,7 +23,6 @@ import com.exactpro.sf.scriptrunner.StatusType;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class VerificationEntry {
