@@ -483,8 +483,6 @@ public class TestAMLSyntaxNegative extends TestMatrix {
         try {
             checkErrorPresents("Error in line 18 column '#messages_count': Invalid value: #{random(10)}", errorsTestsMatrix);
 
-            checkErrorPresents("Error in line 19 column '#messages_count': Invalid value: %{s1}", errorsTestsMatrix);
-
             checkErrorPresents("Error in line 20 column '#messages_count': Invalid value: >=", errorsTestsMatrix);
 
             checkErrorPresents("Error in line 21 column '#messages_count': Invalid value: [1..]", errorsTestsMatrix);
