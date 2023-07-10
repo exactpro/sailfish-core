@@ -30,7 +30,7 @@ const CheckpointAction = connect(
     (state: AppState, ownProps: OwnProps): CheckpointStateProps => ({
         name: getActionCheckpointName(ownProps.action),
         isSelected: ownProps.action.id === state.selected.checkpointActionId,
-        index: getCheckpointActions(state).indexOf(ownProps.action) + 1,
+        index: getCheckpointActions(state).map(s => s.id).indexOf(ownProps.action.id) + 1,
         description: ownProps.action.description
     }),
     (dispatch, ownProps: OwnProps): CheckpointDispatchProps => ({
