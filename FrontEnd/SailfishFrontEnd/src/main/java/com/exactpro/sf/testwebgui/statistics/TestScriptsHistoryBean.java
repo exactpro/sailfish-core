@@ -38,6 +38,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.slf4j.Logger;
@@ -408,7 +409,18 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
     public String getReportRequest(AggregatedReportRow row) {
-        return BeanUtil.getReportRequest(customReportsPath, row);
+		String request = BeanUtil.getReportRequest(customReportsPath, row);
+		try {
+			String zipReport = getZipReport(row);
+			if(!zipReport.isEmpty()) {
+				request = new URIBuilder(request)
+						.addParameter("zip_report_link", zipReport)
+						.build().toString();
+			}
+		} catch (URISyntaxException e) {
+			logger.error("Can't add report link to the url", e);
+		}
+        return request;
     }
 
     public String getZipReport(AggregatedReportRow row) {

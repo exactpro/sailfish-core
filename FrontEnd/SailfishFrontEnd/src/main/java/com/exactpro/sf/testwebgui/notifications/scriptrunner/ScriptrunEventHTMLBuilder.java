@@ -187,7 +187,9 @@ public class ScriptrunEventHTMLBuilder {
 				reportHref = new URIBuilder(reportHref)
 						.addParameter("zip_report_link", buildUriToZipReport(descr, context))
 						.build().toString();
-			} catch (URISyntaxException ignored) {}
+			} catch (URISyntaxException e) {
+				logger.error("Can't add report link to the url", e);
+			}
 			return "<div title='View report' class='eps-result-report-link'> "
                     + "<a class='eps-outer-link eps-event-link' href=\"" + reportHref
                     + "\" class=\"text-link\" target=\"_blank\"> Report </a></div>";
