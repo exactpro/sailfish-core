@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -39,7 +41,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -49,6 +50,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
+import com.exactpro.sf.embedded.statistics.entities.MatrixRunTag;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +81,6 @@ import com.exactpro.sf.util.DateTimeUtility;
 
 @Path("statistics")
 public class StatisticsResource {
-	
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsResource.class);
 	private static final ThreadLocal<SimpleDateFormat> parseFormat = new ThreadLocal<SimpleDateFormat>() {
 	    @Override
@@ -675,6 +677,40 @@ public class StatisticsResource {
                 status(status).
                 entity(xmlResponse).
                 build();
+    }
+
+    @DELETE
+    @Path("delete_matrix_runs_by_tag")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response deleteMatrixRunsByTag(@QueryParam("name") String tagName) {
+        if(StringUtils.isEmpty(tagName)) {
+            return Response
+                    .status(Status.BAD_REQUEST)
+                    .entity(new XmlResponse("'name' parameter is required"))
+                    .build();
+        }
+
+        IStatisticsStorage storage = getStatisticsService().getStorage();
+        Tag tag = storage.getTagByName(tagName);
+        if(tag == null) {
+            String errorMsg = String.format("Tag with name '%s' is not found", tagName);
+            return Response
+                    .status(Status.NOT_FOUND)
+                    .entity(new XmlResponse(errorMsg))
+                    .build();
+        }
+
+        Set<MatrixRun> uniqueMatrixRuns = storage.getAllMatrixRunTagsForTag(tag)
+                .stream()
+                .map(MatrixRunTag::getMatrixRun)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        uniqueMatrixRuns.forEach(storage::deleteMatrixRun);
+
+        return Response
+                .status(Status.OK)
+                .entity(new XmlResponse("Number of deleted matrix runs: " + uniqueMatrixRuns.size()))
+                .build();
     }
 
 	public ServletContext getContext() {

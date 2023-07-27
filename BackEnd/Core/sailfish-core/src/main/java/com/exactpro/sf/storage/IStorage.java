@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public interface IStorage {
 	void update(Object entity) throws StorageException;
 	
 	void delete(Object entity) throws StorageException;
-	
+
 	Object getEntityById(Class<?> entityClass, Long id);
 	
 	<T> T getEntityById(Class<T> entityClass, String id);
@@ -41,6 +41,8 @@ public interface IStorage {
 	<T> List<T> getAllEntities(Class<T> entityClass);
 	
 	<T> List<T> getAllEntities(String className);
+
+	<T> List<T> getAllEntities(Class<T> entityClass, Criterion criteria);
 	
 	<T> List<T> getAllEntities(Class<T> entityClass, List<Criterion> criterions);
 	
@@ -50,5 +52,4 @@ public interface IStorage {
 
 	<T> List<T> getAllEntities(Class<T> entityClass, List<Criterion> criterions,
 			String orderField, boolean orderAsc);
-
 }

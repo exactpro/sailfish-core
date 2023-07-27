@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,14 @@ public class MatrixRun {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "environment_id", nullable = false)
 	private Environment environment;
-	
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+
+	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     @JoinTable(name = "stmrtags", joinColumns = @JoinColumn(name = "mr_id", nullable = false, updatable = true), inverseJoinColumns = @JoinColumn(name = "tag_id",
             nullable = false, updatable = true))
-	private Set<Tag> tags; 
+	private Set<Tag> tags;
+
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "matrixRun")
+	private Set<TestCaseRun> testCaseRuns;
 
 	public Set<Tag> getTags() {
 		return tags;
@@ -157,6 +160,14 @@ public class MatrixRun {
     public void setFailReason(String initException) {
         this.failReason = initException;
     }
+
+	public void setTestCaseRuns(Set<TestCaseRun> testCaseRuns) {
+		this.testCaseRuns = testCaseRuns;
+	}
+
+	public Set<TestCaseRun> getTestCaseRuns() {
+		return testCaseRuns;
+	}
 
     public SfInstance getSfCurrentInstance() {
         return sfCurrentInstance;

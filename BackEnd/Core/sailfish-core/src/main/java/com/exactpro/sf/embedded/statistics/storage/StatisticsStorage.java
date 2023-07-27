@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl;
-import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.DefaultComponentSafeNamingStrategy;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -40,6 +37,7 @@ import com.exactpro.sf.embedded.statistics.entities.Environment;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.embedded.statistics.entities.Matrix;
 import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
+import com.exactpro.sf.embedded.statistics.entities.MatrixRunTag;
 import com.exactpro.sf.embedded.statistics.entities.MessageType;
 import com.exactpro.sf.embedded.statistics.entities.Service;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
@@ -58,7 +56,7 @@ import com.exactpro.sf.util.LRUMap;
 public class StatisticsStorage extends AbstractHibernateStorage implements IStatisticsStorage {
 	
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsStorage.class);
-	
+
 	public static final String UNKNOWN_TC_ID = "_unknown_tc_";
 	
 	private StatisticsReportingStorage reportingStorage;
@@ -88,6 +86,7 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	    .addAnnotatedClass(SfInstance.class)
 	    .addAnnotatedClass(Matrix.class)
 	    .addAnnotatedClass(MatrixRun.class)
+		.addAnnotatedClass(MatrixRunTag.class)
 	    .addAnnotatedClass(TestCase.class)
 	    .addAnnotatedClass(TestCaseRun.class)
 	    
@@ -436,7 +435,7 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	@Override
 	public List<TestCase> getAllTestCases() {
 
-        return storage.getAllEntities(TestCase.class);
+		return storage.getAllEntities(TestCase.class);
 	}
 
 	@Override
@@ -540,10 +539,22 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
         return (TestCaseRun)storage.getEntityById(TestCaseRun.class, id);
     }
 
-    @Override
-    public MatrixRun getMatrixRunById(long id) {
-        return (MatrixRun)storage.getEntityById(MatrixRun.class, id);
-    }
+	@Override
+	public MatrixRun getMatrixRunById(long id) {
+		return (MatrixRun)storage.getEntityById(MatrixRun.class, id);
+	}
+
+	@Override
+	public List<MatrixRunTag> getAllMatrixRunTagsForTag(Tag tag) {
+		Criterion criteria = Restrictions.eq("tagId", tag.getId());
+		return storage.getAllEntities(MatrixRunTag.class, criteria);
+	}
+
+	@Override
+	public void deleteMatrixRun(MatrixRun matrixRun) {
+		matrixRun.setTags(Collections.emptySet());
+		storage.delete(matrixRun);
+	}
 
     private List<SfInstance> loadSfInstancesBy(String host, String port, String sfName) {
         List<Criterion> criterions = new ArrayList<Criterion>();

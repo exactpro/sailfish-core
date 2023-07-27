@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
@@ -74,9 +72,8 @@ public class TestCaseRun {
 
 	private String fixRevision;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "matrix_run_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	private MatrixRun matrixRun;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -90,7 +87,10 @@ public class TestCaseRun {
     @OneToMany(mappedBy = "testCaseRun", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TestCaseRunTag> tags = new HashSet<>();
 
-    private int hash;
+	private int hash;
+
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "tcRun")
+	private Set<ActionRun> actionRuns;
 
 	public Long getId() {
 		return id;
@@ -234,6 +234,14 @@ public class TestCaseRun {
     public void setTags(Set<TestCaseRunTag> tags) {
         this.tags = tags;
     }
+
+	public void setActionRuns(Set<ActionRun> actionRuns) {
+		this.actionRuns = actionRuns;
+	}
+
+	public Set<ActionRun> getActionRuns() {
+		return actionRuns;
+	}
 
     @Override
     public boolean equals(Object o) {

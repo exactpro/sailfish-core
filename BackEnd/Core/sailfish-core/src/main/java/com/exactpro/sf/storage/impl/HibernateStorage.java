@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -207,7 +208,7 @@ public class HibernateStorage implements IStorage {
 		}
 		
 	}
-	
+
 	@Override
 	public Object getEntityById(Class<?> entityClass, Long id) {
 		
@@ -309,6 +310,10 @@ public class HibernateStorage implements IStorage {
             }
 		}
 		
+	}
+
+	public <T> List<T> getAllEntities(Class<T> entityClass, Criterion criteria) {
+		return getAllEntities(entityClass, Collections.singletonList(criteria));
 	}
 	
 	@Override

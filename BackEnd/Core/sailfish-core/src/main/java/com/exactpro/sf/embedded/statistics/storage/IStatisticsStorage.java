@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.exactpro.sf.embedded.statistics.entities.Environment;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.embedded.statistics.entities.Matrix;
 import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
+import com.exactpro.sf.embedded.statistics.entities.MatrixRunTag;
 import com.exactpro.sf.embedded.statistics.entities.MessageType;
 import com.exactpro.sf.embedded.statistics.entities.Service;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
@@ -34,45 +35,45 @@ import com.exactpro.sf.embedded.statistics.entities.User;
 import com.exactpro.sf.embedded.storage.IHibernateStorage;
 
 public interface IStatisticsStorage extends IHibernateStorage {
-	
+
 	SfInstance loadSfInstance(String host, String port, String sfName);
 
 	SfInstance getSfInstance(String host, String port, String sfName);
-	
+
 	TestCase loadUnknownTestCase();
-	
+
 	Environment getEnvironmentEntity(String name);
-	
+
 	User getUserEntity(String name);
-	
+
 	Service getServiceEntity(String name);
-	
+
 	Action getActionEntity(String name);
-	
+
 	MessageType getMsgTypeEntity(String name);
-	
+
 	TestCase loadTestCase(String tcId);
-	
+
 	Matrix loadMatrix(String name);
 
 	KnownBug loadKnownBug(String subject, List<String> categories);
-	
+
 	StatisticsReportingStorage getReportingStorage();
-	
+
 	List<SfInstance> getAllSfInstances();
-	
+
 	SfInstance getSfInstanceById(long id);
-	
+
 	List<TestCase> getAllTestCases();
-	
+
 	TestCase getTestCaseById(long id);
 
-    MatrixRun getMatrixRunById(long id);
+	MatrixRun getMatrixRunById(long id);
 
     TestCaseRun getTestCaseRunById(long id);
 
 	List<Tag> getAllTags();
-	
+
 	Tag getTagByName(String name);
 
 	List<TestCaseRunStatus> getAllRunStatuses();
@@ -94,4 +95,9 @@ public interface IStatisticsStorage extends IHibernateStorage {
 	List<TagGroup> getGroupsContains(String namePart);
 
     void updateSfCurrentID(long matrixRunId, long sfCurrentID);
+
+	List<MatrixRunTag> getAllMatrixRunTagsForTag(Tag tag);
+
+	void deleteMatrixRun(MatrixRun matrixRun);
+
 }
