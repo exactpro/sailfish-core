@@ -17,12 +17,14 @@ package com.exactpro.sf.common.messages
 
 import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.configuration.suri.SailfishURI
+import java.time.Instant
 import java.util.Date
 
 enum class MetadataProperty(val propertyName: String, val propertyClass: Class<*>) {
     ID("id", Long::class.java),
     SEQUENCE("sequence", Long::class.java),
     TIMESTAMP("msgTimestamp", Date::class.java),
+    PRECISE_TIMESTAMP("preciseMsgTimestamp", Instant::class.java),
     NAMESPACE("msgNamespace", String::class.java),
     NAME("msgName", String::class.java),
     FROM_SERVICE("fromService", String::class.java),

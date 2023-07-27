@@ -21,6 +21,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
@@ -28,11 +29,13 @@ import java.util.Objects;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getDictionaryUri;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getName;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getNamespace;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getPreciseTimestamp;
 import static com.exactpro.sf.common.messages.MetadataExtensions.getTimestamp;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setDictionaryUri;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setId;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setName;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setNamespace;
+import static com.exactpro.sf.common.messages.MetadataExtensions.setPreciseTimestamp;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setSequence;
 import static com.exactpro.sf.common.messages.MetadataExtensions.setTimestamp;
 import static com.exactpro.sf.common.messages.MetadataProperty.ID;
@@ -51,24 +54,25 @@ public class MsgMetaData extends Metadata {
         }
     }
 
-    public MsgMetaData(String namespace, String name, Date msgTimestamp, long id, long sequence) {
+    public MsgMetaData(String namespace, String name, Instant msgTimestamp, long id, long sequence) {
         setNamespace(this, namespace);
         setName(this, name);
-        setTimestamp(this, msgTimestamp);
+        setPreciseTimestamp(this, msgTimestamp);
+        setTimestamp(this, Date.from(msgTimestamp));
         setId(this, id);
         setSequence(this, sequence);
     }
 
-    public MsgMetaData(String namespace, String name, Date msgTimestamp) {
+    public MsgMetaData(String namespace, String name, Instant msgTimestamp) {
         this(namespace, name, msgTimestamp, MessageUtil.generateId(), MessageUtil.generateSequence());
     }
 
     public MsgMetaData(String namespace, String name) {
-        this(namespace, name, new Date(), MessageUtil.generateId(), MessageUtil.generateSequence());
+        this(namespace, name, Instant.now(), MessageUtil.generateId(), MessageUtil.generateSequence());
     }
 
     public MsgMetaData(String namespace, String name, long id) {
-        this(namespace, name, new Date(), id, MessageUtil.generateSequence());
+        this(namespace, name, Instant.now(), id, MessageUtil.generateSequence());
     }
 
     public long getId() {
@@ -126,8 +130,18 @@ public class MsgMetaData extends Metadata {
         MetadataExtensions.setDirty(this, dirty);
     }
 
+    /**
+     *
+     * @deprecated This method is no longer recommended to use as Date gives only milliseconds precision.
+     * Use {@link #getPreciseMsgTimestamp()} instead.
+     */
+    @Deprecated
     public Date getMsgTimestamp() {
         return getTimestamp(this);
+    }
+
+    public Instant getPreciseMsgTimestamp() {
+        return getPreciseTimestamp(this);
     }
 
     public String getMsgNamespace() {

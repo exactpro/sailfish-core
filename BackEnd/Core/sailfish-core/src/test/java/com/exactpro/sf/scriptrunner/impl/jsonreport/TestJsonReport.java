@@ -133,7 +133,7 @@ public class TestJsonReport extends AbstractTest {
 
         result.setStatus(StatusType.PASSED);
 
-        result.setMetaData(new MsgMetaData("namespace", "name", Date.from(Instant.now())));
+        result.setMetaData(new MsgMetaData("namespace", "name", Instant.now()));
 
         report.createVerification("name", "description", new StatusDescription(StatusType.NA, "descr"), result);
 

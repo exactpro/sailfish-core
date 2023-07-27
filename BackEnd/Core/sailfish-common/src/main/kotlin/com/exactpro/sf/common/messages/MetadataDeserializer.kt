@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.NON_FINAL
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import java.util.Date
 
 open class MetadataDeserializer : StdDeserializer<IMetadata>(IMetadata::class.java) {
@@ -58,8 +59,8 @@ open class MetadataDeserializer : StdDeserializer<IMetadata>(IMetadata::class.ja
             .allowIfBaseType(ServiceName::class.java)
             .allowIfBaseType(SailfishURI::class.java)
             .build()
-        private val TYPED_MAPPER = ObjectMapper().activateDefaultTyping(PTV, NON_FINAL)
-        private val UNTYPED_MAPPER = ObjectMapper()
+        private val TYPED_MAPPER = ObjectMapper().activateDefaultTyping(PTV, NON_FINAL).registerModule(JavaTimeModule())
+        private val UNTYPED_MAPPER = ObjectMapper().registerModule(JavaTimeModule())
 
         private fun JsonNode.unwrapTyped(): JsonNode {
             if (isArray) {

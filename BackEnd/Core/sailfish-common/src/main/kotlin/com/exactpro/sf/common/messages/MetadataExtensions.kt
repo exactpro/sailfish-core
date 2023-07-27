@@ -20,6 +20,7 @@ package com.exactpro.sf.common.messages
 import com.exactpro.sf.common.messages.MetadataProperty.*
 import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.configuration.suri.SailfishURI
+import java.time.Instant
 import java.util.Date
 
 private const val MESSAGE_PROPERTIES_KEY = "messageProperties"
@@ -65,6 +66,10 @@ var IMetadata.sequence: Long?
 var IMetadata.timestamp: Date
     get() = getRequired(TIMESTAMP)
     set(value) = setOnce(TIMESTAMP, value)
+
+var IMetadata.preciseTimestamp: Instant
+    get() = getRequired(PRECISE_TIMESTAMP)
+    set(value) = setOnce(PRECISE_TIMESTAMP, value)
 
 var IMetadata.namespace: String
     get() = getRequired(NAMESPACE)
