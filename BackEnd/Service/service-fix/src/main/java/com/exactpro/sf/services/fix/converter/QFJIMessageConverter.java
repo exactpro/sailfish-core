@@ -21,6 +21,7 @@ import static com.exactpro.sf.services.fix.QFJDictionaryAdapter.ATTRIBUTE_FIX_TY
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -79,13 +80,14 @@ import quickfix.field.MsgType;
 public class QFJIMessageConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(QFJIMessageConverter.class);
-    private static final Map<MetadataProperty, BiConsumer<IMetadata, IMessageStructure>> REQUIRED_METADATA_PROPERTIES = ImmutableMap.of(
-            MetadataProperty.NAME, (data, structure) -> MetadataExtensions.setName(data, structure.getName()),
-            MetadataProperty.NAMESPACE, (data, structure) -> MetadataExtensions.setNamespace(data, structure.getNamespace()),
-            MetadataProperty.TIMESTAMP, (data, structure) -> MetadataExtensions.setTimestamp(data, new Date()),
-            MetadataProperty.ID, (data, structure) -> MetadataExtensions.setId(data, MessageUtil.generateId()),
-            MetadataProperty.SEQUENCE, (data, structure) -> MetadataExtensions.setSequence(data, MessageUtil.generateSequence())
-    );
+    private static final Map<MetadataProperty, BiConsumer<IMetadata, IMessageStructure>> REQUIRED_METADATA_PROPERTIES = ImmutableMap.<MetadataProperty, BiConsumer<IMetadata, IMessageStructure>>builder()
+            .put(MetadataProperty.NAME, (data, structure) -> MetadataExtensions.setName(data, structure.getName()))
+            .put(MetadataProperty.NAMESPACE, (data, structure) -> MetadataExtensions.setNamespace(data, structure.getNamespace()))
+            .put(MetadataProperty.TIMESTAMP, (data, structure) -> MetadataExtensions.setTimestamp(data, new Date()))
+            .put(MetadataProperty.ID, (data, structure) -> MetadataExtensions.setId(data, MessageUtil.generateId()))
+            .put(MetadataProperty.SEQUENCE, (data, structure) -> MetadataExtensions.setSequence(data, MessageUtil.generateSequence()))
+            .put(MetadataProperty.PRECISE_TIMESTAMP, (data, structure) -> MetadataExtensions.setPreciseTimestamp(data, Instant.now()))
+            .build();
 
 	protected static final String ATTRIBUTE_TAG = "tag";
 	protected static final String ATTRIBUTE_ENTITY_TYPE = "entity_type";

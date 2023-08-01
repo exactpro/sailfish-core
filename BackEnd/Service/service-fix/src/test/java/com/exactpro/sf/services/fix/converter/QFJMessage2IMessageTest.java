@@ -55,7 +55,8 @@ import quickfix.OutgoingEvolutionMessage;
 import quickfix.StringField;
 
 //@Ignore
-public class QFJMessage2IMessageTest extends ConverterTest {
+public class
+QFJMessage2IMessageTest extends ConverterTest {
     private final FixMessageFactory messageFactory = new FixMessageFactory();
     private final String sfDictionary = "FIX50.TEST.xml";
 
@@ -84,6 +85,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertEquals("QuoteCancel", MetadataExtensions.getName(metaData));
         Assert.assertEquals("FIX_5_0", MetadataExtensions.getNamespace(metaData));
         Assert.assertTrue("Timestamp is not set", MetadataExtensions.contains(metaData, MetadataProperty.TIMESTAMP));
+        Assert.assertTrue("PreciseTimestamp is not set", MetadataExtensions.contains(metaData, MetadataProperty.PRECISE_TIMESTAMP));
     }
 
     @Test
