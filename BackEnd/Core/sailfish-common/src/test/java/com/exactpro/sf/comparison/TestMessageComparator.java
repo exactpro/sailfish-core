@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.comparison;
 
 import com.exactpro.sf.aml.script.MetaContainer;
@@ -23,7 +23,6 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.ImmutableMap;
-import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -738,8 +737,7 @@ public class TestMessageComparator {
 	}
 
 	@Test
-    public void testAnyRepeatingGroup() throws IOException, ProtocolCodecException
-    {
+    public void testAnyRepeatingGroup() {
         IMessage message = new MapMessage("Message", "namespace");
         IMessage filter = new MapMessage("Message", "namespace");
 
@@ -782,7 +780,7 @@ public class TestMessageComparator {
     }
 
 	@Test
-    public void testUnchecked() throws IOException, ProtocolCodecException
+    public void testUnchecked()
     {
         IMessage message = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
         IMessage filter = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
@@ -850,7 +848,7 @@ public class TestMessageComparator {
     }
 
 	@Test
-    public void compareMessages() throws IOException, ProtocolCodecException
+    public void compareMessages()
     {
         IMessage msg1 = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
         IMessage msg2 = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
@@ -885,7 +883,7 @@ public class TestMessageComparator {
     }
 
 	@Test
-	public void compareLargeMessages() throws IOException, ProtocolCodecException
+	public void compareLargeMessages()
     {
 	    int count = 500;
 

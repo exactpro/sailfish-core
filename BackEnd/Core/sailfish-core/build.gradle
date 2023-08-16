@@ -69,6 +69,7 @@ dependencies {
         compile project(':FrontEnd:sailfish-rest-api-client')
         testCompile project(':BackEnd:Core:sailfish-common').sourceSets.test.output
     }
+    compile 'com.exactpro.mina:apache-mina-core:2.0.21.2'
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 
     //FIXME: replace all log4j to slf4j logger
