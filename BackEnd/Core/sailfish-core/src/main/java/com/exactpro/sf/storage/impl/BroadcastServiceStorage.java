@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -115,6 +116,11 @@ public class BroadcastServiceStorage implements IServiceStorage {
     @Override
     public void removeServiceEvents(ServiceDescription description) {
         execute(serviceStorage -> serviceStorage.removeServiceEvents(description), ERROR_MESSAGE_ON_REMOVE_EVENT);
+    }
+
+    @Override
+    public void removeServiceEvents(Instant olderThan) {
+        execute(serviceStorage -> serviceStorage.removeServiceEvents(olderThan), ERROR_MESSAGE_ON_REMOVE_EVENT);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import com.exactpro.sf.common.services.ServiceInfo;
@@ -74,6 +74,11 @@ public class EmptyServiceStorage implements IServiceStorage {
 
     @Override
     public void removeServiceEvents(ServiceDescription description) {
+        // do nothing
+    }
+
+    @Override
+    public void removeServiceEvents(Instant olderThan) {
         // do nothing
     }
 
