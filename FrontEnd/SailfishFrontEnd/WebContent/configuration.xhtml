@@ -653,13 +653,13 @@
 	                        			 disabled="#{statConfigBean.currentStatus eq 'Checking'}" />
 	                    </td>
 					</tr>
-					
+
 					<tr>
                         <td>
                             <h:outputLabel for="username" value="Username" />
                         </td>
                         <td class="eps-table-divider-min">
-                            <p:inputText id="username" value="#{statConfigBean.settings.storageSettings.username}" required="true" 
+                            <p:inputText id="username" value="#{statConfigBean.settings.storageSettings.username}" required="true"
                             			 styleClass="eps-input" disabled="#{statConfigBean.currentStatus eq 'Checking'}" />
                         </td>
                         <td class="eps-table-divider">&nbsp;</td>
@@ -667,7 +667,7 @@
                         	<h:outputLabel for="password" value="Password" />
                         </td>
                         <td class="eps-table-divider-min">
-                            <p:password id="password" value="#{statConfigBean.settings.storageSettings.password}" required="true" 
+                            <p:password id="password" value="#{statConfigBean.settings.storageSettings.password}"
                             			styleClass="eps-input" redisplay="true" disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
                         </td>
                         <td class="eps-table-divider-min">
@@ -677,13 +677,13 @@
                         <td>&nbsp;</td>
                     </tr>
                 </table>
-                
-                <p:commandButton value="Apply" actionListener="#{statConfigBean.preApplySettings}" oncomplete="applyStatSettings()" 
+
+                <p:commandButton value="Apply" actionListener="#{statConfigBean.preApplySettings}" oncomplete="applyStatSettings()"
                 				 icon="ui-icon-circle-check" style="margin-bottom: 10px" disabled="#{statConfigBean.currentStatus eq 'Checking'}">
                 	<f:actionListener binding="#{tagsAdminBean.refresh()}" />
                 </p:commandButton>
 
-            </div>            
+            </div>
 		</h:form>
 
 </div>

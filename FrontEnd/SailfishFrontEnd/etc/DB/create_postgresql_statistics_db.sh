@@ -24,7 +24,11 @@
 readParameters()
 {
     case "$2" in
-        -*|"") return 2 ;;
+        -*|"")
+            if [ "$1" != "-password" ] || [ "$2" != "" ]; then
+                return 2
+            fi
+            ;;
     esac
 
     case "$1" in

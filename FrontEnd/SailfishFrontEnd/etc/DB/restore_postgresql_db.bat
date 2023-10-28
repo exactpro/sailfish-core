@@ -56,6 +56,12 @@ if "%VAR%" neq "" (
         if "%CURRENT_PARAM%" equ "user" (
             set USER=%VAR%
         ) else if "%CURRENT_PARAM%" equ "password" (
+            if "%VAR:~0,1%" equ "-" (
+                set "PASSWORD="
+                set "CURRENT_PARAM=%VAR:~1%"
+                shift
+                goto :readArgs
+            )
             set PASSWORD=%VAR%
         ) else if "%CURRENT_PARAM%" equ "host" (
             set HOST=%VAR%
@@ -76,6 +82,11 @@ if "%VAR%" neq "" (
     )
     shift
     goto :readArgs
+)
+
+if "%CURRENT_PARAM%" equ "password" (
+    set "PASSWORD="
+    set "CURRENT_PARAM="
 )
 
 if not exist "%POSTGRESQL%\psql.exe" (
