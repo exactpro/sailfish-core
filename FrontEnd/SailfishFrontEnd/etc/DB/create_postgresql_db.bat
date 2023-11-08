@@ -35,51 +35,43 @@ set CHAR=utf8
 set USER=sailfish
 set PASSWORD=999
 
-set "CURRENT_PARAM="
-
-set "VAR="
-
 :readArgs
-set VAR=%~1
 
-if "%VAR%" neq "" (
-    if "%CURRENT_PARAM%" equ "" (
-        if "%VAR:~0,1%" neq "-" exit /b 2
+set PARAM_NAME=%1
+set PARAM_VALUE=%2
 
-        set "CURRENT_PARAM=%VAR:~1%"
+if "!PARAM_NAME!" neq "" (
+    if "%PARAM_NAME:~0,1%" neq "-" exit /b 2
+
+    if "%PARAM_VALUE:~0,1%" equ "-" (
+        set "PARAM_VALUE="
+        shift
     ) else (
-        if "%CURRENT_PARAM%" equ "user" (
-            set USER=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "password" (
-            if "%VAR:~0,1%" equ "-" (
-                set "PASSWORD="
-                set "CURRENT_PARAM=%VAR:~1%"
-                shift
-                goto :readArgs
-            )
-            set PASSWORD=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "host" (
-            set HOST=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "port" (
-            set PORT=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "database" (
-            set DATABASE=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "superuser" (
-            set SUPERUSER=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "superpassword" (
-            set SUPERPASSWORD=%VAR%
-        ) else if "%CURRENT_PARAM%" equ "path" (
-            set POSTGRESQL=%VAR%
-        )
-        set "CURRENT_PARAM="
+        shift
+        shift
     )
-    shift
-    goto :readArgs
-)
 
-if "%CURRENT_PARAM%" equ "password" (
-    set "PASSWORD="
-    set "CURRENT_PARAM="
+    if "!PARAM_NAME!" equ "-user" (
+        set USER=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-password" (
+        set PASSWORD=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-host" (
+        set HOST=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-port" (
+        set PORT=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-database" (
+        set DATABASE=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-superuser" (
+        set SUPERUSER=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-superpassword" (
+        set SUPERPASSWORD=!PARAM_VALUE!
+    ) else if "!PARAM_NAME!" equ "-path" (
+        set POSTGRESQL=!PARAM_VALUE!
+    ) else (
+        exit /b 1
+    )
+
+    goto :readArgs
 )
 
 if not exist "%POSTGRESQL%\psql.exe" (
