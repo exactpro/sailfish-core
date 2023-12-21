@@ -26,8 +26,10 @@ public class LoggingConfiguration implements ILoggingConfiguration, ICommonSetti
 
     private static final String INDIVIDUAL_APPENDER_ENABLE_PROPERTY = "IndividualAppendersEnabled";
     private static final String INDIVIDUAL_APPENDER_THRESHOLD_PROPERTY = "IndividualAppendersThreshold";
+    private static final String APPENDERS_ENABLED_PROPERTY = "AppendersEnabled";
 
     private boolean individualAppendersEnabled;
+    private boolean appendersEnabled = true;
     private final HierarchicalConfiguration config;
 
     public LoggingConfiguration(HierarchicalConfiguration config) {
@@ -36,6 +38,7 @@ public class LoggingConfiguration implements ILoggingConfiguration, ICommonSetti
 
     private void updateLogConfiguration() {
         config.setProperty(INDIVIDUAL_APPENDER_ENABLE_PROPERTY, individualAppendersEnabled);
+        config.setProperty(APPENDERS_ENABLED_PROPERTY, appendersEnabled);
     }
 
     public void setIndividualAppendersEnabled(boolean individualAppendersEnabled) {
@@ -54,12 +57,24 @@ public class LoggingConfiguration implements ILoggingConfiguration, ICommonSetti
     }
 
     @Override
+    public boolean isAppendersEnabled() {
+        return appendersEnabled;
+    }
+
+    @Override
+    public void setAppendersEnabled(boolean appendersEnabled) {
+        this.appendersEnabled = appendersEnabled;
+        updateLogConfiguration();
+    }
+
+    @Override
     public boolean isIndividualAppendersEnabled() {
         return individualAppendersEnabled;
     }
 
     @Override
     public void load(HierarchicalConfiguration config) {
-        individualAppendersEnabled = this.config.getBoolean(INDIVIDUAL_APPENDER_ENABLE_PROPERTY, true);
+        individualAppendersEnabled = config.getBoolean(INDIVIDUAL_APPENDER_ENABLE_PROPERTY, true);
+        appendersEnabled = config.getBoolean(APPENDERS_ENABLED_PROPERTY, true);
     }
 }

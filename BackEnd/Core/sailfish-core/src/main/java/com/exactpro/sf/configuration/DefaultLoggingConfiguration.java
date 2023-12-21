@@ -21,6 +21,8 @@ public class DefaultLoggingConfiguration implements ILoggingConfiguration {
     private boolean individualAppendersEnabled;
     private String individualAppendersThreshold;
 
+    private boolean appendersEnabled = true;
+
     @Override
     public boolean isIndividualAppendersEnabled() {
         return individualAppendersEnabled;
@@ -39,5 +41,15 @@ public class DefaultLoggingConfiguration implements ILoggingConfiguration {
     @Override
     public void setIndividualAppendersThreshold(String threshold) {
         this.individualAppendersThreshold = threshold;
+    }
+
+    @Override
+    public boolean isAppendersEnabled() {
+        return appendersEnabled;
+    }
+
+    @Override
+    public void setAppendersEnabled(boolean appendersEnabled) {
+        this.appendersEnabled = appendersEnabled;
     }
 }

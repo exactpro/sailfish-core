@@ -25,4 +25,8 @@ public interface ILoggingConfiguration {
     String getIndividualAppendersThereshold();
 
     void setIndividualAppendersThreshold(String threshold);
+
+    boolean isAppendersEnabled();
+
+    void setAppendersEnabled(boolean appendersEnabled);
 }

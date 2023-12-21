@@ -84,6 +84,9 @@ public class LoggingConfigurator implements ILoggingConfigurator {
      */
     @Override
     public void createAppender(@NotNull ServiceName serviceName) {
+        if (!loggingConfiguration.isAppendersEnabled()) {
+            return;
+        }
 
         try {
             synchronized (lock) {
@@ -109,6 +112,9 @@ public class LoggingConfigurator implements ILoggingConfigurator {
      */
     @Override
     public void destroyAppender(@NotNull ServiceName serviceName) {
+        if (!loggingConfiguration.isAppendersEnabled()) {
+            return;
+        }
         try {
             synchronized (lock) {
 
@@ -140,6 +146,9 @@ public class LoggingConfigurator implements ILoggingConfigurator {
 
     @Override
     public void registerLogger(@NotNull Object obj, @NotNull ServiceName serviceName) {
+        if (!loggingConfiguration.isAppendersEnabled()) {
+            return;
+        }
         String loggerName = ILoggingConfigurator.getLoggerName(obj);
 
         Logger log = LogManager.getLogger(loggerName);
@@ -169,6 +178,9 @@ public class LoggingConfigurator implements ILoggingConfigurator {
 
     @Override
     public void enableIndividualAppenders() {
+        if (!loggingConfiguration.isAppendersEnabled()) {
+            return;
+        }
         try {
             synchronized (lock) {
                 if (!loggingConfiguration.isIndividualAppendersEnabled()) {
@@ -193,6 +205,9 @@ public class LoggingConfigurator implements ILoggingConfigurator {
 
     @Override
     public void disableIndividualAppenders() {
+        if (!loggingConfiguration.isAppendersEnabled()) {
+            return;
+        }
         try {
             synchronized (lock) {
                 if (loggingConfiguration.isIndividualAppendersEnabled()) {

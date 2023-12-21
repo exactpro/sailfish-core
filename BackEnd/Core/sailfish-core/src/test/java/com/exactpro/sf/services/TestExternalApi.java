@@ -90,7 +90,13 @@ public class TestExternalApi {
         File[] layers = useTestLayer 
                 ? new File[] { new File("src/test/workspace"), writableLayer }
                 : new File[] { writableLayer };
-        return new ServiceFactory(0, 2, 2, useResourceLayer,strict, layers);
+        return ServiceFactory.builder(layers)
+                .withMinThreadsCount(0)
+                .withMaxThreadsCount(2)
+                .withScheduledThreadsCount(2)
+                .useResourcesLayer(useResourceLayer)
+                .useStrictMessages(strict)
+                .build();
     }
 
     /**
@@ -170,10 +176,12 @@ public class TestExternalApi {
 
     @Test
     public void testStream() {
-        IServiceFactory ssf;
-        try {
-            ssf = new ServiceFactory(0, 2, 2, new File("src/test/workspace"), Files.createTempDirectory("sf-tests").toFile());
-            ssf.createService(new FileInputStream(new File(SERVICE_CONFIG_FILE)), new EmptyListener());
+        try (IServiceFactory ssf = ServiceFactory.builder(new File("src/test/workspace"), Files.createTempDirectory("sf-tests").toFile())
+                .withMinThreadsCount(0)
+                .withMaxThreadsCount(2)
+                .withScheduledThreadsCount(2)
+                .build()) {
+            ssf.createService(Files.newInputStream(new File(SERVICE_CONFIG_FILE).toPath()), new EmptyListener());
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());

@@ -34,6 +34,7 @@ public class ServiceFactoryBuilder {
     private int scheduledThreads = Runtime.getRuntime().availableProcessors() * 2;
     private boolean useResourceLayer;
     private boolean useStrictMessages;
+    private boolean useServiceAppenders = true;
 
     public ServiceFactoryBuilder(File... workspaceLayers) {
         this.workspaceLayers = Objects.requireNonNull(workspaceLayers, "'Workspace layers' parameter");
@@ -46,7 +47,8 @@ public class ServiceFactoryBuilder {
      * @throws SailfishURIException
      */
     public ServiceFactory build() throws IOException, SailfishURIException {
-        return new ServiceFactory(minThreads, maxThreads, scheduledThreads, useResourceLayer, useStrictMessages, workspaceLayers);
+        return new ServiceFactory(minThreads, maxThreads, scheduledThreads, useResourceLayer,
+                useStrictMessages, useServiceAppenders, workspaceLayers);
     }
 
     /**
@@ -98,6 +100,18 @@ public class ServiceFactoryBuilder {
      */
     public ServiceFactoryBuilder useStrictMessages(boolean useStrictMessages){
         this.useStrictMessages = useStrictMessages;
+        return this;
+    }
+
+    /**
+     * Sets {@code useIndividualAppenders} for {@link ServiceFactory}.
+     * If enabled an individual appender will be created for each service.
+     * That appender stores logs into a file that is unique for each service.
+     * @param useServiceAppenders whether the individual appenders should be used or not
+     * @return
+     */
+    public ServiceFactoryBuilder useServiceAppenders(boolean useServiceAppenders) {
+        this.useServiceAppenders = useServiceAppenders;
         return this;
     }
 }

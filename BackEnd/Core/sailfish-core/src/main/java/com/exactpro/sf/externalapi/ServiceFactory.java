@@ -73,6 +73,7 @@ import com.exactpro.sf.configuration.DataManager;
 import com.exactpro.sf.configuration.DefaultLoggingConfiguration;
 import com.exactpro.sf.configuration.DictionaryManager;
 import com.exactpro.sf.configuration.IDictionaryRegistrator;
+import com.exactpro.sf.configuration.ILoggingConfiguration;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.configuration.LoggingConfigurator;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
@@ -137,71 +138,119 @@ public class ServiceFactory implements IServiceFactory {
 
     private final Set<SailfishURI> serviceTypes;
 
-    private final Queue<IDisposable> disposables = Collections.asLifoQueue(new LinkedList<IDisposable>());
+    private final Queue<IDisposable> disposables = Collections.asLifoQueue(new LinkedList<>());
+
+    /**
+     * Creates {@link ServiceFactoryBuilder} with specified workspace layers
+     *
+     * @param workspaceLayers workspace layers to be used
+     * @return {@link ServiceFactoryBuilder} initialized with provided {@code workspaceLayers}
+     */
+    public static ServiceFactoryBuilder builder(File... workspaceLayers) {
+        return new ServiceFactoryBuilder(workspaceLayers);
+    }
 
     /**
      * Creates ServiceFactory with default parameters.
+     *
      * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
-     *
      * @see IWorkspaceDispatcher
+     * @deprecated use {@link ServiceFactory#builder} instead
      */
+    @Deprecated
     public ServiceFactory(File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
         this(false, workspaceLayers);
     }
 
     /**
      * Creates ServiceFactory with default parameters.
-     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
+     *
+     * @param workspaceLayers  the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @param useResourceLayer if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
-     *
      * @see IWorkspaceDispatcher
+     * @deprecated use {@link ServiceFactory#builder} instead
      */
+    @Deprecated
     public ServiceFactory(boolean useResourceLayer, File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
         this(0, 350, Runtime.getRuntime().availableProcessors() * 2, useResourceLayer, false, workspaceLayers);
     }
 
     /**
      * Creates ServiceFactory.
-     * @param minThreads the number of threads to keep in the pool, even
-     *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
-     * @param maxThreads the maximum number of threads to allow in the pool
+     *
+     * @param minThreads       the number of threads to keep in the pool, even
+     *                         if they are idle, unless {@code allowCoreThreadTimeOut} is set
+     * @param maxThreads       the maximum number of threads to allow in the pool
      * @param scheduledThreads the number of threads to keep in the pool,
-     *        even if they are idle
+     *                         even if they are idle
      * @param useResourceLayer if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
-     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
+     * @param workspaceLayers  the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
+     * @deprecated use {@link ServiceFactory#builder} instead
      */
+    @Deprecated
     public ServiceFactory(int minThreads, int maxThreads, int scheduledThreads, boolean useResourceLayer, File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
         this(minThreads, maxThreads, scheduledThreads, useResourceLayer, false, workspaceLayers);
     }
 
     /**
      * Creates ServiceFactory.
-     * @param minThreads the number of threads to keep in the pool, even
-     *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
-     * @param maxThreads the maximum number of threads to allow in the pool
-     * @param scheduledThreads the number of threads to keep in the pool,
-     *        even if they are idle
-     * @param useResourceLayer if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
+     *
+     * @param minThreads        the number of threads to keep in the pool, even
+     *                          if they are idle, unless {@code allowCoreThreadTimeOut} is set
+     * @param maxThreads        the maximum number of threads to allow in the pool
+     * @param scheduledThreads  the number of threads to keep in the pool,
+     *                          even if they are idle
+     * @param useResourceLayer  if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
      * @param useStrictMessages if true all creating messages in services will be instance of '{@link StrictMessageWrapper}'
-     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
+     * @param workspaceLayers   the sequence of workspace layers {@link IWorkspaceDispatcher}
+     * @throws IOException
+     * @throws WorkspaceSecurityException
+     * @throws SailfishURIException
+     * @deprecated use {@link ServiceFactory#builder} instead
+     */
+    @Deprecated
+    public ServiceFactory(int minThreads, int maxThreads, int scheduledThreads, boolean useResourceLayer, boolean useStrictMessages, File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
+        this(minThreads, maxThreads, scheduledThreads, useResourceLayer, useStrictMessages, true, workspaceLayers);
+    }
+
+    /**
+     * Creates ServiceFactory.
+     *
+     * @param minThreads             the number of threads to keep in the pool, even
+     *                               if they are idle, unless {@code allowCoreThreadTimeOut} is set
+     * @param maxThreads             the maximum number of threads to allow in the pool
+     * @param scheduledThreads       the number of threads to keep in the pool,
+     *                               even if they are idle
+     * @param useResourceLayer       if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
+     * @param useStrictMessages      if true all creating messages in services will be an instance of '{@link StrictMessageWrapper}'
+     * @param useServiceAppenders enable individual appender that stores service logs into a dedicated file for each running service
+     * @param workspaceLayers        the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
      */
-    public ServiceFactory(int minThreads, int maxThreads, int scheduledThreads, boolean useResourceLayer, boolean useStrictMessages, File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
+    ServiceFactory(
+            int minThreads,
+            int maxThreads,
+            int scheduledThreads,
+            boolean useResourceLayer,
+            boolean useStrictMessages,
+            boolean useServiceAppenders,
+            File... workspaceLayers
+    ) throws IOException, WorkspaceSecurityException, SailfishURIException {
         this.wd = createWorkspaceDispatcher(useResourceLayer, workspaceLayers);
         this.staticServiceManager = new DefaultStaticServiceManager();
         this.utilManager = new UtilityManager();
-        if(useStrictMessages) {
+        if (useStrictMessages) {
             this.dictionaryManager = new StrictDictionaryManager(wd, utilManager);
         } else {
             this.dictionaryManager = new DictionaryManager(wd, utilManager);
@@ -215,7 +264,10 @@ public class ServiceFactory implements IServiceFactory {
         pluginLoader.load();
 
         this.marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
-        ILoggingConfigurator loggingConfigurator = new LoggingConfigurator(wd, new DefaultLoggingConfiguration());
+        ILoggingConfiguration loggingConfiguration = new DefaultLoggingConfiguration();
+        loggingConfiguration.setAppendersEnabled(useServiceAppenders);
+        ILoggingConfigurator loggingConfigurator = new LoggingConfigurator(wd, loggingConfiguration);
+
         ITaskExecutor taskExecutor = new TaskExecutor(minThreads, maxThreads, scheduledThreads);
         disposables.add(taskExecutor);
         IMessageStorage emptyMessageStorage = new FakeMessageStorage();
@@ -229,23 +281,26 @@ public class ServiceFactory implements IServiceFactory {
 
     /**
      * Creates ServiceFactory.
-     * @param minThreads the number of threads to keep in the pool, even
-     *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
-     * @param maxThreads the maximum number of threads to allow in the pool
+     *
+     * @param minThreads       the number of threads to keep in the pool, even
+     *                         if they are idle, unless {@code allowCoreThreadTimeOut} is set
+     * @param maxThreads       the maximum number of threads to allow in the pool
      * @param scheduledThreads the number of threads to keep in the pool,
-     *        even if they are idle
-     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
+     *                         even if they are idle
+     * @param workspaceLayers  the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
+     * @deprecated use {@link ServiceFactoryBuilder} instead
      */
+    @Deprecated
     public ServiceFactory(int minThreads, int maxThreads, int scheduledThreads, File... workspaceLayers) throws IOException, WorkspaceSecurityException, SailfishURIException {
         this(minThreads, maxThreads, scheduledThreads, false, false, workspaceLayers);
     }
 
     @Override
     public void close() throws Exception {
-        while(!disposables.isEmpty()) {
+        while (!disposables.isEmpty()) {
             try {
                 disposables.remove().dispose();
             } catch (RuntimeException e) {
@@ -303,10 +358,10 @@ public class ServiceFactory implements IServiceFactory {
     }
 
     @Override
-    public SailfishURI registerDictionary(String title, InputStream dictionary, boolean overwrite) throws ServiceFactoryException  {
+    public SailfishURI registerDictionary(String title, InputStream dictionary, boolean overwrite) throws ServiceFactoryException {
         try {
             IDictionaryRegistrator registrator = dictionaryManager.registerDictionary(title, overwrite);
-            try(OutputStream os = new BufferedOutputStream(new FileOutputStream(wd.getFile(FolderType.ROOT, registrator.getPath())))) {
+            try (OutputStream os = new BufferedOutputStream(new FileOutputStream(wd.getFile(FolderType.ROOT, registrator.getPath())))) {
                 IOUtils.copy(dictionary, os);
             }
             return registrator.registrate();
@@ -349,7 +404,7 @@ public class ServiceFactory implements IServiceFactory {
             throw new ServiceFactoryException(String.format("Failed to instantiate service with SailfishURI %s", serviceType), e);
         }
 
-        if(service.getStatus() == DISABLED) {
+        if (service.getStatus() == DISABLED) {
             throw new ServiceFactoryException(
                     String.format("Could not create service %s. Target service '%s' is not presented in plug-ins", serviceType, serviceType));
         }
@@ -477,11 +532,11 @@ public class ServiceFactory implements IServiceFactory {
         private final IServiceMonitor serviceMonitor;
 
         public ServiceProxy(ServiceName name, IInitiatorService service, IDictionaryValidator dictionaryValidator, SailfishURI sURI, IServiceListener listener,
-                ServiceSettingsProxy serviceSettingsProxy, IServiceHandler defaultHandler, IServiceMonitor defaultMonitor,
-                IServiceContext defaultServiceContext) {
+                            ServiceSettingsProxy serviceSettingsProxy, IServiceHandler defaultHandler, IServiceMonitor defaultMonitor,
+                            IServiceContext defaultServiceContext) {
             this.name = requireNonNull(name, "'Name' can't be null");
             this.service = requireNonNull(service, "'Service' can't be null");
-            this.dictionaryValidator =  requireNonNull(dictionaryValidator, "'Dictionary validator' can't be null");
+            this.dictionaryValidator = requireNonNull(dictionaryValidator, "'Dictionary validator' can't be null");
             this.sURI = requireNonNull(sURI, "'Service URI' can't be null");
             this.settingsProxy = requireNonNull(serviceSettingsProxy, "'Settings' can't be null");
             if (listener != null) {
@@ -500,7 +555,7 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public void stop() {
 
-            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
+            if (service.getStatus() == STARTED || service.getStatus() == WARNING) {
                 service.dispose();
             } else {
                 throw new IllegalStateException(String.format("Service %s not started", name));
@@ -577,7 +632,7 @@ public class ServiceFactory implements IServiceFactory {
         }
 
         private ISession getInternalSession() {
-            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
+            if (service.getStatus() == STARTED || service.getStatus() == WARNING) {
                 return service.getSession();
             }
             throw new IllegalStateException("Service is not started");
@@ -595,7 +650,7 @@ public class ServiceFactory implements IServiceFactory {
         }
     }
 
-    private static class ServiceSettingsProxy extends AbstractSettingsProxy{
+    private static class ServiceSettingsProxy extends AbstractSettingsProxy {
         protected final Map<DictionaryType, String> dictionaryProperties = new EnumMap<>(DictionaryType.class);
 
         public ServiceSettingsProxy(IServiceSettings settings) {
@@ -626,7 +681,7 @@ public class ServiceFactory implements IServiceFactory {
 
         public IServiceSettings getSettings() {
             try {
-                IServiceSettings result = (IServiceSettings)settings.getClass().newInstance();
+                IServiceSettings result = (IServiceSettings) settings.getClass().newInstance();
 
                 Object value = null;
                 for (PropertyDescriptor descriptor : descriptors.values()) {
@@ -635,7 +690,8 @@ public class ServiceFactory implements IServiceFactory {
                 }
 
                 return result;
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                     InvocationTargetException e) {
                 throw new EPSCommonException("Could not create a copy of settings", e);
             }
         }
