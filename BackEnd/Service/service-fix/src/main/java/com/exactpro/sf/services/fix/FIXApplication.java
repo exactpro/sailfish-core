@@ -384,14 +384,14 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
             ISession iSession = sessionMap.get(sessionID);
             IMessage iMsg = null;
             try {
-                iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
+                iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, false, true);
                 iMsg.getMetaData().setRejectReason(reason);
                 // We don't call IServiceHandler here because this message is invalid. They shouldn't reach comparator
             } catch (MessageConvertException | RuntimeException e) {
                 // don't throw it to QFJ
                 exceptionCaught(iSession, "Process reject of message " + message + " failure", e);
 
-                iMsg = createErrorMessage(message, e.getMessage() + ". Supprecced reject: " + reason);
+                iMsg = createErrorMessage(message, e.getMessage() + ". Supprecced reject: " + reason, null);
             } finally {
                 storeMessage(iSession, iMsg);
             }
@@ -698,7 +698,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         if (!isPerformance) {
             ISession iSession = sessionMap.get(sessionID);
             try {
-                IMessage iMsg = convert(message, from, to, isAdmin);
+                IMessage iMsg = convert(message, from, to, isAdmin, isOutComingRoute(route));
                 storeMessage(iSession, iMsg);
                 handler.putMessage(iSession, route, iMsg);
 
@@ -713,7 +713,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
             } catch (ServiceHandlerException | MessageConvertException | RuntimeException e) {
                 exceptionCaught(iSession, route.getAlias() + ": process message " + message + " failure", e);
 
-                IMessage iMsg = createErrorMessage(message, e.getMessage());
+                IMessage iMsg = createErrorMessage(message, e.getMessage(), route);
                 storeMessage(iSession, iMsg);
             }
         }
@@ -723,7 +723,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
         return Collections.emptyList();
     }
 
-    private IMessage createErrorMessage(@NotNull Message qfjMessage, String error) {
+    private IMessage createErrorMessage(@NotNull Message qfjMessage, String error, ServiceHandlerRoute route) {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setCause(error);
 
@@ -731,7 +731,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
 
         // qfjMessage.getMessageData() might be null in case the message was created via code
         // FIXME: Integrate this hotfix into qfj library
-        byte[] rawMessage = (qfjMessage.getMessageData() == null ? qfjMessage.toString() : qfjMessage.getMessageData()).getBytes();
+        byte[] rawMessage = extractRawData(qfjMessage, isOutComingRoute(route));
         metaData.setRawMessage(rawMessage);
 
         return errorMessage.getMessage();

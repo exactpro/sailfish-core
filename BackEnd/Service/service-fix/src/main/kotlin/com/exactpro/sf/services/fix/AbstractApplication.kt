@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,16 @@ import com.exactpro.sf.common.services.ServiceInfo
 import com.exactpro.sf.common.services.ServiceName
 import com.exactpro.sf.services.IServiceContext
 import com.exactpro.sf.services.MessageHelper
+import com.exactpro.sf.services.ServiceHandlerRoute
 import com.exactpro.sf.services.fix.converter.MessageConvertException
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter
 import com.exactpro.sf.storage.IMessageStorage
 import org.quickfixj.CharsetSupport
+import quickfix.FieldException
+import quickfix.FieldNotFound
 import quickfix.Message
 import quickfix.SessionID
+import quickfix.field.PossDupFlag
 import java.util.Objects
 
 abstract class AbstractApplication {
@@ -50,8 +54,15 @@ abstract class AbstractApplication {
 
     @JvmOverloads
     @Throws(MessageConvertException::class)
-    protected fun convert(message: Message, from: String, to: String, isAdmin: Boolean, verifyTags: Boolean? = null, isRejected: Boolean = false): IMessage {
-        val rawMessage: ByteArray = extractRawData(message)
+    protected fun convert(
+            message: Message,
+            from: String, to: String,
+            isAdmin: Boolean,
+            isOutComing: Boolean,
+            verifyTags: Boolean? = null,
+            isRejected: Boolean = false,
+    ): IMessage {
+        val rawMessage: ByteArray = extractRawData(message, isOutComing)
         val msg: IMessage = checkNotNull(converter.run {
             when {
                 isRejected -> convertDirty(message, verifyTags, false, false, true)
@@ -70,14 +81,30 @@ abstract class AbstractApplication {
         return msg
     }
 
-    protected fun extractRawData(message: Message): ByteArray {
-        val messageData: String? = message.messageData
-        val rawMessage: ByteArray = messageData?.toByteArray(CharsetSupport.getCharsetInstance())
-                ?: message.toString().toByteArray(CharsetSupport.getCharsetInstance())
-        return rawMessage
+    protected fun extractRawData(message: Message, isOutComingRoute: Boolean): ByteArray {
+        val messageData = message.messageData
+        return if (messageData == null || (isOutComingRoute && getBooleanFlag(message, PossDupFlag.FIELD))) {
+            message.toString().toByteArray(CharsetSupport.getCharsetInstance())
+        } else {
+            messageData.toByteArray(CharsetSupport.getCharsetInstance())
+        }
+    }
+
+    protected fun isOutComingRoute(route: ServiceHandlerRoute?): Boolean {
+        return route != null && !route.isFrom
     }
 
     protected fun createFIXSession(sessionName: String, sessionId: SessionID, storage: IMessageStorage, converter: DirtyQFJIMessageConverter, messageHelper: MessageHelper): FIXSession? {
         return FIXSession(sessionName, sessionId, storage, converter, messageHelper, evolutionOptimize)
+    }
+
+    private fun getBooleanFlag(message: Message, flag: Int): Boolean {
+        return try {
+            message.isSetField(flag) && message.getBoolean(flag)
+        } catch (e: FieldNotFound) {
+            false
+        } catch (e: FieldException) {
+            false
+        }
     }
 }

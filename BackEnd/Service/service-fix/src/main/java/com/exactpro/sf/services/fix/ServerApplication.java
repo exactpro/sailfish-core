@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.services.fix.listener.IFIXListener;
 import com.exactpro.sf.services.fix.listener.StoreListener;
@@ -197,7 +198,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     @Override
     public void fromAdmin(Message message, SessionID sessionId) throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon {
         ISession iSession = getSession(sessionId);
-        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), ServiceHandlerRoute.FROM_ADMIN, null);
         for (IFIXListener listener : listeners) {
             try {
                 listener.fromAdmin(iSession, iMsg);
@@ -217,7 +218,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     public void fromApp(Message message, SessionID sessionId) throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
         ISession iSession = getSession(sessionId);
 
-        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), ServiceHandlerRoute.FROM_APP, null);
         for (IFIXListener listener : listeners) {
             try {
                 listener.fromApp(iSession, iMsg);
@@ -231,7 +232,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     public void onMessageRejected(Message message, SessionID sessionId, String reason) {
         ISession iSession = getSession(sessionId);
 
-        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), reason);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null, reason);
         for (IFIXListener listener : listeners) {
             try {
                 listener.onMessageRejected(iSession, iMsg, reason);
@@ -281,7 +282,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     @Override
     public void onSendToAdmin(Message message, SessionID sessionId) {
         ISession iSession = getSession(sessionId);
-        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), ServiceHandlerRoute.TO_ADMIN, null);
 
         for (IFIXListener listener : listeners) {
             try {
@@ -295,7 +296,7 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
     @Override
     public void onSendToApp(Message message, SessionID sessionId) {
         ISession iSession = getSession(sessionId);
-        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), null);
+        IMessage iMsg = convertToIMessage(message, sessionId.getTargetCompID(), sessionId.getSenderCompID(), ServiceHandlerRoute.TO_APP, null);
 
         for (IFIXListener listener : listeners) {
             try {
@@ -311,13 +312,13 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
         return fixServerSessionsContainer;
     }
 
-    protected IMessage convertToIMessage(Message message, String from, String to, String reason) {
+    protected IMessage convertToIMessage(Message message, String from, String to, ServiceHandlerRoute route, String reason) {
         try {
             return reason != null
-                    ? convert(message, from, to, message.isAdmin(), false, true)
-                    : convert(message, from, to, message.isAdmin());
+                    ? convert(message, from, to, message.isAdmin(), isOutComingRoute(route), false, true)
+                    : convert(message, from, to, message.isAdmin(), isOutComingRoute(route));
         } catch (MessageConvertException e) {
-            return createErrorMessage(e.getMessage(), extractRawData(message), from, to, this.serviceInfo, messageHelper.getMessageFactory());
+            return createErrorMessage(e.getMessage(), extractRawData(message, isOutComingRoute(route)), from, to, this.serviceInfo, messageHelper.getMessageFactory());
         }
     }
 

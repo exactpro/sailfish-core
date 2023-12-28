@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,8 +259,8 @@ public class DemoServerApplication extends AbstractApplication implements FIXSer
         if (keepMessagesInMemory) {
             try {
                 IMessage iMsg = reason != null
-                        ? convert(message, from, to, message.isAdmin(), false, true)
-                        : convert(message, from, to, message.isAdmin());
+                        ? convert(message, from, to, message.isAdmin(), isOutComingRoute(route), false, true)
+                        : convert(message, from, to, message.isAdmin(), isOutComingRoute(route));
                 iMsg.getMetaData().setRejectReason(reason);
 
                 try {
