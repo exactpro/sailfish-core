@@ -26,8 +26,10 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 public class LogUtils {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LogUtils.class);
     public static final String LOG4J_PROPERTIES_FILE_NAME = "log4j2.properties";
 
     private LogUtils() {
@@ -77,8 +79,13 @@ public class LogUtils {
         LoggerConfig loggerConfig = config.getLoggerConfig(logger.getName());
 
         loggerConfig.getAppenders().forEach((key, value) -> {
-            value.stop();
-            loggerConfig.removeAppender(value.getName());
+            try {
+                value.stop();
+                loggerConfig.removeAppender(value.getName());
+            } catch (Exception ex) {
+                LOGGER.error("error occurred when removing appender {} for logger {}",
+                        value.getName(), logger.getName(), ex);
+            }
         });
         context.updateLoggers();
     }
