@@ -30,7 +30,7 @@ ext {
     tomcatContextDir    = file("${cargoDir}/tomcat")
 
     deployPath          = 'sfgui'
-    tomcatUrl           = 'http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.24/bin/apache-tomcat-9.0.24.zip'
+    tomcatUrl           = 'https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.86/bin/apache-tomcat-9.0.86.zip'
     tpmcatPort          = 8080
 }
 
