@@ -90,6 +90,7 @@ public abstract class HTTPClient extends NettyClientService {
     public static final String PROTOCOL_TYPE = "HTTP";
     public static final String REQUEST_ID_PROPERTY = "requestId";
     public static final String REQUEST_REFERENCE_PROPERTY = "requestRef";
+    private static final int MAX_PARALLEL_REQUESTS = 1;
 
     protected final LinkedHashMap<String, ChannelHandler> handlers = new LinkedHashMap<String, ChannelHandler>(){
         @Override
@@ -103,7 +104,7 @@ public abstract class HTTPClient extends NettyClientService {
     protected HTTPClientSettings settings;
     protected IDictionaryStructure dictionary;
     protected URI uri;
-    protected final Semaphore channelBusy = new Semaphore(1);
+    protected final Semaphore channelBusy = new Semaphore(MAX_PARALLEL_REQUESTS);
     private IMessageFactory messageFactory;
     protected final AtomicReference<String> cookie = new AtomicReference<>();
     protected AccessToken accessToken = null;
@@ -318,6 +319,28 @@ public abstract class HTTPClient extends NettyClientService {
                 logger.error(errorMessage);
                 throw new ServiceException(errorMessage);
             }
+        }
+    }
+
+    @Override
+    protected void onStarting() {
+        resetSemaphoreState();
+        super.onStarting();
+    }
+
+    private void resetSemaphoreState() {
+        // Restore semaphore state
+        // Reset permits to zero
+        channelBusy.drainPermits();
+        // And make one available
+        channelBusy.release();
+        int availablePermits = channelBusy.availablePermits();
+        if (availablePermits != MAX_PARALLEL_REQUESTS) {
+            throw new IllegalStateException(
+                    String.format("internal semaphore state is no valid. Expected %d permits, but has %d",
+                            MAX_PARALLEL_REQUESTS, availablePermits
+                    )
+            );
         }
     }
 

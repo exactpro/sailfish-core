@@ -42,24 +42,22 @@ public class HTTPSession extends NettySession {
             client.channelBusy.acquire();
         }
 
-        if(!(message instanceof IMessage)) {
-            throw new ServiceException("Message is not an instance of " + IMessage.class.getCanonicalName());
-        }
-
-        if(isClosed()) {
-            try {
-                client.connect();
-            } catch(Exception e) {
-                client.channelBusy.release();
-                throw new ServiceException("Failed to connect service before sending a message", e);
-            }
-        }
-
         try {
+            if (!(message instanceof IMessage)) {
+                throw new ServiceException("Message is not an instance of " + IMessage.class.getCanonicalName());
+            }
+
+            if (isClosed()) {
+                try {
+                    client.connect();
+                } catch (Exception e) {
+                    throw new ServiceException("Failed to connect service before sending a message", e);
+                }
+            }
+
             return super.send(message);
-        } catch (Exception e) {
+        } finally {
             client.channelBusy.release();
-            throw e;
         }
     }
 

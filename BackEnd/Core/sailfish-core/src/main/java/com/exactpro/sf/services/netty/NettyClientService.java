@@ -180,7 +180,7 @@ public abstract class NettyClientService implements IInitiatorService {
 		try {
 			changeStatus(ServiceStatus.STARTING, "Starting service " + serviceName, null);
             logConfigurator.createAndRegister(getServiceName(), this);
-
+            onStarting();
 			nettySession = createSession();
 			nioEventLoopGroup = new NioEventLoopGroup();
 			connect();
@@ -200,8 +200,8 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	@Override
 	public void connect() throws Exception {
+        channelLock.writeLock().lock();
         try {
-            channelLock.writeLock().lock();
 
             initChannelHandlers(serviceContext);
 
@@ -280,6 +280,11 @@ public abstract class NettyClientService implements IInitiatorService {
 		});
 	}
 
+    /**
+     * Method is called when service is starting before the {@link #connect()}
+     */
+    protected void onStarting() {}
+
 	@Override
 	public void dispose() {
         changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
@@ -294,8 +299,8 @@ public abstract class NettyClientService implements IInitiatorService {
 		} catch (RuntimeException e) {
             changeStatus(ServiceStatus.ERROR, "Session '" + serviceName + "'  has not been closed", e);
 		} finally {
-		    try {
-                channelLock.writeLock().lock();
+            channelLock.writeLock().lock();
+            try {
                 Channel localChannel = getChannel();
                 if (localChannel != null) {
                     if (localChannel.isOpen()) {
@@ -387,8 +392,8 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	// Used in session
 	public Channel getChannel() {
+        channelLock.readLock().lock();
         try {
-            channelLock.readLock().lock();
 		return channel;
         } finally {
             channelLock.readLock().unlock();
@@ -432,8 +437,8 @@ public abstract class NettyClientService implements IInitiatorService {
     }
 
     protected void setChannel(Channel channel) {
+        channelLock.writeLock().lock();
         try {
-            channelLock.writeLock().lock();
             this.channel = channel;
         } finally {
             channelLock.writeLock().unlock();
