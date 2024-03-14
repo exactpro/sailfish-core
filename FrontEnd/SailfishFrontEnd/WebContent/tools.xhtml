@@ -21,6 +21,7 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
       xmlns:o="http://omnifaces.org/ui"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
@@ -63,6 +64,13 @@
 		function reload() {
 		    window.location.reload();
 		}
+
+        function showDVProgress(status) {
+            const mainFormId = 'dictionaryValidatorMainForm';
+            const progressId = 'dictionaryValidatorProgress';
+            const component = document.getElementById(mainFormId + ':' + progressId);
+            component.style.display = (status)? 'block': 'none';
+        }
     </script>
 
 
@@ -89,9 +97,9 @@
                     <div onclick="changeSection('matrixConverter');" class="eps-dot">
                         <li id="matrixConverterNavItem">Matrix Converter</li>
                     </div>
-                    <!--div onclick="changeSection('test');" class="eps-dot">
-                        <li id="testNavItem">test</li>
-                    </div-->
+                    <div onclick="changeSection('dictionaryValidator');" class="eps-dot">
+                        <li id="dictionaryValidatorNavItem">Dictionary Validator</li>
+                    </div>
                 </ul>
             </div>
 
@@ -144,7 +152,7 @@
                                         icon="ui-icon-trash"
                                         onclick="PF('convertMenuSelectFormDialog').show()"
                                         disabled="#{convertMatrixBean.selectedFilesEmpty}" />
-                            </p:menubar>                            
+                            </p:menubar>
 
                             <p:tooltip value="Select Matrices to Upload" for="convertMenuSelectButton"/>
                             <p:tooltip value="Convert Selected Matrices" for="convertMenuConvertButton"/>
@@ -262,12 +270,146 @@
                         </h:form>
                     </p:dialog>
 
-                    <!--div id="testConfig" class="eps-config-container">
+                    <div id="dictionaryValidatorConfig" class="eps-config-container">
+                        <h:form id="dictionaryValidatorMainForm" enctype="multipart/form-data">
+                            <p:messages id="dictionaryValidatorMessages"
+                                        showDetail="true"
+                                        autoUpdate="true"
+                                        closable="true" />
 
-                        <h2>test management</h2>
+                            <div class="dictionaryValidatorToolsWrapper">
+                                <h:panelGrid columns="3">
+                                    <p:fileUpload styleClass="dictionaryValidatorFileUploadButton"
+                                                  allowTypes="#{dictionaryValidatorBean.allowedTypesRegex}"
+                                                  invalidFileMessage="#{dictionaryValidatorBean.allowedTypesMessage}"
+                                                  fileUploadListener="#{dictionaryValidatorBean.handleFileUpload}"
+                                                  label="Choose a dictionary"
+                                                  mode="advanced"
+                                                  multiple="false"
+                                                  update="dictionaryValidatorFileUploadResult dictionaryValidatorClearButton"
+                                                  auto="true" />
+                                    <p:commandButton id="dictionaryValidatorClearButton"
+                                                     styleClass="dictionaryValidatorClearButton"
+                                                     value="Clear" icon="ui-icon-trash"
+                                                     disabled="#{!(dictionaryValidatorBean.fileChosen)}"
+                                                     update="dictionaryValidatorFileUploadResult @this"
+                                                     action="#{dictionaryValidatorBean.clearState()}" />
+                                    <h:graphicImage id="dictionaryValidatorProgress"
+                                                    styleClass="dictionaryValidatorProgress"
+                                                    library="sf"
+                                                    name="images/ajaxloader.gif" />
+                                </h:panelGrid>
+
+                                <p:selectOneMenu value="#{dictionaryValidatorBean.validatorSelection}"
+                                                 styleClass="dictionaryValidatorAvailableServices">
+                                    <p:ajax update="dictionaryValidatorFileUploadResult"
+                                            listener="#{dictionaryValidatorBean.validatorSelectionListener}" />
+                                    <f:selectItem itemLabel="Default Validator"
+                                                  itemValue="#{dictionaryValidatorBean.defaultValidatorUri}" />
+                                    <f:selectItems value="#{dictionaryValidatorBean.validatorSelections}" />
+                                </p:selectOneMenu>
+                            </div>
+
+                            <h:panelGroup id="dictionaryValidatorFileUploadResult"
+                                          styleClass="dictionaryValidatorFileUploadResult"
+                                          layout="block">
+                                <p class="dictionaryValidatorFileStatus">
+                                    <h:panelGroup rendered="#{dictionaryValidatorBean.fileChosen}">
+                                        <i>Dictionary to validate</i> <b><h:outputText value="#{dictionaryValidatorBean.fileName}" /></b>
+                                    </h:panelGroup>
+                                </p>
+
+                                <p:commandButton id="dictionaryValidatorValidateButton"
+                                                 value="Validate" icon="ui-icon-refresh"
+                                                 rendered="#{dictionaryValidatorBean.fileChosen and not dictionaryValidatorBean.validated}"
+                                                 action="#{dictionaryValidatorBean.validate}"
+                                                 onstart="showDVProgress(true)"
+                                                 update="dictionaryValidatorFileUploadResult"
+                                                 oncomplete="showDVProgress(false)" />
+
+                                <h:panelGroup styleClass="dictionaryValidatorResultMsg"
+                                              rendered="#{dictionaryValidatorBean.fileChosen and dictionaryValidatorBean.validated}">
+                                    <h:panelGroup style="color: green;" rendered="#{dictionaryValidatorBean.success()}">
+                                        Validation Succeeded
+                                    </h:panelGroup>
+                                    <h:panelGroup style="color: red;" rendered="#{not dictionaryValidatorBean.success()}">
+                                        Validation Failed
+                                    </h:panelGroup>
+                                </h:panelGroup>
+
+                                <p:panel header="#{dictionaryValidatorBean.validationException.fullMessage}"
+                                         styleClass="dictionaryValidatorExceptionOutput"
+                                         rendered="#{dictionaryValidatorBean.fileChosen and dictionaryValidatorBean.validationException != null}"
+                                         toggleable="true"
+                                         toggleableHeader="true">
+                                    <h:outputText value="#{dictionaryValidatorBean.validationException.stacktrace}" />
+                                </p:panel>
+
+                                <div class="dictionaryValidatorErrorTableWrapper">
+                                <p:panelGrid styleClass="dictionaryValidatorErrorTable"
+                                             rendered="#{dictionaryValidatorBean.fileChosen and dictionaryValidatorBean.validationErrorsExist}">
+                                    <colgroup>
+                                        <col width="20%" />
+                                        <col width="20%" />
+                                        <col width="10%" />
+                                        <col width="50%" />
+                                    </colgroup>
+
+                                    <f:facet name="header">
+                                        <tr class="table-header">
+                                            <th>Message</th>
+                                            <th>Field</th>
+                                            <th>Type</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </f:facet>
+
+                                    <ui:repeat var="group"
+                                               value="#{dictionaryValidatorBean.validationErrorsByLevel}">
+                                        <tr>
+                                            <td colspan="4" class="group-header">
+                                                <h:outputText value="#{group.levelName}" />
+                                            </td>
+                                        </tr>
+
+                                        <ui:repeat var="msg" value="#{group.messageNames}">
+                                            <ui:repeat var="err" value="#{group.getErrorsFor(msg)}">
+                                                <tr>
+                                                    <ui:fragment rendered="#{err.index == 0}">
+                                                        <td rowspan="#{group.getErrorsLengthFor(msg)}"
+                                                            class="message-column group-row">
+                                                            <h:outputText value="#{msg}" />
+                                                        </td>
+                                                    </ui:fragment>
+                                                    <td class="field-column">
+                                                        <h:outputText value="#{err.value.field}" />
+                                                    </td>
+                                                    <td class="type-column">
+                                                        <h:outputText value="#{err.value.type}" />
+                                                    </td>
+                                                    <td class="error-column">
+                                                        <h:outputText value="#{err.value.error}" escape="false" />
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </ui:repeat>
+                                    </ui:repeat>
+
+                                    <tr>
+                                        <td colspan="4" class="group-header" />
+                                    </tr>
+                                </p:panelGrid>
+                                </div>
+                            </h:panelGroup>
+                        </h:form>
+                    </div>
+
+                <!--div id="testConfig" class="eps-config-container">
+
+                    <h2>test management</h2>
 
 
-                    </div-->
+                </div-->
                 </div>
             </div>
         </div>

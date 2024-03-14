@@ -1,3 +1,115 @@
 .eps-application #temporaryFilesUploadDialog .ui-fileupload-content {
     display: none;
 }
+
+.eps-application #dictionaryValidatorConfig .ui-fileupload-content {
+    display: none;
+}
+
+.eps-application #dictionaryValidatorMainForm {
+    height: 100%;
+}
+
+.eps-application .dictionaryValidatorToolsWrapper {
+    height: 75px;
+}
+
+.eps-application .dictionaryValidatorFileUploadButton .ui-fileupload-buttonbar {
+    padding-left: 0px;
+}
+
+.eps-application .dictionaryValidatorFileUploadResult {
+    height: calc(98% - 75px);
+}
+
+.eps-application .dictionaryValidatorFileStatus {
+    font-size: 16px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    margin-left: 0px;
+}
+
+.eps-application .dictionaryValidatorProgress {
+    width: 36px;
+    height: 36px;
+    display: none;
+}
+
+.eps-application .dictionaryValidatorAvailableServices {
+    margin-top: 10px;
+}
+
+.eps-application .dictionaryValidatorExceptionOutput {
+    display: block;
+    margin-top: 6px;
+    border: 1px solid #ff7373;
+    border-radius: 5px;
+    padding: 0 0;
+    font-family: monospace;
+}
+
+.eps-application .dictionaryValidatorExceptionOutput .ui-widget-header {
+    background-color: #ff7373;
+    font-size: 14px;
+    color: white;
+}
+
+.eps-application .dictionaryValidatorExceptionOutput .ui-widget-content {
+    white-space: pre;
+    font-size: 12px;
+    overflow: scroll;
+}
+
+.eps-application .dictionaryValidatorResultMsg {
+    display: block;
+    margin-top: 6px;
+    margin-bottom: 7px;
+    font-size: 20px;
+}
+
+.eps-application .dictionaryValidatorErrorTableWrapper {
+    overflow-y: scroll;
+    height: calc(100% - 80px);
+}
+
+.eps-application .dictionaryValidatorErrorTable {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 4px;
+}
+
+.eps-application .dictionaryValidatorErrorTable td {
+    font-size: 14px;
+}
+
+.eps-application .dictionaryValidatorErrorTable .table-header th {
+    background-color: #757575;
+    border: 1px solid #757575;
+    padding: 6px 10px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+}
+
+.eps-application .dictionaryValidatorErrorTable .group-header {
+    background-color: #b3b3b3;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+    color: white;
+}
+
+.eps-application .dictionaryValidatorErrorTable .group-header,
+.eps-application .dictionaryValidatorErrorTable .message-column,
+.eps-application .dictionaryValidatorErrorTable .field-column,
+.eps-application .dictionaryValidatorErrorTable .type-column,
+.eps-application .dictionaryValidatorErrorTable .error-column {
+    border: 1px solid #757575;
+    padding: 5px 8px;
+}
+
+.eps-application .dictionaryValidatorErrorTable .group-row {
+    background-color: #f5f5f5;
+}
