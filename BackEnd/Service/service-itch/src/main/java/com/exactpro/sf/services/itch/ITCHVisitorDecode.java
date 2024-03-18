@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,18 +51,26 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorDecode.class);
     private static final int INT_MASK = 0x7FFFFFFF;
     private static final long LONG_MASK = 0x7FFFFFFFFFFFFFFFL;
+	private static final ITCHVisitorSettings DEFAULT_VISITOR_SETTINGS = new ITCHVisitorSettings();
+
     private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 	private final IMessage msg;
 	private final IMessageFactory msgFactory;
-	
+	private final ITCHVisitorSettings visitorSettings;
+
     public static final String DEFAULT_ZONE_ID = "UTC";
 
     public ITCHVisitorDecode(IoBuffer buffer, ByteOrder byteOrder, IMessage msg, IMessageFactory msgFactory) {
+		this(buffer, byteOrder, msg, msgFactory, DEFAULT_VISITOR_SETTINGS);
+	}
+
+    public ITCHVisitorDecode(IoBuffer buffer, ByteOrder byteOrder, IMessage msg, IMessageFactory msgFactory, ITCHVisitorSettings visitorSettings) {
 		this.buffer = buffer.order(byteOrder);
 		this.byteOrder = byteOrder;
 		this.msg = msg;
 		this.msgFactory = msgFactory;
+		this.visitorSettings = (visitorSettings != null)? visitorSettings: DEFAULT_VISITOR_SETTINGS;
 	}
 
 	@Override
@@ -170,7 +179,8 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			buffer.get(array); // FIXME: slice?
 
 			try {
-				result = decoder.get().decode(ByteBuffer.wrap(array)).toString().trim();
+				String decoded = decoder.get().decode(ByteBuffer.wrap(array)).toString();
+				result = (visitorSettings.isTrimLeftPaddingEnabled())? decoded.trim(): trimRight(decoded);
 			} catch (CharacterCodingException e) {
 				throw new EPSCommonException(e);
 			}
@@ -543,7 +553,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 		for (int i = 0; i < legsCount; i++) {
 			IMessage msg = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
-            ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, msg, msgFactory);
+            ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, msg, msgFactory, visitorSettings);
             MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
 			list.add(msg);
 		}
@@ -555,7 +565,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		logger.trace("Decode - field: {}", fieldName);
 
 		IMessage subMessage = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
-        ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, subMessage, msgFactory);
+        ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, subMessage, msgFactory, visitorSettings);
         MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
         msg.addField(fieldName, subMessage);
 	}
@@ -625,5 +635,9 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	protected int getStringLength(IFieldStructure fldStruct) {
     	return getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
+	}
+
+	private static String trimRight(String str) {
+		return StringUtils.stripEnd(str, null);
 	}
 }

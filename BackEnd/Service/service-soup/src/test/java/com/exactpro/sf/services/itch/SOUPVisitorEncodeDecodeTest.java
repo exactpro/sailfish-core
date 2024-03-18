@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.services.itch.soup.SOUPCodec;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -46,6 +45,7 @@ public class SOUPVisitorEncodeDecodeTest {
     private IoBuffer buffer;
     private IFieldStructure fldStructure;
     private SOUPVisitorEncode soupVisitorEncode;
+    private SOUPVisitorSettings visitorSettings;
 
     public SOUPVisitorEncodeDecodeTest() {
         this.buffer = IoBuffer.allocate(4);
@@ -55,6 +55,9 @@ public class SOUPVisitorEncodeDecodeTest {
         map.put("Length", new AttributeStructure("Length", "4", 4, JavaType.JAVA_LANG_INTEGER));
         Mockito.when(fldStructure.getAttributes()).thenReturn(map);
         this.soupVisitorEncode = new SOUPVisitorEncode(buffer, ByteOrder.BIG_ENDIAN);
+        this.visitorSettings = new SOUPVisitorSettings() {{
+            setTrimLeftPaddingEnabled(true);
+        }};
     }
 
     @Test
@@ -84,7 +87,7 @@ public class SOUPVisitorEncodeDecodeTest {
 
         IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
         IMessage msg = msgFactory.createMessage("MarketByPrice", "SOUP");
-        SOUPVisitorDecode soupVisitorDecode = new SOUPVisitorDecode(buffer, ByteOrder.BIG_ENDIAN, msg, msgFactory);
+        SOUPVisitorDecode soupVisitorDecode = new SOUPVisitorDecode(buffer, ByteOrder.BIG_ENDIAN, msg, msgFactory, visitorSettings);
 
         buffer.position(0);
         soupVisitorEncode.visitStringCollection("ArrayOfItems", testList, fldStructure, false);
@@ -108,7 +111,7 @@ public class SOUPVisitorEncodeDecodeTest {
 
         IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
         IMessage msg = msgFactory.createMessage("AddOrder", "SOUP");
-        SOUPVisitorDecode soupVisitorDecode = new SOUPVisitorDecode(buffer, ByteOrder.BIG_ENDIAN, msg, msgFactory);
+        SOUPVisitorDecode soupVisitorDecode = new SOUPVisitorDecode(buffer, ByteOrder.BIG_ENDIAN, msg, msgFactory, visitorSettings);
 
         //Testing correctly values
         for (BigDecimal testValue : correctlyTestValues) {

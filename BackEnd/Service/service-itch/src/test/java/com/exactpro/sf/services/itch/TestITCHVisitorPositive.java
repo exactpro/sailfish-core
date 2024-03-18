@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.exactpro.sf.services.itch;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -460,6 +461,42 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
         itchVisitorDecode.visit("test", BigDecimal.ZERO, fieldStructure, false);
 
         Assert.assertThat(msg.getField("test"), CoreMatchers.is(BigDecimal.valueOf(Long.MAX_VALUE)));
+    }
+
+    @Test
+    public void testVisitorWithTrimLeftPaddingConfig() {
+        final IoBuffer buffer = IoBuffer.allocate(8);
+        buffer.order(ByteOrder.nativeOrder());
+        buffer.put("   AB   ".getBytes(StandardCharsets.UTF_8));
+
+        final IMessage message = new MapMessage("TEST", "result");
+        final Map<String, IAttributeStructure> attributes = new HashMap<>();
+        attributes.put("Length", new AttributeStructure("Length", "8", 8, JavaType.JAVA_LANG_INTEGER));
+        attributes.put("Type", new AttributeStructure("Type", "Alpha", "Alpha", JavaType.JAVA_LANG_STRING));
+
+        final IFieldStructure fieldStructure = new FieldStructure("test", "", "", "", attributes,
+        Collections.emptyMap(), JavaType.JAVA_LANG_STRING, false, false, false, null);
+
+        ITCHVisitorSettings visitorSettings;
+        ITCHVisitorDecode itchVisitorDecode;
+
+        buffer.position(0);
+
+        visitorSettings = new ITCHVisitorSettings();
+        visitorSettings.setTrimLeftPaddingEnabled(true);
+        itchVisitorDecode = new ITCHVisitorDecode(buffer, ByteOrder.nativeOrder(), message, DefaultMessageFactory.getFactory(), visitorSettings);
+        itchVisitorDecode.visit("test", "Value", fieldStructure, false);
+
+        Assert.assertEquals("AB", message.getField("test"));
+
+        buffer.position(0);
+
+        visitorSettings = new ITCHVisitorSettings();
+        visitorSettings.setTrimLeftPaddingEnabled(false);
+        itchVisitorDecode = new ITCHVisitorDecode(buffer, ByteOrder.nativeOrder(), message, DefaultMessageFactory.getFactory(), visitorSettings);
+        itchVisitorDecode.visit("test", "Value", fieldStructure, false);
+
+        Assert.assertEquals("   AB", message.getField("test"));
     }
 
 }

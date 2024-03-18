@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class ITCHCodec extends AbstractCodec {
     private long lastDecode;
     private IITCHPreprocessor preprocessor;
     private boolean wrapMessages = true;
+    private ITCHVisitorSettings itchVisitorSettings = null;
 
     public ITCHCodec() {
 		this.lastDecode = System.currentTimeMillis();
@@ -98,6 +99,7 @@ public class ITCHCodec extends AbstractCodec {
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
                     getClass().getClassLoader()) : null;
             this.wrapMessages = msettings.isWrapMessages();
+            this.itchVisitorSettings = ITCHVisitorSettings.from(msettings);
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
@@ -187,9 +189,9 @@ public class ITCHCodec extends AbstractCodec {
 
 			logger.debug("Message for decoding [ Name = {}; position = {}; remaining = {} ]", message.getName(), in.position(), in.remaining());
 
-            IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory);
+            IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory, itchVisitorSettings);
 
-			MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
+            MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
 
             int endCurMsgPosition = in.position();
             in.position(startCurMsgPosition);

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,12 @@ import com.exactpro.sf.services.codecs.CodecMessageFilter;
 import com.exactpro.sf.services.codecs.ICodecSettings;
 import com.exactpro.sf.services.itch.DefaultPreprocessor;
 import com.exactpro.sf.services.itch.IITCHPreprocessor;
+import com.exactpro.sf.services.itch.ITCHCodecSettings;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
 import com.exactpro.sf.services.itch.ITCHVisitorBase;
 import com.exactpro.sf.services.itch.SOUPVisitorDecode;
 import com.exactpro.sf.services.itch.SOUPVisitorEncode;
+import com.exactpro.sf.services.itch.SOUPVisitorSettings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
@@ -122,6 +124,7 @@ public class SOUPCodec extends AbstractCodec {
     protected String seqDataPacketType;
     protected CodecMessageFilter codecMessageFilter;
     private boolean parseMessageLengthAaSeparateMessage;
+    protected SOUPVisitorSettings visitorSettings;
 
 	@Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
@@ -186,6 +189,12 @@ public class SOUPCodec extends AbstractCodec {
         this.unseqDataPacketType = extractAdminType(dictionary, UNSEQUENCED_DATA_PACKET);
         this.seqDataPacketType = extractAdminType(dictionary, SEQUENCED_DATA_PACKET);
         this.parseMessageLengthAaSeparateMessage = isMessageLengthAsSeparateMessage(settings);
+        this.visitorSettings = new SOUPVisitorSettings();
+        if(settings instanceof ITCHCodecSettings) {
+            this.visitorSettings.setTrimLeftPaddingEnabled(
+                    ((ITCHCodecSettings) settings).isTrimLeftPaddingEnabled()
+            );
+        }
     }
 
     protected void setUpPreprocessor(IServiceContext serviceContext, ICodecSettings itchCodecSettings, SailfishURI soupPreprocessorsMappingFileUri, ClassLoader classLoader) {
@@ -308,7 +317,7 @@ public class SOUPCodec extends AbstractCodec {
 
 
         try {
-            IMessageStructureVisitor msgStructVisitor = new SOUPVisitorDecode(in, byteOrder, message, msgFactory);
+            IMessageStructureVisitor msgStructVisitor = new SOUPVisitorDecode(in, byteOrder, message, msgFactory, visitorSettings);
             MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
         } catch(EPSCommonException e) {
             message.getMetaData().setRejectReason(String.format("%s: %s", e.getMessage(), ExceptionUtils.getRootCauseMessage(e)));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,17 @@ public class SOUPVisitorDecode extends ITCHVisitorDecode {
 
     private static final Logger logger = LoggerFactory.getLogger(SOUPVisitorDecode.class);
     private static final BigDecimal PRICE4_DIVISOR = new BigDecimal(10_000);
+    private static final SOUPVisitorSettings DEFAULT_VISITOR_SETTINGS = new SOUPVisitorSettings();
 
     private final IoBuffer buffer;
     private final IMessage msg;
 
     public SOUPVisitorDecode(IoBuffer buffer, ByteOrder byteOrder, IMessage msg, IMessageFactory msgFactory) {
-        super(buffer, byteOrder, msg, msgFactory);
+        this(buffer, byteOrder, msg, msgFactory, DEFAULT_VISITOR_SETTINGS);
+    }
+
+    public SOUPVisitorDecode(IoBuffer buffer, ByteOrder byteOrder, IMessage msg, IMessageFactory msgFactory, SOUPVisitorSettings visitorSettings) {
+        super(buffer, byteOrder, msg, msgFactory, visitorSettings);
         this.buffer = buffer.order(byteOrder);
         this.msg = msg;
     }

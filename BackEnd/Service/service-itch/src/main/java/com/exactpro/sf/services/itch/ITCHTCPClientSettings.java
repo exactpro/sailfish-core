@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ public class ITCHTCPClientSettings extends ITCHClientSettings {
     private boolean doLiteLoginOnStart;
 
 	private byte flag1;
+
+	@Description("Trim messages from left")
+	private boolean trimLeftPadding = true;
 
     @Description("Enable the feature to send heartbeat automatically. You can specify a time interval in 'Heartbeat Timeout' option.")
 	private boolean sendHeartBeats;
@@ -61,6 +64,14 @@ public class ITCHTCPClientSettings extends ITCHClientSettings {
 
 	public void setFlag1(byte flag1) {
 		this.flag1 = flag1;
+	}
+
+	public boolean isTrimLeftPadding() {
+		return trimLeftPadding;
+	}
+
+	public void setTrimLeftPadding(boolean trimLeftPadding) {
+		this.trimLeftPadding = trimLeftPadding;
 	}
 
 	public boolean isSendHeartBeats() {

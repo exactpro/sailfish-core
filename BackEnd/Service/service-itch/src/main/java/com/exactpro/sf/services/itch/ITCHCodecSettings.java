@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class ITCHCodecSettings implements ICodecSettings {
 
     private boolean preprocessingEnabled = true;
     private boolean evolutionSupportEnabled;
+    private boolean trimLeftPaddingEnabled = true;
 
     /**
      * Wraps result messages to {@link ITCHMessageHelper#MESSAGELIST_NAME} message.
@@ -107,6 +108,14 @@ public class ITCHCodecSettings implements ICodecSettings {
 
     public void setEvolutionSupportEnabled(boolean evolutionSupportEnabled) {
         this.evolutionSupportEnabled = evolutionSupportEnabled;
+    }
+
+    public boolean isTrimLeftPaddingEnabled() {
+        return trimLeftPaddingEnabled;
+    }
+
+    public void setTrimLeftPaddingEnabled(boolean trimLeftPaddingEnabled) {
+        this.trimLeftPaddingEnabled = trimLeftPaddingEnabled;
     }
 
     public boolean isWrapMessages() {

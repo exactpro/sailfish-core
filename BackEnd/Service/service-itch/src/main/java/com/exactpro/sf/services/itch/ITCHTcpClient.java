@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
         codecSettings.setFilterValues(ServiceUtil.loadStringFromAlias(serviceContext.getDataManager(), getSettings().getFilterValues(), ","));
         codecSettings.setDictionaryURI(getSettings().getDictionaryName());
         codecSettings.setEvolutionSupportEnabled(getSettings().isEvolutionSupportEnabled());
+        codecSettings.setTrimLeftPaddingEnabled(getSettings().isTrimLeftPadding());
         if (getSettings().isCompressionUsed()) {
             codecSettings.setChunkDelimiter(ByteBuffer.allocate(2).putShort((short)getSettings().getCompressedChunkDelimeter()).array());
         }

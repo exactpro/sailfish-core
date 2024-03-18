@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class SOUPTcpCodec extends SOUPCodec {
 			logger.trace("Message for decoding {} [ Name = {}; position = {}; remaining = {} ]", message.getName(),
 					in.position(), in.remaining());
 
-			IMessageStructureVisitor msgStructVisitor = new SOUPVisitorDecode(in, byteOrder, message, msgFactory);
+			IMessageStructureVisitor msgStructVisitor = new SOUPVisitorDecode(in, byteOrder, message, msgFactory, visitorSettings);
             MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
 
 			// Message '+' with variable length... Ignore var-length field (in traverse). Skip message till the end:
