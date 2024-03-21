@@ -64,6 +64,7 @@ public class SOUPTcpClient extends ITCHTcpClient {
         codecSettings.setChunkDelimiter(originalCodecSettings.getChunkDelimiter());
         codecSettings.setPreprocessingEnabled(originalCodecSettings.isPreprocessingEnabled());
         codecSettings.setEvolutionSupportEnabled(originalCodecSettings.isEvolutionSupportEnabled());
+        codecSettings.setTrimLeftPaddingEnabled(originalCodecSettings.isTrimLeftPaddingEnabled());
     }
 
     protected String getHeartBeatMessageName() {
