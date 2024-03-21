@@ -638,6 +638,12 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 	}
 
 	private static String trimRight(String str) {
-		return StringUtils.stripEnd(str, null);
+		// This is copy of javadoc for trim method
+		//
+		// Returns a string whose value is this string, with all leading and trailing space removed,
+		// where space is defined as any character whose codepoint is less than or equal to 'U+0020' (the space character)
+		//
+		// In ITCH 0x00 char is used as filling character
+		return StringUtils.stripEnd(str, " \u0000");
 	}
 }

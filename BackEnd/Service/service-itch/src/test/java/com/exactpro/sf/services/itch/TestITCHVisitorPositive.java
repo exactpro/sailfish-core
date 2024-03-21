@@ -467,7 +467,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
     public void testVisitorWithTrimLeftPaddingConfig() {
         final IoBuffer buffer = IoBuffer.allocate(8);
         buffer.order(ByteOrder.nativeOrder());
-        buffer.put("   AB   ".getBytes(StandardCharsets.UTF_8));
+        buffer.put("   AB \u0000\u0000".getBytes(StandardCharsets.UTF_8));
 
         final IMessage message = new MapMessage("TEST", "result");
         final Map<String, IAttributeStructure> attributes = new HashMap<>();
