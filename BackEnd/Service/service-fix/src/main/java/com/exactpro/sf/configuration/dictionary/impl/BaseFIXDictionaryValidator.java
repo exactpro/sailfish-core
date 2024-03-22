@@ -358,7 +358,7 @@ public class BaseFIXDictionaryValidator extends AbstractDictionaryValidator {
 
                     errors.add(new DictionaryValidationError(message.getName(), null,
                             MESSAGE_TYPE_ATTR_NAME
-                                    + " attribute value is not exist in enum. Value [" + messageTypeAttribute + "]",
+                                    + " attribute value is not exist in the " + MSG_TYPE_FIELD + " field enum. Value [" + messageTypeAttribute + "]",
                             DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
 
                 }
