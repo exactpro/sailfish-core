@@ -19,6 +19,9 @@ import java.io.File;
 import java.util.Comparator;
 
 public class FileNameComparator implements Comparator<FileAdapter> {
+    public static final FileNameComparator INSTANCE = new FileNameComparator();
+
+    private FileNameComparator() {}
 
 	@Override
 	public int compare(FileAdapter fa1, FileAdapter fa2) {

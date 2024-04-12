@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,9 +104,18 @@ public class DownloadBean implements Serializable {
 				logger.info("Failed to get file from workspace", e );
 			}
 		}
-        Collections.sort(files, new FileNameComparator());
 
-		if (!upNotAvailable) {
+        try {
+            files.sort(FileNameComparator.INSTANCE);
+        } catch(IllegalArgumentException e) {
+            String fileNames = files.stream()
+                    .map(a -> a.getFile().toString())
+                    .collect(Collectors.joining(", "));
+            logger.error("Can't sort files in directory: " + curDirPath, e);
+            logger.info("List of files: [{}]", fileNames);
+        }
+
+        if (!upNotAvailable) {
             File currentDir = workspaceDispatcher.getFile(FolderType.ROOT, curDirPath);
 			FileAdapter parent = new FileAdapter(
 					currentDir.getParentFile(),
