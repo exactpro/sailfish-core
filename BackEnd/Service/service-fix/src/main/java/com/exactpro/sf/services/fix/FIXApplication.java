@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -701,6 +702,11 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                 storeMessage(iSession, iMsg);
                 handler.putMessage(iSession, route, iMsg);
 
+                for(IMessage subMsg: handleSubMessage(iMsg)) {
+                    storeMessage(iSession, subMsg);
+                    handler.putMessage(iSession, route, subMsg);
+                }
+
                 if(route == ServiceHandlerRoute.FROM_ADMIN || route == ServiceHandlerRoute.FROM_APP) {
                     latencyCalculator.updateLatency(sessionID, iMsg);
                 }
@@ -711,6 +717,10 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
                 storeMessage(iSession, iMsg);
             }
         }
+    }
+
+    protected @NotNull List<IMessage> handleSubMessage(IMessage message) {
+        return Collections.emptyList();
     }
 
     private IMessage createErrorMessage(@NotNull Message qfjMessage, String error) {
