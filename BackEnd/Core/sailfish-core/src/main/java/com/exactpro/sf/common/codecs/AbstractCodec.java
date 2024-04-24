@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.common.codecs;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -86,8 +88,15 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
                 MsgMetaData metadata = lastMessage.getMetaData();
                 MetadataExtensions.setBatchSequence(metadata, batchSequence);
                 MetadataExtensions.setSubsequence(metadata, subSequence);
-                out.write(updateMessage(lastMessage));
                 subSequence++;
+                IMessage updateMsg = updateMessage(lastMessage);
+                out.write(updateMsg);
+                for(IMessage subMsg: postDecodeMessage(updateMsg)) {
+                    MetadataExtensions.setBatchSequence(subMsg.getMetaData(), batchSequence);
+                    MetadataExtensions.setSubsequence(subMsg.getMetaData(), subSequence);
+                    subSequence++;
+                    out.write(subMsg);
+                }
             } else {
                 out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
             }
@@ -104,6 +113,9 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
             if (obj instanceof IMessage) {
                 IMessage message = (IMessage)obj;
                 addToBatch(batchMessage, message);
+                for(IMessage subMsg : postDecodeMessage(message)) {
+                    addToBatch(batchMessage, subMsg);
+                }
             } else {
                 out.write(obj); // if it is not IMessage probably there is no IMessage in out. And the EB will be empty
             }
@@ -115,6 +127,10 @@ public abstract class AbstractCodec extends CumulativeProtocolDecoder implements
         if (!batchMessage.isEmpty()) {
             out.write(updateBatchMessage(batchMessage.toMessage(messageFactory)));
         }
+    }
+
+    protected @NotNull List<IMessage> postDecodeMessage(IMessage message) {
+        return Collections.emptyList();
     }
 
     /**
