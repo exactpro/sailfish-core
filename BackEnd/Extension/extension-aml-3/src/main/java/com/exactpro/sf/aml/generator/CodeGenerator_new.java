@@ -190,8 +190,8 @@ public class CodeGenerator_new implements ICodeGenerator {
 	                 ScriptContext scriptContext,
 	                 AMLSettings amlSettings,
 	                 List<IProgressListener> progressListeners,
-            String compilerClassPath,
-            Map<String, SortedMap<Long, String>> definedServiceNames) throws AMLException {
+                     String compilerClassPath,
+                     Map<String, SortedMap<Long, String>> definedServiceNames) throws AMLException {
 	    this.workspaceDispatcher = workspaceDispatcher;
 	    this.adapterManager = adapterManager;
 	    this.environmentManager = environmentManager;
@@ -204,7 +204,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	    this.compilerClassPath = compilerClassPath;
         this.definedServiceNames = definedServiceNames;
 
-	    impl = new OldImpl(alertCollector, adapterManager, dictionaryManager, actionManager, utilityManager, this);
+	    impl = new OldImpl(alertCollector, adapterManager, dictionaryManager, actionManager, utilityManager, this, amlSettings.isAllElementsReferenced());
         newImpl = new NewImpl(alertCollector, adapterManager, this.environmentManager.getConnectionManager(), dictionaryManager, actionManager, utilityManager, this.staticServiceManager, this);
 
         setAutoStart(amlSettings.getAutoStart());

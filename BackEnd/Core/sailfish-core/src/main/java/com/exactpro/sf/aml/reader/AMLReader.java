@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,7 +233,9 @@ public class AMLReader {
 
         logger.debug("Read is completed");
 
-        return new AMLMatrix(header, blocks);
+        MatrixFileTypes type = matrixReader.getFileType();
+        boolean isJsonOrYaml = type == MatrixFileTypes.YAML || type == MatrixFileTypes.JSON;
+        return new AMLMatrix(header, blocks, isJsonOrYaml);
     }
 
     /**

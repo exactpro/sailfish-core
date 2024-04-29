@@ -47,8 +47,8 @@ public interface ICodeGenerator {
 	void cleanup();
 
     void init(IWorkspaceDispatcher workspaceDispatcher, IAdapterManager adapterManager, IEnvironmentManager environment, IDictionaryManager dictionaryManager, IStaticServiceManager staticServiceManager, IActionManager actionManager,
-            IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath, Map<String, SortedMap<Long, String>> definedServiceNames)
-            throws AMLException;
+             IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath, Map<String, SortedMap<Long, String>> definedServiceNames)
+        throws AMLException;
 
     ScriptContext getScriptContext();
 }

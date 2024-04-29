@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class AMLSettings {
     private boolean suppressAskForContinue;
     private IOutputStreamFactory outputStreamFactory = new DefaultOutputStreamFactory();
 	private Map<String, String> staticVariables;
+	private boolean allElementsReferenced = false;
 
 	public AMLSettings() {
     }
@@ -244,4 +245,12 @@ public class AMLSettings {
     public void setSkipOptional(boolean skipOptional) {
         this.skipOptional = skipOptional;
     }
+
+	public boolean isAllElementsReferenced() {
+		return allElementsReferenced;
+	}
+
+	public void setAllElementsReferenced(boolean allElementsReferenced) {
+		this.allElementsReferenced = allElementsReferenced;
+	}
 }

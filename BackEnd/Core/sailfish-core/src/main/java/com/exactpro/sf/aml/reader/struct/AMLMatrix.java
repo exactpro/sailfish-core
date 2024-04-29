@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class AMLMatrix implements Cloneable, Iterable<AMLBlock> {
 
     private final List<SimpleCell> header;
     private final List<AMLBlock> blocks;
+    private final boolean allElementsReferenced;
 
     public AMLMatrix() {
         this(Collections.<SimpleCell>emptyList(), Collections.<AMLBlock>emptyList());
@@ -46,8 +47,13 @@ public class AMLMatrix implements Cloneable, Iterable<AMLBlock> {
     }
 
     public AMLMatrix(Collection<SimpleCell> header, Collection<AMLBlock> blocks) {
+        this(header, blocks, false);
+    }
+
+    public AMLMatrix(Collection<SimpleCell> header, Collection<AMLBlock> blocks, boolean allElementsReferenced) {
         this.header = new ArrayList<>();
         this.blocks = new ArrayList<>();
+        this.allElementsReferenced = allElementsReferenced;
 
         addHeader(header);
         addAllBlocks(blocks);
@@ -162,6 +168,10 @@ public class AMLMatrix implements Cloneable, Iterable<AMLBlock> {
 
     public Iterator<AMLBlock> iterator() {
         return blocks.iterator();
+    }
+
+    public boolean isAllElementsReferenced() {
+        return allElementsReferenced;
     }
 
     private SimpleCell checkColumn(SimpleCell column, boolean checkPresence) {

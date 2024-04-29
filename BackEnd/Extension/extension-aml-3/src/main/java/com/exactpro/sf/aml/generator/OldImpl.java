@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,14 +87,16 @@ public class OldImpl {
 
     private static final int CAPACITY_4K = 4096;
     private static final int CAPACITY_128K = 131072;
+	private final boolean allElementsReferenced;
 
-	public OldImpl(AlertCollector alertCollector, IAdapterManager adapterManager, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager, CodeGenerator_new codeGenerator) {
+	public OldImpl(AlertCollector alertCollector, IAdapterManager adapterManager, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager, CodeGenerator_new codeGenerator, boolean allElementsReferenced) {
 		this.alertCollector = alertCollector;
 		this.adapterManager = adapterManager;
 		this.dictionaryManager = dictionaryManager;
 		this.actionManager = actionManager;
 		this.utilityManager = utilityManager;
-        this.codeGenerator = codeGenerator;
+		this.codeGenerator = codeGenerator;
+		this.allElementsReferenced = allElementsReferenced;
 	}
 
 	protected void setContinueOnFailed(boolean b) {
@@ -143,7 +145,7 @@ public class OldImpl {
             }
 
             Class<?> returnType = action.getActionInfo().getReturnType();
-            if (action.hasReference() && void.class.equals(returnType)) {
+            if (allElementsReferenced && action.hasReference() && void.class.equals(returnType)) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot refer to void method: " + action.getActionURI() + ". "
                         + "Please remove reference label and all reference occurrences to this row.", AlertType.WARNING));
             } else if (!void.class.equals(returnType)) {
