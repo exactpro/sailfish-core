@@ -32,6 +32,7 @@ import com.exactpro.sf.services.http.handlers.MatcherHandlerUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 
 import io.netty.channel.ChannelHandlerContext;
 
@@ -74,10 +75,11 @@ public class JSONDecoder extends AbstractHTTPDecoder {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode root = null;
-        if (msg.getMetaData().getRawMessage().length > 0) {
+        JsonNode root = NullNode.getInstance();
+        byte[] rawMessage = msg.getMetaData().getRawMessage();
+        if (rawMessage != null && rawMessage.length > 0) {
             try {
-                root = objectMapper.readTree(handleContentEncoding(MatcherHandlerUtil.getEncodingString(msg), msg.getMetaData().getRawMessage()));
+                root = objectMapper.readTree(handleContentEncoding(MatcherHandlerUtil.getEncodingString(msg), rawMessage));
             } catch (JsonProcessingException e) {
                 logger.error("Json parsing error", e);
                 msg.getMetaData().setRejectReason(e.getMessage());

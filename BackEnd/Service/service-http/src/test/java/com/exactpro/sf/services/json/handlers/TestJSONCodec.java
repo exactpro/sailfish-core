@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.intellij.lang.annotations.Language;
@@ -39,7 +38,8 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.common.messages.IMetadata;
+import com.exactpro.sf.common.messages.MetadataExtensions;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.services.http.HTTPClientSettings;
 import com.exactpro.sf.services.http.HTTPMessageHelper;
@@ -55,9 +55,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.handler.codec.http.HttpHeaderNames;
 
 public class TestJSONCodec extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(TestJSONCodec.class);
@@ -71,6 +71,17 @@ public class TestJSONCodec extends AbstractTest {
         settings = new HTTPClientSettings();
         factory = DefaultMessageFactory.getFactory();
         dictionary = serviceContext.getDictionaryManager().createMessageDictionary("cfg/dictionaries/http_soap_test.xml");
+    }
+
+    @Test
+    public void testEmptyBodyDoesNotCauseNPE() {
+        IMessage msg = decode("", "TestMessage");
+        Assert.assertNotNull("null message decoded", msg);
+        Assert.assertEquals("unexpected message name", "TestMessage", msg.getName());
+        Assert.assertFalse("message should not be rejected", msg.getMetaData().isRejected());
+        byte[] rawMessage = msg.getMetaData().getRawMessage();
+        Assert.assertNotNull("null raw message", rawMessage);
+        Assert.assertEquals("raw message must be empty", 0, rawMessage.length);
     }
 
     @Test
@@ -178,13 +189,13 @@ public class TestJSONCodec extends AbstractTest {
                 + "}";
 
         IMessage message = decode(json, "TestMessage");
-        MsgMetaData metaData = message.getMetaData();
+        IMetadata metaData = message.getMetaData();
 
         Assert.assertEquals(1, (int)message.<Integer>getField("Integer"));
         Assert.assertEquals(2, (int)message.<IMessage>getField("Message").<Integer>getField("InnerInteger"));
         Assert.assertEquals(3, (int)message.<List<IMessage>>getField("MessageArray").get(0).<Integer>getField("InnerInteger"));
 
-        Assert.assertTrue(metaData.isRejected());
+        Assert.assertTrue(MetadataExtensions.isRejected(metaData));
 
         Assert.assertEquals(
                 join(
@@ -193,7 +204,7 @@ public class TestJSONCodec extends AbstractTest {
                         "Unexpected fields in message 'MessageArray': [unexpectedFieldInCollection]",
                         "Unexpected fields in message 'TestMessage': [unexpectedMessageField]"
                 ),
-                metaData.getRejectReason()
+                MetadataExtensions.getRejectReason(metaData)
         );
     }
 
@@ -372,7 +383,14 @@ public class TestJSONCodec extends AbstractTest {
         }
     }
 
-    private class ByteToMessageHandler extends ByteToMessageDecoder {
+    /**
+     * MessageToMessageDecoder is used instead of ByteToMessageDecoder
+     * because the latter does not allow passing empty {@link ByteBuf}.
+     * </p>
+     * {@link JSONDecoder} expects to parse the whole buffer,
+     * so we can use simple {@link MessageToMessageDecoder} to emulate how HTTP decoder works.
+     */
+    private class ByteToMessageHandler extends MessageToMessageDecoder<ByteBuf> {
         private final String messageName;
 
         public ByteToMessageHandler() {
@@ -387,7 +405,7 @@ public class TestJSONCodec extends AbstractTest {
         protected void decode(ChannelHandlerContext handlerContext, ByteBuf in, List<Object> out) throws Exception {
             IMessage message = factory.createMessage(messageName, "SOAP");
             IMessage header = factory.createMessage(HTTPMessageHelper.HTTPHEADER, "SOAP");
-            header.addField(Names.CONTENT_ENCODING, "IDENTITY");
+            header.addField(HttpHeaderNames.CONTENT_ENCODING.toString(), "IDENTITY");
             message.addField(HTTPMessageHelper.HTTPHEADER, header);
 
             byte[] data = new byte[in.readableBytes()];
