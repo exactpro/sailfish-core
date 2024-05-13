@@ -24,7 +24,9 @@ import static com.exactpro.sf.services.http.HTTPClient.REQUEST_ID_PROPERTY;
 import static com.exactpro.sf.services.http.HTTPClient.REQUEST_REFERENCE_PROPERTY;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -247,7 +249,7 @@ public class BaseHTTPMatcherHandlerEncode extends MessageToMessageEncoder<IMessa
                     } else {
                         value = message.getField(paramName).toString();
                     }
-                    pathBuilder.replaceAll("{" + paramName + "}", value);
+                    pathBuilder.replaceAll("{" + paramName + "}", escapeQueryParameter(value));
                     requiredParamsNames.remove(paramName);
                 }
             }
@@ -260,6 +262,14 @@ public class BaseHTTPMatcherHandlerEncode extends MessageToMessageEncoder<IMessa
         }
 
         return endPoint.getRawPath();
+    }
+
+    private String escapeQueryParameter(String param) {
+        try {
+            return URLEncoder.encode(param, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("invalid param value " + param, e);
+        }
     }
 
     private HttpMethod detectHttpMethod(IMessageStructure messageStructure, HttpMethod defaultMethod) {
