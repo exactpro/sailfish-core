@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,10 @@ public class WaitAction {
 
         ComparatorSettings settings = createCompareSettings(actionContext, null, messageFilter);
         IServiceSettings serviceSettings = service.getSettings();
-        SailfishURI dictionaryURI = serviceSettings.getDictionaryName();
+        SailfishURI dictionaryURI = actionContext.getDictionaryURI();
+        if(dictionaryURI == null) {
+            dictionaryURI = serviceSettings.getDictionaryName();
+        }
 
         if (dictionaryURI != null) {
             settings.setDictionaryStructure(actionContext.getDictionary(dictionaryURI));
@@ -167,7 +170,10 @@ public class WaitAction {
         ComparatorSettings compSettings = createCompareSettings(actionContext, postValidation, messageFilter);
 
 		IService service = actionContext.getServiceManager().getService(new ServiceName(serviceName));
-		SailfishURI dictionaryURI = service.getSettings().getDictionaryName();
+        SailfishURI dictionaryURI = actionContext.getDictionaryURI();
+        if(dictionaryURI == null) {
+            dictionaryURI = service.getSettings().getDictionaryName();
+        }
 
 		if (dictionaryURI != null) {
             compSettings.setDictionaryStructure(actionContext.getDictionary(dictionaryURI));
@@ -472,7 +478,10 @@ public class WaitAction {
 
         ComparatorSettings compSettings = createCompareSettings(actionContext, postValidation, message);
 
-        SailfishURI dictionaryURI = service.getSettings().getDictionaryName();
+        SailfishURI dictionaryURI = actionContext.getDictionaryURI();
+        if(dictionaryURI == null) {
+            dictionaryURI = service.getSettings().getDictionaryName();
+        }
 
         if(dictionaryURI != null) {
             compSettings.setDictionaryStructure(actionContext.getDictionary(dictionaryURI));
