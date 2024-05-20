@@ -78,8 +78,11 @@ public class DictionaryComparator {
     }
 
     private static void displayDifference(DistinctionType distinctionType, Object first, Object second, DictionaryPath dictionaryPath) {
-        StringBuilder builder = new StringBuilder(dictionaryPath.toString()).append(' ')
-                .append('[');
+        StringBuilder builder = new StringBuilder();
+        if(dictionaryPath != null) {
+            builder.append(dictionaryPath).append(' ');
+        }
+        builder.append('[');
         if (first != null) {
             builder.append(first.getClass().getSimpleName()).append(" : ");
         }
