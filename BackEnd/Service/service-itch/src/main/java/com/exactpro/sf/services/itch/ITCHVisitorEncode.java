@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.itch;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,10 +39,10 @@ import com.exactpro.sf.util.DateTimeUtility;
 
 public class ITCHVisitorEncode extends ITCHVisitorBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorEncode.class);
-    public static final int INT_MASK = 0x800000;
+	private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorEncode.class);
+    public static final int INT_MASK = 0x80000000;
     public static final long LONG_MASK = 0x8000000000000000L;
-    private final IoBuffer buffer;
+	private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 
     private static final Byte DEFAULT_BYTE = 0x0;
@@ -94,7 +93,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		if (type == ProtocolType.UINT32) {
 			buffer.putInt(value.intValue());
 		} else if (type == ProtocolType.UINT64) {
-			buffer.putLong(value.longValue());
+			buffer.putLong(value);
 		} else if (type == ProtocolType.INT16) {
 			buffer.putShort(value.shortValue());
 		} else if (type == ProtocolType.INT32) {
@@ -142,7 +141,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         }
 
 		if (type == ProtocolType.BYTE) {
-			buffer.put(value.byteValue());
+			buffer.put(value);
 		} else if (type == ProtocolType.INT8) {
 			buffer.put(value);
 		} else {
@@ -204,13 +203,13 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		    return;
         }
         if (type == ProtocolType.PRICE && length == 4) {
-            buffer.putInt(convertSignedDoubleToInt(value.doubleValue(), 10_000));
+            buffer.putInt(convertSignedDoubleToInt(value, PRICE4_DEVIDER));
         } else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
-			buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), 100_000_000));
+			buffer.putLong(convertSignedDoubleToLong(value, PRICE_DEVIDER));
 		} else if (type == ProtocolType.PRICE4 || type == ProtocolType.SIZE4) {
-            buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), 10_000));
+            buffer.putLong(convertSignedDoubleToLong(value, PRICE4_DEVIDER));
 		} else if (type == ProtocolType.UINT16) {
-			double val = value.doubleValue();
+			double val = value;
             Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
 			if (impliedDecimals != null) {
 				for (int i = 0; i < impliedDecimals; i++) {
@@ -311,14 +310,14 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 			}
 			buffer.putLong(val);
         } else if (type == ProtocolType.PRICE && length == 4) {
-            int val = (int)(value.doubleValue() * 10_000);
-            buffer.putInt(val);
+			buffer.putInt(convertSignedDoubleToInt(value.doubleValue(), PRICE4_DEVIDER));
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
-            long val = (long)(value.doubleValue() * 100_000_000);
-			buffer.putLong(val);
+			buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), PRICE_DEVIDER));
+		} else if (type == ProtocolType.PRICE4 || type == ProtocolType.SIZE4) {
+			buffer.putLong(convertSignedDoubleToLong(value.doubleValue(), PRICE4_DEVIDER));
 		} else if (type == ProtocolType.UDT) {
 			byte[] longArray = new byte[length];
-			byte[] data = value.toBigInteger().multiply(new BigInteger("1000000000")).toByteArray();
+			byte[] data = value.toBigInteger().multiply(BI_UDT_MULTIPLIER).toByteArray();
 
 			int l = Math.min(length, data.length);
 			// copy (& reverse)

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,25 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.junit.Assert;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
@@ -48,6 +31,23 @@ import com.exactpro.sf.services.MockProtocolEncoderOutput;
 import com.exactpro.sf.services.itch.ITCHCodec;
 import com.exactpro.sf.services.itch.ITCHCodecSettings;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.junit.Assert;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 public class TestITCHHelper extends AbstractTest {
 	
@@ -121,7 +121,7 @@ public class TestITCHHelper extends AbstractTest {
 		codec.encode(session, message, output);
 		Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput)output).getMessageQueue();
 		Assert.assertNotNull("Message queue from AbstractProtocolEncoderOutput.", msgQueue);
-        Assert.assertTrue("Message queue size must be equal 1.", msgQueue.size() == 1);
+        Assert.assertEquals("Message queue size must be equal 1.", 1, msgQueue.size());
 		Object lastMessage = msgQueue.element();
 		Assert.assertNotNull(lastMessage);
 		return lastMessage;
@@ -136,7 +136,7 @@ public class TestITCHHelper extends AbstractTest {
 		IoBuffer toDecode = IoBuffer.wrap( ((IoBuffer)lastMessage).array() );
 		codec.decode( decodeSession, toDecode, decoderOutput );
 
-        Assert.assertTrue("Message queue size must not less then 1.", decoderOutput.getMessageQueue().size() >= 1);
+        Assert.assertTrue("Message queue size must not less then 1.", !decoderOutput.getMessageQueue().isEmpty());
 
 		return (IMessage) decoderOutput.getMessageQueue().element();
 	}
@@ -150,7 +150,7 @@ public class TestITCHHelper extends AbstractTest {
         return codec;
 	}
 
-    protected static ITCHCodec getCodec(MessageHelper helper) throws IOException {
+    protected static ITCHCodec getCodec(MessageHelper helper) {
         ITCHCodec codec = new ITCHCodec();
         ITCHCodecSettings settings = new ITCHCodecSettings();
         IDictionaryStructure dictionary = helper.getDictionaryStructure();
@@ -182,7 +182,7 @@ public class TestITCHHelper extends AbstractTest {
 		String t= String.format("Original value of %s field with Type=%s: "+original.getField(type)+"; \n"+
 				"Result value of %s field with Type=%s: "+result.getField(type), c.getSimpleName(),type,c.getSimpleName(),type);
 		if("STUB".equals(type)){
-			Assert.assertTrue(t, result.getField(type)==null);
+			Assert.assertNull(t, result.getField(type));
 		}else{
 			Assert.assertTrue(t, original.getField(type).equals(result.getField(type)) || 
 					original.getField(type).toString().equals(result.getField(type).toString()));
@@ -244,9 +244,8 @@ public class TestITCHHelper extends AbstractTest {
 	    IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
         String fileFQN = BASE_DIR + File.separator + "src" + File.separator  + "test" + File.separator + 
         		"workspace" + File.separator + "cfg" + File.separator + "dictionaries" + File.separator + fileName;
-        try (InputStream inputStream = new FileInputStream( fileFQN )) {
-        	IDictionaryStructure dictionary = loader.load(inputStream);
-            return dictionary;
+        try (InputStream inputStream = Files.newInputStream(Paths.get(fileFQN))) {
+            return loader.load(inputStream);
         }
 	}
 }

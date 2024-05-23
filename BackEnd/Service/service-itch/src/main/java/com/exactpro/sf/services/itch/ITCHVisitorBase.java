@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.itch;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -42,11 +43,15 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
 
     public static final UnsignedLong SIZE_DEVIDER = UnsignedLong.valueOf(100_000_000L);
     public static final UnsignedLong SIZE4_DEVIDER = UnsignedLong.valueOf(10_000L);
+	public static final int PRICE_DEVIDER = 100_000_000;
+	public static final int PRICE4_DEVIDER = 10_000;
 
     public static final BigDecimal BD_SIZE_DEVIDER = new BigDecimal(100_000_000L);
+    public static final BigDecimal BD_SIZE4_DEVIDER = new BigDecimal(10_000L);
     public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100_000_000L);
     public static final BigDecimal BD_PRICE4_DEVIDER = new BigDecimal(10_000L);
     public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1_000_000_000L);
+	public static final BigInteger BI_UDT_MULTIPLIER = new BigInteger("1000000000");
     public static final BigDecimal UDT_DEVIDER = new BigDecimal(1_000_000L);
     public static final DateTimeFormatter DATE_AS_INT = DateTimeUtility.createFormatter("yyyyMMdd");
 

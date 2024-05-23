@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,24 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
+
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.services.itch.ITCHMessageHelper;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.services.itch.ITCHMessageHelper;
 
 public class TestITCHMessageCreator {
 	
@@ -57,7 +56,7 @@ public class TestITCHMessageCreator {
 	
 	public IMessage getTime(long seconds){
 		 IMessage messageTime = msgFactory.createMessage("Time", namespace);
-        messageTime.addField(ITCHMessageHelper.FIELD_SECONDS, Long.valueOf(seconds));
+        messageTime.addField(ITCHMessageHelper.FIELD_SECONDS, seconds);
 	     return messageTime;
 	}
 	
@@ -191,12 +190,12 @@ public class TestITCHMessageCreator {
 	
 	public IMessage getTestDouble(){
 		IMessage message = messageHelper.getMessageFactory().createMessage("testDouble", "ITCH");
-		message.addField("Price", 3.1);
 		message.addField("Size", 3.2);
-		message.addField("Price4", 3.3);
 		message.addField("Size4", 3.4);
 		message.addField("UInt16", 3.5);
-        message.addField("PriceLength4", 9984.4444);
+        message.addField("PriceLen4", 9984.4444);
+        message.addField("PriceLen8", 9984.4444);
+        message.addField("Price4Len8", 9984.4444);
 		return messageHelper.prepareMessageToEncode(message, null);
 	}
 	
@@ -205,9 +204,11 @@ public class TestITCHMessageCreator {
 		message.addField("UInt64", new BigDecimal(10));
 		message.addField("Int32", new BigDecimal(11));
 		message.addField("UInt32", new BigDecimal(12));
-		message.addField("Price", new BigDecimal(13));
-        message.addField("PriceLength4", BigDecimal.valueOf(9984.4444));
+		message.addField("PriceLen8", new BigDecimal(13));
+        message.addField("PriceLen4", BigDecimal.valueOf(9984.4444));
+        message.addField("Price4Len8", BigDecimal.valueOf(9984.4444));
 		message.addField("Size", new BigDecimal(14));
+		message.addField("Size4", new BigDecimal(14));
 		message.addField("UDT", new BigDecimal(0));
 		return messageHelper.prepareMessageToEncode(message, null);
 	}
@@ -224,8 +225,6 @@ public class TestITCHMessageCreator {
 		Date startDate=df.parse(dateString);
 	    Date startTime=tf.parse(timeString);
         Date days = new Date(100);
-        LocalDateTime localDays = DateTimeUtility.toLocalDateTime(days);
-        localDays = localDays.minusNanos(localDays.getNano());
         message.addField("Date", DateTimeUtility.toLocalDate(startDate));
         message.addField("Time", DateTimeUtility.toLocalTime(startTime));
         message.addField("Days", DateTimeUtility.toLocalDate(startDate));

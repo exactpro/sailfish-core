@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.itch;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.util.ServiceUtil.divideDouble;
 import static com.exactpro.sf.services.util.ServiceUtil.divide;
 
 import java.math.BigDecimal;
@@ -29,7 +30,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,12 +49,12 @@ import com.google.common.primitives.UnsignedLong;
 
 public class ITCHVisitorDecode extends ITCHVisitorBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorDecode.class);
+	private static final Logger logger = LoggerFactory.getLogger(ITCHVisitorDecode.class);
     private static final int INT_MASK = 0x7FFFFFFF;
     private static final long LONG_MASK = 0x7FFFFFFFFFFFFFFFL;
 	private static final ITCHVisitorSettings DEFAULT_VISITOR_SETTINGS = new ITCHVisitorSettings();
 
-    private final IoBuffer buffer;
+	private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 	private final IMessage msg;
 	private final IMessageFactory msgFactory;
@@ -234,19 +235,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			msg.addField(fieldName, result);
         } else if (type == ProtocolType.PRICE && length == 4) {
             int val = correctIfNegative(buffer.getInt());
-            msg.addField(fieldName, divide(val, 10000L));
+            msg.addField(fieldName, divideDouble(val, PRICE4_DEVIDER));
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.PRICE4) {
-			long val = buffer.getLong();
-
-			boolean positive = (byte) (val >> 63) == 0;
-			
-			if (!positive) {
-                val &= LONG_MASK;
-                val *= -1L;
-			}
-
-            double valDouble = divide(val, type == ProtocolType.PRICE ? 100_000_000L : 10_000L);
-
+			long val = correctIfNegative(buffer.getLong());
+            double valDouble = divide(val, type == ProtocolType.PRICE ? PRICE_DEVIDER : PRICE4_DEVIDER);
             msg.addField(fieldName, valDouble);
 		} else if (type == ProtocolType.UINT16) {
 			BigDecimal val = new BigDecimal(buffer.getUnsignedShort());
@@ -324,7 +316,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 			msg.addField(fieldName, bigDec);
 		} else  if (type == ProtocolType.INT32 || type == ProtocolType.UINT32) {
-			long val = 0;
+			long val;
 
 			switch (type) {
 			case INT32:
@@ -346,7 +338,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			}
 			msg.addField(fieldName, bigDec);
 
-		} else if (type == ProtocolType.SIZE) {
+		} else if (type == ProtocolType.SIZE || type == ProtocolType.SIZE4) {
 			byte[] rawArray = new byte[length + 1];
 
 			rawArray[length] = 0;
@@ -361,28 +353,17 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			BigInteger bigInt = new BigInteger(rawArray);
 			BigDecimal bigDec = new BigDecimal(bigInt);
 
-			msg.addField(fieldName, bigDec.divide(BD_SIZE_DEVIDER));
-		} else if (type == ProtocolType.PRICE) {
-            BigDecimal valBD;
-            if (length == 4) {
-                int intVal = buffer.getInt();
-                valBD = BigDecimal.valueOf(intVal);
-                msg.addField(fieldName, valBD.divide(BD_PRICE4_DEVIDER));
-            } else {
-                long longVal = buffer.getLong();
+			BigDecimal divider = (type == ProtocolType.SIZE) ? BD_SIZE_DEVIDER : BD_SIZE4_DEVIDER;
 
-                boolean positive = (byte)(longVal >> 63) == 0;
-
-                if (!positive) {
-                    long mask = LONG_MASK;
-                    longVal = longVal & mask;
-                    longVal = longVal * -1L;
-                }
-
-                valBD = new BigDecimal(longVal);
-
-                msg.addField(fieldName, valBD.divide(BD_PRICE_DEVIDER));
-            }
+			msg.addField(fieldName, bigDec.divide(divider));
+		} else if (type == ProtocolType.PRICE && length == 4) {
+			int intVal = correctIfNegative(buffer.getInt());
+			BigDecimal valBD = BigDecimal.valueOf(intVal);
+			msg.addField(fieldName, valBD.divide(BD_PRICE4_DEVIDER));
+		} else if (type == ProtocolType.PRICE || type == ProtocolType.PRICE4) {
+			long longVal = correctIfNegative(buffer.getLong());
+			BigDecimal valBD = new BigDecimal(longVal);
+			msg.addField(fieldName, valBD.divide(type == ProtocolType.PRICE ? BD_PRICE_DEVIDER : BD_PRICE4_DEVIDER ));
 		} else if (type == ProtocolType.UDT) {
             byte[] longArray = new byte[length];
 
@@ -549,7 +530,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 		logger.trace("Decode - field: {}, count: {}", fieldName, legsCount);
 
-		List<IMessage> list = new LinkedList<IMessage>();
+		List<IMessage> list = new ArrayList<>();
 
 		for (int i = 0; i < legsCount; i++) {
 			IMessage msg = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
@@ -578,8 +559,16 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
         }
         return val;
     }
+	private static long correctIfNegative(long val) {
+		boolean isNegative = (byte)(val >> 63) != 0;
+		if (isNegative) {
+			val &= LONG_MASK;
+			val *= -1L;
+		}
+		return val;
+	}
 
-	private final void reverseBytes(byte[] data) {
+	private void reverseBytes(byte[] data) {
 		int length = data.length;
 		for (int i = 0; i < length / 2; i++) {
 			byte temp = data[length - i - 1];

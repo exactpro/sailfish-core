@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.util;
 
 import static com.exactpro.sf.services.ServiceEvent.Level.ERROR;
@@ -136,12 +136,24 @@ public class ServiceUtil {
         return result + div;
     }
 
-    public static float divide(int dividend, int divider) {
+    public static double divideDouble(int dividend, int divider) {
+        int div = dividend / divider;
+        int mod = dividend % divider;
+
+        double result = (double)mod / divider;
+        return result + div;
+    }
+
+    public static float divideFloat(int dividend, int divider) {
         int div = dividend / divider;
         int mod = dividend % divider;
 
         float result = (float)mod / divider;
         return result + div;
+    }
+
+    public static float divide(int dividend, int divider) {
+        return divideFloat(dividend, divider);
     }
 
     public static byte[] normalisate(byte[] array, int size) {

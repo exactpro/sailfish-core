@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.services.itch;
 
 import java.io.IOException;
@@ -49,6 +49,8 @@ import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.util.TestITCHHelper;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class TestITCHVisitorPositive extends TestITCHHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(TestITCHVisitorPositive.class);
@@ -74,7 +76,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Integer value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * UInt16, Int8, Int16, Int32 and STUB
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testIntegerType(){
 		try{
@@ -104,7 +105,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Long value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * UInt32, UInt64, Int16, Int32,  Int64 and STUB
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testLongType(){
 		try{
@@ -133,7 +133,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Short value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * UInt8, Byte, Int8, Int16 and STUB
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testShortType(){
 		try{
@@ -161,7 +160,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Byte value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * Byte and Int8
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testByteType(){
 		try{
@@ -186,7 +184,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(String value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * Alpha, Time, Date and STUB
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testStringType(){
 		try{
@@ -214,7 +211,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Float value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * Price
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testFloatType(){
 		try{
@@ -238,7 +234,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Double value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type and positive value:
 	 * Price, Size, Price4 and Size4
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDoubleType(){
 		try{
@@ -249,12 +244,12 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
             List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
-		    compareFieldsValues(result.get(1),original.get(1),"Price",Double.class);
-		    compareFieldsValues(result.get(1),original.get(1),"Size",Double.class);
-		    compareFieldsValues(result.get(1),original.get(1),"Price4",Double.class);
-		    compareFieldsValues(result.get(1),original.get(1),"Size4",Double.class);
+		    compareFieldsValues(result.get(1),original.get(1),"PriceLen4",Double.class);
+		    compareFieldsValues(result.get(1),original.get(1),"PriceLen8",Double.class);
+			compareFieldsValues(result.get(1),original.get(1),"Price4Len8",Double.class);
+			compareFieldsValues(result.get(1),original.get(1),"Size",Double.class);
+			compareFieldsValues(result.get(1),original.get(1),"Size4",Double.class);
 		    compareFieldsValues(result.get(1),original.get(1),"UInt16",Double.class);
-            compareFieldsValues(result.get(1),original.get(1),"PriceLength4",Double.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -266,23 +261,24 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Double value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type and negative value:
 	 * Price, Size, Price4 and Size4
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDoubleTypeWithNegativeValue(){
 		try{
 			Double neg = -3.1;
 			IMessage message = getMessageHelper().getMessageFactory().createMessage("testDouble", "ITCH");
-			message.addField("Price", neg);
-            message.addField("Size", 0d);
-			message.addField("Price4", neg);
+			message.addField("PriceLen4", neg);
+			message.addField("PriceLen8", neg);
+			message.addField("Price4Len8", neg);
+			message.addField("Size", 0d);
             message.addField("Size4", 0d);
             message.addField("UInt16", 0d);
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 			IMessage decodedMessage=decode(encode(message,codec),codec);
 
             List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            Assert.assertEquals(neg, result.get(1).getField("Price"));
-            Assert.assertEquals(neg, result.get(1).getField("Price4"));
+			Assert.assertEquals(neg, result.get(1).getField("PriceLen4"));
+			Assert.assertEquals(neg, result.get(1).getField("PriceLen8"));
+            Assert.assertEquals(neg, result.get(1).getField("Price4Len8"));
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -296,7 +292,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(BigDecimal value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type and positive value:
 	 * UInt64,Price,Size and UDT
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testBigDecimalType(){
 		try{
@@ -310,10 +305,12 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 		    compareFieldsValues(result.get(1),original.get(1),"UInt64",BigDecimal.class);
 		    compareFieldsValues(result.get(1),original.get(1),"Int32",BigDecimal.class);
 		    compareFieldsValues(result.get(1),original.get(1),"UInt32",BigDecimal.class);
-		    compareFieldsValues(result.get(1),original.get(1),"Price",BigDecimal.class);
-		    compareFieldsValues(result.get(1),original.get(1),"Size",BigDecimal.class);
-		    compareFieldsValues(result.get(1),original.get(1),"UDT",BigDecimal.class);
-            compareFieldsValues(result.get(1),original.get(1),"PriceLength4",BigDecimal.class);
+		    compareFieldsValues(result.get(1),original.get(1),"PriceLen4",BigDecimal.class);
+		    compareFieldsValues(result.get(1),original.get(1),"PriceLen8",BigDecimal.class);
+			compareFieldsValues(result.get(1),original.get(1),"Price4Len8",BigDecimal.class);
+			compareFieldsValues(result.get(1),original.get(1),"Size",BigDecimal.class);
+			compareFieldsValues(result.get(1),original.get(1),"Size4",BigDecimal.class);
+			compareFieldsValues(result.get(1),original.get(1),"UDT",BigDecimal.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -325,7 +322,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(BigDecimal value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type and negative value:
 	 * UInt64,Price,Size and UDT
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testBigDecimalTypeWithNegativeValue(){
 		try{
@@ -334,22 +330,20 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			message.addField("UInt64", new BigDecimal(0));
 			message.addField("Int32", new BigDecimal(0));
 			message.addField("UInt32", new BigDecimal(0));
-			message.addField("Price", negativeValue);
+			message.addField("PriceLen4", negativeValue);
+			message.addField("PriceLen8", negativeValue);
+			message.addField("Price4Len8", negativeValue);
 			message.addField("Size", new BigDecimal(0));
+			message.addField("Size4", new BigDecimal(0));
 			message.addField("UDT", new BigDecimal(0));
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
             List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 
-            long val = (long)(negativeValue.doubleValue() * 100_000_000);
-			long mask = 0x7FFFFFFFFFFFFFFFL;
-			val = val & mask;
-			val = val * -1L;
-			BigDecimal valBD = new BigDecimal(val);
-            valBD = valBD.divide(new BigDecimal(100_000_000L));
-
-			Assert.assertEquals(valBD,result.get(1).getField("Price"));
+			Assert.assertEquals(negativeValue,result.get(1).getField("PriceLen4"));
+			Assert.assertEquals(negativeValue,result.get(1).getField("PriceLen8"));
+			Assert.assertEquals(negativeValue,result.get(1).getField("Price4Len8"));
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -360,7 +354,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 	/**
      * Test methods visit(IMessage value...) in ITCHVisitorEncode and ITCHVisitorDecode
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testIMessageType(){
 		try{
@@ -403,10 +396,9 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			codec.decode( decodeSession, toDecode, decoderOutput );
 			Assert.assertEquals( "No message decoded", 1, decoderOutput.getMessageQueue().size());
 			IMessage message=(IMessage) decoderOutput.getMessageQueue().element();
-			@SuppressWarnings("unchecked")
-            List<IMessage> result = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+			List<IMessage> result = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 			Assert.assertEquals(2, result.size());
-			Assert.assertEquals(1, (int)Integer.valueOf(result.get(1).getField("Alpha_notrim").toString().trim()));
+			Assert.assertEquals(1, Integer.parseInt(result.get(1).getField("Alpha_notrim").toString().trim()));
 		}catch(Exception e){
 			e.printStackTrace(System.err);
 			logger.error(e.getMessage(),e);
@@ -418,7 +410,6 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
      * Test methods visit(Date value...) in ITCHVisitorEncode and ITCHVisitorDecode with all possible type:
 	 * Date, Time, Days and Stub
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDateType(){
 		try{
@@ -460,7 +451,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
         itchVisitorDecode.visit("test", BigDecimal.ZERO, fieldStructure, false);
 
-        Assert.assertThat(msg.getField("test"), CoreMatchers.is(BigDecimal.valueOf(Long.MAX_VALUE)));
+		assertThat(msg.getField("test"), CoreMatchers.is(BigDecimal.valueOf(Long.MAX_VALUE)));
     }
 
     @Test
