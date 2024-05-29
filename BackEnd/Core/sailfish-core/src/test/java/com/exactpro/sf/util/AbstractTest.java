@@ -132,10 +132,12 @@ public class AbstractTest {
                     	.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/gen/workspace"), new TestWorkspaceLayout())
                     	.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/provided/workspace"), new TestWorkspaceLayout())
                     	.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/test/workspace"), new TestWorkspaceLayout())
+                    	.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/testgen/workspace"), new TestWorkspaceLayout())
 							.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/main/plugin"), new TestWorkspaceLayout())
 							.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/gen/plugin"), new TestWorkspaceLayout())
 							.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/provided/plugin"), new TestWorkspaceLayout())
 							.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/test/plugin"), new TestWorkspaceLayout())
+							.addWorkspaceLayer(new File(BASE_DIR.getAbsolutePath(), "src/testgen/plugin"), new TestWorkspaceLayout())
 						.addWorkspaceLayer(Files.createTempDirectory("sf-tests").toFile(), DefaultWorkspaceLayout.getInstance())
                     	.build();
 
