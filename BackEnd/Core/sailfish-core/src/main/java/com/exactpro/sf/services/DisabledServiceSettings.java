@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.dom4j.QName;
 import org.dom4j.dom.DOMElement;
 import org.w3c.dom.Element;
@@ -108,7 +109,7 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     @Override
-    public void load(HierarchicalConfiguration config) {
+    public void load(HierarchicalConfiguration<ImmutableNode> config) {
 
     }
 

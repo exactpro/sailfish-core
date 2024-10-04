@@ -4,8 +4,8 @@ dependencies {
     compile 'org.apache.httpcomponents:httpmime:4.5.13'
     compile "com.fasterxml.jackson.core:jackson-annotations"
     compile "com.fasterxml.jackson.core:jackson-databind"
-    compile 'org.apache.commons:commons-lang3:3.8.1'
-    compile 'commons-configuration:commons-configuration:1.10'
+    compile 'org.apache.commons:commons-lang3:3.14.0'
+    compile 'org.apache.commons:commons-configuration2:2.11.0'
     compile 'com.google.guava:guava:30.1-jre'
     compile 'commons-beanutils:commons-beanutils:1.9.4'
     constraints {
@@ -15,12 +15,11 @@ dependencies {
             }
             because("To be compatible with sailfish-core: overriding transitive from apache.poi.")
         }
-        compile("commons-logging:commons-logging") {
-            version {
-                strictly "1.2"
-                because("To fix vulnerability: overriding transitive from commons-configuration")
-            }
-        }
     }
 }
 
+configurations.configureEach {
+    resolutionStrategy {
+        force 'commons-logging:commons-logging:1.3.2'
+    }
+}

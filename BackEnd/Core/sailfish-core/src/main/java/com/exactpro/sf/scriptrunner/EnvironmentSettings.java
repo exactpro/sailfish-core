@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.HierarchicalConfiguration.Node;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
@@ -36,6 +36,8 @@ import com.exactpro.sf.aml.ValidateRegex;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.google.common.collect.ImmutableSet;
+
+import static com.exactpro.sf.util.Configuration2Utils.createNode;
 
 public class EnvironmentSettings implements ICommonSettings
 {
@@ -164,15 +166,15 @@ public class EnvironmentSettings implements ICommonSettings
     private int verificationLimit;
 
     // this config is one per SF
-    private final HierarchicalConfiguration config;
+    private final HierarchicalConfiguration<ImmutableNode> config;
 
-	public EnvironmentSettings(HierarchicalConfiguration hierarchicalConfiguration) {
+	public EnvironmentSettings(HierarchicalConfiguration<ImmutableNode> hierarchicalConfiguration) {
 		this.config = hierarchicalConfiguration;
 		if (config.configurationsAt(GENERAL_KEY).isEmpty()) {
-            config.getRootNode().addChild(new Node(GENERAL_KEY));
+            config.getNodeModel().getNodeHandler().getRootNode().addChild(createNode(GENERAL_KEY));
         }
         if (config.configurationsAt(SCRIPT_RUN).isEmpty()) {
-            config.getRootNode().addChild(new Node(SCRIPT_RUN));
+            config.getNodeModel().getNodeHandler().getRootNode().addChild(createNode(SCRIPT_RUN));
         }
 	}
 
@@ -408,7 +410,7 @@ public class EnvironmentSettings implements ICommonSettings
     }
 
 	@Override
-	public void load(HierarchicalConfiguration config)
+	public void load(HierarchicalConfiguration<ImmutableNode> config)
 	{
         if(!config.configurationsAt(GENERAL_KEY).isEmpty()) {
             loadGeneralSettings(config.configurationAt(GENERAL_KEY));
@@ -419,7 +421,7 @@ public class EnvironmentSettings implements ICommonSettings
         }
 	}
 
-	private static Set<String> parseSet(HierarchicalConfiguration config, String propertyName, String regex, Set<String> defaultValue) {
+	private static Set<String> parseSet(HierarchicalConfiguration<ImmutableNode> config, String propertyName, String regex, Set<String> defaultValue) {
 	    List<?> value = config.getList(propertyName);
         if (CollectionUtils.isNotEmpty(value)) {
             Pattern pattern = Pattern.compile(regex);
@@ -456,7 +458,7 @@ public class EnvironmentSettings implements ICommonSettings
         }
 	}
 
-	private void loadGeneralSettings(HierarchicalConfiguration config) {
+	private void loadGeneralSettings(HierarchicalConfiguration<ImmutableNode> config) {
 		this.fileStoragePath = config.getString("FileStoragePath", "storage");
 
 		this.storeAdminMessages = config.getBoolean("StoreAdminMessages", true);
@@ -470,7 +472,7 @@ public class EnvironmentSettings implements ICommonSettings
         this.comparisonPrecision = config.getBigDecimal(COMPARISON_PRECISION, MathProcessor.COMPARISON_PRECISION);
 	}
 
-    private void updateGeneralSettings(HierarchicalConfiguration config) {
+    private void updateGeneralSettings(HierarchicalConfiguration<ImmutableNode> config) {
 		config.setProperty("FileStoragePath", fileStoragePath);
 		config.setProperty("StoreAdminMessages", storeAdminMessages);
 		config.setProperty(ASYNC_RUN_MATRIX_KEY, asyncRunMatrix);
@@ -479,7 +481,7 @@ public class EnvironmentSettings implements ICommonSettings
         config.setProperty(MAX_STORAGE_QUEUE_SIZE, maxQueueSize);
 	}
 
-    private void loadScriptRunSettings(HierarchicalConfiguration config) {
+    private void loadScriptRunSettings(HierarchicalConfiguration<ImmutableNode> config) {
         notificationIfServicesNotStarted = config.getBoolean(NOTIFICATION_IF_SOME_SERVICES_NOT_STARTED, false);
         failUnexpected = config.getString(FAIL_UNEXPECTED_KEY, "N");
         matrixCompilerPriority = config.getInt(MATRIX_COMPILER_PRIORITY, Thread.NORM_PRIORITY);
@@ -489,7 +491,7 @@ public class EnvironmentSettings implements ICommonSettings
         verificationLimit = config.getInt(VERIFICATION_LIMIT, 200);
     }
 
-    private void updateScriptRunSettings(HierarchicalConfiguration config) {
+    private void updateScriptRunSettings(HierarchicalConfiguration<ImmutableNode> config) {
         config.setProperty(NOTIFICATION_IF_SOME_SERVICES_NOT_STARTED, notificationIfServicesNotStarted);
         config.setProperty(FAIL_UNEXPECTED_KEY, failUnexpected);
         config.setProperty(MATRIX_COMPILER_PRIORITY, matrixCompilerPriority);

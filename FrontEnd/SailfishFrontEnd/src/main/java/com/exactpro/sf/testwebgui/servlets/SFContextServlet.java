@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -346,29 +347,18 @@ public class SFContextServlet implements Servlet {
             }
 
             // Read settings
-            XMLConfiguration sfConfig = new XMLConfiguration() {
-                @Override
-                protected Transformer createTransformer() throws TransformerException {
-                    Transformer transformer = super.createTransformer();
-                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                    return transformer;
-                }
-            };
+			FileBasedConfigurationBuilder<PrettyXMLConfiguration> configBuilder = new FileBasedConfigurationBuilder<>(PrettyXMLConfiguration.class);
+            XMLConfiguration sfConfig = configBuilder.getConfiguration();
 			try {
 				File configFile = wd.getFile(FolderType.CFG, CONFIG_FILE_NAME);
 				try (InputStream stream = new FileInputStream(configFile)) {
-					sfConfig.load(stream);
+					sfConfig.read(stream);
 				}
 			} catch (ConfigurationException | WorkspaceSecurityException e) {
 				throw new SFException("Could not read [" + CONFIG_FILE_NAME + "] configuration file", e);
 			} catch (FileNotFoundException e) {
 	    		logger.info("Use default settings for Sailfish");
 			}
-
-			File configFileOnLastLayer = new File(wd.getFolder(FolderType.CFG), CONFIG_FILE_NAME);
-			sfConfig.setFile(configFileOnLastLayer);
-			sfConfig.setAutoSave(true);
 
     		// ----------- SFContextSettings init
     		SFContextSettings sfContextSettings = new SFContextSettings();
@@ -543,5 +533,15 @@ public class SFContextServlet implements Servlet {
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 		throw new SFException("Incorrect State. This servlet only initialize SF context");
+	}
+
+	private static class PrettyXMLConfiguration extends XMLConfiguration {
+		@Override
+		protected Transformer createTransformer() throws ConfigurationException {
+			Transformer transformer = super.createTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			return transformer;
+		}
 	}
 }

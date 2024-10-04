@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -111,7 +112,7 @@ public class UpdateService implements IEmbeddedService {
 
     private UpdateServiceSettings settings;
 
-    public UpdateService(IWorkspaceDispatcher workspaceDispatcher, HierarchicalConfiguration config, ITaskExecutor taskExecutor, Collection<IVersion> currentVersions) {
+    public UpdateService(IWorkspaceDispatcher workspaceDispatcher, HierarchicalConfiguration<ImmutableNode> config, ITaskExecutor taskExecutor, Collection<IVersion> currentVersions) {
         this.wd = workspaceDispatcher;
         this.taskExecutor = taskExecutor;
         deployerPath = config.getString(PATH_PARAMETER, "");
@@ -337,7 +338,7 @@ public class UpdateService implements IEmbeddedService {
         try {
             File configFile = wd.getFile(FolderType.CFG, DEPLOYER_CFG_FILE);
             try (InputStream stream = new FileInputStream(configFile)) {
-                deployerCfg.load(stream);
+                deployerCfg.read(stream);
             }
         } catch (ConfigurationException | WorkspaceSecurityException e) {
             throw new EPSCommonException("Could not read [" + DEPLOYER_CFG_FILE + "] configuration file", e);

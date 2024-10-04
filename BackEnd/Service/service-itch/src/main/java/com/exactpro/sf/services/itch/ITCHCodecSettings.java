@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.codecs.ICodecSettings;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class ITCHCodecSettings implements ICodecSettings {
 
@@ -54,7 +55,7 @@ public class ITCHCodecSettings implements ICodecSettings {
 	}
 
 	@Override
-	public void load(HierarchicalConfiguration config) {
+	public void load(HierarchicalConfiguration<ImmutableNode> config) {
 		// TODO Auto-generated method stub
 
 	}

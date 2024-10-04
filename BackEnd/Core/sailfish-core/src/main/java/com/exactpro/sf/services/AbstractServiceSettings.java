@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
 import com.exactpro.sf.services.util.ServiceUtil;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 @SuppressWarnings("serial")
 public abstract class AbstractServiceSettings implements IServiceSettings, Serializable {
@@ -112,7 +113,7 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
     @XmlJavaTypeAdapter(SailfishURIAdapter.class)
     public abstract void setDictionaryName(SailfishURI dictionaryName);
 
-    public void load(HierarchicalConfiguration cfg) {
+    public void load(HierarchicalConfiguration<ImmutableNode> cfg) {
     	this.expectedTimeOfStarting = cfg.getLong("expectedTimeOfStarting", 0L);
     	this.waitingTimeBeforeStarting = cfg.getLong("waitingTimeBeforeStarting", 0L);
     	this.comment = cfg.getString("comment", null);

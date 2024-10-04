@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.common.util.ICommonSettings;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class AdapterDescription implements ICommonSettings
 {
@@ -27,7 +28,7 @@ public class AdapterDescription implements ICommonSettings
 	
 	
 	@Override
-	public void load(HierarchicalConfiguration config) 
+	public void load(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		this.adapterForClass = config.getString("AdapterForClass");
 	    this.adapterClass = config.getString("AdapterClass");

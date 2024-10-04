@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@ package com.exactpro.sf.services.ntg;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.exactpro.sf.aml.Description;
@@ -307,7 +308,7 @@ public class NTGClientSettings extends AbstractMINASettings {
 	}
 
 	@Override
-	public void load( HierarchicalConfiguration config ) {
+	public void load( HierarchicalConfiguration<ImmutableNode> config ) {
 		this.connectTimeout = config.getInt("connectTimeout", 30000);
 		this.loginTimeout = config.getInt("loginTimeout", 30000);
 		this.logoutTimeout = config.getInt("logoutTimeout", 5000);

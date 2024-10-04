@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.common.util.ICommonSettings;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 /**
  * Created by alexey.zarovny on 1/30/15.
@@ -30,9 +31,9 @@ public class LoggingConfiguration implements ILoggingConfiguration, ICommonSetti
 
     private boolean individualAppendersEnabled;
     private boolean appendersEnabled = true;
-    private final HierarchicalConfiguration config;
+    private final HierarchicalConfiguration<ImmutableNode> config;
 
-    public LoggingConfiguration(HierarchicalConfiguration config) {
+    public LoggingConfiguration(HierarchicalConfiguration<ImmutableNode> config) {
         this.config = config;
     }
 
@@ -73,7 +74,7 @@ public class LoggingConfiguration implements ILoggingConfiguration, ICommonSetti
     }
 
     @Override
-    public void load(HierarchicalConfiguration config) {
+    public void load(HierarchicalConfiguration<ImmutableNode> config) {
         individualAppendersEnabled = config.getBoolean(INDIVIDUAL_APPENDER_ENABLE_PROPERTY, true);
         appendersEnabled = config.getBoolean(APPENDERS_ENABLED_PROPERTY, true);
     }

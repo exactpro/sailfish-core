@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@ package com.exactpro.sf.services.fast;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.services.RequiredParam;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 @XmlRootElement
 public class FASTClientSettings extends FASTCodecSettings {
@@ -104,7 +105,7 @@ public class FASTClientSettings extends FASTCodecSettings {
 	}
 
 	@Override
-	public void load(HierarchicalConfiguration config)
+	public void load(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		//this.address = config.getString("address");
 		//this.port = config.getInt("port", 0);

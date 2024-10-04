@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package com.exactpro.sf.common.codecs;
 
 import java.util.Queue;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
@@ -94,7 +95,7 @@ public class TestAbstractCodec {
             }
 
             @Override
-            public void load(HierarchicalConfiguration config) {
+            public void load(HierarchicalConfiguration<ImmutableNode> config) {
                 throw new UnsupportedOperationException("load method is not implemented");
             }
         };

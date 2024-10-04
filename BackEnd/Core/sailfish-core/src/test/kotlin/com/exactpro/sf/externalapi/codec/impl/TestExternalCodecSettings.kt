@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package com.exactpro.sf.externalapi.codec.impl
 
 import com.exactpro.sf.common.util.ICommonSettings
-import org.apache.commons.configuration.HierarchicalConfiguration
+import org.apache.commons.configuration2.HierarchicalConfiguration
+import org.apache.commons.configuration2.tree.ImmutableNode
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -27,7 +28,7 @@ class TestExternalCodecSettings {
         private var fieldB: Boolean = false
         fun isFieldB(): Boolean = fieldB
         fun setFieldB(value: Boolean) { fieldB = value }
-        override fun load(config: HierarchicalConfiguration?) {
+        override fun load(config: HierarchicalConfiguration<ImmutableNode>?) {
         }
     }
 
@@ -43,7 +44,7 @@ class TestExternalCodecSettings {
         fun setFieldB(value: Boolean): BuilderSetters = apply {
             fieldB = value
         }
-        override fun load(config: HierarchicalConfiguration?) {
+        override fun load(config: HierarchicalConfiguration<ImmutableNode>?) {
         }
     }
 

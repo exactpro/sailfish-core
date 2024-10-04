@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.HierarchicalConfiguration.Node;
+import com.exactpro.sf.util.Configuration2Utils;
+import org.apache.commons.configuration2.BaseHierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.center.ISFContext;
@@ -36,8 +38,8 @@ import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
 
 public abstract class AbstractStaticTest {
     protected static ISFContext initContext(List<File> workspaceLayers) throws Exception {
-        HierarchicalConfiguration config = new HierarchicalConfiguration();
-        config.setRootNode(new Node("configuration"));
+        HierarchicalConfiguration<ImmutableNode> config = new BaseHierarchicalConfiguration();
+        config.getNodeModel().setRootNode(Configuration2Utils.createNode("configuration"));
 
         config.addProperty("Environment.GeneralSettings.StorageType", "file");
         config.addProperty("Environment.GeneralSettings.FileStoragePath", "storage");

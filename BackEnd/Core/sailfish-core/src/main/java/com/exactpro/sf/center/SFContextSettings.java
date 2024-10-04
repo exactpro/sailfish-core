@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.center;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.HierarchicalConfiguration.Node;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
+
+import static com.exactpro.sf.util.Configuration2Utils.addChildNodeAndUpdate;
+import static com.exactpro.sf.util.Configuration2Utils.createNode;
 
 public class SFContextSettings {
     private static final String ENVIRONMENT_KEY = "Environment";
@@ -24,42 +27,42 @@ public class SFContextSettings {
     private static final String UPDATER_KEY = "Update";
     private static final String CLEANUP_KEY = "Cleanup";
 
-    private HierarchicalConfiguration config;
+    private HierarchicalConfiguration<ImmutableNode> config;
 	private String compilerClassPath;
 	
 	private String version;
 	private String branchName;
     private boolean authEnabled;
 
-    public HierarchicalConfiguration getEnvironmentConfig() {
+    public HierarchicalConfiguration<ImmutableNode> getEnvironmentConfig() {
         if (config.configurationsAt(ENVIRONMENT_KEY).isEmpty()) {
-            config.getRootNode().addChild(new Node(ENVIRONMENT_KEY));
+			addChildNodeAndUpdate(config, createNode(ENVIRONMENT_KEY));
         }
         return config.configurationAt(ENVIRONMENT_KEY);
     }
 
-    public HierarchicalConfiguration getLoggingConfig() {
+    public HierarchicalConfiguration<ImmutableNode> getLoggingConfig() {
         if (config.configurationsAt(LOGGING_KEY).isEmpty()) {
-            config.getRootNode().addChild(new Node(LOGGING_KEY));
+			addChildNodeAndUpdate(config, createNode(LOGGING_KEY));
         }
         return config.configurationAt(LOGGING_KEY);
     }
 
-    public HierarchicalConfiguration getUpdateServiceConfiguration() {
+    public HierarchicalConfiguration<ImmutableNode> getUpdateServiceConfiguration() {
         if (config.configurationsAt(UPDATER_KEY).isEmpty()) {
-            config.getRootNode().addChild(new Node(UPDATER_KEY));
+			addChildNodeAndUpdate(config, createNode(UPDATER_KEY));
         }
         return config.configurationAt(UPDATER_KEY);
     }
 
-    public HierarchicalConfiguration getCleanupConfig() {
+    public HierarchicalConfiguration<ImmutableNode> getCleanupConfig() {
         if (config.configurationsAt(CLEANUP_KEY).isEmpty()) {
-            config.getRootNode().addChild(new Node(CLEANUP_KEY));
+            addChildNodeAndUpdate(config, createNode(CLEANUP_KEY));
         }
         return config.configurationAt(CLEANUP_KEY);
     }
 
-    public void setConfig(HierarchicalConfiguration config) {
+    public void setConfig(HierarchicalConfiguration<ImmutableNode> config) {
         this.config = config;
     }
 

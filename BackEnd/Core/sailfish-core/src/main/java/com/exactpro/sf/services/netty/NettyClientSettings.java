@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.exactpro.sf.services.netty;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -26,6 +26,7 @@ import com.exactpro.sf.externalapi.DictionaryProperty;
 import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.ServiceException;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 @XmlRootElement
 public abstract class NettyClientSettings extends AbstractServiceSettings {
@@ -57,7 +58,7 @@ public abstract class NettyClientSettings extends AbstractServiceSettings {
 	}
 
 	@Override
-	public void load(HierarchicalConfiguration cfg) {
+	public void load(HierarchicalConfiguration<ImmutableNode> cfg) {
 		super.load(cfg);
 		this.idleTimeout = cfg.getInt("idleTimeout");
 

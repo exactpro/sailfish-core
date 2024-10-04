@@ -18,7 +18,7 @@ package com.exactpro.sf.common.impl.messages.json.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import com.exactpro.sf.common.impl.messages.all.configuration.IField;
 import com.exactpro.sf.common.impl.messages.json.configuration.Converters.AttributesDeserializeConverter;

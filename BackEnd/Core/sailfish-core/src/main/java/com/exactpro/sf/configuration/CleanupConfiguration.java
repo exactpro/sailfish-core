@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 package com.exactpro.sf.configuration;
 
 import com.exactpro.sf.common.util.ICommonSettings;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class CleanupConfiguration implements ICommonSettings {
 
-    private final HierarchicalConfiguration config;
+    private final HierarchicalConfiguration<ImmutableNode> config;
 
     private static final String REPORTS = "Reports";
     private static final String MATRICES = "Matrices";
@@ -42,12 +43,12 @@ public class CleanupConfiguration implements ICommonSettings {
     private boolean autoclean;
     private int cleanOlderThanDays;
 
-    public CleanupConfiguration(HierarchicalConfiguration config) {
+    public CleanupConfiguration(HierarchicalConfiguration<ImmutableNode> config) {
         this.config = config;
     }
 
     @Override
-    public void load(HierarchicalConfiguration config) {
+    public void load(HierarchicalConfiguration<ImmutableNode> config) {
         reports = config.getBoolean(REPORTS, false);
         matrices = config.getBoolean(MATRICES, false);
         messages = config.getBoolean(MESSAGES, false);

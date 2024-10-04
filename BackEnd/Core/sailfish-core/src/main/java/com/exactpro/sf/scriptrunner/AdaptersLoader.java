@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.configuration.AdapterDescription;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class AdaptersLoader {
 
@@ -30,15 +31,15 @@ public class AdaptersLoader {
 
 	private final List<AdapterDescription> adapters = new LinkedList<>();
 
-	public void load(HierarchicalConfiguration config) {
+	public void load(HierarchicalConfiguration<ImmutableNode> config) {
 		loadAdaptersSettings(config.configurationAt(SETTINGS_ADAPTERS_KEY));
 	}
 
-	private void loadAdaptersSettings(HierarchicalConfiguration config) {
+	private void loadAdaptersSettings(HierarchicalConfiguration<ImmutableNode> config) {
 		List<?> list = config.configurationsAt(SETTINGS_ADAPTER_KEY);
 
 		for (Iterator<?> it = list.iterator(); it.hasNext();) {
-			HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
+			HierarchicalConfiguration<ImmutableNode> sub = (HierarchicalConfiguration<ImmutableNode>) it.next();
 
 			AdapterDescription adapterDescription = new AdapterDescription();
 			adapterDescription.load(sub);

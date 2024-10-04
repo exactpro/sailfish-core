@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import com.exactpro.sf.externalapi.DictionaryType
 import com.exactpro.sf.externalapi.DictionaryType.MAIN
 import com.exactpro.sf.externalapi.codec.IExternalCodecFactory
 import com.exactpro.sf.externalapi.codec.IExternalCodecSettings
-import org.apache.commons.configuration.HierarchicalConfiguration
+import org.apache.commons.configuration2.HierarchicalConfiguration
+import org.apache.commons.configuration2.tree.ImmutableNode
 
 abstract class AbstractExternalCodecFactory : IExternalCodecFactory {
     protected abstract val settingsClass: Class<out ICommonSettings>
@@ -65,6 +66,6 @@ abstract class AbstractExternalCodecFactory : IExternalCodecFactory {
     }
 
     protected class DummyCodecSettings : ICommonSettings {
-        override fun load(config: HierarchicalConfiguration?) {}
+        override fun load(config: HierarchicalConfiguration<ImmutableNode>?) {}
     }
 }

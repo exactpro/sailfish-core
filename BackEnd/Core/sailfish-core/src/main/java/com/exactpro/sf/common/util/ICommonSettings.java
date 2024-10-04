@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 /**
  * Reflects settings entity. All classes intended for configuring must implement
@@ -26,9 +27,9 @@ public interface ICommonSettings
 {
 	/**
 	 * 
-	 * Fills settings using <link>HierarchicalConfiguration<link> as source
+	 * Fills settings using <link>HierarchicalConfiguration<ImmutableNode><link> as source
 	 *  
 	 * @param config - source of settings
 	 */
-    void load(HierarchicalConfiguration config);
+    void load(HierarchicalConfiguration<ImmutableNode> config);
 }

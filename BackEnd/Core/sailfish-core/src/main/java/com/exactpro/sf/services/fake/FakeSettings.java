@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.exactpro.sf.services.fake;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -25,6 +25,7 @@ import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.externalapi.DictionaryProperty;
 import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 @XmlRootElement
 public class FakeSettings extends AbstractServiceSettings {
@@ -35,7 +36,7 @@ public class FakeSettings extends AbstractServiceSettings {
 	private long idleTimeout = 1000;
 
 	@Override
-	public void load(HierarchicalConfiguration config)
+	public void load(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		try {
             dictionaryName = SailfishURI.parse(config.getString("dictionaryName"));

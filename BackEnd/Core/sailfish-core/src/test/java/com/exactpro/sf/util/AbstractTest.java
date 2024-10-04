@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.mockito.ArgumentMatchers;
@@ -175,10 +177,10 @@ public class AbstractTest {
         Assert.assertEquals(getFieldCount(msg), ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
     }
 
-	protected static HierarchicalConfiguration loadDefaultEnvironment(IWorkspaceDispatcher wd) {
+	protected static HierarchicalConfiguration<ImmutableNode> loadDefaultEnvironment(IWorkspaceDispatcher wd) {
 		try {
 			File file = wd.getFile(FolderType.CFG, DEFAULT_CFG_FILENAME);
-			return new XMLConfiguration(file);
+			return new Configurations().fileBased(XMLConfiguration.class, file);
 		} catch (ConfigurationException e) {
 			throw new ScriptRunException("Exception during configuration loading", e);
 		} catch (Exception e) {

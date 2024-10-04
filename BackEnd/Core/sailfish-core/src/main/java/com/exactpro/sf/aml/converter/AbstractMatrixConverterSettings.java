@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@ package com.exactpro.sf.aml.converter;
 
 import java.io.File;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.common.services.ServiceName;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public abstract class AbstractMatrixConverterSettings implements IMatrixConverterSettings {
     @Ignore
@@ -31,7 +32,7 @@ public abstract class AbstractMatrixConverterSettings implements IMatrixConverte
     private String environment = ServiceName.DEFAULT_ENVIRONMENT;
 
     @Override
-    public void load(HierarchicalConfiguration config) {
+    public void load(HierarchicalConfiguration<ImmutableNode> config) {
         // TODO Auto-generated method stub
     }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.beans.PropertyDescriptor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class BeanConfigurator 
 {
 	
-	public static void loadBean(HierarchicalConfiguration context, Object beanObject, ConvertUtilsBean converter)   
+	public static void loadBean(HierarchicalConfiguration<ImmutableNode> context, Object beanObject, ConvertUtilsBean converter)
 	{
 		PropertyUtilsBean beanUtils = new PropertyUtilsBean(); 
 		
@@ -53,7 +54,7 @@ public class BeanConfigurator
 	}
 	
 	
-	public static void loadBean(HierarchicalConfiguration context, Object beanObject)   
+	public static void loadBean(HierarchicalConfiguration<ImmutableNode> context, Object beanObject)   
 	{
 		ConvertUtilsBean converter = new ConvertUtilsBean();
 		
@@ -62,7 +63,7 @@ public class BeanConfigurator
 
 	
 	
-	public static void saveBean(HierarchicalConfiguration context, Object beanObject)
+	public static void saveBean(HierarchicalConfiguration<ImmutableNode> context, Object beanObject)
 	{
 		ConvertUtilsBean converter = new ConvertUtilsBean();
 		

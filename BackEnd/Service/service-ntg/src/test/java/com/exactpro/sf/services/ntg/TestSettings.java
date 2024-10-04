@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,8 +43,7 @@ public class TestSettings extends AbstractTest
 
 			if(new File(fileFQN).exists())
 			{
-				XMLConfiguration config = new XMLConfiguration( fileFQN );
-				config.load();
+				XMLConfiguration config = new Configurations().fileBased(XMLConfiguration.class, fileFQN);
 
 				Object servers = config.getProperty("Environment.ConnectionManager.Services.Service[@name]");
 

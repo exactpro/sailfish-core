@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -23,6 +23,7 @@ import com.exactpro.sf.externalapi.DictionaryProperty;
 import com.exactpro.sf.externalapi.DictionaryType;
 import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class FASTCodecSettings extends AbstractServiceSettings {
 
@@ -70,7 +71,7 @@ public class FASTCodecSettings extends AbstractServiceSettings {
 	}
 
 	@Override
-	public void load(HierarchicalConfiguration config) {
+	public void load(HierarchicalConfiguration<ImmutableNode> config) {
 	}
 
     @Override

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import com.exactpro.sf.common.util.ICommonSettings;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 public class ScriptSettings implements ICommonSettings 
 {
@@ -155,9 +156,9 @@ public class ScriptSettings implements ICommonSettings
 
 	
 	@Override
-	public void load(HierarchicalConfiguration config) 
+	public void load(HierarchicalConfiguration<ImmutableNode> config) 
 	{
-		HierarchicalConfiguration testScriptConfig = config.configurationAt(TESTSCRIPT_KEY);
+		HierarchicalConfiguration<ImmutableNode> testScriptConfig = config.configurationAt(TESTSCRIPT_KEY);
 		
 		String scriptNamePar = config.getString("TestScript[@name]");
 
@@ -181,7 +182,7 @@ public class ScriptSettings implements ICommonSettings
 	}
 	
 	
-	private void loadProperties(HierarchicalConfiguration config)
+	private void loadProperties(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		Iterator<?> it = config.getKeys();
 
@@ -195,7 +196,7 @@ public class ScriptSettings implements ICommonSettings
 	}
 	
 	
-	private void loadLoggingProperties(HierarchicalConfiguration config)
+	private void loadLoggingProperties(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		this.consoleLayout = config.getString("ConsoleLogger.Pattern", "%p %t %d{dd MMM yyyy HH:mm:ss,SSS} %c - %m%n");
 		this.consoleLoggerLevel = config.getString("ConsoleLogger.Level", "ALL");
@@ -206,7 +207,7 @@ public class ScriptSettings implements ICommonSettings
 	}
 	
 	
-	private void loadTestReportProperties(HierarchicalConfiguration config)
+	private void loadTestReportProperties(HierarchicalConfiguration<ImmutableNode> config)
 	{
 		this.addMessagetoReport = config.getBoolean("AddMessagesToReport", true);
 	}

@@ -13,37 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.services.json;
+package com.exactpro.sf.util;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
-
-import com.exactpro.sf.common.util.ICommonSettings;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 
-public class JsonSettings implements ICommonSettings {
-    private boolean rejectUnexpectedFields;
-    private boolean treatSimpleValuesAsStrings;
+import java.util.List;
 
-    public boolean isRejectUnexpectedFields() {
-        return rejectUnexpectedFields;
-    }
+public class Configuration2Utils {
+	public static ImmutableNode createNode(String name) {
+		return new ImmutableNode.Builder().name(name).create();
+	}
 
-    public JsonSettings setRejectUnexpectedFields(boolean rejectUnexpectedFields) {
-        this.rejectUnexpectedFields = rejectUnexpectedFields;
-        return this;
-    }
+	public static void addChildNodeAndUpdate(HierarchicalConfiguration<ImmutableNode> config, ImmutableNode newNode) {
+		ImmutableNode updatedRoot = new ImmutableNode.Builder()
+				.addChildren(getChildrenOfRootNode(config))
+				.addChild(newNode)
+				.create();
+		config.getNodeModel().setRootNode(updatedRoot);
+	}
 
-    public boolean isTreatSimpleValuesAsStrings() {
-        return treatSimpleValuesAsStrings;
-    }
-
-    public JsonSettings setTreatSimpleValuesAsStrings(boolean treatSimpleValuesAsStrings) {
-        this.treatSimpleValuesAsStrings = treatSimpleValuesAsStrings;
-        return this;
-    }
-
-    @Override
-    public void load(HierarchicalConfiguration<ImmutableNode> config) {
-
-    }
+	private static List<ImmutableNode> getChildrenOfRootNode(HierarchicalConfiguration<ImmutableNode> config) {
+		return config.getNodeModel()
+				.getNodeHandler()
+				.getRootNode()
+				.getChildren();
+	}
 }

@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.common.impl.messages.json.configuration.FieldMessageDeserializer;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonField;

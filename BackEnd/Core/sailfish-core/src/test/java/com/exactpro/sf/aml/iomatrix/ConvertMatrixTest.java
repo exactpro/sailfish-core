@@ -16,7 +16,7 @@
 package com.exactpro.sf.aml.iomatrix;
 
 import com.exactpro.sf.util.AbstractTest;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
