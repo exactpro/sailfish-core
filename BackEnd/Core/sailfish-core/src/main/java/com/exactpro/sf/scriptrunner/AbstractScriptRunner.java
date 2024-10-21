@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.Level;
@@ -716,7 +717,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         File scriptFile = workspaceDispatcher.getFile(FolderType.REPORT, description.getSettingsPath());
         XMLConfiguration scriptConfig = new XMLConfiguration();
         try (InputStream stream = Files.newInputStream(scriptFile.toPath())) {
-            scriptConfig.read(stream);
+            new FileHandler(scriptConfig).load(stream);
         }
         ScriptSettings scriptSettings = new ScriptSettings();
         scriptSettings.load(scriptConfig);

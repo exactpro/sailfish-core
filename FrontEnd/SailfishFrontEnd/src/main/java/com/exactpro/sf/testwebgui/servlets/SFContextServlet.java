@@ -347,11 +347,10 @@ public class SFContextServlet implements Servlet {
 
             // Read settings
             XMLConfiguration sfConfig = new PrettyXMLConfiguration();
-			FileHandler fileHandler = new FileHandler(sfConfig);
 			try {
 				File configFile = wd.getFile(FolderType.CFG, CONFIG_FILE_NAME);
 				try (InputStream stream = new FileInputStream(configFile)) {
-					fileHandler.load(stream);
+					new FileHandler(sfConfig).load(stream);
 				}
 			} catch (ConfigurationException | WorkspaceSecurityException e) {
 				throw new SFException("Could not read [" + CONFIG_FILE_NAME + "] configuration file", e);
