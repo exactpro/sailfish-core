@@ -43,10 +43,9 @@ import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -347,12 +346,12 @@ public class SFContextServlet implements Servlet {
             }
 
             // Read settings
-			FileBasedConfigurationBuilder<PrettyXMLConfiguration> configBuilder = new FileBasedConfigurationBuilder<>(PrettyXMLConfiguration.class);
-            XMLConfiguration sfConfig = configBuilder.getConfiguration();
+            XMLConfiguration sfConfig = new PrettyXMLConfiguration();
+			FileHandler fileHandler = new FileHandler(sfConfig);
 			try {
 				File configFile = wd.getFile(FolderType.CFG, CONFIG_FILE_NAME);
 				try (InputStream stream = new FileInputStream(configFile)) {
-					sfConfig.read(stream);
+					fileHandler.load(stream);
 				}
 			} catch (ConfigurationException | WorkspaceSecurityException e) {
 				throw new SFException("Could not read [" + CONFIG_FILE_NAME + "] configuration file", e);
