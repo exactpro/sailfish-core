@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.testwebgui.servlets;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,7 +43,6 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -93,6 +90,8 @@ import com.exactpro.sf.testwebgui.notifications.events.LogSubscriber;
 import com.exactpro.sf.testwebgui.notifications.events.WebLoggingAppender;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.MLPersistenceManager;
 import com.exactpro.sf.testwebgui.scriptruns.MatrixHolder;
+
+import static com.exactpro.sf.util.Configuration2Utils.readConfig;
 
 
 public class SFContextServlet implements Servlet {
@@ -349,10 +348,8 @@ public class SFContextServlet implements Servlet {
             XMLConfiguration sfConfig = new PrettyXMLConfiguration();
 			try {
 				File configFile = wd.getFile(FolderType.CFG, CONFIG_FILE_NAME);
-				try (InputStream stream = new FileInputStream(configFile)) {
-					new FileHandler(sfConfig).load(stream);
-				}
-			} catch (ConfigurationException | WorkspaceSecurityException e) {
+                readConfig(sfConfig, configFile);
+            } catch (ConfigurationException | WorkspaceSecurityException e) {
 				throw new SFException("Could not read [" + CONFIG_FILE_NAME + "] configuration file", e);
 			} catch (FileNotFoundException e) {
 	    		logger.info("Use default settings for Sailfish");

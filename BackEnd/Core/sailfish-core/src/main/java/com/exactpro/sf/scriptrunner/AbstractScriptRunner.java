@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.scriptrunner;
 
+import static com.exactpro.sf.util.Configuration2Utils.readConfig;
 import static com.exactpro.sf.util.LogUtils.addAppender;
 import static com.exactpro.sf.util.LogUtils.removeAllAppenders;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.Level;
@@ -715,10 +713,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
         // load Script Settings
         File scriptFile = workspaceDispatcher.getFile(FolderType.REPORT, description.getSettingsPath());
-        XMLConfiguration scriptConfig = new XMLConfiguration();
-        try (InputStream stream = Files.newInputStream(scriptFile.toPath())) {
-            new FileHandler(scriptConfig).load(stream);
-        }
+        XMLConfiguration scriptConfig = readConfig(scriptFile);
         ScriptSettings scriptSettings = new ScriptSettings();
         scriptSettings.load(scriptConfig);
         scriptSettings.setScriptName(description.getMatrixFileName());

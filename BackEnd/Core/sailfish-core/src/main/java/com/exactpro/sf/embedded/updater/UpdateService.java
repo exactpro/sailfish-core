@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 
 package com.exactpro.sf.embedded.updater;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +31,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
@@ -68,6 +65,8 @@ import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
+
+import static com.exactpro.sf.util.Configuration2Utils.readConfig;
 
 public class UpdateService implements IEmbeddedService {
     private static final Logger logger = LoggerFactory.getLogger(UpdateService.class);
@@ -274,8 +273,7 @@ public class UpdateService implements IEmbeddedService {
     }
 
     private List<String> createCheckUpdateParameters() {
-        List<String> builder = createCommonParameters("check");
-        return builder;
+        return createCommonParameters("check");
     }
 
     private List<String> createUpdateParameters() {
@@ -333,13 +331,10 @@ public class UpdateService implements IEmbeddedService {
     }
 
     private void readDeployerConfiguration() {
-        XMLConfiguration deployerCfg = new XMLConfiguration();
-
+        XMLConfiguration deployerCfg;
         try {
             File configFile = wd.getFile(FolderType.CFG, DEPLOYER_CFG_FILE);
-            try (InputStream stream = new FileInputStream(configFile)) {
-                deployerCfg.read(stream);
-            }
+            deployerCfg = readConfig(configFile);
         } catch (ConfigurationException | WorkspaceSecurityException e) {
             throw new EPSCommonException("Could not read [" + DEPLOYER_CFG_FILE + "] configuration file", e);
         } catch (FileNotFoundException e) {
