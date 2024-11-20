@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.comparison;
 
 import java.math.BigDecimal;
@@ -35,8 +35,9 @@ import com.exactpro.sf.util.DateTimeUtility;
 public class Convention {
 
 
+    public static final Object CONV_EXISTENCE_OBJECT = ComparisonExistenceFilter.INSTANCE;
     public static final Object CONV_PRESENT_OBJECT = ComparisonNotNullFilter.INSTANCE;
-	public static final String CONV_PRESENT_STRING = "*";
+	public static final String CONV_PRESENT_STRING = ComparisonNotNullFilter.CONDITION;
 	public static final byte CONV_PRESENT_BYTE = Byte.MAX_VALUE;
 	public static final int CONV_PRESENT_INTEGER = -999;
 	public static final long CONV_PRESENT_LONG = -999L;
@@ -55,7 +56,7 @@ public class Convention {
 	public static final String CONV_PRESENT_ENUM = "Present";
 
 	public static final Object CONV_MISSED_OBJECT = ComparisonNullFilter.INSTANCE;
-	public static final String CONV_MISSED_STRING = "#";
+	public static final String CONV_MISSED_STRING = ComparisonNullFilter.CONDITION;
 	public static final byte CONV_MISSED_BYTE = Byte.MIN_VALUE;
 	public static final int CONV_MISSED_INTEGER = -998;
 	public static final long CONV_MISSED_LONG = -998L;

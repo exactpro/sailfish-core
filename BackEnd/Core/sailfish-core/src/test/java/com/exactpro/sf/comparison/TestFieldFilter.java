@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructure
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.AbstractTest;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -37,53 +36,146 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
+
 public class TestFieldFilter extends AbstractTest {
 
     @Test
-    public void testNullAndNotNull() {
+    public void testNull() {
 
         IMessage message = messageFactory.createMessage("name", "namespace");
         IMessage filter = messageFactory.createMessage("name", "namespace");
 
         IFilter nullFilter = StaticUtil.nullFilter(0, null);
-        IFilter notNullFilter = StaticUtil.notNullFilter(0, null);
-        IFilter missedFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_MISSED_OBJECT");
-        IFilter presentFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_PRESENT_OBJECT");
 
         message.addField("ExplicitNull_NullFilter", null);
+        message.addField("AnyValue_NullFilter", new Object());
+
         filter.addField("ExplicitNull_NullFilter", nullFilter);
+        filter.addField("AnyValue_NullFilter", nullFilter);
         filter.addField("HiddenNull_NullFilter", nullFilter);
 
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_NullFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("AnyValue_NullFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("HiddenNull_NullFilter").getStatus());
+    }
+
+    @Test
+    public void testMissed() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IFilter missedFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_MISSED_OBJECT");
+
         message.addField("ExplicitNull_EmptyValue", null);
+        message.addField("AnyValue_EmptyValue", new Object());
+
         filter.addField("ExplicitNull_EmptyValue", missedFilter);
+        filter.addField("AnyValue_EmptyValue", missedFilter);
         filter.addField("HiddenNull_EmptyValue", missedFilter);
 
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_EmptyValue").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("AnyValue_EmptyValue").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("HiddenNull_EmptyValue").getStatus());
+    }
+
+    @Test
+    public void testNotNull() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IFilter notNullFilter = StaticUtil.notNullFilter(0, null);
+
         message.addField("ExplicitNull_NotNullFilter", null);
+        message.addField("AnyValue_NotNullFilter", new Object());
+
         filter.addField("ExplicitNull_NotNullFilter", notNullFilter);
+        filter.addField("AnyValue_NotNullFilter", notNullFilter);
         filter.addField("HiddenNull_NotNullFilter", notNullFilter);
 
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 1, 2, 0);
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("ExplicitNull_NotNullFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_NotNullFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_NotNullFilter").getStatus());
+    }
+
+    @Test
+    public void testPresent() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IFilter presentFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_PRESENT_OBJECT");
+
         message.addField("ExplicitNull_AnyValue", null);
+        message.addField("AnyValue_AnyValue", new Object());
+
         filter.addField("ExplicitNull_AnyValue", presentFilter);
+        filter.addField("AnyValue_AnyValue", presentFilter);
         filter.addField("HiddenNull_AnyValue", presentFilter);
 
         ComparatorSettings compareSettings = new ComparatorSettings();
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
 
-        validateResult(comparisonResult, 4, 4, 0);
+        validateResult(comparisonResult, 1, 2, 0);
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("ExplicitNull_AnyValue").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_AnyValue").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_AnyValue").getStatus());
     }
 
-    private IMessageFactory messageFactory = DefaultMessageFactory.getFactory();
+    @Test
+    public void testExistence() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IFilter presentFilter = StaticUtil.existenceFilter(0, null);
+
+        message.addField("ExplicitNull_ExistenceFilter", null);
+        message.addField("AnyValue_ExistenceFilter", new Object());
+
+        filter.addField("ExplicitNull_ExistenceFilter", presentFilter);
+        filter.addField("AnyValue_ExistenceFilter", presentFilter);
+        filter.addField("HiddenNull_ExistenceFilter", presentFilter);
+
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_ExistenceFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_ExistenceFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_ExistenceFilter").getStatus());
+    }
+
+    private final IMessageFactory messageFactory = DefaultMessageFactory.getFactory();
 
     private void validateResult(ComparisonResult comparatorResult, int passed, int failed, int na) {
         System.out.println(comparatorResult);
         System.out.println();
-        int apassed = ComparisonUtil.getResultCount(comparatorResult, StatusType.PASSED);
-        int afailed = ComparisonUtil.getResultCount(comparatorResult, StatusType.FAILED);
-        int ana = ComparisonUtil.getResultCount(comparatorResult, StatusType.NA);
-        Assert.assertEquals("PASSED", passed, apassed);
-        Assert.assertEquals("FAILED", failed, afailed);
-        Assert.assertEquals("N/A", na, ana);
+        int allPassed = ComparisonUtil.getResultCount(comparatorResult, StatusType.PASSED);
+        int allFailed = ComparisonUtil.getResultCount(comparatorResult, StatusType.FAILED);
+        int allna = ComparisonUtil.getResultCount(comparatorResult, StatusType.NA);
+        Assert.assertEquals("PASSED", passed, allPassed);
+        Assert.assertEquals("FAILED", failed, allFailed);
+        Assert.assertEquals("N/A", na, allna);
     }
 
     @Test

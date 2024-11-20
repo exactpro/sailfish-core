@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
 
 import java.math.BigDecimal;
@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.exactpro.sf.comparison.NullValueSubstitute;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.exactpro.sf.aml.scriptutil.ExpressionResult;
@@ -41,19 +42,18 @@ import com.google.common.collect.SetMultimap;
 public class BugsCheckerBuilder extends AbstractBugsChecker {
     public static String ORIGIN_VALUE_MESSAGE = "Origin value";
 
-    private static final Set<Object> CONVENTIONS = ImmutableSet.of(Convention.CONV_MISSED_OBJECT, Convention.CONV_PRESENT_OBJECT);
+    private static final Set<Object> CONVENTIONS = ImmutableSet.of(Convention.CONV_MISSED_OBJECT, Convention.CONV_PRESENT_OBJECT, Convention.CONV_EXISTENCE_OBJECT);
 
     private final Object originValue;
     private final SetMultimap<Object, BugDescription> alternativeValues = LinkedHashMultimap.create();
     private Object actualValue = BugsCheckerBuilder.class; //default value, because real actual value may be null
     private final Function<Object, Object> defaultActualMapFunction = value ->
-            actualValue != BugsCheckerBuilder.class
-                    ? actualValue
-            : ObjectUtils.defaultIfNull(value, Convention.CONV_MISSED_OBJECT);
-    private Function<Object, Object> actualMapFumction = defaultActualMapFunction;
+            actualValue == BugsCheckerBuilder.class ? convertValue(value) : actualValue;
+
+    private Function<Object, Object> actualMapFunction = defaultActualMapFunction;
 
     public BugsCheckerBuilder(Object originValue) {
-        this.originValue = ObjectUtils.defaultIfNull(originValue, Convention.CONV_MISSED_OBJECT);
+        this.originValue = convertValue(originValue);
     }
 
     @Override
@@ -82,9 +82,9 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
         return Bug(subject, Convention.CONV_PRESENT_OBJECT, categories);
     }
 
-    public BugsCheckerBuilder ActualFunction(Function<Object, Object> actualMapFumction) {
+    public BugsCheckerBuilder ActualFunction(Function<Object, Object> actualMapFunction) {
         if(isActualEmpty()) {
-            this.actualMapFumction = Objects.requireNonNull(actualMapFumction, "Actual map function can't be null");
+            this.actualMapFunction = Objects.requireNonNull(actualMapFunction, "Actual map function can't be null");
         }
         return this;
     }
@@ -92,20 +92,20 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     @Override
     public BugsCheckerBuilder Actual(Object obj) {
         if(isActualEmpty()) {
-            this.actualValue = ObjectUtils.defaultIfNull(obj, Convention.CONV_MISSED_OBJECT);
+            this.actualValue = convertValue(obj);
         }
         return this;
     }
 
     @Override
     public ExpressionResult validate(Object actualValue) throws KnownBugException {
-        actualValue = actualMapFumction.apply(actualValue);
+        actualValue = actualMapFunction.apply(actualValue);
 
-        if(originValue == Convention.CONV_PRESENT_OBJECT && actualValue != Convention.CONV_MISSED_OBJECT) {
+        if (isConventionsMatched(originValue, actualValue)) {
             return new ExpressionResult(false, ORIGIN_VALUE_MESSAGE, null, null, getDescriptions());
         }
 
-        Function<Object, ExpressionResult> checkFunction = value -> ExpressionResult.create(Objects.equals(originValue, value));
+        Function<Object, ExpressionResult> checkFunction = value -> ExpressionResult.create( Objects.equals(originValue, value));
 
         if(!CONVENTIONS.contains(originValue) && !CONVENTIONS.contains(actualValue)) {
             if(originValue instanceof IFilter) {
@@ -123,7 +123,10 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
                 actualDescriptions.addAll(descriptions);
             }
 
-            boolean convertible = MultiConverter.SUPPORTED_TYPES.contains(actualValue.getClass());
+            boolean convertible = false;
+            if (actualValue != null) {
+                convertible = MultiConverter.SUPPORTED_TYPES.contains(actualValue.getClass());
+            }
             
             for(Object alternativeValue : alternativeValues.keySet()) {
                 descriptions = alternativeValues.get(alternativeValue);
@@ -138,12 +141,11 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
                     if (areEqual(convertedValue, actualValue)) {
                         actualDescriptions.addAll(descriptions);
                     }
+                } else if (CONVENTIONS.contains(alternativeValue)) {
+                    if (isConventionsMatched(alternativeValue, actualValue)) {
+                        actualDescriptions.addAll(descriptions);
+                    }
                 }
-            }
-
-            descriptions = alternativeValues.get(Convention.CONV_PRESENT_OBJECT);
-            if (descriptions != null && actualValue != Convention.CONV_MISSED_OBJECT) {
-                actualDescriptions.addAll(descriptions);
             }
 
             if (!actualDescriptions.isEmpty()) {
@@ -171,14 +173,21 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
 
     private String formatValue(Object value) {
         StringBuilder resultBuilder = new StringBuilder(String.valueOf(value));
-        if (value != Convention.CONV_PRESENT_OBJECT && value != Convention.CONV_MISSED_OBJECT) {
+        if (!CONVENTIONS.contains(value)) {
             resultBuilder.append(" (").append(value.getClass().getSimpleName()).append(")");
         }
         return resultBuilder.toString();
     }
 
     private Set<BugDescription> getDescriptions() {
-        return Collections.unmodifiableSet(new HashSet<>(alternativeValues.values()));
+        return alternativeValues.isEmpty()
+                ? EXPECTED_ONLY_BUG_DESCRIPTION_SET
+                : Collections.unmodifiableSet(new HashSet<>(alternativeValues.values()));
+    }
+
+    private static Object convertValue(Object value) {
+        Object result = ObjectUtils.defaultIfNull(value, Convention.CONV_MISSED_OBJECT);
+        return result == NullValueSubstitute.INSTANCE ? Convention.CONV_EXISTENCE_OBJECT : result;
     }
 
     private static ExpressionResult createExpressionResult(BugsCheckerBuilder bugsCheckerBuilder, Set<BugDescription> descriptions) {
@@ -186,13 +195,26 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     }
 
     private boolean isActualEmpty() {
-        if(actualMapFumction != defaultActualMapFunction) {
-            throw new EPSCommonException("Actual map fumction already set");
+        if(actualMapFunction != defaultActualMapFunction) {
+            throw new EPSCommonException("Actual map function already set");
         } else if(actualValue != BugsCheckerBuilder.class) {
             throw new EPSCommonException("Actual already set '" + actualValue + "'");
         }
 
         return true;
+    }
+
+    private static boolean isConventionsMatched(Object originValue, Object actualValue) {
+        if (originValue == Convention.CONV_MISSED_OBJECT) {
+            return actualValue == Convention.CONV_MISSED_OBJECT || actualValue == Convention.CONV_EXISTENCE_OBJECT;
+        }
+        if (originValue == Convention.CONV_PRESENT_OBJECT) {
+            return actualValue != Convention.CONV_MISSED_OBJECT && actualValue != Convention.CONV_EXISTENCE_OBJECT;
+        }
+        if (originValue == Convention.CONV_EXISTENCE_OBJECT) {
+            return actualValue != Convention.CONV_MISSED_OBJECT;
+        }
+        return false;
     }
 
     @SuppressWarnings("OverlyStrongTypeCast")

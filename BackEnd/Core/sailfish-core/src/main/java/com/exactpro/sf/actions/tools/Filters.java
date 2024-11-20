@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.actions.tools;
 
 import java.util.Objects;
@@ -56,6 +56,22 @@ public class Filters {
 
     public static IFilter empty() {
         return empty(0, null);
+    }
+
+    public static IFilter existence(long line, String column) {
+        return StaticUtil.existenceFilter(line, ObjectUtils.defaultIfNull(column, ""));
+    }
+
+    public static IFilter existence(long line) {
+        return existence(line, null);
+    }
+
+    public static IFilter existence(String column) {
+        return existence(0, column);
+    }
+
+    public static IFilter existence() {
+        return existence(0, null);
     }
 
     public static IFilter filter(long line, String column, Function<Object, Boolean> function, Function<Object, String> view) {

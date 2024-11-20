@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,25 +12,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 
 package com.exactpro.sf.common.messages;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
+
+import javax.annotation.Nullable;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestMessageStructureReader {
     
@@ -57,36 +63,54 @@ public class TestMessageStructureReader {
         message.addField("LocalDate", "2016-08-18");
         message.addField("LocalTime", "01:02:03.123456789");
         message.addField("LocalDateTime", "2016-08-18T01:02:03.123456789");
+        message.addField("NullValue", null);
         message.addField("Collection", Arrays.asList("1", "2", "3", "4"));
+        message.addField("CollectionNullValue", Arrays.asList("5", null, null, "8"));
 
-        IMessageStructureVisitor visitor = new TestVisitor<>();
+        TestVisitor visitor = new TestVisitor();
         MessageStructureReader.READER.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
-        
+
+        assertFiledClassName(structure, visitor.getMap());
+    }
+
+    @Test
+    public void testDefaultValueNotPutToMessage() throws IOException {
+        IDictionaryStructure dictionary = loadDictionary();
+        IMessageStructure messageStructure = dictionary.getMessages().get("MessageWithDefaultValues");
+
+        int defaultValues = messageStructure.getFields().values().stream()
+                .mapToInt(field -> field.getDefaultValue() == null ? 0 : 1).sum();
+        assertTrue("'" + messageStructure.getName() + "' hasn't got default fields", defaultValues > 0);
+
+        IMessage message = DefaultMessageFactory.getFactory().createMessage(messageStructure.getName(), dictionary.getNamespace());
+        TestVisitor visitor = new TestVisitor();
+        MessageStructureReader.READER.traverse(visitor, messageStructure, message, MessageStructureReaderHandlerImpl.instance());
+
+        assertEquals("Result hasn't default fields", defaultValues, visitor.getMap().size());
+        assertEquals("Message has unexpected fields", 0, message.getFieldCount());
+        assertFiledClassName(messageStructure, visitor.getMap());
+    }
+
+    private void assertFiledClassName(IMessageStructure structure, Map<String, Object> map) {
         structure.getFields().forEach((fieldName, fldStructure) -> {
             String expectedType = fldStructure.getJavaType().value();
             if (fldStructure.isCollection()) {
-                message.<Iterable<?>>getField(fieldName).forEach(element ->
-                        Assert.assertEquals(expectedType, element.getClass().getName()));
+                ((Collection<?>) map.get(fieldName)).forEach(element ->
+                        assertClassName(fieldName, expectedType, element));
             } else {
-                Assert.assertEquals(expectedType, message.getField(fieldName).getClass().getName());
+                assertClassName(fieldName, expectedType, map.get(fieldName));
             }
         });
     }
 
-    @Test
-    public void testDefaultValueIsNotPutToMessage() throws IOException {
-        IDictionaryStructure dictionary = loadDictionary();
-        IMessageStructure messageStructure = dictionary.getMessages().get("MessageWithDefaultValues");
-        IMessage message = DefaultMessageFactory.getFactory().createMessage(messageStructure.getName(), dictionary.getNamespace());
-
-        IMessageStructureVisitor visitor = new TestVisitor<>();
-        MessageStructureReader.READER.traverse(visitor, messageStructure, message, MessageStructureReaderHandlerImpl.instance());
-
-        Assert.assertEquals("Message has unexpected fields", 0, message.getFieldCount());
+    private void assertClassName(String fieldName, String expectedClass, @Nullable Object value) {
+        if (value != null) {
+            assertEquals("Incorrect type of " + fieldName + " field", expectedClass, value.getClass().getName());
+        }
     }
 
     private IDictionaryStructure loadDictionary() throws IOException {
-        try (InputStream fileInputStream = new FileInputStream(new File(BASE_DIR.toString(), DICTIONARY_PATH))) {
+        try (InputStream fileInputStream = Files.newInputStream(new File(BASE_DIR.toString(), DICTIONARY_PATH).toPath())) {
             return new XmlDictionaryStructureLoader().load(fileInputStream);
         }
     }

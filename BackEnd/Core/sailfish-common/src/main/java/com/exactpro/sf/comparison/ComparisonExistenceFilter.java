@@ -20,15 +20,15 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
 
-public class ComparisonNullFilter implements IComparisonFilter {
-    public static final String CONDITION = "#";
-    public static final ComparisonNullFilter INSTANCE = new ComparisonNullFilter();
+public class ComparisonExistenceFilter implements IComparisonFilter {
+    public static final String CONDITION = "* or " + NullValueSubstitute.NAME;
+    public static final ComparisonExistenceFilter INSTANCE = new ComparisonExistenceFilter();
 
-    protected ComparisonNullFilter() {}
+    protected ComparisonExistenceFilter() {}
 
     @Override
     public ExpressionResult validate(Object value) {
-        return create(value == null || value == NullValueSubstitute.INSTANCE);
+        return create(value != null);
     }
 
     @Override
@@ -47,12 +47,12 @@ public class ComparisonNullFilter implements IComparisonFilter {
     }
 
     @Override
-    public boolean hasValue() {
-        return false;
+    public String toString() {
+        return getCondition();
     }
 
     @Override
-    public String toString() {
-        return getCondition();
+    public boolean hasValue() {
+        return false;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("deprecation")
 public class TestMessageComparator {
@@ -64,27 +64,78 @@ public class TestMessageComparator {
     }
 
 	@Test
-    public void testNullAndNotNull() {
+    public void testNull() {
 
         IMessage message = messageFactory.createMessage("name", "namespace");
         IMessage filter = messageFactory.createMessage("name", "namespace");
 
         IComparisonFilter nullFilter = ComparisonNullFilter.INSTANCE;
-        IComparisonFilter notNullFilter = ComparisonNotNullFilter.INSTANCE;
 
         message.addField("ExplicitNull_NullFilter", null);
+        message.addField("AnyValue_NullFilter", new Object());
+
         filter.addField("ExplicitNull_NullFilter", nullFilter);
+        filter.addField("AnyValue_NullFilter", nullFilter);
         filter.addField("HiddenNull_NullFilter", nullFilter);
 
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_NullFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("AnyValue_NullFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("HiddenNull_NullFilter").getStatus());
+    }
+
+    @Test
+    public void testNotNull() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IComparisonFilter notNullFilter = ComparisonNotNullFilter.INSTANCE;
+
         message.addField("ExplicitNull_NotNullFilter", null);
+        message.addField("AnyValue_NotNullFilter", new Object());
+
         filter.addField("ExplicitNull_NotNullFilter", notNullFilter);
+        filter.addField("AnyValue_NotNullFilter", notNullFilter);
         filter.addField("HiddenNull_NotNullFilter", notNullFilter);
 
         ComparatorSettings compareSettings = new ComparatorSettings();
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
 
-        validateResult(comparisonResult, 2, 2, 0);
+        validateResult(comparisonResult, 1, 2, 0);
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("ExplicitNull_NotNullFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_NotNullFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_NotNullFilter").getStatus());
+    }
+
+    @Test
+    public void testExistence() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IComparisonFilter existenceFilter = ComparisonExistenceFilter.INSTANCE;
+
+        message.addField("ExplicitNull_ExistenceFilter", null);
+        message.addField("AnyValue_ExistenceFilter", new Object());
+
+        filter.addField("ExplicitNull_ExistenceFilter", existenceFilter);
+        filter.addField("AnyValue_ExistenceFilter", existenceFilter);
+        filter.addField("HiddenNull_ExistenceFilter", existenceFilter);
+
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_ExistenceFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_ExistenceFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_ExistenceFilter").getStatus());
     }
 
 	@Test
@@ -138,9 +189,9 @@ public class TestMessageComparator {
 
         for(ComparisonResult subResult : comparisonResult) {
 			if (subResult.getName().endsWith(passed)) {
-				Assert.assertEquals(subResult.getName(), StatusType.PASSED, subResult.getStatus());
+				assertEquals(subResult.getName(), StatusType.PASSED, subResult.getStatus());
 			} else if (subResult.getName().endsWith(failed)) {
-				Assert.assertEquals(subResult.getName(), StatusType.FAILED, subResult.getStatus());
+				assertEquals(subResult.getName(), StatusType.FAILED, subResult.getStatus());
 			} else {
 				Assert.fail("Unknown comparison " + subResult.getName());
 			}
@@ -253,9 +304,9 @@ public class TestMessageComparator {
         int afailed = ComparisonUtil.getResultCount(comparatorResult, StatusType.FAILED);
         int ana = ComparisonUtil.getResultCount(comparatorResult, StatusType.NA);
 		//System.out.println(apassed+", "+afailed+", "+ana);
-		Assert.assertEquals("PASSED", passed, apassed);
-		Assert.assertEquals("FAILED", failed, afailed);
-		Assert.assertEquals("N/A", na, ana);
+		assertEquals("PASSED", passed, apassed);
+		assertEquals("FAILED", failed, afailed);
+		assertEquals("N/A", na, ana);
 	}
 
 	private ComparisonResult doUnexpectedCompareIMessage(String failUnexpected, int expected, int actual, FilterType filterType)
@@ -336,8 +387,7 @@ public class TestMessageComparator {
 
         compSettings.setUncheckedFields(uncheckedFields);
 
-        ComparisonResult table = MessageComparator.compare(message, filter, compSettings);
-        return table;
+        return MessageComparator.compare(message, filter, compSettings);
     }
 
 	@Test
@@ -371,14 +421,14 @@ public class TestMessageComparator {
 	    IMessage filter = new MapMessage("namespace", "name");
 
         List<IMessage> list = new ArrayList<>();
-        for (int i = 0; i < groupsMessage.length; i++) {
-            list.add(subMessages[groupsMessage[i]]);
+        for (int k : groupsMessage) {
+            list.add(subMessages[k]);
         }
         msg.addField("group", list);
 
         list = new ArrayList<>();
-        for (int i = 0; i < groupsFilter.length; i++) {
-            list.add(subMessages[groupsFilter[i]]);
+        for (int j : groupsFilter) {
+            list.add(subMessages[j]);
         }
         filter.addField("group", list);
 
@@ -396,7 +446,7 @@ public class TestMessageComparator {
 	{
 
         HashMap<String, Boolean> map = new HashMap<>();
-		map.put("OldGrossConsideration", new Boolean(true));
+		map.put("OldGrossConsideration", Boolean.TRUE);
 
         IMessage mEXECUTION_REPORT = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
         mEXECUTION_REPORT.addField("CounterParty", "CounterParty0");
@@ -426,7 +476,7 @@ public class TestMessageComparator {
 		mEXECUTION_REPORT.addField("ContingentValue", 0);
 		mEXECUTION_REPORT.addField("ContingentCondition", -1);
 		mEXECUTION_REPORT.addField("TraderIndex", 5710);
-        mEXECUTION_REPORT.addField("SourceGatewayType", new Byte("0"));
+        mEXECUTION_REPORT.addField("SourceGatewayType", Byte.valueOf("0"));
 		mEXECUTION_REPORT.addField("ExecType", "ExecType.Fill");
 		mEXECUTION_REPORT.addField("Symbol", "AKPS1");
 		mEXECUTION_REPORT.addField("AllocatedSize", 0);
@@ -465,7 +515,7 @@ public class TestMessageComparator {
 		mEXECUTION_REPORT.addField("OnlyForMarketDataSystem", "OnlyForMarketDataSystem.RegularTrade");
 		mEXECUTION_REPORT.addField("Qualifier", "Qualifier.Conventional");
 		mEXECUTION_REPORT.addField("SideQualifier", "SideQualifier.BUY");
-        mEXECUTION_REPORT.addField("CrossType", new Byte("0"));
+        mEXECUTION_REPORT.addField("CrossType", Byte.valueOf("0"));
 		mEXECUTION_REPORT.addField("TransactTime", "*");
 		mEXECUTION_REPORT.addField("RoutingSeq", -999L);
 		mEXECUTION_REPORT.addField("ClearingAccountType", "ClearingAccountType.House");
@@ -559,97 +609,97 @@ public class TestMessageComparator {
 		Map<String, Object> actions = new HashMap<>();
 
         IMessage messageOTHRPRTY = messageFactory.createMessage("OTHRPRTY", "namespace");
-        messageOTHRPRTY.addField("CounterParty", new String("CounterParty"));
+        messageOTHRPRTY.addField("CounterParty", "CounterParty");
 		actions.put("othrprty", messageOTHRPRTY);
 
         IMessage messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new String("SettlementAccount_1"));
-        messageSETPRTY.addField("SettlementParty_Seller_R", new String("SettlementParty_Seller_R_1"));
-        messageSETPRTY.addField("PlaceOfSettlement", new String("PlaceOfSettlement_1"));
-        messageSETPRTY.addField("SettlementParty_Seller_P", new String("SettlementParty_Seller_P_1"));
-        messageSETPRTY.addField("SettlementParty_Buyer_R", new String("SettlementParty_Buyer_R_1"));
-        messageSETPRTY.addField("SettlementParty_Buyer_P", new String("SettlementParty_Buyer_P_1"));
+        messageSETPRTY.addField("SettlementAccount", "SettlementAccount_1");
+        messageSETPRTY.addField("SettlementParty_Seller_R", "SettlementParty_Seller_R_1");
+        messageSETPRTY.addField("PlaceOfSettlement", "PlaceOfSettlement_1");
+        messageSETPRTY.addField("SettlementParty_Seller_P", "SettlementParty_Seller_P_1");
+        messageSETPRTY.addField("SettlementParty_Buyer_R", "SettlementParty_Buyer_R_1");
+        messageSETPRTY.addField("SettlementParty_Buyer_P", "SettlementParty_Buyer_P_1");
 		actions.put("setprty1", messageSETPRTY);
 
         messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new String("SettlementAccount_2"));
-        messageSETPRTY.addField("SettlementParty_Seller_R", new String("SettlementParty_Seller_R_2"));
-        messageSETPRTY.addField("PlaceOfSettlement", new String("PlaceOfSettlement_2"));
-        messageSETPRTY.addField("SettlementParty_Seller_P", new String("SettlementParty_Seller_P_2"));
-        messageSETPRTY.addField("SettlementParty_Buyer_R", new String("SettlementParty_Buyer_R_2"));
-        messageSETPRTY.addField("SettlementParty_Buyer_P", new String("SettlementParty_Buyer_P_2"));
+        messageSETPRTY.addField("SettlementAccount", "SettlementAccount_2");
+        messageSETPRTY.addField("SettlementParty_Seller_R", "SettlementParty_Seller_R_2");
+        messageSETPRTY.addField("PlaceOfSettlement", "PlaceOfSettlement_2");
+        messageSETPRTY.addField("SettlementParty_Seller_P", "SettlementParty_Seller_P_2");
+        messageSETPRTY.addField("SettlementParty_Buyer_R", "SettlementParty_Buyer_R_2");
+        messageSETPRTY.addField("SettlementParty_Buyer_P", "SettlementParty_Buyer_P_2");
 		actions.put("setprty2", messageSETPRTY);
 
         IMessage messageSETDET = messageFactory.createMessage("SETDET", "namespace");
-        messageSETDET.addField("TypeOfSettlementIndicator", new String("TypeOfSettlementIndicator"));
+        messageSETDET.addField("TypeOfSettlementIndicator", "TypeOfSettlementIndicator");
 		messageSETDET.addField("SETPRTY", actions.get("setprty1"));
 		messageSETDET.addField("SETPRTY", actions.get("setprty2"));
 		actions.put("setdet", messageSETDET);
 
         IMessage messageBasicHeader = messageFactory.createMessage("BasicHeader", "namespace");
 		messageBasicHeader.addField("ServiceID", 1 );
-        messageBasicHeader.addField("LogicalTerminalAddress", new String("ANASCH20AXXX"));
+        messageBasicHeader.addField("LogicalTerminalAddress", "ANASCH20AXXX");
 		messageBasicHeader.addField("SessionNumber", 4321 );
 		messageBasicHeader.addField("SequenceNumber", 654321 );
-        messageBasicHeader.addField("ApplicationID", new String("F"));
+        messageBasicHeader.addField("ApplicationID", "F");
 		actions.put("bh", messageBasicHeader);
 
         IMessage messageCONFPRTY = messageFactory.createMessage("CONFPRTY", "namespace");
-        messageCONFPRTY.addField("ClearingMember_P", new String("ClearingMember_P"));
-        messageCONFPRTY.addField("PartyCapacity", new String("PartyCapacity"));
-        messageCONFPRTY.addField("AccountAtTradingVenue", new String("AccountAtTradingVenue"));
-        messageCONFPRTY.addField("ClearingMember_R", new String("ClearingMember_R"));
-        messageCONFPRTY.addField("Buyer_P", new String("Buyer_P"));
-        messageCONFPRTY.addField("PositionAccount", new String("PositionAccount"));
-        messageCONFPRTY.addField("Buyer_R", new String("Buyer_R"));
-        messageCONFPRTY.addField("TradingPartyReference", new String("TradingPartyReference"));
-        messageCONFPRTY.addField("PartyNarrative", new String("PartyNarrative"));
-        messageCONFPRTY.addField("Seller_P", new String("Seller_P"));
-        messageCONFPRTY.addField("Seller_R", new String("Seller_R"));
+        messageCONFPRTY.addField("ClearingMember_P", "ClearingMember_P");
+        messageCONFPRTY.addField("PartyCapacity", "PartyCapacity");
+        messageCONFPRTY.addField("AccountAtTradingVenue", "AccountAtTradingVenue");
+        messageCONFPRTY.addField("ClearingMember_R", "ClearingMember_R");
+        messageCONFPRTY.addField("Buyer_P", "Buyer_P");
+        messageCONFPRTY.addField("PositionAccount", "PositionAccount");
+        messageCONFPRTY.addField("Buyer_R", "Buyer_R");
+        messageCONFPRTY.addField("TradingPartyReference", "TradingPartyReference");
+        messageCONFPRTY.addField("PartyNarrative", "PartyNarrative");
+        messageCONFPRTY.addField("Seller_P", "Seller_P");
+        messageCONFPRTY.addField("Seller_R", "Seller_R");
 		actions.put("confprty", messageCONFPRTY);
 
         IMessage messageCONFDET = messageFactory.createMessage("CONFDET", "namespace");
-        messageCONFDET.addField("PlaceOfTrade", new String("PlaceOfTrade"));
-        messageCONFDET.addField("SettlementDate", new String("SettlementDate"));
+        messageCONFDET.addField("PlaceOfTrade", "PlaceOfTrade");
+        messageCONFDET.addField("SettlementDate", "SettlementDate");
 		messageCONFDET.addField("CONFPRTY", actions.get("confprty"));
-        messageCONFDET.addField("QuantityTraded", new String("QuantityTraded"));
-        messageCONFDET.addField("DealPriceAndCurrency_B", new String("DealPriceAndCurrency_B"));
-        messageCONFDET.addField("BuySellIndicator", new String("BuySellIndicator"));
-        messageCONFDET.addField("SettlementAmountAndCurrency", new String("SettlementAmountAndCurrency"));
-        messageCONFDET.addField("DealPriceAndCurrency_A", new String("DealPriceAndCurrency_A"));
-        messageCONFDET.addField("TradeDateTime", new String("TradeDateTime"));
-        messageCONFDET.addField("FinancialInstrument", new String("FinancialInstrument"));
-        messageCONFDET.addField("PaymentIndicator", new String("PaymentIndicator"));
-        messageCONFDET.addField("TradeProcessingNarrative", new String("TradeProcessingNarrative"));
+        messageCONFDET.addField("QuantityTraded", "QuantityTraded");
+        messageCONFDET.addField("DealPriceAndCurrency_B", "DealPriceAndCurrency_B");
+        messageCONFDET.addField("BuySellIndicator", "BuySellIndicator");
+        messageCONFDET.addField("SettlementAmountAndCurrency", "SettlementAmountAndCurrency");
+        messageCONFDET.addField("DealPriceAndCurrency_A", "DealPriceAndCurrency_A");
+        messageCONFDET.addField("TradeDateTime", "TradeDateTime");
+        messageCONFDET.addField("FinancialInstrument", "FinancialInstrument");
+        messageCONFDET.addField("PaymentIndicator", "PaymentIndicator");
+        messageCONFDET.addField("TradeProcessingNarrative", "TradeProcessingNarrative");
 		actions.put("confdet", messageCONFDET);
 
         IMessage messageLINK = messageFactory.createMessage("LINK", "namespace");
-        messageLINK.addField("LinkedMessage", new String("LinkedMessage"));
-        messageLINK.addField("TradeReference", new String("TradeReference"));
-        messageLINK.addField("PreviousReference", new String("PreviousReference"));
-        messageLINK.addField("VenueTradeReference", new String("VenueTradeReference"));
+        messageLINK.addField("LinkedMessage", "LinkedMessage");
+        messageLINK.addField("TradeReference", "TradeReference");
+        messageLINK.addField("PreviousReference", "PreviousReference");
+        messageLINK.addField("VenueTradeReference", "VenueTradeReference");
 		actions.put("link", messageLINK);
 
         IMessage messageGENL = messageFactory.createMessage("GENL", "namespace");
-        messageGENL.addField("TradeType", new String("TradeType"));
-        messageGENL.addField("SendersReference", new String("SendersReference"));
-        messageGENL.addField("PreparationDateTime", new String("PreparationDateTime"));
+        messageGENL.addField("TradeType", "TradeType");
+        messageGENL.addField("SendersReference", "SendersReference");
+        messageGENL.addField("PreparationDateTime", "PreparationDateTime");
 		messageGENL.addField("LINK", actions.get("link"));
 		actions.put("genl", messageGENL);
 
         IMessage messageTrailer = messageFactory.createMessage("Trailer", "namespace");
-        messageTrailer.addField("TNG", new String("TNG"));
-        messageTrailer.addField("CHK", new String("CHK"));
-        messageTrailer.addField("MAC", new String("MAC"));
+        messageTrailer.addField("TNG", "TNG");
+        messageTrailer.addField("CHK", "CHK");
+        messageTrailer.addField("MAC", "MAC");
 		actions.put("trailer", messageTrailer);
 
         IMessage messageApplicationHeaderInput = messageFactory.createMessage("ApplicationHeaderInput", "namespace");
 		messageApplicationHeaderInput.addField("ObsolescencePeriod", 3 );
-        messageApplicationHeaderInput.addField("Input", new String("I"));
-        messageApplicationHeaderInput.addField("ReceiversAddress", new String("BANKDEFFXXXX"));
-        messageApplicationHeaderInput.addField("MessagePriority", new String("U"));
+        messageApplicationHeaderInput.addField("Input", "I");
+        messageApplicationHeaderInput.addField("ReceiversAddress", "BANKDEFFXXXX");
+        messageApplicationHeaderInput.addField("MessagePriority", "U");
 		messageApplicationHeaderInput.addField("MessageType", 518 );
-        messageApplicationHeaderInput.addField("DeliveryMonitoring", new String("3"));
+        messageApplicationHeaderInput.addField("DeliveryMonitoring", "3");
 		actions.put("h1", messageApplicationHeaderInput);
 
         IMessage messageTradeConfirmation = messageFactory.createMessage("TradeConfirmation", "namespace");
@@ -662,13 +712,13 @@ public class TestMessageComparator {
 		messageTradeConfirmation.addField("ApplicationHeaderInput", actions.get("h1"));
 
         messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new String("another value"));
-        messageSETPRTY.addField("SettlementParty_Seller_R", new String("another value"));
-        messageSETPRTY.addField("PlaceOfSettlement", new String("another value"));
+        messageSETPRTY.addField("SettlementAccount", "another value");
+        messageSETPRTY.addField("SettlementParty_Seller_R", "another value");
+        messageSETPRTY.addField("PlaceOfSettlement", "another value");
 		actions.put("setprty2", messageSETPRTY);
 
         messageSETDET = messageFactory.createMessage("SETDET", "namespace");
-        messageSETDET.addField("TypeOfSettlementIndicator", new String("TypeOfSettlementIndicator"));
+        messageSETDET.addField("TypeOfSettlementIndicator", "TypeOfSettlementIndicator");
 		messageSETDET.addField("SETPRTY", messageSETPRTY);
 		messageSETDET.addField("SETPRTY", actions.get("setprty1"));
 		actions.put("setdet", messageSETDET);
@@ -707,7 +757,7 @@ public class TestMessageComparator {
 		settings.setMetaContainer(metaContainer);
 
         ComparisonResult result = MessageComparator.compare(mGrossRecord, mGrossRecord2, settings);
-        Assert.assertEquals(StatusType.PASSED, result.getResult("CurrentGross").getStatus());
+        assertEquals(StatusType.PASSED, result.getResult("CurrentGross").getStatus());
 		System.out.println(result);
 	}
 
@@ -760,23 +810,23 @@ public class TestMessageComparator {
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compSettings);
         System.out.println(comparisonResult);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
 
         metaContainer.setFailUnexpected("Y");
         comparisonResult = MessageComparator.compare(message, filter, compSettings);
         System.out.println(comparisonResult);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
 
         metaContainer.setFailUnexpected("A");
         comparisonResult = MessageComparator.compare(message, filter, compSettings);
         System.out.println(comparisonResult);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        assertEquals(1, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
     }
 
 	@Test
@@ -842,9 +892,9 @@ public class TestMessageComparator {
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compSettings);
         System.out.println(comparisonResult);
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
-        Assert.assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        assertEquals(8, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
     }
 
 	@Test
@@ -879,7 +929,7 @@ public class TestMessageComparator {
         ComparisonResult comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
         System.out.printf("diff %d\n", System.currentTimeMillis() - startTime);
         System.out.println(comparisonResult);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
     }
 
 	@Test
@@ -932,11 +982,11 @@ public class TestMessageComparator {
         long startTime = System.currentTimeMillis();
         ComparisonResult comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
         System.out.printf("diff %d\n", System.currentTimeMillis() - startTime);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
     }
 
     @Test
-    public void testIgnoredFields() throws Exception {
+    public void testIgnoredFields() {
         ComparatorSettings settings = new ComparatorSettings().setIgnoredFields(singleton("filler"));
 
         IMessage message = new MapMessage("TEST", "TestMessage");
@@ -997,8 +1047,8 @@ public class TestMessageComparator {
         result = MessageComparator.compare(message, filter, settings);
 
         Assert.assertNotNull(result);
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("keyField is not key in " + result, result
                 .getResult("keyField")
                 .isKey());
@@ -1042,8 +1092,8 @@ public class TestMessageComparator {
         result = MessageComparator.compare(message, filter, settings);
 
         Assert.assertNotNull(result);
-        Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("keyField is not key in " + result, result
                 .getResult("subMessage")
                 .getResult("keyField")
@@ -1106,8 +1156,8 @@ public class TestMessageComparator {
         result = MessageComparator.compare(message, filter, settings);
 
         Assert.assertNotNull(result);
-        Assert.assertEquals(4, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(4, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertFalse("keyField is a key in 0 result " + result,
                 result.getResult("collection")
                         .getResult("0")
@@ -1134,34 +1184,27 @@ public class TestMessageComparator {
             msg.addField("collection", asList(
                     createMessage(subMsg -> {
                         subMsg.addField("nonKeyField", 2);
-                        subMsg.addField("anotherInnerMessage", createMessage(innerMsg -> {
-                            innerMsg.addField("anotherField", 1);
-                        }));
+                        subMsg.addField("anotherInnerMessage",
+                                createMessage(innerMsg -> innerMsg.addField("anotherField", 1)));
                     }),
                     createMessage(subMsg -> {
                         subMsg.addField("nonKeyField", 4);
-                        subMsg.addField("innerMessage", createMessage(innerMsg -> {
-                            innerMsg.addField("keyField", 1);
-                        }));
+                        subMsg.addField("innerMessage",
+                                createMessage(innerMsg -> innerMsg.addField("keyField", 1)));
                     })
             ));
         });
 
-        IMessage wrongFilter = createMessage(msg -> {
-            msg.addField("collection", asList(
-                    createMessage(subMsg -> {
-                        subMsg.addField("nonKeyField", 2);
-                        subMsg.addField("anotherInnerMessage", createMessage(innerMsg -> {
-                            innerMsg.addField("anotherField", 2); // does not match
-                        }));
-                    }),
-                    createMessage(subMsg -> {
-                        subMsg.addField("innerMessage", createMessage(innerMsg -> {
-                            innerMsg.addField("keyField", 1);
-                        }));
-                    })
-            ));
-        });
+        IMessage wrongFilter = createMessage(msg -> msg.addField("collection", asList(
+                createMessage(subMsg -> {
+                    subMsg.addField("nonKeyField", 2);
+                    subMsg.addField("anotherInnerMessage", createMessage(innerMsg -> {
+                        innerMsg.addField("anotherField", 2); // does not match
+                    }));
+                }),
+                createMessage(subMsg -> subMsg.addField("innerMessage",
+                        createMessage(innerMsg -> innerMsg.addField("keyField", 1))))
+        )));
 
         IMessage rightFilter = wrongFilter.cloneMessage();
         rightFilter.<List<IMessage>>getField("collection").get(0)
@@ -1178,8 +1221,8 @@ public class TestMessageComparator {
 
         ComparisonResult result = MessageComparator.compare(message, wrongFilter, settings);
         Assert.assertNotNull("Key is not matched", result);
-        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("keyField is not a key in 1 result " + result,
                 result.getResult("collection")
                         .getResult("1")
@@ -1189,8 +1232,8 @@ public class TestMessageComparator {
 
         result = MessageComparator.compare(message, rightFilter, settings);
         Assert.assertNotNull("Key is not matched", result);
-        Assert.assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(3, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("keyField is not a key in 1 result " + result,
                 result.getResult("collection")
                         .getResult("1")
@@ -1201,23 +1244,14 @@ public class TestMessageComparator {
 
     @Test
     public void testMessageAsKeyField() {
-        IMessage message = createMessage(root -> {
-            root.addField("inner", createMessage(inner -> {
-                inner.addField("test", 1);
-            }));
-        });
+        IMessage message = createMessage(root -> root.addField("inner",
+                createMessage(inner -> inner.addField("test", 1))));
 
-        IMessage correctFilter = createMessage(root -> {
-            root.addField("inner", createMessage(inner -> {
-                inner.addField("test", 1);
-            }));
-        });
+        IMessage correctFilter = createMessage(root -> root.addField("inner",
+                createMessage(inner -> inner.addField("test", 1))));
 
-        IMessage wrongFilter = createMessage(root -> {
-            root.addField("inner", createMessage(inner -> {
-                inner.addField("test", 2);
-            }));
-        });
+        IMessage wrongFilter = createMessage(root -> root.addField("inner",
+                createMessage(inner -> inner.addField("test", 2))));
 
         ComparatorSettings settings = new ComparatorSettings();
         MetaContainer metaContainer = settings.getMetaContainer();
@@ -1228,8 +1262,8 @@ public class TestMessageComparator {
 
         result = MessageComparator.compare(message, correctFilter, settings);
         Assert.assertNotNull(result);
-        Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("inner is not a key in 1 result " + result,
                 result.getResult("inner")
                         .isKey());
@@ -1237,44 +1271,20 @@ public class TestMessageComparator {
 
     @Test
     public void testMessageInCollectionAsKeyField() {
-        IMessage message = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(inner -> {
-                        inner.addField("test", 1);
-                    }),
-                    createMessage(inner -> {
-                        inner.addField("key", createMessage(key -> {
-                            key.addField("test", 1);
-                        }));
-                    })
-            ));
-        });
+        IMessage message = createMessage(root -> root.addField("collection", asList(
+                createMessage(inner -> inner.addField("test", 1)),
+                createMessage(inner -> inner.addField("key", createMessage(key -> key.addField("test", 1))))
+        )));
 
-        IMessage correctFilter = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(inner -> {
-                        inner.addField("test", 1);
-                    }),
-                    createMessage(inner -> {
-                        inner.addField("key", createMessage(key -> {
-                            key.addField("test", 1);
-                        }));
-                    })
-            ));
-        });
+        IMessage correctFilter = createMessage(root -> root.addField("collection", asList(
+                createMessage(inner -> inner.addField("test", 1)),
+                createMessage(inner -> inner.addField("key", createMessage(key -> key.addField("test", 1))))
+        )));
 
-        IMessage wrongFilter = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(inner -> {
-                        inner.addField("test", 1);
-                    }),
-                    createMessage(inner -> {
-                        inner.addField("key", createMessage(key -> {
-                            key.addField("test", 2);
-                        }));
-                    })
-            ));
-        });
+        IMessage wrongFilter = createMessage(root -> root.addField("collection", asList(
+                createMessage(inner -> inner.addField("test", 1)),
+                createMessage(inner -> inner.addField("key", createMessage(key -> key.addField("test", 2))))
+        )));
 
         ComparatorSettings settings = new ComparatorSettings();
         MetaContainer metaContainer = settings.getMetaContainer();
@@ -1287,8 +1297,8 @@ public class TestMessageComparator {
 
         result = MessageComparator.compare(message, correctFilter, settings);
         Assert.assertNotNull(result);
-        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("key msg is not a key in 1 result " + result,
                 result.getResult("collection")
                         .getResult("1")
@@ -1298,17 +1308,11 @@ public class TestMessageComparator {
 
     @Test
     public void testSimpleCollectionAsKeyField() {
-        IMessage message = createMessage(root -> {
-            root.addField("collection", asList(1, 2));
-        });
+        IMessage message = createMessage(root -> root.addField("collection", asList(1, 2)));
 
-        IMessage correctFilter = createMessage(root -> {
-            root.addField("collection", asList(1, 2));
-        });
+        IMessage correctFilter = createMessage(root -> root.addField("collection", asList(1, 2)));
 
-        IMessage wrongFilter = createMessage(root -> {
-            root.addField("collection", asList(1, 3));
-        });
+        IMessage wrongFilter = createMessage(root -> root.addField("collection", asList(1, 3)));
 
         ComparatorSettings settings = new ComparatorSettings();
         MetaContainer metaContainer = settings.getMetaContainer();
@@ -1319,8 +1323,8 @@ public class TestMessageComparator {
 
         result = MessageComparator.compare(message, correctFilter, settings);
         Assert.assertNotNull(result);
-        Assert.assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+        assertEquals(2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
         Assert.assertTrue("collection is not a key in 1 result " + result,
                 result.getResult("collection")
                         .isKey());
@@ -1328,50 +1332,46 @@ public class TestMessageComparator {
 
     @Test
     public void testCollectionOrderInResult() {
-        IMessage message = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 1);
-                        msg.addField("marker2", 1);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 2);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 4);
-                        msg.addField("marker2", 4);
-                        msg.addField("marker3", 4);
-                    })
-            ));
-        });
+        IMessage message = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 1);
+                    msg.addField("marker2", 1);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 2);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 4);
+                    msg.addField("marker2", 4);
+                    msg.addField("marker3", 4);
+                })
+        )));
 
-        IMessage filter = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 42);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    })
-            ));
-        });
+        IMessage filter = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 42);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                })
+        )));
 
         ComparatorSettings settings = new ComparatorSettings();
         settings.setKeepResultGroupOrder(true);
@@ -1385,7 +1385,7 @@ public class TestMessageComparator {
             statuses.forEach((field, status) -> {
                 ComparisonResult marker = valueResult.getResult(field);
                 Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
-                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+                assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
             });
         };
 
@@ -1414,50 +1414,46 @@ public class TestMessageComparator {
 
     @Test
     public void testCollectionOrderInResultUsesBestMatchRule() {
-        IMessage message = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 1);
-                        msg.addField("marker2", 1);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 2);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 4);
-                        msg.addField("marker2", 4);
-                        msg.addField("marker3", 4);
-                    })
-            ));
-        });
+        IMessage message = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 1);
+                    msg.addField("marker2", 1);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 2);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 4);
+                    msg.addField("marker2", 4);
+                    msg.addField("marker3", 4);
+                })
+        )));
 
-        IMessage filter = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 42);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    })
-            ));
-        });
+        IMessage filter = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 42);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                })
+        )));
 
         ComparatorSettings settings = new ComparatorSettings();
         ComparisonResult result = MessageComparator.compare(message, filter, settings);
@@ -1470,7 +1466,7 @@ public class TestMessageComparator {
             statuses.forEach((field, status) -> {
                 ComparisonResult marker = valueResult.getResult(field);
                 Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
-                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+                assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
             });
         };
 
@@ -1499,49 +1495,45 @@ public class TestMessageComparator {
 
     @Test
     public void testCollectionOrderInResultIfFilterHasMoreElements() {
-        IMessage message = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 1);
-                        msg.addField("marker2", 1);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 2);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    })
-            ));
-        });
+        IMessage message = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 1);
+                    msg.addField("marker2", 1);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 2);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                })
+        )));
 
-        IMessage filter = createMessage(root -> {
-            root.addField("collection", asList(
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 42);
-                        msg.addField("marker3", 1);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 42);
-                        msg.addField("marker2", 2);
-                        msg.addField("marker3", 2);
-                    }),
-                    createMessage(msg -> {
-                        msg.addField("marker", 3);
-                        msg.addField("marker2", 3);
-                        msg.addField("marker3", 3);
-                    }), createMessage(msg -> {
-                        msg.addField("marker", 4);
-                        msg.addField("marker2", 4);
-                        msg.addField("marker3", 4);
-                    })
-            ));
-        });
+        IMessage filter = createMessage(root -> root.addField("collection", asList(
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 42);
+                    msg.addField("marker3", 1);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 42);
+                    msg.addField("marker2", 2);
+                    msg.addField("marker3", 2);
+                }),
+                createMessage(msg -> {
+                    msg.addField("marker", 3);
+                    msg.addField("marker2", 3);
+                    msg.addField("marker3", 3);
+                }), createMessage(msg -> {
+                    msg.addField("marker", 4);
+                    msg.addField("marker2", 4);
+                    msg.addField("marker3", 4);
+                })
+        )));
 
         ComparatorSettings settings = new ComparatorSettings();
         settings.setKeepResultGroupOrder(true);
@@ -1555,7 +1547,7 @@ public class TestMessageComparator {
             statuses.forEach((field, status) -> {
                 ComparisonResult marker = valueResult.getResult(field);
                 Assert.assertNotNull("Field " + field + " has no result at index " + index + ". Result: " + result, marker);
-                Assert.assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
+                assertEquals("Field " + field + " has unexpected status at index: " + index + ". Result: " + result, status, marker.getStatus());
             });
         };
 
@@ -1587,9 +1579,7 @@ public class TestMessageComparator {
         IMessage expected = createMessage(root -> {
             root.addField("Simple", 5);
             root.addField("Collection", asList(42, 43));
-            root.addField("SubMessage", createMessage(sub -> {
-                sub.addField("Simple", 6);
-            }));
+            root.addField("SubMessage", createMessage(sub -> sub.addField("Simple", 6)));
             root.addField("SubMessageCollection", asList(
                     createMessage(sub -> sub.addField("Simple", 7)),
                     createMessage(sub -> sub.addField("Simple", 8))
@@ -1599,9 +1589,7 @@ public class TestMessageComparator {
         IMessage actual = createMessage(root -> {
             root.addField("Simple", asList(42, 43));
             root.addField("SubMessage", 5);
-            root.addField("SubMessageCollection", createMessage(sub -> {
-                sub.addField("Simple", 6);
-            }));
+            root.addField("SubMessageCollection", createMessage(sub -> sub.addField("Simple", 6)));
             root.addField("Collection", asList(
                     createMessage(sub -> sub.addField("Simple", 7)),
                     createMessage(sub -> sub.addField("Simple", 8))
@@ -1622,67 +1610,63 @@ public class TestMessageComparator {
 
     @Test
     public void testBestMatchAlgorithmWorkWhenKeepResultInOrderEnabled() {
-        IMessage actual = createMessage(root -> {
-            root.addField("transactions", asList(
-                    createMessage(tx1 -> {
-                        tx1.addField("A", "3869a6e7-8401-4674-bb50-3934b873c896");
-                        tx1.addField("B", "pending");
-                        tx1.addField("C", "2021-11-24");
-                        tx1.addField("D", "NPP394");
-                    }),
-                    createMessage(tx2 -> {
-                        tx2.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
-                        tx2.addField("B", "archived");
-                        tx2.addField("C", "2021-11-24");
-                        tx2.addField("D", "TML5049");
-                    }),
-                    createMessage(tx3 -> {
-                        tx3.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
-                        tx3.addField("B", "archived");
-                        tx3.addField("C", "2021-11-24");
-                        tx3.addField("D", "TML227");
-                    }),
-                    createMessage(tx4 -> {
-                        tx4.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
-                        tx4.addField("B", "archived");
-                        tx4.addField("D", "cash");
-                    })
-            ));
-        });
+        IMessage actual = createMessage(root -> root.addField("transactions", asList(
+                createMessage(tx1 -> {
+                    tx1.addField("A", "3869a6e7-8401-4674-bb50-3934b873c896");
+                    tx1.addField("B", "pending");
+                    tx1.addField("C", "2021-11-24");
+                    tx1.addField("D", "NPP394");
+                }),
+                createMessage(tx2 -> {
+                    tx2.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
+                    tx2.addField("B", "archived");
+                    tx2.addField("C", "2021-11-24");
+                    tx2.addField("D", "TML5049");
+                }),
+                createMessage(tx3 -> {
+                    tx3.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
+                    tx3.addField("B", "archived");
+                    tx3.addField("C", "2021-11-24");
+                    tx3.addField("D", "TML227");
+                }),
+                createMessage(tx4 -> {
+                    tx4.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
+                    tx4.addField("B", "archived");
+                    tx4.addField("D", "cash");
+                })
+        )));
 
-        IMessage expected = createMessage(root -> {
-            root.addField("transactions", asList(
-                    createMessage(tx -> {
-                        tx.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
-                        tx.addField("B", "archived");
-                        tx.addField("C", ComparisonNullFilter.INSTANCE);
-                        tx.addField("D", "cash");
-                    }),
-                    createMessage(tx -> {
-                        tx.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
-                        tx.addField("B", "archived");
-                        tx.addField("C", "2021-11-24");
-                        tx.addField("D", "TML227");
-                    }),
-                    createMessage(tx -> {
-                        tx.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
-                        tx.addField("B", "archived");
-                        tx.addField("C", "2021-11-24");
-                        tx.addField("D", "TML5049");
-                    })
-            ));
-        });
+        IMessage expected = createMessage(root -> root.addField("transactions", asList(
+                createMessage(tx -> {
+                    tx.addField("A", "1461a7bd-9d8e-4178-a9b5-c8edb9daa6c5");
+                    tx.addField("B", "archived");
+                    tx.addField("C", ComparisonNullFilter.INSTANCE);
+                    tx.addField("D", "cash");
+                }),
+                createMessage(tx -> {
+                    tx.addField("A", "0ceacb75-a7a1-47c0-b0d0-26f6c8dc080b");
+                    tx.addField("B", "archived");
+                    tx.addField("C", "2021-11-24");
+                    tx.addField("D", "TML227");
+                }),
+                createMessage(tx -> {
+                    tx.addField("A", "91cab72b-18a7-4338-8d88-daaf11393c4c");
+                    tx.addField("B", "archived");
+                    tx.addField("C", "2021-11-24");
+                    tx.addField("D", "TML5049");
+                })
+        )));
 
         ComparisonResult result = MessageComparator.compare(actual, expected, new ComparatorSettings().setKeepResultGroupOrder(true));
         Assert.assertNotNull("result must not be null", result);
         ComparisonResult transactions = result.getResult("transactions");
         Assert.assertNotNull("transactions must not be null", transactions);
         Map<String, ComparisonResult> elements = transactions.getResults();
-        Assert.assertEquals("Unexpected elements size: " + elements, 4, elements.size());
+        assertEquals("Unexpected elements size: " + elements, 4, elements.size());
         BiConsumer<String, StatusType> assertStatus = (key, expectedStatus) -> {
             ComparisonResult first = elements.get(key);
             Assert.assertNotNull(key + " result must not be null", first);
-            Assert.assertEquals("Unexpected result for " + key + ":" + first, expectedStatus, ComparisonUtil.getStatusType(first));
+            assertEquals("Unexpected result for " + key + ":" + first, expectedStatus, ComparisonUtil.getStatusType(first));
         };
         assertStatus.accept("0", StatusType.NA);
         assertStatus.accept("1", StatusType.PASSED);
@@ -1733,8 +1717,8 @@ public class TestMessageComparator {
     private static void assertComparisonResult(String name, ComparisonResult result, Object expected, Object actual) {
         ComparisonResult field = result.getResult(name);
         Assert.assertNotNull("Cannot find result for " + name, field);
-        Assert.assertEquals("Expected result does not match expectation", expected, field.getExpected());
-        Assert.assertEquals("Actual result does not match expectation", actual, field.getActual());
+        assertEquals("Expected result does not match expectation", expected, field.getExpected());
+        assertEquals("Actual result does not match expectation", actual, field.getActual());
     }
 
     private static IMessage createMessage(Consumer<IMessage> initializer) {

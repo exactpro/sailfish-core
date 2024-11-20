@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.aml.scriptutil;
 
 import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.exactpro.sf.comparison.ComparisonExistenceFilter;
 import com.exactpro.sf.comparison.ComparisonNotNullFilter;
 import com.exactpro.sf.comparison.ComparisonNullFilter;
 import com.exactpro.sf.comparison.IComparisonFilter;
@@ -65,7 +66,7 @@ public class StaticUtil {
 	private static final Map<String, Serializable> EXPRESSION_CACHE = new LRUMap<>(EXPRESSIONS_CACHE_SIZE);
 
 	private static Map<String, Object> toMap(Object... args) {
-	    args = Objects.requireNonNull(args, "Arguments cannot be null");
+	    Objects.requireNonNull(args, "Arguments cannot be null");
 
 	    if(args.length % 2 > 0) {
 	        throw new IllegalArgumentException("Amount of arguments must be even");
@@ -122,6 +123,10 @@ public class StaticUtil {
 
 	public static IFilter notNullFilter(long line, String column) {
 		return new NotNullFilter(line, column);
+	}
+
+	public static IFilter existenceFilter(long line, String column) {
+		return new ExistenceFilter(line, column);
 	}
 
 	public static IFilter simpleFilter(long line, String column, String condition, Object... args) {
@@ -237,6 +242,7 @@ public class StaticUtil {
         IKnownBug Bug(String subject, Object alternativeValue, String... categories);
         IKnownBug BugEmpty(String subject, String... categories);
         IKnownBug BugAny(String subject, String... categories);
+        IKnownBug BugExistence(String subject, String... categories);
         IKnownBug Actual(Object obj);
         IFilter toFilter();
     }
@@ -311,7 +317,7 @@ public class StaticUtil {
 				    } else if ("x".equals(var)) {
 					    result.append("x"); // don't replace 'x'
 				    } else {
-					    Object evaluated = null;
+					    Object evaluated;
 					    try {
                             evaluated = eval(line, column, var, variables);
 						    // escape strings and characters
@@ -371,7 +377,6 @@ public class StaticUtil {
         public Object getValue() {
             throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
-
     }
 
 	private static class NotNullFilter extends ComparisonNotNullFilter implements IFilter {
@@ -379,6 +384,21 @@ public class StaticUtil {
         private final String column;
 
         public NotNullFilter(long line, String column) {
+            this.line = line;
+            this.column = column;
+        }
+
+        @Override
+        public Object getValue() {
+            throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
+        }
+    }
+
+    private static class ExistenceFilter extends ComparisonExistenceFilter implements IFilter {
+        private final long line;
+        private final String column;
+
+        public ExistenceFilter(long line, String column) {
             this.line = line;
             this.column = column;
         }

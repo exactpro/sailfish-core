@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.common.impl.messages;
 
 import java.math.BigDecimal;
@@ -86,6 +86,14 @@ public class MapMessage implements IMessage
 	}
 
 	@Override
+	public boolean hasField(String name) {
+		if (name == null) {
+			throw new IllegalArgumentException("[name] could not be null");
+		}
+		return fieldsMap.containsKey(name);
+	}
+
+	@Override
 	public void addField(String name, Object value)
 	{
 		if ( name == null )
@@ -97,9 +105,7 @@ public class MapMessage implements IMessage
 	}
 
 	public Map<String, Object> getFieldsMap(){
-		Map<String, Object> resultFieldsMap = new HashMap<>();
-		resultFieldsMap.putAll(fieldsMap);
-		return resultFieldsMap;
+        return new HashMap<>(fieldsMap);
 	}
 
     @JsonSetter("fieldsMap")
@@ -117,8 +123,7 @@ public class MapMessage implements IMessage
     @Override
 	public <T> T getField(String name)
 	{
-		if ( name == null )
-		{
+		if (name == null) {
 			throw new IllegalArgumentException("[name] could not be null");
 		}
         return (T)fieldsMap.get(name);
@@ -260,7 +265,7 @@ public class MapMessage implements IMessage
                             if(getField(fldName) instanceof IMessage)
 							{
                                 equal = ((IMessage)getField(fldName))
-									.compare((IMessage) message.getField( fldName ));
+									.compare(message.getField( fldName ));
 
 								if(! equal )
 								{
@@ -269,8 +274,8 @@ public class MapMessage implements IMessage
 							}
 							else
 							{
-                                IMessage[] thisArr = (IMessage[])getField(fldName);
-								IMessage[] thatArr = (IMessage[]) message.getField( fldName );
+                                IMessage[] thisArr = getField(fldName);
+								IMessage[] thatArr = message.getField( fldName );
 
 								if(thisArr.length != thatArr.length)
 								{

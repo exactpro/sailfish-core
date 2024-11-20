@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,19 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
 
 public class ComparisonNotNullFilter implements IComparisonFilter {
+    public static final String CONDITION = "*";
     public static final ComparisonNotNullFilter INSTANCE = new ComparisonNotNullFilter();
 
     protected ComparisonNotNullFilter() {}
 
     @Override
     public ExpressionResult validate(Object value) {
-        return create(value != null);
+        return create(value != null && value != NullValueSubstitute.INSTANCE);
     }
 
     @Override
     public String getCondition() {
-        return "*";
+        return CONDITION;
     }
 
     @Override

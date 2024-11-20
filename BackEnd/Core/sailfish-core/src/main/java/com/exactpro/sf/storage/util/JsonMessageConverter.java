@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.storage.util;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.common.messages.IMetadata;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -41,6 +41,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.exactpro.sf.common.messages.MetadataExtensions.getDictionaryUri;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getId;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getName;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getNamespace;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getProtocol;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getRejectReason;
+import static com.exactpro.sf.common.messages.MetadataExtensions.getTimestamp;
+import static com.exactpro.sf.common.messages.MetadataExtensions.isAdmin;
+import static com.exactpro.sf.common.messages.MetadataExtensions.isDirty;
 
 public class JsonMessageConverter {
 
@@ -77,18 +87,18 @@ public class JsonMessageConverter {
 
         try(StringWriter writer = new StringWriter(4096);
                 JsonGenerator generator = factory.createGenerator(writer)) {
-            MsgMetaData metaData = message.getMetaData();
+            IMetadata metaData = message.getMetaData();
 
             generator.writeStartObject();
-            generator.writeNumberField(JSON_MESSAGE_ID, metaData.getId());
-            generator.writeNumberField(JSON_MESSAGE_TIMESTAMP, metaData.getMsgTimestamp().getTime());
-            generator.writeStringField(JSON_MESSAGE_NAME, metaData.getMsgName());
-            generator.writeStringField(JSON_MESSAGE_NAMESPACE, metaData.getMsgNamespace());
-            generator.writeStringField(JSON_MESSAGE_DICTIONARY_URI, Objects.toString(metaData.getDictionaryURI(), StringUtils.EMPTY));
-            generator.writeStringField(JSON_MESSAGE_PROTOCOL, StringUtils.defaultString(metaData.getProtocol()));
-            generator.writeBooleanField(JSON_MESSAGE_DIRTY, metaData.isDirty());
-            generator.writeBooleanField(JSON_MESSAGE_ADMIN, metaData.isAdmin());
-            generator.writeStringField(JSON_MESSAGE_RR, metaData.getRejectReason());
+            generator.writeNumberField(JSON_MESSAGE_ID, getId(metaData));
+            generator.writeNumberField(JSON_MESSAGE_TIMESTAMP, getTimestamp(metaData).getTime());
+            generator.writeStringField(JSON_MESSAGE_NAME, getName(metaData));
+            generator.writeStringField(JSON_MESSAGE_NAMESPACE, getNamespace(metaData));
+            generator.writeStringField(JSON_MESSAGE_DICTIONARY_URI, Objects.toString(getDictionaryUri(metaData), StringUtils.EMPTY));
+            generator.writeStringField(JSON_MESSAGE_PROTOCOL, StringUtils.defaultString(getProtocol(metaData)));
+            generator.writeBooleanField(JSON_MESSAGE_DIRTY, isDirty(metaData));
+            generator.writeBooleanField(JSON_MESSAGE_ADMIN, isAdmin(metaData));
+            generator.writeStringField(JSON_MESSAGE_RR, getRejectReason(metaData));
             generator.writeFieldName(JSON_MESSAGE);
 
             if(compact) {
@@ -117,9 +127,9 @@ public class JsonMessageConverter {
     /**
      * Parse JSON to IMessage
      * @param json - JSON
-     * @param dictionaryManager
+     * @param dictionaryManager - dictionary manager
      * @param compact - if true use light strategy otherwise use full strategy for parsing
-     * @return
+     * @return - deserialized {@link IMessage}
      */
     public static IMessage fromJson(String json, IDictionaryManager dictionaryManager, boolean compact) {
         return new JsonIMessageDecoder(dictionaryManager).decode(json, compact);
@@ -129,7 +139,7 @@ public class JsonMessageConverter {
     /**
      * Parse JSON to Human readable message
      * @param json - Sailfish JSON format
-     * @param dictionaryManager
+     * @param dictionaryManager - dictionary manager
      * @param compact - if true use light strategy otherwise use full strategy for parsing
      * @return String
      */
@@ -157,13 +167,12 @@ public class JsonMessageConverter {
         generator.writeStartObject();
 
         for(String fieldName : fieldNames) {
-            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getFields().get(fieldName) : null;
-            Object value = message.getField(fieldName);
-
-            if(value == null) {
+            if (!message.hasField(fieldName)) {
                 continue;
             }
 
+            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getFields().get(fieldName) : null;
+            Object value = message.getField(fieldName);
             generator.writeFieldName(fieldName);
             generator.writeStartObject();
             generator.writeStringField("type", getValueClass(value, subStructure));

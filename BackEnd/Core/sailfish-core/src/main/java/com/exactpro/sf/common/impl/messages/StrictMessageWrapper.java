@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.common.impl.messages;
 
 import static java.util.Objects.requireNonNull;
@@ -53,8 +53,6 @@ public class StrictMessageWrapper implements IMessage {
 
     /**
      * 
-     * @param value
-     * @param elementClass
      * @return {@code CheckedList<T>} which check opportunity to cast the
      *         {@code value} elements to {@code elementClass} during its adding
      */
@@ -193,6 +191,16 @@ public class StrictMessageWrapper implements IMessage {
     /*
      * (non-Javadoc)
      *
+     * @see com.exactpro.sf.common.messages.IMessage#hasField()
+     */
+    @Override
+    public boolean hasField(String name) {
+        return message.hasField(name);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see com.exactpro.sf.common.messages.IMessage#getFieldNames()
      */
     @Override
@@ -248,8 +256,6 @@ public class StrictMessageWrapper implements IMessage {
     
     /**
      * 
-     * @param value
-     * @param fieldStructure
      * @return value if it can be NULL, else throw Exception
      */
     private Object requiredNotNull(Object value, IFieldStructure fieldStructure) {

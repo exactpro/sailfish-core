@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.common.messages;
 
 import org.jetbrains.annotations.Nullable;
@@ -53,11 +53,18 @@ public interface IMessage
 	FieldMetaData getFieldMetaData(String name);
 
 	/**
-	 * Checks if field is present in message and not equal to null. IMessage#getFieldNames() can be used to find out if null value for field is set.
+	 * Checks if field is present in message and not equal to null. {@link  IMessage#hasField} can be used to check the field is set.
 	 * @param name - field name.
 	 * @return whenever field is present in this message and it is not null.
 	 */
 	boolean isFieldSet(String name);
+
+	/**
+	 * Checks if field is set in message.
+	 * @param name - field name.
+	 * @return whenever field is set in this message.
+	 */
+	boolean hasField(String name);
 
 	Set<String> getFieldNames();
 

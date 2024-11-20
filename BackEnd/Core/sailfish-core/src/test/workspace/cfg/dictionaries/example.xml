@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -123,6 +123,7 @@
 			<field name="FString2"       reference="TString"/>
 			<field name="SimpleMessage"  reference="SimpleMessage"/>
 			<field name="ArrayMessage"	 reference="ArrayMessage"/>
+			<field name="NullValue"      reference="TString"/>
 			<field name="Collection"     reference="Collection" isCollection="true" />
 			<field name="EmptyComplexCollection"     reference="Collection" isCollection="true" />
 			<field name="EmptySimpleCollection"      reference="TString" isCollection="true" />

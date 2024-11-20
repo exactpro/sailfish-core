@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
 
 import static com.exactpro.sf.util.BugsListCheckerBuilder.ListValueType.DEFAULT_LIST;
+import static com.exactpro.sf.util.BugsListCheckerBuilder.ListValueType.EXISTENCE_LIST_SIZE;
 import static com.exactpro.sf.util.BugsListCheckerBuilder.ListValueType.MISSED_LIST_SIZE;
 import static com.exactpro.sf.util.BugsListCheckerBuilder.ListValueType.PRESENT_LIST_SIZE;
 
@@ -27,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.comparison.NullValueSubstitute;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -78,21 +80,18 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
 
     @Override
     public ExpressionResult validate(Object actualValue) throws KnownBugException {
-        int actualSize = this.actualSize != DEFAULT_LIST.key ? this.actualSize : size(actualValue);
+        int actualSize = this.actualSize == DEFAULT_LIST.key ? size(actualValue) : this.actualSize;
 
-        if(originList.size == PRESENT_LIST_SIZE.key && actualSize != MISSED_LIST_SIZE.key) {
-            return new ExpressionResult(false, originList.list, ORIGIN_SIZE_MESSAGE, null, null, getDescriptions());
-        }
-
-        if (originList.size != actualSize) {
+        if (!originList.isMatched(actualSize)) {
             ListWrapper listWrapper = alternativeSizes.get(actualSize);
             if (listWrapper != null) {
                 return createExpressionResult(this, listWrapper);
             }
 
-            listWrapper = alternativeSizes.get(PRESENT_LIST_SIZE.key);
-            if (listWrapper != null && actualSize != MISSED_LIST_SIZE.key) {
-                return createExpressionResult(this, listWrapper);
+            for (ListWrapper wrapper : alternativeSizes.values()) {
+                if (wrapper.isMatched(actualSize)) {
+                    return createExpressionResult(this, wrapper);
+                }
             }
 
             Throwable exception = new EPSCommonException("Expected " + originList + " value is not equal actual " + formatSize(actualSize) + " value");
@@ -121,6 +120,8 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
             resultBuilder.append('*');
         } else if (size == MISSED_LIST_SIZE.key) {
             resultBuilder.append('#');
+        } else if (size == EXISTENCE_LIST_SIZE.key) {
+            resultBuilder.append(NullValueSubstitute.NAME);
         } else {
             resultBuilder.append(size);
 
@@ -129,13 +130,15 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
     }
 
     private Set<BugDescription> getDescriptions() {
-        return alternativeSizes.values().stream()
-                .map(ListWrapper::getDescription)
-                .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+        return alternativeSizes.isEmpty()
+                ? EXPECTED_ONLY_BUG_DESCRIPTION_SET
+                : alternativeSizes.values().stream()
+                    .map(ListWrapper::getDescription)
+                    .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
 
     private static ExpressionResult createExpressionResult(BugsListCheckerBuilder bugsCheckerBuilder, ListWrapper listWrapper) {
-        return new ExpressionResult(false, listWrapper.list, "Actual " + formatSize(bugsCheckerBuilder.actualSize) + " value сomplies with bug(s): '"
+        return new ExpressionResult(false, listWrapper.list, "Actual " + formatSize(bugsCheckerBuilder.actualSize) + " value complies with bug(s): '"
                 + listWrapper.description + "'", null, Collections.singleton(listWrapper.description), bugsCheckerBuilder.getDescriptions());
     }
 
@@ -151,19 +154,22 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
         return ListValueType.valueOf(value).size(value);
     }
 
-    public static ListWrapper wrap(BugDescription description, Object value) {
+    private static ListWrapper wrap(BugDescription description, Object value) {
         return ListValueType.valueOf(value).wrap(description, value);
     }
 
     enum ListValueType {
         MISSED_LIST_SIZE(-1),
         PRESENT_LIST_SIZE(-2),
-        DEFAULT_LIST(-3),
-        OTHER(-4) {
+        EXISTENCE_LIST_SIZE(-3),
+        DEFAULT_LIST(-4),
+        OTHER(-5) {
             @Override
             public int size(Object value) {
                 if (value instanceof List<?>) {
                     return ((List<?>) value).size();
+                } else if (value == NullValueSubstitute.INSTANCE) {
+                    return EXISTENCE_LIST_SIZE.key;
                 }
                 throw new IllegalArgumentException("Unsupported type '" + value.getClass().getSimpleName() + "' for Bugs list checker");
             }
@@ -172,6 +178,8 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
             public ListWrapper wrap(BugDescription description, Object value) {
                 if (value instanceof List<?>) {
                     return new ListWrapper(description, (List<?>) value);
+                } else if (value == NullValueSubstitute.INSTANCE) {
+                    return new ListWrapper(description, EXISTENCE_LIST_SIZE.key);
                 }
                 throw new IllegalArgumentException("Unsupportable type '" + value.getClass().getSimpleName() + "' for Bugs list checker");
             }
@@ -183,19 +191,21 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
             this.key = key;
         }
 
-        public int size(Object value) {
+        int size(Object value) {
             return key;
         }
 
-        public ListWrapper wrap(BugDescription description, Object value) {
+        ListWrapper wrap(BugDescription description, Object value) {
             return new ListWrapper(description, key);
         }
 
-        public static ListValueType valueOf(Object value) {
+        static ListValueType valueOf(Object value) {
             if (value == Convention.CONV_MISSED_OBJECT || value == null) {
                 return MISSED_LIST_SIZE;
             } else if (value == Convention.CONV_PRESENT_OBJECT) {
                 return PRESENT_LIST_SIZE;
+            } else if (value == Convention.CONV_EXISTENCE_OBJECT || value == NullValueSubstitute.INSTANCE) {
+                return EXISTENCE_LIST_SIZE;
             } else if (value instanceof List<?>) {
                 return OTHER;
             }
@@ -224,6 +234,19 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
 
         public BugDescription getDescription() {
             return description;
+        }
+
+        private boolean isMatched(int actualSize) {
+            if (this.size == MISSED_LIST_SIZE.key) {
+                return actualSize == MISSED_LIST_SIZE.key || actualSize == EXISTENCE_LIST_SIZE.key;
+            }
+            if (this.size == PRESENT_LIST_SIZE.key) {
+                return actualSize >= 0;
+            }
+            if (this.size == EXISTENCE_LIST_SIZE.key) {
+                return actualSize >=0 || actualSize == EXISTENCE_LIST_SIZE.key;
+            }
+            return this.size == actualSize;
         }
 
         @Override

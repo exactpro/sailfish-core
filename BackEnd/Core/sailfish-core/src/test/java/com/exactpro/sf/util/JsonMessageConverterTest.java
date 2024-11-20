@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +40,8 @@ import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.comparison.MessageComparator;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.storage.util.JsonMessageConverter;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.google.common.collect.Lists;
 
 public class JsonMessageConverterTest extends AbstractTest {
@@ -78,47 +75,59 @@ public class JsonMessageConverterTest extends AbstractTest {
     }
 
     @Test
-    public void testFullFormat() throws JsonParseException, IOException, SailfishURIException {
+    public void testFullFormatWithoutDictionary() {
         IMessage message = generate();
 
         String json = JsonMessageConverter.toJson(message, false);
         IMessage actual = JsonMessageConverter.fromJson(json, false);
-        compare(message, actual, 43, 0, 0);
-
-        Assert.assertNull(actual.getMetaData().getRejectReason());
-        Assert.assertFalse(actual.getMetaData().isRejected());
-
-        json = JsonMessageConverter.toJson(message, dictionary, false);
-        actual = JsonMessageConverter.fromJson(json, manager, false);
-        compare(message, actual, 43, 0, 0);
+        compare(actual, message, 44, 0, 0);
 
         Assert.assertNull(actual.getMetaData().getRejectReason());
         Assert.assertFalse(actual.getMetaData().isRejected());
     }
 
     @Test
-    public void testFullFormatRejected() throws JsonParseException, IOException, SailfishURIException {
+    public void testFullFormatWithDictionary() {
+        IMessage message = generate();
+
+        String json = JsonMessageConverter.toJson(message, dictionary, false);
+        IMessage actual = JsonMessageConverter.fromJson(json, manager, false);
+        compare(actual, message, 44, 0, 0);
+
+        Assert.assertNull(actual.getMetaData().getRejectReason());
+        Assert.assertFalse(actual.getMetaData().isRejected());
+    }
+
+    @Test
+    public void testFullFormatRejectedWithoutDictionary() {
         IMessage message = generate();
 
         message.getMetaData().setRejectReason("Test reject");
 
         String json = JsonMessageConverter.toJson(message, false);
         IMessage actual = JsonMessageConverter.fromJson(json, false);
-        compare(message, actual, 43, 0, 0);
-
-        Assert.assertEquals("Test reject", actual.getMetaData().getRejectReason());
-        Assert.assertTrue(actual.getMetaData().isRejected());
-
-        json = JsonMessageConverter.toJson(message, dictionary, false);
-        actual = JsonMessageConverter.fromJson(json, manager, false);
-        compare(message, actual, 43, 0, 0);
+        compare(actual, message, 44, 0, 0);
 
         Assert.assertEquals("Test reject", actual.getMetaData().getRejectReason());
         Assert.assertTrue(actual.getMetaData().isRejected());
     }
 
     @Test
-    public void testFilter() throws JsonParseException, IOException, SailfishURIException {
+    public void testFullFormatRejectedWithDictionary() {
+        IMessage message = generate();
+
+        message.getMetaData().setRejectReason("Test reject");
+
+        String json = JsonMessageConverter.toJson(message, dictionary, false);
+        IMessage actual = JsonMessageConverter.fromJson(json, manager, false);
+        compare(actual, message, 44, 0, 0);
+
+        Assert.assertEquals("Test reject", actual.getMetaData().getRejectReason());
+        Assert.assertTrue(actual.getMetaData().isRejected());
+    }
+
+    @Test
+    public void testFilter() {
         IMessage message = messageFactory.createMessage("name", "namespace");
         message.addField("NotNullFilter", "*");
         message.addField("NullFilter", "#");
@@ -135,41 +144,47 @@ public class JsonMessageConverterTest extends AbstractTest {
                 + "\"NullFilter\":{\"type\":\"NullFilter\",\"value\":\"#\"},"
                 + "\"RegexFilter\":{\"type\":\"RegexMvelFilter\",\"value\":\"\\\"123\\\"\"}}}";
         IMessage actual = JsonMessageConverter.fromJson(json, false);
-        compare(message, actual, 5, 1, 0);
+        compare(actual, message, 5, 1, 0);
     }
 
     @Test
-    public void testNull() throws JsonParseException, IOException, SailfishURIException {
+    public void testNull() {
         IMessage message = messageFactory.createMessage("name", "namespace");
         message.addField("Field", null);
 
         String json = "{\"id\":0,\"timestamp\":1512736145191,\"name\":\"name\",\"namespace\":\"namespace\",\"dictionaryURI\":\"Example\",\"protocol\":\"TEST\","
                 + "\"message\":{\"Field\":{\"type\":null,\"value\":null}}}";
         IMessage actual = JsonMessageConverter.fromJson(json, false);
-        compare(message, actual, 0, 0, 0);
+        compare(actual, message, 1, 0, 0);
     }
 
     @Test
-    public void testCompactFormat() throws SailfishURIException {
+    public void testCompactFormatWithoutDictionary() {
         IMessage message = generate();
 
         String json = JsonMessageConverter.toJson(message);
         IMessage actual = JsonMessageConverter.fromJson(json);
-        compare(message, actual, 11, 32, 0);
-
-        json = JsonMessageConverter.toJson(message, dictionary, true);
-        actual = JsonMessageConverter.fromJson(json, manager, true);
-        compare(message, actual, 43, 0, 0);
+        compare(actual, message, 12, 32, 0);
     }
 
     @Test
-    public void testFromJsonToHuman() {
+    public void testCompactFormatWithDictionary() {
+        IMessage message = generate();
+
+        String json = JsonMessageConverter.toJson(message, dictionary, true);
+        IMessage actual = JsonMessageConverter.fromJson(json, manager, true);
+        compare(actual, message, 44, 0, 0);
+    }
+
+    @Test
+    public void testFromJsonToHuman() { // FIXME: this test counts on hash map order
         IMessage message = createDirtyMessage();
 
         String json = JsonMessageConverter.toJson(message);
         IHumanMessage actual = JsonMessageConverter.fromJsonToHuman(json, manager, true);
         Assert.assertEquals(
                 "EmptyComplexCollection=[]; " +
+                "NullValue=null; " +
                 "SimpleMessage={" +
                     "FCharacter=c; FShort=0; " +
                     "FBoolean=true; FDouble=1.0; " +
@@ -184,7 +199,6 @@ public class JsonMessageConverterTest extends AbstractTest {
                 actual.toString());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testHumanFormat() {
         Map<String, Object> map = new HashMap<>();
@@ -258,25 +272,27 @@ public class JsonMessageConverterTest extends AbstractTest {
         message.addField("Trailer", messageFactory.createMessage("Trailer", "example"));
         message.addField("EmptySimpleCollection", new ArrayList<String>());
         message.addField("EmptyComplexCollection", new ArrayList<IMessage>());
+        message.addField("NullValue", null);
         return message;
     }
 
-    private void compare(IMessage expected, IMessage actual, int passed, int failed, int na) {
+    private void compare(IMessage actual, IMessage expected, int passed, int failed, int na) {
         ComparatorSettings settings = new ComparatorSettings();
-        ComparisonResult comparisonResult = MessageComparator.compare(expected, actual, settings);
+        ComparisonResult comparisonResult = MessageComparator.compare(actual, expected, settings);
         System.out.println(comparisonResult);
-        Assert.assertEquals(passed, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
-        Assert.assertEquals(failed, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(na, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        Assert.assertEquals("passed", passed, ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        Assert.assertEquals("failed", failed, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        Assert.assertEquals("na", na, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
     }
 
-    private IMessage generate() throws SailfishURIException {
+    private IMessage generate() {
         CreateIMessageVisitor visitor = new CreateIMessageVisitor(messageFactory, "ComplexMessage", messageStructure.getNamespace());
         MessageStructureWriter.WRITER.traverse(visitor, messageStructure.getFields());
         IMessage result = visitor.getImessage();
         result.addField("Trailer", messageFactory.createMessage("Trailer", "namespace"));
         result.addField("EmptySimpleCollection", new ArrayList<String>());
         result.addField("EmptyComplexCollection", new ArrayList<IMessage>());
+        result.addField("NullValue", null);
 
         return result;
     }

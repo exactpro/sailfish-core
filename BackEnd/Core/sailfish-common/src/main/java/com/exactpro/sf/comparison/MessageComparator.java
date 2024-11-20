@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import com.exactpro.sf.common.messages.structures.StructureType;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.jetbrains.annotations.Nullable;
 
 public class MessageComparator {
     public static double COMPARISON_PRECISION = pow(10, -10);
@@ -88,9 +89,11 @@ public class MessageComparator {
             if(validation != null) {
                 validation.doValidate(actual, expected, settings, result);
             }
+
+            result.setMetaData(actual.getMetaData());
         }
 
-        return result.setMetaData(actual.getMetaData());
+        return result;
     }
 
     protected static ComparisonResult compareValues(String name, Object actual, Object expected, boolean unchecked, boolean keyFieldsOnly, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
@@ -221,12 +224,6 @@ public class MessageComparator {
                 boolean matches = Pattern.matches(regex, (String)actual);
                 return result.setStatus(matches ? StatusType.PASSED : StatusType.FAILED);
             }
-        }
-
-        if(actual instanceof BigDecimal && expected instanceof BigDecimal) {
-            BigDecimal actualValue = (BigDecimal)actual;
-            BigDecimal expectedValue = (BigDecimal)expected;
-            return result.setStatus(expectedValue.compareTo(actualValue) == 0 ? StatusType.PASSED : StatusType.FAILED);
         }
 
         Class<?> actualClass = actual.getClass();
@@ -403,12 +400,15 @@ public class MessageComparator {
         }
 
         for(String fieldName : fieldNames) {
-            Object actualValue = actualMessage.getField(fieldName);
-            Object expectedValue = expectedMessage.getField(fieldName);
+            boolean hasActual = actualMessage.hasField(fieldName);
+            boolean hasExpected = expectedMessage.hasField(fieldName);
 
-            if(actualValue == null && expectedValue == null) {
+            if(!(hasActual || hasExpected)) {
                 continue;
             }
+
+            Object actualValue = replaceByNullSubstitute(actualMessage.getField(fieldName), hasActual);
+            Object expectedValue = replaceByNullSubstitute(expectedMessage.getField(fieldName), hasExpected);
 
             boolean uncheckedField = unchecked || settings.getUncheckedFields().contains(fieldName);
             boolean checkKeyFieldsOnly = keyFieldsOnly && keyFields.get(fieldName);
@@ -421,6 +421,11 @@ public class MessageComparator {
         }
 
         return result;
+    }
+
+    @Nullable
+    private static Object replaceByNullSubstitute(@Nullable Object value, boolean hasValue) {
+        return value == null && hasValue ? NullValueSubstitute.INSTANCE : value;
     }
 
     private static ComparisonResult initialComparison(String name, Object actual, Object expected, boolean unchecked, IFieldStructure structure, List<MetaContainer> metaContainers, ComparatorSettings settings) {
