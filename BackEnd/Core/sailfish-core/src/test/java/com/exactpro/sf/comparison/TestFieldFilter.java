@@ -35,10 +35,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
 public class TestFieldFilter extends AbstractTest {
+
+    @Test
+    public void testEquals() {
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage sub = messageFactory.createMessage("sub", "namespace");
+        sub.addField("ExplicitNullValue", null);
+        sub.addField("AnyValue", 1);
+        sub.addField("EmptyValueList", Collections.emptyList());
+        sub.addField("ValueList", Arrays.asList(2, 3, 4));
+        sub.addField("ValueListWithNull", Arrays.asList(5, null, 6));
+
+        message.addField("ExplicitNullValue", null);
+        message.addField("AnyValue", 1);
+        message.addField("MessageValue", sub);
+        message.addField("EmptyValueList", Collections.emptyList());
+        message.addField("ValueList", Arrays.asList(2, 3, 4));
+        message.addField("ValueListWithNull", Arrays.asList(5, null, 6));
+        message.addField("MessageList", Arrays.asList(sub, sub));
+
+        equals(message, message);
+    }
 
     @Test
     public void testNull() {

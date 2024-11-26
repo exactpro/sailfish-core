@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.util;
 
 import static com.exactpro.sf.util.LogUtils.LOG4J_PROPERTIES_FILE_NAME;
 import static com.exactpro.sf.util.LogUtils.setConfigLocation;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
@@ -74,7 +73,7 @@ import com.exactpro.sf.storage.IServiceStorage;
 
 public class AbstractTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTest.class);
 
 	protected static final String BIN_FOLDER_PATH = "build/test-results";
 
@@ -96,9 +95,7 @@ public class AbstractTest {
     	public String getPath(File root, FolderType folderType) {
     		switch (folderType) {
     		case CFG:
-				return new StringBuilder(root.getPath())
-	                .append(File.separator).append("cfg")
-	                .toString();
+				return root.toPath().resolve("cfg").toString();
 			case MATRIX:
 				return root.getPath();
 			case CSV:
@@ -119,7 +116,7 @@ public class AbstractTest {
 
     @BeforeClass
     public static void initTestToolsTestCase() throws Throwable {
-		synchronized(logger) {
+		synchronized(LOGGER) {
 		    try {
     			if(!isLoggingAlreadyConfigured) {
                     setConfigLocation(Objects.requireNonNull(AbstractTest.class.getClassLoader().getResource(LOG4J_PROPERTIES_FILE_NAME)).getFile());
@@ -155,8 +152,7 @@ public class AbstractTest {
                     }).when(serviceContext).lookupService(ArgumentMatchers.any(ServiceName.class));
 		        }
 		    } catch (Exception e) {
-		    	System.err.println(e);
-	            logger.error(e.getMessage(), e);
+	            LOGGER.error(e.getMessage(), e);
 	            throw e;
 		    } finally {
 		        isAlreadyConfigured = true;
@@ -172,9 +168,10 @@ public class AbstractTest {
         ComparisonResult comparisonResult = MessageComparator.compare(msg, result, settings);
 
         Assert.assertNotNull(comparisonResult);
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
-        Assert.assertEquals(0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
-        Assert.assertEquals(getFieldCount(msg), ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
+        if (LOGGER.isDebugEnabled()) { LOGGER.debug(comparisonResult.toString()); }
+        Assert.assertEquals("NA status", 0, ComparisonUtil.getResultCount(comparisonResult, StatusType.NA));
+        Assert.assertEquals("FAILED status", 0, ComparisonUtil.getResultCount(comparisonResult, StatusType.FAILED));
+        Assert.assertEquals("PASSED status", getFieldCount(msg), ComparisonUtil.getResultCount(comparisonResult, StatusType.PASSED));
     }
 
 	protected static HierarchicalConfiguration<ImmutableNode> loadDefaultEnvironment(IWorkspaceDispatcher wd) {
@@ -184,12 +181,12 @@ public class AbstractTest {
 		} catch (ConfigurationException e) {
 			throw new ScriptRunException("Exception during configuration loading", e);
 		} catch (Exception e) {
-			logger.error("Exception during environment initialization", e);
+			LOGGER.error("Exception during environment initialization", e);
 			throw new ScriptRunException("Exception during environment initialization", e);
 		}
 	}
 
-	protected IDictionaryStructure loadMessageDictionary(InputStream inputStream) throws IOException {
+	protected IDictionaryStructure loadMessageDictionary(InputStream inputStream) {
 	    IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
 	    return loader.load(inputStream);
 	}
@@ -237,17 +234,15 @@ public class AbstractTest {
         int all = 0;
         for (String fieldName : message.getFieldNames()) {
             Object field = message.getField(fieldName);
-            if(field == null) continue;
 
             if (field instanceof IMessage) {
-                if(field == null) continue;
                 all += getFieldCount((IMessage) field);
                 continue;
             }
 
             if (field instanceof List<?>) {
                 for (Object nested : (List<?>)field) {
-                    if(nested == null) continue;
+                    if(nested == null) continue; // FIXME: null values in list aren't checked
                     if (nested instanceof IMessage) {
                         all += getFieldCount((IMessage) nested);
                     } else {
