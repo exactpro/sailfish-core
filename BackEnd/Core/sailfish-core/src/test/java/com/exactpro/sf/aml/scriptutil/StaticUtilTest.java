@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.aml.scriptutil;
 
 import java.math.BigDecimal;
@@ -80,12 +80,6 @@ public class StaticUtilTest {
 
     @Test
     public void testSimpleFilterWithInsertMvel_simpleCollections() throws Exception {
-    	List<IMessage> lst = new ArrayList<>();
-    	for (int i=0; i<5; i++) {
-    		IMessage msg = new MapMessage("namespace", "name");
-    		msg.addField("val", i);
-    		lst.add(msg);
-    	}
         IMessage iMessage = new MapMessage("namespace", "name");
 		iMessage.addField("ref", Arrays.asList(1, 2, 3, 4, 5));
 
@@ -236,6 +230,12 @@ public class StaticUtilTest {
     public void testNullFilterCreationFromValue() {
         IFilter filter = StaticUtil.simpleFilter(0, null, "x", "x", Convention.CONV_MISSED_OBJECT);
         Assert.assertEquals("com.exactpro.sf.aml.scriptutil.StaticUtil.NullFilter", filter.getClass().getCanonicalName());
+    }
+
+    @Test
+    public void testExistenceFilterCreationFromValue() {
+        IFilter filter = StaticUtil.simpleFilter(0, null, "x", "x", Convention.CONV_EXISTENCE_OBJECT);
+        Assert.assertEquals("com.exactpro.sf.aml.scriptutil.StaticUtil.ExistenceFilter", filter.getClass().getCanonicalName());
     }
 
     @Test

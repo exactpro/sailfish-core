@@ -164,12 +164,37 @@ public class TestFieldFilter extends AbstractTest {
     }
 
     @Test
-    public void testExistence() {
+    public void testIsNullSet() {
 
         IMessage message = messageFactory.createMessage("name", "namespace");
         IMessage filter = messageFactory.createMessage("name", "namespace");
 
         IFilter presentFilter = StaticUtil.existenceFilter(0, null);
+
+        message.addField("ExplicitNull_ExistenceFilter", null);
+        message.addField("AnyValue_ExistenceFilter", new Object());
+
+        filter.addField("ExplicitNull_ExistenceFilter", presentFilter);
+        filter.addField("AnyValue_ExistenceFilter", presentFilter);
+        filter.addField("HiddenNull_ExistenceFilter", presentFilter);
+
+        ComparatorSettings compareSettings = new ComparatorSettings();
+
+        ComparisonResult comparisonResult = MessageComparator.compare(message, filter, compareSettings);
+
+        validateResult(comparisonResult, 2, 1, 0);
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("ExplicitNull_ExistenceFilter").getStatus());
+        assertEquals(StatusType.PASSED, comparisonResult.getResult("AnyValue_ExistenceFilter").getStatus());
+        assertEquals(StatusType.FAILED, comparisonResult.getResult("HiddenNull_ExistenceFilter").getStatus());
+    }
+
+    @Test
+    public void testExistence() {
+
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
+
+        IFilter presentFilter = StaticUtil.simpleFilter(0, null, "com.exactpro.sf.comparison.Convention.CONV_EXISTENCE_OBJECT");
 
         message.addField("ExplicitNull_ExistenceFilter", null);
         message.addField("AnyValue_ExistenceFilter", new Object());

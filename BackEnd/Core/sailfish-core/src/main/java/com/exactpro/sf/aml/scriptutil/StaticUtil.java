@@ -129,6 +129,9 @@ public class StaticUtil {
 		return new ExistenceFilter(line, column);
 	}
 
+    /**
+     * This method is called from matrix generated code.
+     */
 	public static IFilter simpleFilter(long line, String column, String condition, Object... args) {
 	    Map<String, Object> variables = toMap(args);
 	    Object value = eval(line, column, condition, variables);
@@ -140,6 +143,8 @@ public class StaticUtil {
 	        return new NotNullFilter(line, column);
 	    } else if(value == Convention.CONV_MISSED_OBJECT) {
 	        return new NullFilter(line, column);
+        } else if(value == Convention.CONV_EXISTENCE_OBJECT) {
+            return new ExistenceFilter(line, column);
 	    } else {
 	        return new SimpleMvelFilter(line, column, value, variables);
 	    }
