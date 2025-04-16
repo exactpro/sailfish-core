@@ -635,7 +635,8 @@ public class MessageComparator {
             }
         }
 
-        return (actualType || actual == null) && (expectedType || expected == null || expected instanceof IComparisonFilter);
+        return (actualType || isNull(actual))
+                && (expectedType || isNull(expected) || expected instanceof IComparisonFilter);
     }
 
     private static Exception checkStructureType(Class<?> clazz, IFieldStructure structure) {
@@ -658,8 +659,15 @@ public class MessageComparator {
         return null;
     }
 
+    private static boolean isNull(Object value) {
+        return value == null || value == NullValueSubstitute.INSTANCE;
+    }
+
     private static boolean isObject(Object value) {
-        return !(value == null || value instanceof List<?> || value instanceof IMessage || value instanceof IComparisonFilter);
+        return !(isNull(value)
+                    || value instanceof List<?>
+                    || value instanceof IMessage
+                    || value instanceof IComparisonFilter);
     }
 
     private static boolean isCollection(IFieldStructure structure) {

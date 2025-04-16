@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2025 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package com.exactpro.sf.comparison;
 
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
+import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +45,14 @@ import java.util.function.Consumer;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("deprecation")
 public class TestMessageComparator {
 
     private static final Set<String> uncheckedFields = new HashSet<>();
+
+    private static final IDictionaryStructure dictionary;
 
     static {
         uncheckedFields.add("BeginString");
@@ -61,6 +68,13 @@ public class TestMessageComparator {
         uncheckedFields.add("templateId");
         uncheckedFields.add("ApplVerID");
         uncheckedFields.add("SenderSubID");
+
+        try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("message-comparator.xml")) {
+            IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
+            dictionary = loader.load(stream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 	@Test
@@ -205,7 +219,8 @@ public class TestMessageComparator {
 		this.messageFactory = DefaultMessageFactory.getFactory();
 	}
 
-	@Test
+	@SuppressWarnings("PointlessArithmeticExpression")
+    @Test
 	public void testFailUnexpected_N()
 	{
 		// Fail + 3 {BodyLength, MsgSeqNum, CheckSum}; NA - 3 {BodyLength, MsgSeqNum, CheckSum};
@@ -235,6 +250,7 @@ public class TestMessageComparator {
         validateResult(doUnexpectedCompareIMessage("N", 0, 2, FilterType.EMPTY), 2, 1 + 3 + 1, 14 - 4);
 	}
 
+    @SuppressWarnings("PointlessArithmeticExpression")
     @Test
 	public void testFailUnexpected_Y()
 	{
@@ -265,7 +281,8 @@ public class TestMessageComparator {
         validateResult(doUnexpectedCompareIMessage("Y", 0, 2, FilterType.EMPTY), 2, 2 + 3 + 1, 13 - 4);
 	}
 
-	@Test
+	@SuppressWarnings("PointlessArithmeticExpression")
+    @Test
 	public void testFailUnexpected_A()
 	{
 		// Fail + 3 {BodyLength, MsgSeqNum, CheckSum}; NA - 3 {BodyLength, MsgSeqNum, CheckSum};
@@ -315,9 +332,9 @@ public class TestMessageComparator {
 	    String namespace = "namespace";
         IMessage noPartyIDs;
 
-        IMessage message = new MapMessage(namespace, "ExecutionReport");
-        IMessage header = new MapMessage(namespace, "header");
-        IMessage trailer = new MapMessage(namespace, "trailer");
+        IMessage message = createMessage(namespace, "ExecutionReport");
+        IMessage header = createMessage(namespace, "header");
+        IMessage trailer = createMessage(namespace, "trailer");
 
         header.addField("BeginString", "FIXT.1.1");
         header.addField("BodyLength", 20);
@@ -332,7 +349,7 @@ public class TestMessageComparator {
 
         List<IMessage> group = new ArrayList<>(actual);
         for(int i = 0; i < actual; i++) {
-            noPartyIDs = new MapMessage(namespace, "NoPartyIDs");
+            noPartyIDs = createMessage(namespace, "NoPartyIDs");
             noPartyIDs.addField("PartyID", "PartyID");
             noPartyIDs.addField("PartyIDSource", 'B');
             noPartyIDs.addField("PartyRole", 1);
@@ -340,9 +357,9 @@ public class TestMessageComparator {
         }
         message.addField("group_NoPartyIDs", group);
 
-        IMessage filter = new MapMessage(namespace, "ExecutionReport");
-        header = new MapMessage(namespace, "header");
-        trailer = new MapMessage(namespace, "trailer");
+        IMessage filter = createMessage(namespace, "ExecutionReport");
+        header = createMessage(namespace, "header");
+        trailer = createMessage(namespace, "trailer");
 
         header.addField("BeginString", "FIXT.1.1");
         header.addField("BodyLength", 21);
@@ -357,7 +374,7 @@ public class TestMessageComparator {
         case VALUE:
             group = new ArrayList<>(expected);
             for(int i = 0; i < expected; i++) {
-                noPartyIDs = new MapMessage(namespace, "NoPartyIDs");
+                noPartyIDs = createMessage(namespace, "NoPartyIDs");
                 noPartyIDs.addField("PartyID", "PartyID");
                 noPartyIDs.addField("PartyRole", 1);
                 group.add(noPartyIDs);
@@ -409,16 +426,17 @@ public class TestMessageComparator {
         validateResult(doGroupCompare("Y", false, 4, new int [] {0, 1, 3}, new int[] {0, 1, 2}), 2, 1, 0);
     }
 
-	private ComparisonResult doGroupCompare(String failUnexpected, boolean checkGroupOrder, int groupCount, int[] groupsMessage, int[] groupsFilter) {
+	@SuppressWarnings("SameParameterValue")
+    private ComparisonResult doGroupCompare(String failUnexpected, boolean checkGroupOrder, int groupCount, int[] groupsMessage, int[] groupsFilter) {
 	    IMessage[] subMessages = new IMessage[groupCount];
 
 	    for (int i = 0; i < subMessages.length; i++) {
-	        subMessages[i] = new MapMessage("namespace", "subMessage");
+	        subMessages[i] = createMessage("namespace", "subMessage");
 	        subMessages[i].addField("field", i);
         }
 
-	    IMessage msg = new MapMessage("namespace", "name");
-	    IMessage filter = new MapMessage("namespace", "name");
+	    IMessage msg = createMessage("namespace", "name");
+	    IMessage filter = createMessage("namespace", "name");
 
         List<IMessage> list = new ArrayList<>();
         for (int k : groupsMessage) {
@@ -788,11 +806,11 @@ public class TestMessageComparator {
 
 	@Test
     public void testAnyRepeatingGroup() {
-        IMessage message = new MapMessage("Message", "namespace");
-        IMessage filter = new MapMessage("Message", "namespace");
+        IMessage message = createMessage("Message", "namespace");
+        IMessage filter = createMessage("Message", "namespace");
 
         List<IMessage> list = new ArrayList<>();
-        IMessage group = new MapMessage("Group", "namespace");
+        IMessage group = createMessage("Group", "namespace");
         group.addField("269", '1');
         group.addField("270", 20.01D);
         group.addField("271", 40.01D);
@@ -832,16 +850,16 @@ public class TestMessageComparator {
 	@Test
     public void testUnchecked()
     {
-        IMessage message = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
-        IMessage filter = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
+        IMessage message = createMessage("MarketDataSnapshotFullRefresh", "namespace");
+        IMessage filter = createMessage("MarketDataSnapshotFullRefresh", "namespace");
 
 
-        IMessage subMsg1 = new MapMessage("List", "namespace");
+        IMessage subMsg1 = createMessage("List", "namespace");
         subMsg1.addField("LP", '1');
         subMsg1.addField("LN", '2');
         subMsg1.addField("LF", '3');
 
-        IMessage subMsg2 = new MapMessage("List", "namespace");
+        IMessage subMsg2 = createMessage("List", "namespace");
         subMsg2.addField("LP", '1');
         subMsg2.addField("LF", '4');
 
@@ -854,12 +872,12 @@ public class TestMessageComparator {
         list2.add(subMsg2);
         list2.add(subMsg2);
 
-        subMsg1 = new MapMessage("Message", "namespace");
+        subMsg1 = createMessage("Message", "namespace");
         subMsg1.addField("MP", '1');
         subMsg1.addField("MN", '2');
         subMsg1.addField("MF", '3');
 
-        subMsg2 = new MapMessage("Message", "namespace");
+        subMsg2 = createMessage("Message", "namespace");
         subMsg2.addField("MP", '1');
         subMsg2.addField("MF", '4');
 
@@ -900,17 +918,17 @@ public class TestMessageComparator {
 	@Test
     public void compareMessages()
     {
-        IMessage msg1 = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
-        IMessage msg2 = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
+        IMessage msg1 = createMessage("MarketDataSnapshotFullRefresh", "namespace");
+        IMessage msg2 = createMessage("MarketDataSnapshotFullRefresh", "namespace");
 
         List<IMessage> list = new ArrayList<>();
-        IMessage group = new MapMessage("MDEntries", "namespace");
+        IMessage group = createMessage("MDEntries", "namespace");
         group.addField("269", '1');
         group.addField("270", 20.01D);
         group.addField("271", 40.01D);
 
         list.add(group);
-        group = new MapMessage("MDEntries", "namespace");
+        group = createMessage("MDEntries", "namespace");
 
         group.addField("269", '2');
         group.addField("270", 20.01D);
@@ -937,9 +955,9 @@ public class TestMessageComparator {
     {
 	    int count = 500;
 
-	    IMessage msg1 = new MapMessage("MarketDataSnapshotFullRefresh", "namespace");
+	    IMessage msg1 = createMessage("MarketDataSnapshotFullRefresh", "namespace");
 
-	    IMessage msgHeader = new MapMessage("Header", "namespace");
+	    IMessage msgHeader = createMessage("Header", "namespace");
 	    msgHeader.addField("8", "FIXT.1.1");
 	    msgHeader.addField("9", "11789");
 	    msgHeader.addField("35", "W");
@@ -957,7 +975,7 @@ public class TestMessageComparator {
 
 	    IMessage msg2 = msg1.cloneMessage();
 
-	    IMessage group = new MapMessage("MDEntries", "namespace");
+	    IMessage group = createMessage("MDEntries", "namespace");
         group.addField("269", '2');
         group.addField("270", 40.01D);
         group.addField("271", 20.01D);
@@ -989,7 +1007,7 @@ public class TestMessageComparator {
     public void testIgnoredFields() {
         ComparatorSettings settings = new ComparatorSettings().setIgnoredFields(singleton("filler"));
 
-        IMessage message = new MapMessage("TEST", "TestMessage");
+        IMessage message = createMessage("TEST", "TestMessage");
         IMessage filter = message.cloneMessage();
 
         message.addField("valid", "a");
@@ -1003,14 +1021,14 @@ public class TestMessageComparator {
         Assert.assertThat(result.getResult("valid").getStatus(), CoreMatchers.is(StatusType.PASSED));
         Assert.assertThat(result.getResult("filler").getStatus(), CoreMatchers.is(StatusType.NA));
 
-        message = new MapMessage("TEST", "TestMessage");
+        message = createMessage("TEST", "TestMessage");
         filter = message.cloneMessage();
 
-        IMessage subMessage = new MapMessage("TEST", "filler");
+        IMessage subMessage = createMessage("TEST", "filler");
         subMessage.addField("a", "a");
         message.addField("filler", subMessage);
 
-        IMessage filterSubMessage = new MapMessage("TEST", "filler");
+        IMessage filterSubMessage = createMessage("TEST", "filler");
         filterSubMessage.addField("a", "b");
         filter.addField("filler", filterSubMessage);
 
@@ -1678,8 +1696,8 @@ public class TestMessageComparator {
     public void compareListOfSimpleElements() {
         String messageName = "MessageWithNoComplexList";
         String namespace = "namespace";
-        IMessage msg1 = new MapMessage(namespace, messageName);
-        IMessage msg2 = new MapMessage(namespace, messageName);
+        IMessage msg1 = createMessage(namespace, messageName);
+        IMessage msg2 = createMessage(namespace, messageName);
 
         List<String> list = new ArrayList<>();
         list.add("1");
@@ -1712,6 +1730,29 @@ public class TestMessageComparator {
         comparisonResult = MessageComparator.compare(msg1, msg2, compSettings);
         validateResult(comparisonResult, 5, 0, 0);
 
+    }
+
+    @Test
+    public void testEmptyFilterVsNullFields() {
+        assertNotNull("dictionary cannot be null", dictionary);
+
+        ComparatorSettings settings = new ComparatorSettings().setDictionaryStructure(dictionary);
+        IMessage message = createMessage(dictionary.getNamespace(), "ComplexMessage");
+        IMessage filter = message.cloneMessage();
+
+        message.addField("simple-value", null);
+        message.addField("simple-value-list", null);
+        message.addField("message-value", null);
+        message.addField("message-value-list", null);
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+
+        assertEquals(4, ComparisonUtil.getResultCount(result, StatusType.NA));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+        assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+    }
+    
+    private static IMessage createMessage(String namespace, String name) {
+        return DefaultMessageFactory.getFactory().createMessage( name, namespace);
     }
 
     private static void assertComparisonResult(String name, ComparisonResult result, Object expected, Object actual) {
