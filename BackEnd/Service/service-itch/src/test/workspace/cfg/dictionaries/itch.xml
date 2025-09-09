@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ Copyright 2009-2025 Exactpro (Exactpro Systems Limited)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@
             <value type="java.lang.Short" name="AddOrderShortMBP">103</value>
             <value type="java.lang.Short" name="LowLatencyIndicesUpdate">123</value>
             <value type="java.lang.Short" name="OrderExecuted">69</value>
+            <value type="java.lang.Short" name="TestMessage">-1</value>
         </field>
         <field type="java.lang.Short" id="Side" name="Side">
             <value type="java.lang.Short" name="BUY">66</value>
@@ -638,6 +639,30 @@
             <field type="java.math.BigDecimal" name="TradeMatchID">
                 <attribute type="java.lang.String" name="Type">UInt64</attribute>
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+        </message>
+        <message name="TestMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">-1</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="-1" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="StringTypeDate10">
+                <attribute type="java.lang.String" name="Type">Date</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+            <field type="java.time.LocalDate" name="LocalDateTypeDate10">
+                <attribute type="java.lang.String" name="Type">Date</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">yyyy-MM-dd</attribute>
             </field>
         </message>
     </messages>

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
+/*
+ * Copyright 2009-2025 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 package com.exactpro.sf.configuration.dictionary.impl;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
+import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -189,10 +192,33 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                     case DATE:
                         checkJavaTypeArray(errors, message, field, new JavaType[]{
                                 JavaType.JAVA_LANG_STRING,
-                                JavaType.JAVA_TIME_LOCAL_DATE_TIME}, javaType);
+                                JavaType.JAVA_TIME_LOCAL_DATE}, javaType);
 
-                        if (length != 8) {
-                            addProtocolTypeError(errors, message, field, type, 8, length);
+                        if (length != 8 && length != 10) {
+                            addProtocolTypeError(errors, message, field, type, new int[] { 8, 10 }, length);
+                        }
+
+                        if (javaType == JavaType.JAVA_TIME_LOCAL_DATE) {
+                            String dateFormat = getAttributeValue(field, ITCHVisitorBase.DATE_TIME_FORMAT);
+                            if (dateFormat == null) {
+                                errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                                        "Attribute <strong>\"" + ITCHVisitorBase.DATE_TIME_FORMAT +
+                                                "\"</strong> for java type <strong>\"" + javaType +
+                                                "\"</strong> and type <strong>\"" + type
+                                                + "\"</strong> must be specified",
+                                        DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+                            } else {
+                                try {
+                                    DateTimeFormatter.ofPattern(dateFormat);
+                                } catch (IllegalArgumentException e) {
+                                    errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                                            "Attribute <strong>\"" + ITCHVisitorBase.DATE_TIME_FORMAT +
+                                                    "\"</strong> for java type <strong>\"" + javaType +
+                                                    "\"</strong> and type <strong>\"" + type
+                                                    + "\"</strong> has incorrect value = [" + dateFormat + "].",
+                                            DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+                                }
+                            }
                         }
 
                         break;
@@ -407,13 +433,12 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
     
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
             int[] expected, int actual) {
-        addProtocolTypeError(errors, message, field, type, Arrays.toString(expected), String.valueOf(actual));
+        addProtocolTypeError(errors, message, field, type, Arrays.stream(expected).mapToObj(String::valueOf).collect(Collectors.joining(" or ")), String.valueOf(actual));
     }
 
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
                                       int expectedLength, int actualLength) {
         addProtocolTypeError(errors, message, field, type, String.valueOf(expectedLength), String.valueOf(actualLength));
-
     }
 
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
