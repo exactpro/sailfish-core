@@ -1,0 +1,227 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Create or update a GitHub Release with the packaged ZIP files'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build packages
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build without tests
+        run: ./gradlew clean build -x test --no-daemon --stacktrace
+
+      - name: Package Sailfish release
+        run: ./gradlew :FrontEnd:sailfish-js-report:buildProd :FrontEnd:sailfish-frontend:zipRelease :BackEnd:Plugin:plugin-generic:zipRelease --no-daemon --stacktrace
+
+      - name: Collect release files
+        shell: bash
+        run: |
+          mkdir -p dist
+          find . -path '*/build/release/*' -type f -name '*.zip' -exec cp {} dist/ \;
+          find dist -maxdepth 1 -type f -name '*.zip' -print
+          test "$(find dist -maxdepth 1 -type f -name '*.zip' | wc -l)" -gt 0
+
+      - name: Build GitHub Pages site
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          rm -rf pages-site
+          mkdir -p pages-site/downloads pages-site/report-viewer
+
+          cp dist/*.zip pages-site/downloads/
+
+          if [ -d FrontEnd/Sailfish-JS-report/build/out ]; then
+            cp -R FrontEnd/Sailfish-JS-report/build/out/. pages-site/report-viewer/
+          fi
+
+          cat > pages-site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Sailfish Core</title>
+              <style>
+                :root {
+                  color-scheme: light;
+                  font-family: Arial, Helvetica, sans-serif;
+                  color: #1f2933;
+                  background: #f5f7fb;
+                }
+                body {
+                  margin: 0;
+                }
+                main {
+                  max-width: 960px;
+                  margin: 0 auto;
+                  padding: 48px 20px;
+                }
+                h1 {
+                  margin: 0 0 12px;
+                  font-size: 32px;
+                  line-height: 1.2;
+                }
+                p {
+                  margin: 0 0 24px;
+                  line-height: 1.55;
+                }
+                section {
+                  margin-top: 28px;
+                  padding: 24px;
+                  border: 1px solid #d9e2ec;
+                  border-radius: 8px;
+                  background: #ffffff;
+                }
+                h2 {
+                  margin: 0 0 16px;
+                  font-size: 20px;
+                }
+                ul {
+                  margin: 0;
+                  padding-left: 20px;
+                }
+                li {
+                  margin: 10px 0;
+                }
+                a {
+                  color: #0b5cad;
+                }
+                code {
+                  padding: 2px 5px;
+                  border-radius: 4px;
+                  background: #eef2f7;
+                }
+              </style>
+            </head>
+            <body>
+              <main>
+                <h1>Sailfish Core</h1>
+                <p>Automated build output for this repository.</p>
+
+                <section>
+                  <h2>Downloads</h2>
+                  <ul id="downloads"></ul>
+                </section>
+
+                <section>
+                  <h2>Static Report Viewer</h2>
+                  <p>
+                    The report viewer is a static frontend. It can be served by GitHub Pages,
+                    but it needs Sailfish report data next to its <code>index.html</code> to show a real report.
+                  </p>
+                  <p><a href="./report-viewer/index.html">Open report viewer</a></p>
+                </section>
+              </main>
+              <script>
+                const files = __DOWNLOADS__;
+                const list = document.getElementById('downloads');
+                files.forEach((file) => {
+                  const item = document.createElement('li');
+                  const link = document.createElement('a');
+                  link.href = `./downloads/${file}`;
+                  link.textContent = file;
+                  item.appendChild(link);
+                  list.appendChild(item);
+                });
+              </script>
+            </body>
+          </html>
+          HTML
+
+          downloads_json="$(find pages-site/downloads -maxdepth 1 -type f -name '*.zip' -printf '%f\n' | sort | jq -R . | jq -s -c .)"
+          sed -i "s|__DOWNLOADS__|$downloads_json|" pages-site/index.html
+
+          touch pages-site/.nojekyll
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sailfish-packages
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-site
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          release_tag="$TAG_NAME"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            release_tag="manual-${{ github.run_number }}"
+          fi
+
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" dist/*.zip --clobber
+          else
+            gh release create "$release_tag" dist/*.zip \
+              --title "$release_tag" \
+              --notes "Automated Sailfish build from ${{ github.sha }}"
+          fi
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-22.04
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
